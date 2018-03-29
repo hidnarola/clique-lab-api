@@ -1,6 +1,8 @@
+var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var fs = require('fs');
+var db = require('./models/db');
 
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -60,8 +62,9 @@ app.use(function (req, res, next) {
 
 var index = require('./routes/index');
 // var admin = require('./routes/admin');
+var Routerinterest = require('./routes/interest');
 
-app.use('/', index);
+app.use('/user', Routerinterest);
 // app.use('/user', user);
 // app.use('/admin', admin);
 
