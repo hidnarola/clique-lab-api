@@ -63,8 +63,14 @@ app.use(function (req, res, next) {
 var index = require('./routes/index');
 // var admin = require('./routes/admin');
 var Routerinterest = require('./routes/interest');
+var Routerjobindustry = require('./routes/job_industry');
+var Routermusictaste = require('./routes/music_taste');
+var Rouuterprofile=require('./routes/profile');
 
-app.use('/user', Routerinterest);
+app.use('/', Routerinterest);
+app.use('/', Routerjobindustry);
+app.use('/', Routermusictaste);
+app.use('/', Rouuterprofile);
 // app.use('/user', user);
 // app.use('/admin', admin);
 

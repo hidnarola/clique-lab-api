@@ -8,13 +8,13 @@ var router = express.Router();
 var config = require("./../config");
 var logger = config.logger;
 
-var interest_helper = require("../helpers/interest_helper");
+var job_industry = require("../helpers/job_industry_helper");
 
 
 
 
 /**
- * @api {get} user/job_interest Interest Parts - Get all
+ * @api {get} user/job_industry Interest Parts - Get all
  * @apiName get_interest - Get all
  * @apiGroup Admin
  *
@@ -23,15 +23,15 @@ var interest_helper = require("../helpers/interest_helper");
  * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/interest", async (req, res) => {
+router.get("/job_industry", async (req, res) => {
 
-    logger.trace("Get all Interest API called");
-    var resp_data = await interest_helper.get_all_interest();
+    logger.trace("Get all Job industry API called");
+    var resp_data = await job_industry.get_all_job_industry();
     if (resp_data.status == 0) {
-      logger.error("Error occured while fetching interest = ", resp_data);
+      logger.error("Error occured while fetching Job Industry = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
     } else {
-      logger.trace("Interest got successfully = ", resp_data);
+      logger.trace("Job Industry got successfully = ", resp_data);
       res.status(config.OK_STATUS).json(resp_data);
     }
   });
