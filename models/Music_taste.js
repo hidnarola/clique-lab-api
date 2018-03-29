@@ -6,7 +6,7 @@ var Schema = mongoose.Schema;
 
 var MusicTasteSchema = new Schema({
     name: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now }
+    created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
 // Compile model from schema

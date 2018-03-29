@@ -9,7 +9,7 @@ var DicountModelSchema = new Schema({
     price: Number,
     percentage: Number,
     terms: String,
-    createdAt: { type: Date, default: Date.now }
+    created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
 // Compile model from schema
