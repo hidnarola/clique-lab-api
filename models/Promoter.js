@@ -30,9 +30,13 @@ var PromoterModelSchema = new Schema({
     referal_link: String,
     wallet_balance: Number,
     date_of_birth: Date,
+    status: {type:Boolean, default:true},
+    refresh_token: {type: String},
+    last_login_date: {type: Date},
+    password_changed_date: {type: Date},
     creditcard: CreditcardSchema,
     bank_details: BankSchema,
-    createdAt: { type: Date, default: Date.now }
+    created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
 // Compile model from schema

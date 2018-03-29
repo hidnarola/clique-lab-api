@@ -10,7 +10,7 @@ var Promotion_requestSchema = new Schema({
     social_media_platform: { type: String, enum: ["facebook", "instagram", "twitter", "pinterest", "linkedin"], required: true },
     post_text: String,
     price: Number,
-    createdAt: { type: Date, default: Date.now }
+    created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
 // Compile model from schema

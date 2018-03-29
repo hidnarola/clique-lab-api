@@ -9,7 +9,7 @@ var Campaign_appliedSchema = new Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
     desription: String,
     Image: String,
-    createdAt: { type: Date, default: Date.now }
+    created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
 // Compile model from schema

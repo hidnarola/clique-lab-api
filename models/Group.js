@@ -8,7 +8,7 @@ var GroupModelSchema = new Schema({
     name: { type: String, required: true },
     image: String,
     promoter_id: { type: mongoose.Schema.Types.ObjectId, ref: 'promoters', required: true },
-    createdAt: { type: Date, default: Date.now }
+    created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
 // Compile modyel from schema
