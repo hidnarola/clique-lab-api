@@ -27,4 +27,7 @@ module.exports = {
     "VALIDATION_FAILURE_STATUS": 417,
     "DATABASE_ERROR_STATUS": 422,
     "INTERNAL_SERVER_ERROR": 500,
+
+    // Other configuration
+    "website_url" : "http://localhost:8080"
 };

@@ -33,6 +33,7 @@ var PromoterSchema = new Schema({
     wallet_balance: Number,
     date_of_birth: Date,
     status: {type:Boolean, default:false},
+    email_verified: {type:Boolean, default:false},
     refresh_token: {type: String},
     last_login_date: {type: Date},
     password_changed_date: {type: Date},
