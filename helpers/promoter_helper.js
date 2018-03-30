@@ -34,9 +34,9 @@ promoter_helper.get_promoter_by_id = async (promoter_id) => {
  * 
  * @developed by "ar"
  */
-promoter_helper.get_promoter_by_email = async (email) => {
+promoter_helper.get_promoter_by_email_or_username = async (email_or_username) => {
     try {
-        var promoter = await Promoter.findOne({ "email": email });
+        var promoter = await Promoter.findOne({ "$or" : [{"email": email_or_username} , {"username":email_or_username}] }).lean();
         if (promoter) {
             return { "status": 1, "message": "Promoter details found", "promoter": promoter };
         } else {
