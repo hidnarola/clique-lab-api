@@ -191,17 +191,15 @@ router.post('/promoter_signup', async (req, res) => {
             "to":promoter_data.promoter.email,
             "subject":"Clique Lab - Email confirmation"
           },{
-            "confirm_url":config.website_url+"/email_confirm/"+promoter_resp.promoter._id
+            "confirm_url":config.website_url+"/email_confirm/"+promoter_data.promoter._id
           });
 
           console.log("mail resp = ",mail_resp);
           if(mail_resp.status === 0){
               res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while sending confirmation email","error":mail_resp.error});
           } else {
-              res.status(config.OK_STATUS).json({"status":1,"message":"Confirmation link has been sent on your email address"});
+              res.status(config.OK_STATUS).json({"status":1,"message":"Promoter registered successfully"});
           }
-
-          res.status(config.OK_STATUS).json({"status":1,"message":"Promoter registered successfully"});
         }
       } else {
         res.status(config.BAD_REQUEST).json({"status":0,"message":"Promoter's username already exist"});
