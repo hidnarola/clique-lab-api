@@ -16,7 +16,7 @@ router.get('/', function (req, res, next) {
 });
 
 /**
- * @api {post} /promotor_login Promoter Login
+ * @api {post} /promoter_login Promoter Login
  * @apiName Promoter Login
  * @apiGroup Root
  * 
@@ -32,7 +32,7 @@ router.get('/', function (req, res, next) {
  * @apiSuccess (Success 200) {String} refresh_token Unique token which needs to be passed to generate next access token.
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.post('/promotor_login', async (req, res) => {
+router.post('/promoter_login', async (req, res) => {
 
   logger.trace("API - Promoter login called");
   logger.debug("req.body = ", req.body);
@@ -66,11 +66,11 @@ router.post('/promotor_login', async (req, res) => {
       logger.trace("User found. Executing next instruction");
 
       // Checking password
-      if(bcrypt.compareSync(req.body.old_password, college_resp.college.password)){
+      if(bcrypt.compareSync(req.body.password, promoter_resp.promoter.password)){
         logger.trace("valid password. Generating token");
         var refreshToken = jwt.sign({ id: promoter_resp.promoter._id, role: 'promoter' }, config.REFRESH_TOKEN_SECRET_KEY, {});
 
-        let update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id, { "refresh_token": refreshToken, "lastLoginDate": Date.now() });
+        let update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
 
         var promoterJson = { id: promoter_resp.promoter._id, email: promoter_resp.promoter.email, role: 'promoter' };
         var token = jwt.sign(promoterJson, config.ACCESS_TOKEN_SECRET_KEY, {
@@ -89,7 +89,80 @@ router.post('/promotor_login', async (req, res) => {
       }
     } else {
       logger.info("Account doesn't exist.");
-      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address" });
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or password" });
+    }
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
+/**
+ * @api {post} /promoter_signup Promoter Signup
+ * @apiName Promoter Signup
+ * @apiGroup Root
+ * 
+ * @apiDescription  Signup request for promoter role
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} name Full name of promoter
+ * @apiParam {String} username Username
+ * @apiParam {String} email Email address
+ * @apiParam {String} company Name of the company
+ * @apiParam {String} password Password
+ * 
+ * @apiSuccess (Success 200) {String} message Success message
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/promoter_signup', async (req, res) => {
+
+  logger.trace("API - Promoter signup called");
+  logger.debug("req.body = ", req.body);
+  var schema = {
+      'name': {
+          notEmpty: true,
+          errorMessage: "Full name is required"
+      },
+      'username': {
+        notEmpty: true,
+        errorMessage: "Username is required"
+      },
+      'email': {
+        notEmpty: true,
+        errorMessage: "Email address is required",
+        isEmail: {errorMessage: "Please enter valid email address"}
+      },
+      'company': {
+          notEmpty: true,
+          errorMessage: "Company name is required"
+      },
+      'password': {
+        notEmpty: true,
+        errorMessage: "Password is required"
+      }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+    let data = req.body;
+    var promoter_obj = {
+      "full_name" : req.body.name,
+      "email": req.body.email,
+      "username": req.body.username,
+      "company":req.body.company,
+      "password": req.body.password
+    };
+
+    var promoter_data = await promoter_helper.insert_promoter(promoter_obj);
+
+    if(promoter_data.status == 0){
+      logger.trace("Error occured while inserting promoter - Promoter Signup API");
+      logger.debug("Error = ",promoter_data.error);
+      res.status(config.INTERNAL_SERVER_ERROR).json(promoter_data);
+    } else {
+      logger.trace("Promoter has been inserted");
+      res.status(config.OK_STATUS).json({"status":1,"message":"Promoter registered successfully"});
     }
   } else {
     logger.error("Validation Error = ", errors);
