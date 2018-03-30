@@ -3,7 +3,8 @@ var express = require('express');
 var path = require('path');
 var fs = require('fs');
 var db = require('./models/db');
-
+var auth = require('./middlewares/auth');
+var authorization = require('./middlewares/authorization');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -71,9 +72,9 @@ var Routerlogin=require('./routes/login');
 
 
 app.use('/',index);
-app.use('/', Routerinterest);
-app.use('/', Routerjobindustry);
-app.use('/', Routermusictaste);
+app.use('/',auth, Routerinterest);
+app.use('/',auth, Routerjobindustry);
+app.use('/',auth, Routermusictaste);
 app.use('/', Routerprofile);
 app.use('/', Routerlogin);
 
