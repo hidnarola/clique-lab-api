@@ -66,13 +66,17 @@ var index = require('./routes/index');
 var Routerinterest = require('./routes/interest');
 var Routerjobindustry = require('./routes/job_industry');
 var Routermusictaste = require('./routes/music_taste');
-var Rouuterprofile=require('./routes/profile');
+var Routerprofile=require('./routes/profile');
+var Routerlogin=require('./routes/login');
+
 
 app.use('/',index);
 app.use('/', Routerinterest);
 app.use('/', Routerjobindustry);
 app.use('/', Routermusictaste);
-app.use('/', Rouuterprofile);
+app.use('/', Routerprofile);
+app.use('/', Routerlogin);
+
 // app.use('/user', user);
 // app.use('/admin', admin);
 
