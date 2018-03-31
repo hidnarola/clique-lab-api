@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
  
    user_id = req.userInfo.id;
    logger.trace("Get all campaign API called");
-  var resp_data = await campaign_helper.get_user_id(user_id);
+  var resp_data = await campaign_helper.get_capmpaign_by_user_id(user_id);
    if (resp_data.status == 0) {
      logger.error("Error occured while fetching campaign = ", resp_data);
      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);

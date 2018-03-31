@@ -7,27 +7,33 @@ var campaign_helper = {};
  *          status 1 - If interest data found, with interest object
  *          status 2 - If interest not found, with appropriate message
  */
-campaign_helper.get_user_id = async (id) => {
+campaign_helper.get_capmpaign_by_user_id = async (user_id) => {
     try {
-       var campaigns=  db.campaign.aggregate([
+        console.log("1");
+       var campaigns=  Campaign.aggregate([
             { 
-                $match: { 
-                    $and: [
-                        { _id: { $eq: 'campaign_id' } }, 
-                    ]                   
-                } 
-            },
-            { 
-                $lookup: { 
+            
+               $lookup: { 
                     from: "campaign_user",
                     localField: "_id",
                     foreignField: "campaign_id",
-                    as: "Private Campaign" 
+                    as: "Private_Campaign" 
                 } 
             },
+            { 
+                 $match: { 
+                    $and: [
+                        { campaign_id: { $eq: 'user_id' } }, 
+                    ]                   
+                } 
+                
+            },
         ])
-        var campaign = await Campaign.find({_id:id});
+        console.log(campaigns);
+        console.log("2");
+        //var campaign = awaconsole.log()
         if (campaign) {
+            console.log("3");
             return { "status": 1, "message": "campaign found", "campaign": campaign };
         } else {
             return { "status": 2, "message": "No campaign available" };

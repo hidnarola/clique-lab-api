@@ -63,11 +63,15 @@ app.use(function (req, res, next) {
 
 var index = require('./routes/index');
 var user = require('./routes/user');
+var campaign = require('./routes/user/campaign');
+
 // var admin = require('./routes/admin');
 
 
 app.use('/',index);
 app.use('/user', user);
+app.use('/campaign', campaign);
+
 // app.use('/admin', admin);
 
 
