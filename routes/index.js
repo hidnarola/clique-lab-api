@@ -219,6 +219,52 @@ router.post('/promoter_signup', async (req, res) => {
 });
 
 /**
+ * @api {get} /promoter_email_verify/:token Promoter email verification
+ * @apiName Promoter email verification
+ * @apiGroup Root
+ * 
+ * @apiDescription  Email verification request for promoter
+ * 
+ * @apiSuccess (Success 200) {String} message Success message
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get('/promoter_email_verify/:promoter_id',async (req,res) => {
+  logger.trace("API - Promoter email verify called");
+  logger.debug("req.body = ", req.body);
+
+  var promoter_resp = await promoter_helper.get_promoter_by_id(req.params.promoter_id);
+  if(promoter_resp.status === 0){
+    logger.error("Error occured while finding promoter by id - ",req.params.promoter_id, promoter_resp.error);
+    res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error has occured while finding promoter"});
+  } else if(promoter_resp.status === 2){
+    logger.trace("Promoter not found in promoter email verify API");
+    res.status(config.BAD_REQUEST).json({"status":0,"message":"Invalid token entered"});
+  } else {
+    // Promoter available
+    if(promoter_resp.promoter.email_verified){
+      // Email already verified
+      logger.trace("promoter already verified");
+      res.status(config.BAD_REQUEST).json({"status":0,"message":"Email already verified"});
+    } else {
+      // Verify email
+      logger.trace("Valid request for email verification - ",promoter_resp.promoter._id);
+      
+      var update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id,{"email_verified":true,"status":true});
+      if(update_resp.status === 0){
+        logger.trace("Error occured while updating promoter : ",update_resp.error);
+        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while verifying user's email"});
+      } else if(update_resp.status === 2) {
+        logger.trace("Promoter has not updated");
+        res.status(config.BAD_REQUEST).json({"status":0,"message":"Error occured while verifying user's email"});
+      } else {
+        // Email verified!
+        res.status(config.OK_STATUS).json({"status":1,"message":"Email has been verified"});
+      }
+    }
+  }
+});
+
+/**
  * @api {get} user/job_interest Interest Parts - Get all
  * @apiName get_interest - Get all
  * @apiGroup Admin
