@@ -8,6 +8,11 @@ var bcrypt = require('bcrypt');
 
 var promoter_helper = require('./../helpers/promoter_helper');
 var mail_helper = require('./../helpers/mail_helper');
+var interest_helper = require("../helpers/interest_helper");
+var job_industry = require("../helpers/job_industry_helper");
+var profile = require("../helpers/profile_helper");
+var music_taste = require("../helpers/music_taste_helper");
+var login_helper = require('./../helpers/login_helper');
 
 var logger = config.logger;
 
@@ -213,4 +218,228 @@ router.post('/promoter_signup', async (req, res) => {
   }
 });
 
+/**
+ * @api {get} user/job_interest Interest Parts - Get all
+ * @apiName get_interest - Get all
+ * @apiGroup Admin
+ *
+ * @apiHeader {String}  x-access-token Admin's unique access-key
+ *
+ * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get("/interest", async (req, res) => {
+
+  logger.trace("Get all Interest API called");
+  var resp_data = await interest_helper.get_all_interest();
+  if (resp_data.status == 0) {
+    logger.error("Error occured while fetching interest = ", resp_data);
+    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  } else {
+    logger.trace("Interest got successfully = ", resp_data);
+    res.status(config.OK_STATUS).json(resp_data);
+  }
+});
+
+
+/**
+ * @api {get} user/job_industry Interest Parts - Get all
+ * @apiName get_interest - Get all
+ * @apiGroup Admin
+ *
+ * @apiHeader {String}  x-access-token Admin's unique access-key
+ *
+ * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get("/job_industry", async (req, res) => {
+
+  logger.trace("Get all Job industry API called");
+  var resp_data = await job_industry.get_all_job_industry();
+  if (resp_data.status == 0) {
+    logger.error("Error occured while fetching Job Industry = ", resp_data);
+    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  } else {
+    logger.trace("Job Industry got successfully = ", resp_data);
+    res.status(config.OK_STATUS).json(resp_data);
+  }
+});
+
+/**
+ * @api {get} user/job_interest Interest Parts - Get all
+ * @apiName get_interest - Get all
+ * @apiGroup Admin
+ *
+ * @apiHeader {String}  x-access-token Admin's unique access-key
+ *
+ * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get("/music_taste", async (req, res) => {
+  logger.trace("Get all Music Taste API called");
+  var resp_data = await music_taste.get_all_music_taste();
+  if (resp_data.status == 0) {
+    logger.error("Error occured while fetching Music Taste = ", resp_data);
+    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  } else {
+    logger.trace("Music Taste got successfully = ", resp_data);
+    res.status(config.OK_STATUS).json(resp_data);
+  }
+});
+
+
+
+/**
+ * @api {post} /profile Exercise Types Add
+ * @apiName Exercise Type Add
+ * @apiGroup Admin
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * @apiHeader {String}  x-access-token  unique access-key
+ * 
+ * @apiParam {String} name Name of profile
+ * @apiParam {String} description Description of profile
+ * 
+ * @apiSuccess (Success 200) {JSON}profile types details
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/signup', async (req, res) => {
+  var schema = {
+      "name": {
+          notEmpty: true,
+          errorMessage: "Name is required"
+      },
+      "username": {
+          notEmpty: true,
+          errorMessage: "Username is required"
+      },
+      "email": {
+          notEmpty: true,
+          errorMessage: "Email is required"
+      },
+      "user_interest": {
+          notEmpty: true,
+          errorMessage: "User Interest is required"
+      },
+      "job_industry": {
+          notEmpty: true,
+          errorMessage: "Job Industry is required"
+      },
+      "music_taste": {
+          notEmpty: true,
+          errorMessage: "Music taste is required"
+      },
+  };
+
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+      var profile_obj = {
+          "name": req.body.name,
+          "username": req.body.username,
+          "email": req.body.email,
+          "user_interest": req.body.user_interest,
+          "job_industry": req.body.job_industry,
+          "music_taste": req.body.music_taste
+         
+      };
+
+      let profile_data = await profile.insert_profile(profile_obj);
+      if (profile_data.status === 0) {
+          
+          logger.error("Error while inserting Profile data = ", profile_data);
+          res.status(config.BAD_REQUEST).json({ profile_data });
+      } else {
+          res.status(config.OK_STATUS).json(profile_data);
+      }
+  } else {
+      logger.error("Validation Error = ", errors);
+      res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
+
+
+/**
+ * @api {post} /login Login
+ * @apiName  Login
+ * @apiGroup Root
+ * 
+ * @apiDescription Login request
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} email Email
+ * @apiParam {String} token as facebook token
+ * 
+ * @apiSuccess (Success 200) {JSON} user Admin user object.
+ * @apiSuccess (Success 200) {String} token Unique token which needs to be passed in subsequent requests.
+ * @apiSuccess (Success 200) {String} refresh_token Unique token which needs to be passed to generate next access token.
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/login', async (req, res) => {
+
+  logger.trace("API - Promoter login called");
+  logger.debug("req.body = ", req.body);
+
+  var schema = {
+    'email': {
+      notEmpty: true,
+      errorMessage: "Email is required.",
+      isEmail: { errorMessage: "Please enter valid email address" }
+    },
+    'token': {
+      notEmpty: true,
+      errorMessage: "token is required."
+    }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+    logger.trace("Valid request of login");
+
+    // Checking for promoter availability
+    logger.trace("Checking for promoter availability");
+
+    let login_resp = await login_helper.get_login_by_email(req.body.email);
+    logger.trace("Login checked resp = ", login_resp);
+    if (login_resp.status === 0) {
+    logger.trace("Login checked resp = ", login_resp);
+      logger.error("Error in finding by email in login API. Err = ", login_resp.err);
+
+      res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Something went wrong while finding promoter", "error": promoter_resp.error });
+    } else if (login_resp.status === 1) {
+      logger.trace("User found. Executing next instruction");
+
+      // Checking password
+      if(req.body.token=== login_resp.user.facebook.token){
+        logger.trace("valid token. Generating token");
+        var refreshToken = jwt.sign({ id: login_resp._id}, config.REFRESH_TOKEN_SECRET_KEY, {});
+
+        let update_resp = await login_helper.update_by_id(login_resp._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
+
+        var LoginJson = { id: login_resp._id, email: login_resp.email, role:"user" };
+        var token = jwt.sign(LoginJson, config.ACCESS_TOKEN_SECRET_KEY, {
+          expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
+        });
+
+        delete login_resp.password;
+        delete login_resp.refresh_token;
+        delete login_resp.last_login_date;
+        delete login_resp.created_at;
+
+        logger.info("Token generated");
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "token": token, "refresh_token": refreshToken });
+      } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or token" });
+      }
+    } else {
+      logger.info("Account doesn't exist.");
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or token" });
+    }
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
 module.exports = router;

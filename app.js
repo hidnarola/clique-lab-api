@@ -62,23 +62,12 @@ app.use(function (req, res, next) {
 });
 
 var index = require('./routes/index');
-
+var user = require('./routes/user');
 // var admin = require('./routes/admin');
-var Routerinterest = require('./routes/interest');
-var Routerjobindustry = require('./routes/job_industry');
-var Routermusictaste = require('./routes/music_taste');
-var Routerprofile=require('./routes/profile');
-var Routerlogin=require('./routes/login');
 
 
 app.use('/',index);
-app.use('/',auth, Routerinterest);
-app.use('/',auth, Routerjobindustry);
-app.use('/',auth, Routermusictaste);
-app.use('/', Routerprofile);
-app.use('/', Routerlogin);
-
-// app.use('/user', user);
+app.use('/user', user);
 // app.use('/admin', admin);
 
 
