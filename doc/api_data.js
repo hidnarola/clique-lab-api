@@ -72,7 +72,7 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/profile.js",
+    "filename": "routes/index.js",
     "groupTitle": "Admin"
   },
   {
@@ -121,7 +121,7 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/interest.js",
+    "filename": "routes/index.js",
     "groupTitle": "Admin"
   },
   {
@@ -170,7 +170,7 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/job_industry.js",
+    "filename": "routes/index.js",
     "groupTitle": "Admin"
   },
   {
@@ -219,16 +219,127 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/music_taste.js",
+    "filename": "routes/index.js",
     "groupTitle": "Admin"
   },
   {
+    "type": "get",
+    "url": "/user_id",
+    "title": "campaigns - Get by ID",
+    "name": "campaigns___Get_campaigns_by_ID",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "user_id",
+            "description": "<p>ID of campaigns</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "exercise",
+            "description": "<p>Array of campaigns</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/campaign.js",
+    "group": "E__Node_example_Clique_lab_API_routes_user_campaign_js",
+    "groupTitle": "E__Node_example_Clique_lab_API_routes_user_campaign_js"
+  },
+  {
+    "type": "get",
+    "url": "user/public_campaign",
+    "title": "Campaign  - Get all",
+    "name": "public_campaign___Get_all",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "capaign",
+            "description": "<p>Array of bodyparts document</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/campaign.js",
+    "group": "E__Node_example_Clique_lab_API_routes_user_campaign_js",
+    "groupTitle": "E__Node_example_Clique_lab_API_routes_user_campaign_js"
+  },
+  {
     "type": "post",
-    "url": "/admin_login",
-    "title": "Admin Login",
-    "name": "Admin_Login",
+    "url": "/login",
+    "title": "Login",
+    "name": "Login",
     "group": "Root",
-    "description": "<p>Login request for admin role</p>",
+    "description": "<p>Login request</p>",
     "header": {
       "fields": {
         "Header": [
@@ -256,8 +367,8 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "password",
-            "description": "<p>Password</p>"
+            "field": "token",
+            "description": "<p>as facebook token</p>"
           }
         ]
       }
@@ -303,7 +414,7 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/login.js",
+    "filename": "routes/index.js",
     "groupTitle": "Root"
   },
   {
@@ -451,6 +562,43 @@ define({ "api": [
         ]
       }
     },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Success message</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Root"
+  },
+  {
+    "type": "get",
+    "url": "/promoter_email_verify/:token",
+    "title": "Promoter email verification",
+    "name": "Promoter_email_verification",
+    "group": "Root",
+    "description": "<p>Email verification request for promoter</p>",
     "success": {
       "fields": {
         "Success 200": [
