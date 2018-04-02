@@ -8,18 +8,16 @@ var job_industry_helper = {};
  *          status 2 - If job_industry not found, with appropriate message
  */
 job_industry_helper.get_all_job_industry = async () => {
-    console.log("1");
     try {
-        var job_industry = await Job_industry.find();
+        var job_industry = await Job_industry.find({},{"name":1});
         if (job_industry ) {
-            console.log("2");
             return { "status": 1, "message": "Job_industry found", "Job_industry": job_industry };
         } else {
-            console.log("3");
             return { "status": 2, "message": "No Job_industry available" };   
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding Job Industry", "error": err }
     }
 }
+
 module.exports = job_industry_helper;

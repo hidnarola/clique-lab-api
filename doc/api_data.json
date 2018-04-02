@@ -126,55 +126,6 @@
   },
   {
     "type": "get",
-    "url": "user/job_industry",
-    "title": "Interest Parts - Get all",
-    "name": "get_interest___Get_all",
-    "group": "Admin",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "x-access-token",
-            "description": "<p>Admin's unique access-key</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Array",
-            "optional": false,
-            "field": "bodyparts",
-            "description": "<p>Array of bodyparts document</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>Validation or error message.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/index.js",
-    "groupTitle": "Admin"
-  },
-  {
-    "type": "get",
     "url": "user/job_interest",
     "title": "Interest Parts - Get all",
     "name": "get_interest___Get_all",
@@ -332,6 +283,42 @@
     "filename": "routes/user/campaign.js",
     "group": "E__Node_example_Clique_lab_API_routes_user_campaign_js",
     "groupTitle": "E__Node_example_Clique_lab_API_routes_user_campaign_js"
+  },
+  {
+    "type": "get",
+    "url": "/job_industry",
+    "title": "Get all job industry",
+    "name": "Get_all_job_industry",
+    "group": "Root",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "Job_industry",
+            "description": "<p>Array of Job_industry document</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Root"
   },
   {
     "type": "post",
@@ -608,6 +595,139 @@
             "optional": false,
             "field": "message",
             "description": "<p>Success message</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Root"
+  },
+  {
+    "type": "post",
+    "url": "/promoter_forgot_password",
+    "title": "Promoter forgot password",
+    "name": "Promoter_forgot_password",
+    "group": "Root",
+    "description": "<p>Forgot password request for promoter role</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Appropriate success message</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Root"
+  },
+  {
+    "type": "post",
+    "url": "/promoter_reset_password",
+    "title": "Promoter reset password",
+    "name": "Promoter_reset_password",
+    "group": "Root",
+    "description": "<p>Reset password request for promoter role</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "token",
+            "description": "<p>Reset password token</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>New password</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Appropriate success message</p>"
           }
         ]
       }
