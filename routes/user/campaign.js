@@ -40,7 +40,7 @@ router.get("/approved", async (req, res) => {
   * @apiGroup User
  * @apiHeader {String}  x-access-token unique access-key
  *
- * @apiSuccess (Success 200) {Array} capaign Array of bodyparts document
+ * @apiSuccess (Success 200) {Array} Campaign Array of Campaign document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/public_campaign", async (req, res) => {

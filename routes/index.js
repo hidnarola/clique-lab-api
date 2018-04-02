@@ -391,7 +391,7 @@ router.post('/promoter_reset_password', async (req, res) => {
 // Can be used by both, user and promoter
 
 /**
- * @api {get} /user/job_industry Get all job industry
+ * @api {get} /job_industry Get all job industry
  * @apiName Get all job industry
  * @apiGroup Root
  *
@@ -411,13 +411,13 @@ router.get("/job_industry", async (req, res) => {
 });
 
 /**
- * @api {get} user/interest Interest - Get all
+ * @api {get} /interest Interest - Get all
  * @apiName get_interest - Get all
  * @apiGroup User
  *
  * @apiHeader {String}  x-access-token  unique access-key
  *
- * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
+ * @apiSuccess (Success 200) {Array} Interest  of User document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/interest", async (req, res) => {
@@ -434,13 +434,13 @@ router.get("/interest", async (req, res) => {
 });
 
 /**
- * @api {get} user/music_taste/ Music Taste - Get all
+ * @api {get} /music_taste/ Music Taste - Get all
  * @apiName Music taste - Get all
  * @apiGroup User
 
  * @apiHeader {String}  x-access-token unique access-key
  *
- * @apiSuccess (Success 200) {Array}  Array of music taste document
+ * @apiSuccess (Success 200) {Array}  Music taste of User document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/music_taste", async (req, res) => {
@@ -457,7 +457,7 @@ router.get("/music_taste", async (req, res) => {
 
 
   /**
- * @api {post} /user/profile profile  Add
+ * @api {post} /profile profile  Add
  * @apiName Profile - Add
  * @apiGroup User
 

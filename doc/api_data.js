@@ -92,7 +92,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/user/job_industry",
+    "url": "/job_industry",
     "title": "Get all job industry",
     "name": "Get_all_job_industry",
     "group": "Root",
@@ -603,14 +603,14 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "text",
-            "description": "<p>image of company</p>"
+            "description": "<p>text of company</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
             "field": "price",
-            "description": "<p>image of company</p>"
+            "description": "<p>price of company</p>"
           }
         ]
       }
@@ -696,7 +696,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "user/music_taste/",
+    "url": "/music_taste/",
     "title": "Music Taste - Get all",
     "name": "Music_taste___Get_all",
     "group": "User",
@@ -720,8 +720,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "Array",
-            "description": "<p>of music taste document</p>"
+            "field": "Music",
+            "description": "<p>taste of User document</p>"
           }
         ]
       }
@@ -745,7 +745,7 @@ define({ "api": [
   },
   {
     "type": "post",
-    "url": "/user/profile",
+    "url": "/profile",
     "title": "profile  Add",
     "name": "Profile___Add",
     "group": "User",
@@ -1071,7 +1071,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "user/interest",
+    "url": "/interest",
     "title": "Interest - Get all",
     "name": "get_interest___Get_all",
     "group": "User",
@@ -1095,8 +1095,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "bodyparts",
-            "description": "<p>Array of bodyparts document</p>"
+            "field": "Interest",
+            "description": "<p>of User document</p>"
           }
         ]
       }
@@ -1193,8 +1193,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "capaign",
-            "description": "<p>Array of bodyparts document</p>"
+            "field": "Campaign",
+            "description": "<p>Array of Campaign document</p>"
           }
         ]
       }
