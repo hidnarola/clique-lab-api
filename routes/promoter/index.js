@@ -6,6 +6,7 @@ var router = express.Router();
 
 var config = require('./../../config');
 var promoter_helper = require('./../../helpers/promoter_helper');
+var setting_helper = require('./../../helpers/setting_helper');
 var logger = config.logger;
 
 /** 
@@ -16,6 +17,7 @@ var logger = config.logger;
  * @apiDescription  Update promoter info
  * 
  * @apiHeader {String}  Content-Type multipart/form-data
+ * @apiHeader {String}  x-access-token promoter's unique access-key
  * 
  * @apiParam {String} [name] Full name of promoter
  * @apiParam {String} [company] Company name of the company
@@ -99,6 +101,27 @@ router.post('/update_profile', async (req, res) => {
         });
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/** 
+ * @api {get} /promoter/setting/:key Get settings value
+ * @apiName Get settings value
+ * @apiGroup Promoter
+ * 
+ * @apiDescription  Get settings value by key
+ * 
+ * @apiHeader {String}  x-access-token promoter's unique access-key
+ * 
+ * @apiSuccess (Success 200) {String} value Appropriate value for given key
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get('/setting/:key', async(req,res) => {
+    var settings = await setting_helper.get_setting_by_key(req.params.key);
+    if(settings.status === 1){
+        res.status(config.OK_STATUS).json({"status":1,"message":"Setting value found","value":settings.setting.value});
+    } else {
+        res.status(config.BAD_REQUEST).json({"status":0,"message":"Setting not found"});
     }
 });
 
