@@ -77,9 +77,9 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "user/job_interest",
-    "title": "Interest Parts - Get all",
-    "name": "get_interest___Get_all",
+    "url": "user/myoffer",
+    "title": "Approved Campaign  - Get all",
+    "name": "approved_campaign___Get_all",
     "group": "Admin",
     "header": {
       "fields": {
@@ -89,7 +89,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "x-access-token",
-            "description": "<p>Admin's unique access-key</p>"
+            "description": "<p>unique access-key</p>"
           }
         ]
       }
@@ -101,8 +101,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "bodyparts",
-            "description": "<p>Array of bodyparts document</p>"
+            "field": "Array",
+            "description": "<p>of Approved Campaign document</p>"
           }
         ]
       }
@@ -121,7 +121,7 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/index.js",
+    "filename": "routes/user/campaign.js",
     "groupTitle": "Admin"
   },
   {
@@ -172,6 +172,180 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "routes/index.js",
     "groupTitle": "Admin"
+  },
+  {
+    "type": "get",
+    "url": "user/music_taste",
+    "title": "Music Taste - Get all",
+    "name": "music_taste___Get_all",
+    "group": "Admin",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "Array",
+            "description": "<p>of music taste document</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Admin"
+  },
+  {
+    "type": "post",
+    "url": "/user/brand",
+    "title": "Brand Add",
+    "name": "Brand_Add",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>Admin's unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of comapny</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description of company</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "inspired",
+            "description": "<p>Inspired details</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/brand.js",
+    "group": "E__Node_example_Clique_lab_API_routes_user_brand_js",
+    "groupTitle": "E__Node_example_Clique_lab_API_routes_user_brand_js"
+  },
+  {
+    "type": "get",
+    "url": "user/campaign/brand",
+    "title": "Interest  - Get all",
+    "name": "get_all_brand___Get_all",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "Array",
+            "description": "<p>of Brand document</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/brand.js",
+    "group": "E__Node_example_Clique_lab_API_routes_user_brand_js",
+    "groupTitle": "E__Node_example_Clique_lab_API_routes_user_brand_js"
   },
   {
     "type": "get",
@@ -285,6 +459,97 @@ define({ "api": [
     "groupTitle": "E__Node_example_Clique_lab_API_routes_user_campaign_js"
   },
   {
+    "type": "post",
+    "url": "/update_profile",
+    "title": "Update promoter profile",
+    "name": "Update_promoter_profile",
+    "group": "Promoter",
+    "description": "<p>Update promoter info</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>multipart/form-data</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "name",
+            "description": "<p>Full name of promoter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "company",
+            "description": "<p>Company name of the company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "industry_category",
+            "description": "<p>Industry category id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "industry_description",
+            "description": "<p>Industry description</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "File",
+            "optional": true,
+            "field": "avatar",
+            "description": "<p>Industry avatar/logo</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Success message</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/index.js",
+    "groupTitle": "Promoter"
+  },
+  {
     "type": "get",
     "url": "/job_industry",
     "title": "Get all job industry",
@@ -297,7 +562,7 @@ define({ "api": [
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "Job_industry",
+            "field": "job_industry",
             "description": "<p>Array of Job_industry document</p>"
           }
         ]

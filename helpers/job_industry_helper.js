@@ -11,7 +11,7 @@ job_industry_helper.get_all_job_industry = async () => {
     try {
         var job_industry = await Job_industry.find({},{"name":1});
         if (job_industry ) {
-            return { "status": 1, "message": "Job_industry found", "Job_industry": job_industry };
+            return { "status": 1, "message": "Job_industry found", "job_industry": job_industry };
         } else {
             return { "status": 2, "message": "No Job_industry available" };   
         }
