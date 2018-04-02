@@ -2,9 +2,8 @@
   {
     "type": "post",
     "url": "/profile",
-    "title": "Exercise Types Add",
-    "name": "Exercise_Type_Add",
-    "group": "Admin",
+    "title": " Add",
+    "name": "Add",
     "header": {
       "fields": {
         "Header": [
@@ -39,8 +38,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "description",
-            "description": "<p>Description of profile</p>"
+            "field": "username",
+            "description": "<p>UserName of profile</p>"
           }
         ]
       }
@@ -52,8 +51,8 @@
             "group": "Success 200",
             "type": "JSON",
             "optional": false,
-            "field": "profile",
-            "description": "<p>types details</p>"
+            "field": "email",
+            "description": "<p>Email</p>"
           }
         ]
       }
@@ -78,8 +77,8 @@
   {
     "type": "get",
     "url": "user/job_interest",
-    "title": "Interest Parts - Get all",
-    "name": "get_interest___Get_all",
+    "title": "Interest  - Get all",
+    "name": "job_interest",
     "group": "Admin",
     "header": {
       "fields": {
@@ -89,7 +88,7 @@
             "type": "String",
             "optional": false,
             "field": "x-access-token",
-            "description": "<p>Admin's unique access-key</p>"
+            "description": "<p> unique access-key</p>"
           }
         ]
       }
@@ -102,7 +101,7 @@
             "type": "Array",
             "optional": false,
             "field": "bodyparts",
-            "description": "<p>Array of bodyparts document</p>"
+            "description": "<p>Array of job interest document</p>"
           }
         ]
       }
@@ -127,8 +126,8 @@
   {
     "type": "get",
     "url": "user/job_interest",
-    "title": "Interest Parts - Get all",
-    "name": "get_interest___Get_all",
+    "title": "Interest  - Get all",
+    "name": "get_interest Get_all",
     "group": "Admin",
     "header": {
       "fields": {
@@ -138,7 +137,7 @@
             "type": "String",
             "optional": false,
             "field": "x-access-token",
-            "description": "<p>Admin's unique access-key</p>"
+            "description": "<p> unique access-key</p>"
           }
         ]
       }

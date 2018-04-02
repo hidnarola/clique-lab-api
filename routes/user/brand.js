@@ -9,11 +9,11 @@ var config = require("./../../config");
 var logger = config.logger;
 
 var promoter_helper = require("./../../helpers/promoter_helper");
-//var inspiredBrand=require("./../../helpers/promoter_helper");
+
 
 
 /**
- * @api {get} user/campaign/brand Interest  - Get all
+ * @api {get} user/brand/  Brand  - Get all
  * @apiName get_all_brand - Get all
 
  *
@@ -22,7 +22,7 @@ var promoter_helper = require("./../../helpers/promoter_helper");
  * @apiSuccess (Success 200) {Array}  Array of Brand document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/brand", async (req, res) => {
+router.get("/", async (req, res) => {
 
     logger.trace("Get all Brand API called");
     var resp_data = await promoter_helper.get_all_brand();
@@ -50,7 +50,7 @@ router.get("/brand", async (req, res) => {
  * @apiSuccess (Success 200) {JSON} inspired Inspired details
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-  router.post("/brand", async (req, res) => {
+  router.post("/", async (req, res) => {
    
       
     var schema = {
@@ -92,68 +92,46 @@ router.get("/brand", async (req, res) => {
             if (req.files && req.files["image"]) {
               var file_path_array = [];
               // var files = req.files['images'];
-              var files = [].concat(req.files.image);
-              var dir = "./uploads/inspired_brands";
+              var file =req.files.image;
+              var dir = "./uploads/inspired_submission";
               var mimetype = ["image/png", "image/jpeg", "image/jpg"];
   
               // assuming openFiles is an array of file names
-              async.eachSeries(
-                files,
-                function(file, loop_callback) {
-                  var mimetype = ["image/png", "image/jpeg", "image/jpg"];
-                  if (mimetype.indexOf(file.mimetype) != -1) {
-                    if (!fs.existsSync(dir)) {
-                      fs.mkdirSync(dir);
-                    }
-                    extention = path.extname(file.name);
-                    filename = "image" + new Date().getTime() + extention;
-                    file.mv(dir + "/" + filename, function(err) {
-                      if (err) {
-                        logger.error("There was an issue in uploading image");
-                        loop_callback({
-                          status: config.MEDIA_ERROR_STATUS,
-                          err: "There was an issue in uploading image"
-                        });
-                      } else {
-                        logger.trace(
-                          "image has been uploaded. Image name = ",
-                          filename
-                        );
-                        location = "uploads/inspired_brands/" + filename;
-                        file_path_array.push(location);
-                        loop_callback();
-                      }
-                    });
-                  } else {
-                    logger.error("Image format is invalid");
-                    loop_callback({
-                      status: config.VALIDATION_FAILURE_STATUS,
-                      err: "Image format is invalid"
-                    });
-                  }
-                },
-                function(err) {
-                  // if any of the file processing produced an error, err would equal that error
-                  if (err) {
-                    res.status(err.status).json(err);
-                  } else {
-                    callback(null, file_path_array);
-                  }
+              
+              if (mimetype.indexOf(file.mimetype) != -1) {
+                logger.trace("Uploading image");
+                if (!fs.existsSync(dir)) {
+                    fs.mkdirSync(dir);
                 }
-              );
+
+                extension = ".jpg";
+                filename = "image_" + new Date().getTime() + extension;
+                file.mv(dir + '/' + filename, function (err) {
+                    if (err) {
+                        logger.trace("Problem in uploading image");
+                        callback({"status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image"});
+                    } else {
+                        logger.trace("Image uploaded");
+                        callback(null, filename);
+                    }
+                });
             } else {
-              logger.info(
-                "Image not available to upload. Executing next instruction"
-              );
-              callback(null, []);
+                logger.trace("Invalid image format");
+                callback({"status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid"});
             }
-          }
+        } else {
+            logger.trace("Avatar is not available");
+            callback(null, user, null);
+        }
+            }
+         
         ],
-        async (err, file_path_array) => {
+        async (err, filename) => {
           //End image upload
-          if(file_path_array)
+         
+          if(filename)
           {
-            inspire_obj.image = file_path_array;
+            inspire_obj.image = filename;
           }
           
           let inspire_data = await promoter_helper.insert_inspired_brand(inspire_obj);

@@ -39,7 +39,7 @@ login_helper.get_login_by_email = async (email) => {
  * 
  * @developed by "ar"
  */
-login_helper.update_by_id = async (user_id, login_object) => {
+login_helper = async (user_id, login_object) => {
     try {
         let user = await User.findOneAndUpdate({ _id: user_id }, login_object);
         if (!user) {

@@ -7,6 +7,7 @@ var Schema = mongoose.Schema;
 var InspiredBrandModelSchema = new Schema({
     company: String,
     image: String,
+    social_media_platform:String,
    text:String,
    price:Number
 }, { versionKey: false });

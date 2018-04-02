@@ -411,7 +411,7 @@ router.get("/job_industry", async (req, res) => {
 });
 
 /**
- * @api {get} user/job_interest Interest Parts - Get all
+ * @api {get} user/job_interest Interest - Get all
  * @apiName get_interest - Get all
  * @apiGroup Admin
  *
@@ -456,15 +456,20 @@ router.get("/music_taste", async (req, res) => {
 });
 
 /**
- * @api {post} /profile Exercise Types Add
- * @apiName Exercise Type Add
- * @apiGroup Admin
+ * @api {post} /profile  Types Add
+ * @apiName insert_inspired_brand  Type Add
+
  * 
  * @apiHeader {String}  Content-Type application/json
  * @apiHeader {String}  x-access-token  unique access-key
  * 
  * @apiParam {String} name Name of profile
- * @apiParam {String} description Description of profile
+ * @apiParam {String} username Username of profile
+ *  @apiParam {String} email Email of profile
+ *  @apiParam {String} job_industry Job Industry of profile
+ *  @apiParam {String} music_taste Music Taste of profile
+ *  @apiParam {String} interest Interest of profile
+
  * 
  * @apiSuccess (Success 200) {JSON}profile types details
  * @apiError (Error 4xx) {String} message Validation or error message.
@@ -538,7 +543,7 @@ router.post('/signup', async (req, res) => {
  * @apiParam {String} email Email
  * @apiParam {String} token as facebook token
  * 
- * @apiSuccess (Success 200) {JSON} user Admin user object.
+ * @apiSuccess (Success 200) {JSON} user  user object.
  * @apiSuccess (Success 200) {String} token Unique token which needs to be passed in subsequent requests.
  * @apiSuccess (Success 200) {String} refresh_token Unique token which needs to be passed to generate next access token.
  * @apiError (Error 4xx) {String} message Validation or error message.
