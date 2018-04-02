@@ -5,6 +5,7 @@ var promoter = require('../models/User');
 var jwt = require('jsonwebtoken');
 var moment = require('moment');
 var bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 var promoter_helper = require('./../helpers/promoter_helper');
 var mail_helper = require('./../helpers/mail_helper');
@@ -46,8 +47,7 @@ router.post('/promoter_login', async (req, res) => {
   var schema = {
     'login_id': {
       notEmpty: true,
-      errorMessage: "Email or username is required.",
-      isEmail: { errorMessage: "Please enter valid email address" }
+      errorMessage: "Email or username is required."
     },
     'password': {
       notEmpty: true,
@@ -72,10 +72,10 @@ router.post('/promoter_login', async (req, res) => {
 
       logger.trace("User found. Executing next instruction");
       // Checking password
-      if(bcrypt.compareSync(req.body.password, promoter_resp.promoter.password)){
+      if (bcrypt.compareSync(req.body.password, promoter_resp.promoter.password)) {
 
         // Valid password, now check account is active or not
-        if(promoter_resp.promoter.status && promoter_resp.promoter.email_verified){
+        if (promoter_resp.promoter.status && promoter_resp.promoter.email_verified) {
           // Account is active
           logger.trace("valid password. Generating token");
 
@@ -95,12 +95,12 @@ router.post('/promoter_login', async (req, res) => {
           logger.info("Token generated");
           res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "promoter": promoter_resp.promoter, "token": token, "refresh_token": refreshToken });
         } else {
-          if(promoter_resp.promoter.status){
+          if (promoter_resp.promoter.status) {
             logger.trace("Account is inactive");
-            res.status(config.BAD_REQUEST).json({"status":0,"message":"Account is not active. Contact to admin for more information."});
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not active. Contact to admin for more information." });
           } else {
             logger.trace("Account is inactive");
-            res.status(config.BAD_REQUEST).json({"status":0,"message":"Please verify your email to logged-in"});
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please verify your email to logged-in" });
           }
         }
       } else {
@@ -139,78 +139,78 @@ router.post('/promoter_signup', async (req, res) => {
   logger.trace("API - Promoter signup called");
   logger.debug("req.body = ", req.body);
   var schema = {
-      'name': {
-          notEmpty: true,
-          errorMessage: "Full name is required"
-      },
-      'username': {
-        notEmpty: true,
-        errorMessage: "Username is required"
-      },
-      'email': {
-        notEmpty: true,
-        errorMessage: "Email address is required",
-        isEmail: {errorMessage: "Please enter valid email address"}
-      },
-      'company': {
-          notEmpty: true,
-          errorMessage: "Company name is required"
-      },
-      'password': {
-        notEmpty: true,
-        errorMessage: "Password is required"
-      }
+    'name': {
+      notEmpty: true,
+      errorMessage: "Full name is required"
+    },
+    'username': {
+      notEmpty: true,
+      errorMessage: "Username is required"
+    },
+    'email': {
+      notEmpty: true,
+      errorMessage: "Email address is required",
+      isEmail: { errorMessage: "Please enter valid email address" }
+    },
+    'company': {
+      notEmpty: true,
+      errorMessage: "Company name is required"
+    },
+    'password': {
+      notEmpty: true,
+      errorMessage: "Password is required"
+    }
   };
   req.checkBody(schema);
   var errors = req.validationErrors();
   if (!errors) {
     let data = req.body;
     var promoter_obj = {
-      "full_name" : req.body.name,
+      "full_name": req.body.name,
       "email": req.body.email,
       "username": req.body.username,
-      "company":req.body.company,
+      "company": req.body.company,
       "password": req.body.password
     };
 
     // Check email availability
     var promoter = await promoter_helper.get_promoter_by_email_or_username(req.body.email)
-    if(promoter.status === 2){
+    if (promoter.status === 2) {
 
       // Check username availability
       promoter = await promoter_helper.get_promoter_by_email_or_username(req.body.username)
-      if(promoter.status === 2){
+      if (promoter.status === 2) {
 
         // Insert promoter
         var promoter_data = await promoter_helper.insert_promoter(promoter_obj);
 
-        if(promoter_data.status == 0){
+        if (promoter_data.status == 0) {
           logger.trace("Error occured while inserting promoter - Promoter Signup API");
-          logger.debug("Error = ",promoter_data.error);
+          logger.debug("Error = ", promoter_data.error);
           res.status(config.INTERNAL_SERVER_ERROR).json(promoter_data);
         } else {
           logger.trace("Promoter has been inserted");
           // Send email confirmation mail to user
           logger.trace("sending mail");
-          let mail_resp = await mail_helper.send("email_confirmation",{
-            "to":promoter_data.promoter.email,
-            "subject":"Clique Lab - Email confirmation"
-          },{
-            "confirm_url":config.website_url+"/email_confirm/"+promoter_data.promoter._id
-          });
+          let mail_resp = await mail_helper.send("email_confirmation", {
+            "to": promoter_data.promoter.email,
+            "subject": "Clique Lab - Email confirmation"
+          }, {
+              "confirm_url": config.website_url + "/email_confirm/" + promoter_data.promoter._id
+            });
 
-          console.log("mail resp = ",mail_resp);
-          if(mail_resp.status === 0){
-              res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while sending confirmation email","error":mail_resp.error});
+          console.log("mail resp = ", mail_resp);
+          if (mail_resp.status === 0) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending confirmation email", "error": mail_resp.error });
           } else {
-              res.status(config.OK_STATUS).json({"status":1,"message":"Promoter registered successfully"});
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter registered successfully" });
           }
         }
       } else {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"Promoter's username already exist"});
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter's username already exist" });
       }
     } else {
-      res.status(config.BAD_REQUEST).json({"status":0,"message":"Promoter's email already exist"});
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter's email already exist" });
     }
   } else {
     logger.error("Validation Error = ", errors);
@@ -228,50 +228,196 @@ router.post('/promoter_signup', async (req, res) => {
  * @apiSuccess (Success 200) {String} message Success message
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get('/promoter_email_verify/:promoter_id',async (req,res) => {
+router.get('/promoter_email_verify/:promoter_id', async (req, res) => {
   logger.trace("API - Promoter email verify called");
   logger.debug("req.body = ", req.body);
 
   var promoter_resp = await promoter_helper.get_promoter_by_id(req.params.promoter_id);
-  if(promoter_resp.status === 0){
-    logger.error("Error occured while finding promoter by id - ",req.params.promoter_id, promoter_resp.error);
-    res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error has occured while finding promoter"});
-  } else if(promoter_resp.status === 2){
+  if (promoter_resp.status === 0) {
+    logger.error("Error occured while finding promoter by id - ", req.params.promoter_id, promoter_resp.error);
+    res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error has occured while finding promoter" });
+  } else if (promoter_resp.status === 2) {
     logger.trace("Promoter not found in promoter email verify API");
-    res.status(config.BAD_REQUEST).json({"status":0,"message":"Invalid token entered"});
+    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid token entered" });
   } else {
     // Promoter available
-    if(promoter_resp.promoter.email_verified){
+    if (promoter_resp.promoter.email_verified) {
       // Email already verified
       logger.trace("promoter already verified");
-      res.status(config.BAD_REQUEST).json({"status":0,"message":"Email already verified"});
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Email already verified" });
     } else {
       // Verify email
-      logger.trace("Valid request for email verification - ",promoter_resp.promoter._id);
-      
-      var update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id,{"email_verified":true,"status":true});
-      if(update_resp.status === 0){
-        logger.trace("Error occured while updating promoter : ",update_resp.error);
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while verifying user's email"});
-      } else if(update_resp.status === 2) {
+      logger.trace("Valid request for email verification - ", promoter_resp.promoter._id);
+
+      var update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id, { "email_verified": true, "status": true });
+      if (update_resp.status === 0) {
+        logger.trace("Error occured while updating promoter : ", update_resp.error);
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while verifying user's email" });
+      } else if (update_resp.status === 2) {
         logger.trace("Promoter has not updated");
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"Error occured while verifying user's email"});
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while verifying user's email" });
       } else {
         // Email verified!
-        res.status(config.OK_STATUS).json({"status":1,"message":"Email has been verified"});
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Email has been verified" });
       }
     }
   }
 });
 
 /**
- * @api {get} user/job_interest Interest  - Get all
+ * @api {post} /promoter_forgot_password Promoter forgot password
+ * @apiName Promoter forgot password
+ * @apiGroup Root
+ * 
+ * @apiDescription   Forgot password request for promoter role
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} email Email
+ * 
+ * @apiSuccess (Success 200) {String} message Appropriate success message
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/promoter_forgot_password', async (req, res) => {
+
+  logger.trace("API - Promoter forgot password called");
+  logger.debug("req.body = ", req.body);
+  var schema = {
+    'email': {
+      notEmpty: true,
+      errorMessage: "Email is required.",
+      isEmail: { errorMessage: "Please enter valid email address" }
+    }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+    var promoter_resp = await promoter_helper.get_promoter_by_email_or_username(req.body.email);
+    if (promoter_resp.status === 0) {
+      res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error while finding promoter" });
+    } else if (promoter_resp.status === 2) {
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available with given email" });
+    } else {
+      // Send mail on user's email address
+      var reset_token = jwt.sign({ "promoter_id": promoter_resp.promoter._id }, config.ACCESS_TOKEN_SECRET_KEY, {
+        expiresIn: 60 * 60 * 2 // expires in 2 hour
+      });
+
+      let mail_resp = await mail_helper.send("reset_password", {
+        "to": promoter_resp.promoter.email,
+        "subject": "Clique Lab - Reset password request"
+      }, {
+          "reset_link": config.website_url + "/forget_password/" + reset_token
+        });
+
+      if (mail_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending mail to promoter", "error": mail_resp.error });
+      } else {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Reset link has been sent on your email address" });
+      }
+    }
+  } else {
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
+/**
+ * @api {post} /promoter_reset_password Promoter reset password
+ * @apiName Promoter reset password
+ * @apiGroup Root
+ * 
+ * @apiDescription   Reset password request for promoter role
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} token Reset password token
+ * @apiParam {String} password New password
+ * 
+ * @apiSuccess (Success 200) {String} message Appropriate success message
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/promoter_reset_password', async (req, res) => {
+  logger.trace("API - Promoter reset password called");
+  logger.debug("req.body = ", req.body);
+  var schema = {
+    'token': {
+      notEmpty: true,
+      errorMessage: "Reset password token is required."
+    },
+    'password': {
+      notEmpty: true,
+      errorMessage: "Password is required."
+    }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+
+    logger.trace("Verifying JWT");
+    jwt.verify(req.body.token, config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
+      if (err) {
+        if (err.name === "TokenExpiredError") {
+          logger.trace("Link has expired");
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Link has been expired" });
+        } else {
+          logger.trace("Invalid link");
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid token sent" });
+        }
+      } else {
+        logger.trace("Valid token. Reseting password for promoter");
+        if (decoded.promoter_id) {
+            var update_resp = await promoter_helper.update_promoter_by_id(decoded.promoter_id, { "password": bcrypt.hashSync(req.body.password, saltRounds) });
+            if (update_resp.status === 0) {
+              logger.trace("Error occured while updating promoter : ", update_resp.error);
+              res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while verifying user's email" });
+            } else if (update_resp.status === 2) {
+              logger.trace("Promoter has not updated");
+              res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while reseting password of promoter" });
+            } else {
+              // Password reset!
+              logger.trace("Password has been changed for promoter - ",decoded.promoter_id);
+              res.status(config.OK_STATUS).json({ "status": 1, "message": "Password has been changed" });
+            }
+        } else {
+
+        }
+      }
+    });
+  } else {
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+})
+
+
+// Can be used by both, user and promoter
+/**
+ * @api {get} /job_industry Get all job industry
+ * @apiName Get all job industry
+ * @apiGroup Root
+ *
+ * @apiSuccess (Success 200) {Array} Job_industry Array of Job_industry document
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get("/job_industry", async (req, res) => {
+  logger.trace("Get all Job industry API called");
+  var resp_data = await job_industry.get_all_job_industry();
+  if (resp_data.status == 0) {
+    logger.error("Error occured while fetching Job Industry = ", resp_data);
+    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  } else {
+    logger.trace("Job Industry got successfully = ", resp_data);
+    res.status(config.OK_STATUS).json(resp_data);
+  }
+});
+
+/**
+ * @api {get} user/job_interest Interest Parts - Get all
  * @apiName get_interest - Get all
  * @apiGroup Admin
  *
- * @apiHeader {String}  x-access-token  unique access-key
+ * @apiHeader {String}  x-access-token Admin's unique access-key
  *
- * @apiSuccess (Success 200) {Array}  Array of interest document
+ * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/interest", async (req, res) => {
@@ -283,30 +429,6 @@ router.get("/interest", async (req, res) => {
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
   } else {
     logger.trace("Interest got successfully = ", resp_data);
-    res.status(config.OK_STATUS).json(resp_data);
-  }
-});
-
-
-/**
- * @api {get} user/job_industry Job Industry  - Get all
- * @apiName job_industry - Get all
- * @apiGroup Admin
- *
- * @apiHeader {String}  x-access-token  unique access-key
- *
- * @apiSuccess (Success 200) {Array}  Array of job industry document
- * @apiError (Error 4xx) {String} message Validation or error message.
- */
-router.get("/job_industry", async (req, res) => {
-
-  logger.trace("Get all Job industry API called");
-  var resp_data = await job_industry.get_all_job_industry();
-  if (resp_data.status == 0) {
-    logger.error("Error occured while fetching Job Industry = ", resp_data);
-    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-  } else {
-    logger.trace("Job Industry got successfully = ", resp_data);
     res.status(config.OK_STATUS).json(resp_data);
   }
 });
@@ -333,8 +455,6 @@ router.get("/music_taste", async (req, res) => {
   }
 });
 
-
-
 /**
  * @api {post} /profile Exercise Types Add
  * @apiName Exercise Type Add
@@ -351,56 +471,56 @@ router.get("/music_taste", async (req, res) => {
  */
 router.post('/signup', async (req, res) => {
   var schema = {
-      "name": {
-          notEmpty: true,
-          errorMessage: "Name is required"
-      },
-      "username": {
-          notEmpty: true,
-          errorMessage: "Username is required"
-      },
-      "email": {
-          notEmpty: true,
-          errorMessage: "Email is required"
-      },
-      "user_interest": {
-          notEmpty: true,
-          errorMessage: "User Interest is required"
-      },
-      "job_industry": {
-          notEmpty: true,
-          errorMessage: "Job Industry is required"
-      },
-      "music_taste": {
-          notEmpty: true,
-          errorMessage: "Music taste is required"
-      },
+    "name": {
+      notEmpty: true,
+      errorMessage: "Name is required"
+    },
+    "username": {
+      notEmpty: true,
+      errorMessage: "Username is required"
+    },
+    "email": {
+      notEmpty: true,
+      errorMessage: "Email is required"
+    },
+    "user_interest": {
+      notEmpty: true,
+      errorMessage: "User Interest is required"
+    },
+    "job_industry": {
+      notEmpty: true,
+      errorMessage: "Job Industry is required"
+    },
+    "music_taste": {
+      notEmpty: true,
+      errorMessage: "Music taste is required"
+    },
   };
 
   req.checkBody(schema);
   var errors = req.validationErrors();
   if (!errors) {
-      var profile_obj = {
-          "name": req.body.name,
-          "username": req.body.username,
-          "email": req.body.email,
-          "user_interest": req.body.user_interest,
-          "job_industry": req.body.job_industry,
-          "music_taste": req.body.music_taste
-         
-      };
+    var profile_obj = {
+      "name": req.body.name,
+      "username": req.body.username,
+      "email": req.body.email,
+      "user_interest": req.body.user_interest,
+      "job_industry": req.body.job_industry,
+      "music_taste": req.body.music_taste
 
-      let profile_data = await profile.insert_profile(profile_obj);
-      if (profile_data.status === 0) {
-          
-          logger.error("Error while inserting Profile data = ", profile_data);
-          res.status(config.BAD_REQUEST).json({ profile_data });
-      } else {
-          res.status(config.OK_STATUS).json(profile_data);
-      }
+    };
+
+    let profile_data = await profile.insert_profile(profile_obj);
+    if (profile_data.status === 0) {
+
+      logger.error("Error while inserting Profile data = ", profile_data);
+      res.status(config.BAD_REQUEST).json({ profile_data });
+    } else {
+      res.status(config.OK_STATUS).json(profile_data);
+    }
   } else {
-      logger.error("Validation Error = ", errors);
-      res.status(config.BAD_REQUEST).json({ message: errors });
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
 
@@ -450,7 +570,7 @@ router.post('/login', async (req, res) => {
     let login_resp = await login_helper.get_login_by_email(req.body.email);
     logger.trace("Login checked resp = ", login_resp);
     if (login_resp.status === 0) {
-    logger.trace("Login checked resp = ", login_resp);
+      logger.trace("Login checked resp = ", login_resp);
       logger.error("Error in finding by email in login API. Err = ", login_resp.err);
 
       res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Something went wrong while finding promoter", "error": promoter_resp.error });
@@ -458,7 +578,7 @@ router.post('/login', async (req, res) => {
       logger.trace("User found. Executing next instruction");
 
       // Checking password
-      if(req.body.token=== login_resp.user.facebook.token){
+      if (req.body.token === login_resp.user.facebook.token) {
         logger.trace("valid token. Generating token");
         var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
         let update_resp = await login_helper.update_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });

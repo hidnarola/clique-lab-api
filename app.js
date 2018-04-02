@@ -63,15 +63,13 @@ app.use(function (req, res, next) {
 
 var index = require('./routes/index');
 var user = require('./routes/user');
-
-
+var promoter = require('./routes/promoter');
 // var admin = require('./routes/admin');
 
 
 app.use('/',index);
 app.use('/user', user);
-
-
+app.use('/promoter', promoter);
 // app.use('/admin', admin);
 
 
