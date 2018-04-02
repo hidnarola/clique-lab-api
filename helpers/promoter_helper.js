@@ -1,6 +1,6 @@
 var Promoter = require("./../models/Promoter");
 var promoter_helper = {};
-
+var inspireBrand=require("./../models/Inspired_Brand_submit");
 /*
  * get_promoter_by_id is used to fetch promoter details by promoter id
  * 
@@ -89,6 +89,46 @@ promoter_helper.update_promoter_by_id = async (promoter_id, promoter_object) => 
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while updating promoter", "error": err }
+    }
+};
+
+/*
+ * get_promoter_by_id is used to fetch promoter details by promoter id
+ * 
+ * @params  promoter_id     _id field of promoter collection
+ * 
+ * @return  status 0 - If any internal error occured while fetching promoter data, with error
+ *          status 1 - If promoter data found, with promoter object
+ *          status 2 - If promoter not found, with appropriate message
+ */
+promoter_helper.get_all_brand = async () => {
+    try {
+        var brand = await Promoter.find({},{"industry_description":1,"company":1});
+        if (brand) {
+            return { "status": 1, "message": "Brand details found", "brand": brand };
+        } else {
+            return { "status": 2, "message": "Brand not found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding Brand", "error": err }
+    }
+};
+/*
+ * get_promoter_by_id is used to fetch promoter details by promoter id
+ * 
+ * @params  promoter_id     _id field of promoter collection
+ * 
+ * @return  status 0 - If any internal error occured while fetching promoter data, with error
+ *          status 1 - If promoter data found, with promoter object
+ *          status 2 - If promoter not found, with appropriate message
+ */
+promoter_helper.insert_inspired_brand = async (promoter_object) => {
+    let promoter = new inspireBrand(promoter_object);
+    try{
+        let promoter_data = await promoter.save();
+        return { "status": 1, "message": "Brand inserted", "brand": promoter_data };
+    } catch(err){
+        return { "status": 0, "message":"Error occured while Brand ","error": err };
     }
 };
 

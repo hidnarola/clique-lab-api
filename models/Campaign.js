@@ -17,6 +17,7 @@ var CampaignModelSchema = new Schema({
     hash_tag: [String],
     at_tag: [String],
     privacy: { type: String, enum: ["public", "invite"], default: "public" },
+    status :Boolean,
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 

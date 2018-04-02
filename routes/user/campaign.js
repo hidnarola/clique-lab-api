@@ -20,13 +20,12 @@ var campaign_helper = require("./../../helpers/campaign_helper");
  * @apiSuccess (Success 200) {Array} exercise Array of campaigns 
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/", async (req, res) => {
- 
+router.get("/approved", async (req, res) => {
    user_id = req.userInfo.id;
    logger.trace("Get all campaign API called");
-  var resp_data = await campaign_helper.get_capmpaign_by_user_id(user_id);
+  var resp_data = await campaign_helper.get_campaign_by_user_id(user_id);
    if (resp_data.status == 0) {
-     logger.error("Error occured while fetching campaign = ", resp_data);
+    logger.error("Error occured while fetching campaign = ", resp_data);
      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
   } else {
     logger.trace("Campaigns got successfully = ", resp_data);
@@ -45,6 +44,7 @@ router.get("/", async (req, res) => {
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/public_campaign", async (req, res) => {
+  user_id = req.userInfo.id;
   logger.trace("Get all Public Campaign API called");
   var resp_data = await campaign_helper.get_all_campaign();
   if (resp_data.status == 0) {
@@ -52,6 +52,30 @@ router.get("/public_campaign", async (req, res) => {
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
   } else {
     logger.trace("Public Campaign got successfully = ", resp_data);
+    res.status(config.OK_STATUS).json(resp_data);
+  }
+});
+
+
+/**
+ * @api {get} user/myoffer Approved Campaign  - Get all
+ * @apiName approved_campaign - Get all
+ * @apiGroup Admin
+ *
+ * @apiHeader {String}  x-access-token unique access-key
+ *
+ * @apiSuccess (Success 200) {Array} Array of Approved Campaign document
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get("/myoffer", async (req, res) => {
+  user_id = req.userInfo.id;
+  logger.trace("Get all Approved Campaign API called");
+  var resp_data = await campaign_helper.get_all_approved_campaign(user_id);
+  if (resp_data.status == 0) {
+    logger.error("Error occured while fetchingApproved Campaign = ", resp_data);
+    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  } else {
+    logger.trace("Approved Campaign got successfully = ", resp_data);
     res.status(config.OK_STATUS).json(resp_data);
   }
 });

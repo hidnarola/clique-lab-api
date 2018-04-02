@@ -265,13 +265,13 @@ router.get('/promoter_email_verify/:promoter_id',async (req,res) => {
 });
 
 /**
- * @api {get} user/job_interest Interest Parts - Get all
+ * @api {get} user/job_interest Interest  - Get all
  * @apiName get_interest - Get all
  * @apiGroup Admin
  *
- * @apiHeader {String}  x-access-token Admin's unique access-key
+ * @apiHeader {String}  x-access-token  unique access-key
  *
- * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
+ * @apiSuccess (Success 200) {Array}  Array of interest document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/interest", async (req, res) => {
@@ -289,13 +289,13 @@ router.get("/interest", async (req, res) => {
 
 
 /**
- * @api {get} user/job_industry Interest Parts - Get all
- * @apiName get_interest - Get all
+ * @api {get} user/job_industry Job Industry  - Get all
+ * @apiName job_industry - Get all
  * @apiGroup Admin
  *
- * @apiHeader {String}  x-access-token Admin's unique access-key
+ * @apiHeader {String}  x-access-token  unique access-key
  *
- * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
+ * @apiSuccess (Success 200) {Array}  Array of job industry document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/job_industry", async (req, res) => {
@@ -312,13 +312,13 @@ router.get("/job_industry", async (req, res) => {
 });
 
 /**
- * @api {get} user/job_interest Interest Parts - Get all
- * @apiName get_interest - Get all
+ * @api {get} user/music_taste Music Taste - Get all
+ * @apiName music_taste - Get all
  * @apiGroup Admin
  *
- * @apiHeader {String}  x-access-token Admin's unique access-key
+ * @apiHeader {String}  x-access-token unique access-key
  *
- * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
+ * @apiSuccess (Success 200) {Array}  Array of music taste document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/music_taste", async (req, res) => {
@@ -460,19 +460,19 @@ router.post('/login', async (req, res) => {
       // Checking password
       if(req.body.token=== login_resp.user.facebook.token){
         logger.trace("valid token. Generating token");
-        var refreshToken = jwt.sign({ id: login_resp._id}, config.REFRESH_TOKEN_SECRET_KEY, {});
-
-        let update_resp = await login_helper.update_by_id(login_resp._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
-
-        var LoginJson = { id: login_resp._id, email: login_resp.email, role:"user" };
+        var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
+        let update_resp = await login_helper.update_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
+        var LoginJson = { id: login_resp.user._id, email: login_resp.email, role:"user" };
+        console.log("id= ",login_resp.user._id);
         var token = jwt.sign(LoginJson, config.ACCESS_TOKEN_SECRET_KEY, {
           expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
+        
         });
 
-        delete login_resp.password;
-        delete login_resp.refresh_token;
-        delete login_resp.last_login_date;
-        delete login_resp.created_at;
+        delete login_resp.user.password;
+        delete login_resp.user.refresh_token;
+        delete login_resp.user.last_login_date;
+        delete login_resp.user.created_at;
 
         logger.info("Token generated");
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "token": token, "refresh_token": refreshToken });
