@@ -46,8 +46,8 @@ router.get("/", async (req, res) => {
  * 
  * @apiParam {String} name Name of comapny
  * @apiParam {String}  Image  image of company
- * @apiParam {String}  text  image of company
- * @apiParam {String}  price  image of company
+ * @apiParam {String}  text  text of company
+ * @apiParam {String}  price  price of company
  
  * @apiSuccess (Success 200) {JSON} inspired Inspired details
  * @apiError (Error 4xx) {String} message Validation or error message.
