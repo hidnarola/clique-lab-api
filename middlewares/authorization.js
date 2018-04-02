@@ -1,7 +1,7 @@
 var config = require('../config');
 
 module.exports = function (req, res, next) {
-    if (req.decoded.role == "promoter" && req.baseUrl.match('/user')) {
+    if (req.decoded.role == "promoter" && req.baseUrl.match('/promoter')) {
         req.userInfo = req.decoded;
         next();
     } else if (req.decoded.role == "user" && req.baseUrl.match('/user')) {

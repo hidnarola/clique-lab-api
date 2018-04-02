@@ -1,10 +1,253 @@
 define({ "api": [
   {
+    "type": "put",
+    "url": "/user/profile",
+    "title": "Update profile",
+    "name": "Update_faq",
+    "group": "Admin",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>Admin's unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>FAQ Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "question",
+            "description": "<p>FAQ question</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "answer",
+            "description": "<p>FAQ answer</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "category_id",
+            "description": "<p>Category of FAQ</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "is_active",
+            "description": "<p>Activation status for faq</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "driver",
+            "description": "<p>Driver details</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/profile.js",
+    "groupTitle": "Admin"
+  },
+  {
+    "type": "get",
+    "url": "user/myoffer",
+    "title": "My offer Campaign  - Get all",
+    "name": "approved_campaign___Get_all",
+    "group": "Admin",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "Array",
+            "description": "<p>of Offered Campaign document</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/campaign.js",
+    "groupTitle": "Admin"
+  },
+  {
+    "type": "get",
+    "url": "user/job_interest",
+    "title": "Interest - Get all",
+    "name": "get_interest___Get_all",
+    "group": "Admin",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>Admin's unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "bodyparts",
+            "description": "<p>Array of bodyparts document</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Admin"
+  },
+  {
+    "type": "get",
+    "url": "user/music_taste",
+    "title": "Music Taste - Get all",
+    "name": "music_taste___Get_all",
+    "group": "Admin",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "Array",
+            "description": "<p>of music taste document</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Admin"
+  },
+  {
     "type": "post",
     "url": "/profile",
-    "title": "Exercise Types Add",
-    "name": "Exercise_Type_Add",
-    "group": "Admin",
+    "title": "Types Add",
+    "name": "insert_inspired_brand_Type_Add",
     "header": {
       "fields": {
         "Header": [
@@ -39,8 +282,36 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "description",
-            "description": "<p>Description of profile</p>"
+            "field": "username",
+            "description": "<p>Username of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "job_industry",
+            "description": "<p>Job Industry of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "music_taste",
+            "description": "<p>Music Taste of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "interest",
+            "description": "<p>Interest of profile</p>"
           }
         ]
       }
@@ -73,17 +344,24 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/index.js",
-    "groupTitle": "Admin"
+    "group": "D__Clique_clique_lab_api_routes_index_js",
+    "groupTitle": "D__Clique_clique_lab_api_routes_index_js"
   },
   {
-    "type": "get",
-    "url": "user/job_interest",
-    "title": "Interest Parts - Get all",
-    "name": "get_interest___Get_all",
-    "group": "Admin",
+    "type": "post",
+    "url": "/user/brand",
+    "title": "Brand Add",
+    "name": "Brand_Add",
     "header": {
       "fields": {
         "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          },
           {
             "group": "Header",
             "type": "String",
@@ -94,15 +372,35 @@ define({ "api": [
         ]
       }
     },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of comapny</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description of company</p>"
+          }
+        ]
+      }
+    },
     "success": {
       "fields": {
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "Array",
+            "type": "JSON",
             "optional": false,
-            "field": "bodyparts",
-            "description": "<p>Array of bodyparts document</p>"
+            "field": "inspired",
+            "description": "<p>Inspired details</p>"
           }
         ]
       }
@@ -121,15 +419,15 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/index.js",
-    "groupTitle": "Admin"
+    "filename": "routes/user/brand.js",
+    "group": "D__Clique_clique_lab_api_routes_user_brand_js",
+    "groupTitle": "D__Clique_clique_lab_api_routes_user_brand_js"
   },
   {
     "type": "get",
-    "url": "user/job_interest",
-    "title": "Interest Parts - Get all",
-    "name": "get_interest___Get_all",
-    "group": "Admin",
+    "url": "user/brand/",
+    "title": "Brand  - Get all",
+    "name": "get_all_brand___Get_all",
     "header": {
       "fields": {
         "Header": [
@@ -138,7 +436,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "x-access-token",
-            "description": "<p>Admin's unique access-key</p>"
+            "description": "<p>unique access-key</p>"
           }
         ]
       }
@@ -150,8 +448,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "bodyparts",
-            "description": "<p>Array of bodyparts document</p>"
+            "field": "Array",
+            "description": "<p>of Brand document</p>"
           }
         ]
       }
@@ -170,12 +468,13 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/index.js",
-    "groupTitle": "Admin"
+    "filename": "routes/user/brand.js",
+    "group": "D__Clique_clique_lab_api_routes_user_brand_js",
+    "groupTitle": "D__Clique_clique_lab_api_routes_user_brand_js"
   },
   {
     "type": "get",
-    "url": "/user_id",
+    "url": "/approved",
     "title": "campaigns - Get by ID",
     "name": "campaigns___Get_campaigns_by_ID",
     "header": {
@@ -211,8 +510,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "exercise",
-            "description": "<p>Array of campaigns</p>"
+            "field": "Approved",
+            "description": "<p>Campaign Array of campaigns</p>"
           }
         ]
       }
@@ -232,8 +531,8 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/user/campaign.js",
-    "group": "E__Node_example_Clique_lab_API_routes_user_campaign_js",
-    "groupTitle": "E__Node_example_Clique_lab_API_routes_user_campaign_js"
+    "group": "D__Clique_clique_lab_api_routes_user_campaign_js",
+    "groupTitle": "D__Clique_clique_lab_api_routes_user_campaign_js"
   },
   {
     "type": "get",
@@ -281,8 +580,148 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/user/campaign.js",
-    "group": "E__Node_example_Clique_lab_API_routes_user_campaign_js",
-    "groupTitle": "E__Node_example_Clique_lab_API_routes_user_campaign_js"
+    "group": "D__Clique_clique_lab_api_routes_user_campaign_js",
+    "groupTitle": "D__Clique_clique_lab_api_routes_user_campaign_js"
+  },
+  {
+    "type": "get",
+    "url": "user/profile",
+    "title": "Profile - Get",
+    "name": "get_profile_by_id___Get",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "Profile",
+            "description": "<p>as per id</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/profile.js",
+    "group": "D__Clique_clique_lab_api_routes_user_profile_js",
+    "groupTitle": "D__Clique_clique_lab_api_routes_user_profile_js"
+  },
+  {
+    "type": "post",
+    "url": "/update_profile",
+    "title": "Update promoter profile",
+    "name": "Update_promoter_profile",
+    "group": "Promoter",
+    "description": "<p>Update promoter info</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>multipart/form-data</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "name",
+            "description": "<p>Full name of promoter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "company",
+            "description": "<p>Company name of the company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "industry_category",
+            "description": "<p>Industry category id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "industry_description",
+            "description": "<p>Industry description</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "File",
+            "optional": true,
+            "field": "avatar",
+            "description": "<p>Industry avatar/logo</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Success message</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/index.js",
+    "groupTitle": "Promoter"
   },
   {
     "type": "get",
@@ -297,7 +736,7 @@ define({ "api": [
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "Job_industry",
+            "field": "job_industry",
             "description": "<p>Array of Job_industry document</p>"
           }
         ]
@@ -368,7 +807,7 @@ define({ "api": [
             "type": "JSON",
             "optional": false,
             "field": "user",
-            "description": "<p>Admin user object.</p>"
+            "description": "<p>user object.</p>"
           },
           {
             "group": "Success 200",

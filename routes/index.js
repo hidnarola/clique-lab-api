@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var config = require('../config');
-var promoter = require('../models/User');
 var jwt = require('jsonwebtoken');
 var moment = require('moment');
 var bcrypt = require('bcrypt');
@@ -395,7 +394,7 @@ router.post('/promoter_reset_password', async (req, res) => {
  * @apiName Get all job industry
  * @apiGroup Root
  *
- * @apiSuccess (Success 200) {Array} Job_industry Array of Job_industry document
+ * @apiSuccess (Success 200) {Array} job_industry Array of Job_industry document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/job_industry", async (req, res) => {
