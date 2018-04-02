@@ -13,13 +13,12 @@ var promoter_helper = require("./../../helpers/promoter_helper");
 
 
 /**
- * @api {get} user/brand/  Brand  - Get all
- * @apiName get_all_brand - Get all
-
+ * @api {get} /user/promoter Brand  - Get 
+ * @apiName Brand - Get all
+  * @apiGroup User
+ * @apiHeader {String}  x-access-token unique access-key
  *
- * @apiHeader {String}  x-access-token  unique access-key
- *
- * @apiSuccess (Success 200) {Array}  Array of Brand document
+ * @apiSuccess (Success 200) {Array} brand Array of brand document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/", async (req, res) => {
@@ -37,15 +36,18 @@ router.get("/", async (req, res) => {
 
 
   /**
- * @api {post} /user/brand Brand Add
- * @apiName Brand  Add
-
- * 
+ * @api {post} /user/promoter Brand Add
+ * @apiName Brand - Add
+/**
+  * @apiGroup User
+ * @apiHeader {String}  x-access-token unique access-key 
  * @apiHeader {String}  Content-Type application/json
- * @apiHeader {String}  x-access-token Admin's unique access-key
+ * @apiHeader {String}  x-access-token  unique access-key
  * 
  * @apiParam {String} name Name of comapny
- * @apiParam {String} [description] Description of company
+ * @apiParam {String}  Image  image of company
+ * @apiParam {String}  text  image of company
+ * @apiParam {String}  price  image of company
  
  * @apiSuccess (Success 200) {JSON} inspired Inspired details
  * @apiError (Error 4xx) {String} message Validation or error message.

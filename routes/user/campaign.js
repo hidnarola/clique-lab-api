@@ -10,9 +10,9 @@ var logger = config.logger;
 
 var campaign_helper = require("./../../helpers/campaign_helper");
 /**
- * @api {get} /approved campaigns - Get by ID
+ * @api {get} /user/campaign/approved campaigns - Get by ID
  * @apiName campaigns - Get campaigns by ID
-
+ * @apiGroup User
  *
  * @apiHeader {String}  x-access-token  unique access-key
  * * @apiParam {String} user_id ID of campaigns
@@ -35,9 +35,9 @@ router.get("/approved", async (req, res) => {
 
 
 /**
- * @api {get} user/public_campaign Campaign  - Get all
+ * @api {get} /user/campaign/public_campaign Campaign  - Get all
  * @apiName public campaign - Get all
- *
+  * @apiGroup User
  * @apiHeader {String}  x-access-token unique access-key
  *
  * @apiSuccess (Success 200) {Array} capaign Array of bodyparts document
@@ -58,9 +58,9 @@ router.get("/public_campaign", async (req, res) => {
 
 
 /**
- * @api {get} user/myoffer My offer Campaign  - Get all
+ * @api {get} /user/campaign/myoffer My offer Campaign  - Get all
  * @apiName approved_campaign - Get all
- * @apiGroup Admin
+ * @apiGroup User
  *
  * @apiHeader {String}  x-access-token unique access-key
  *

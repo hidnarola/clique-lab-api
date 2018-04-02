@@ -1,11 +1,11 @@
 var Music_taste = require("./../models/Music_taste");
 var music_taste_helper = {};
 /*
- * get_all_interest is used to fetch all interest data
+ * get_all_music_taste is used to fetch all music_taste data
  * 
- * @return  status 0 - If any internal error occured while fetching interest data, with error
- *          status 1 - If interest data found, with interest object
- *          status 2 - If interest not found, with appropriate message
+ * @return  status 0 - If any internal error occured while fetching music_taste data, with error
+ *          status 1 - If music_taste data found, with music_taste object
+ *          status 2 - If music_taste not found, with appropriate message
  */
 music_taste_helper.get_all_music_taste = async () => {
     try {

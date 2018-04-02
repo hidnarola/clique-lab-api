@@ -11,8 +11,9 @@ var logger = config.logger;
 var profile_helper = require("./../../helpers/profile_helper");
 
 /**
- * @api {get} user/profile Profile - Get 
+ * @api {get} /user/profile Profile - Get 
  * @apiName get_profile_by_id - Get
+ * @apiGroup User
  *
  * @apiHeader {String}  x-access-token unique access-key
  *
@@ -37,23 +38,25 @@ router.get("/", async (req, res) => {
 
 /**
  * @api {put} /user/profile Update profile
- * @apiName Update faq
- * @apiGroup Admin
+ * @apiName Update profile
+ * @apiGroup User
  * 
  * @apiHeader {String}  Content-Type application/json
- * @apiHeader {String}  x-access-token Admin's unique access-key
+ * @apiHeader {String}  x-access-token  unique access-key
  * 
- * @apiParam {String} id FAQ Id
- * @apiParam {String} question FAQ question
- * @apiParam {String} answer FAQ answer
- * @apiParam {String} category_id Category of FAQ
- * @apiParam {String} [is_active] Activation status for faq
+ * @apiParam {String} id User Id
+ * @apiParam {String} name User name
+ * @apiParam {String} username User username
+ * @apiParam {String} email User Email
+ * @apiParam {String} user_interest User Interest
+ * * @apiParam {String} job_industry User Job Industry
+ * * @apiParam {String} music_taste User Music taste
  * 
- * @apiSuccess (Success 200) {JSON} driver Driver details
+ * @apiSuccess (Success 200) {JSON} profile User details
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.put('/', function (req, res) {
-user_id=req.userInfo.id;
+    user_id = req.userInfo.id;
     var schema = {
         "name": {
             notEmpty: true,
@@ -96,7 +99,7 @@ user_id=req.userInfo.id;
 
         if (result.isEmpty()) {
 
-            console.log("body = ",req.body);
+            console.log("body = ", req.body);
             var obj = {
                 "name": req.body.name,
                 "username": req.body.username,
@@ -110,14 +113,16 @@ user_id=req.userInfo.id;
             if (req.body.is_active && req.body.is_active != null) {
                 obj.is_active = req.body.is_active;
             }
-            profile_helper.update_by_id(user_id, obj, function (resp) {
 
-                if (resp.status == 0) {
+            console.log("obj = ",obj);
+           var profile= profile_helper.update_by_id(user_id, obj);
+
+                if (profile.status == 0) {
                     res.status(config.INTERNAL_SERVER_ERROR).json({ "error": resp.err });
                 } else {
                     res.status(config.OK_STATUS).json({ "message": "Profile has been updated successfully" });
                 }
-            });
+           
         } else {
             var result = {
                 message: "Validation Error",

@@ -57,7 +57,7 @@ profile_helper.get_profile_by_id = async (id) => {
  *          status  1 - If User updated successfully, with appropriate message
  *          status  2 - If User not updated, with appropriate messag
  * 
- * @developed by "mansi"
+ * @developed by "mm"
  * */
 profile_helper.update_by_id = async (id, login_object) => {
     try {

@@ -389,8 +389,9 @@ router.post('/promoter_reset_password', async (req, res) => {
 
 
 // Can be used by both, user and promoter
+
 /**
- * @api {get} /job_industry Get all job industry
+ * @api {get} /user/job_industry Get all job industry
  * @apiName Get all job industry
  * @apiGroup Root
  *
@@ -410,11 +411,11 @@ router.get("/job_industry", async (req, res) => {
 });
 
 /**
- * @api {get} user/job_interest Interest - Get all
+ * @api {get} user/interest Interest - Get all
  * @apiName get_interest - Get all
- * @apiGroup Admin
+ * @apiGroup User
  *
- * @apiHeader {String}  x-access-token Admin's unique access-key
+ * @apiHeader {String}  x-access-token  unique access-key
  *
  * @apiSuccess (Success 200) {Array} bodyparts Array of bodyparts document
  * @apiError (Error 4xx) {String} message Validation or error message.
@@ -433,10 +434,10 @@ router.get("/interest", async (req, res) => {
 });
 
 /**
- * @api {get} user/music_taste Music Taste - Get all
- * @apiName music_taste - Get all
- * @apiGroup Admin
- *
+ * @api {get} user/music_taste/ Music Taste - Get all
+ * @apiName Music taste - Get all
+ * @apiGroup User
+
  * @apiHeader {String}  x-access-token unique access-key
  *
  * @apiSuccess (Success 200) {Array}  Array of music taste document
@@ -454,14 +455,14 @@ router.get("/music_taste", async (req, res) => {
   }
 });
 
-/**
- * @api {post} /profile  Types Add
- * @apiName insert_inspired_brand  Type Add
 
- * 
+  /**
+ * @api {post} /user/profile profile  Add
+ * @apiName Profile - Add
+ * @apiGroup User
+
  * @apiHeader {String}  Content-Type application/json
  * @apiHeader {String}  x-access-token  unique access-key
- * 
  * @apiParam {String} name Name of profile
  * @apiParam {String} username Username of profile
  *  @apiParam {String} email Email of profile
@@ -469,8 +470,7 @@ router.get("/music_taste", async (req, res) => {
  *  @apiParam {String} music_taste Music Taste of profile
  *  @apiParam {String} interest Interest of profile
 
- * 
- * @apiSuccess (Success 200) {JSON}profile types details
+ * @apiSuccess (Success 200) {JSON}profile details
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post('/signup', async (req, res) => {
