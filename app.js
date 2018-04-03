@@ -20,6 +20,8 @@ var numCPUs = require('os').cpus().length;
 /* config files */
 var config = require('./config');
 var dbConnect = require('./database/mongoDbConnection');
+var swaggerUi = require('swagger-ui-express'),
+swaggerDocument = require('./swagger.json');
 
 var app = express();
 app.use(fileUpload());
@@ -37,6 +39,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'doc')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+var options = {
+  swaggerOptions: {
+    authAction :{ JWT: {name: "JWT", schema: {type: "apiKey", in: "header", name: "x-access-token", description: ""}, value: "<JWT>"} }
+  }
+};
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument,options));
+
 app.use(expressValidator());
 
 // Support corss origin request

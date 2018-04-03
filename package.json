@@ -23,6 +23,7 @@
     "mongoose": "^5.0.12",
     "morgan": "~1.8.1",
     "nodemailer": "^2.6.0",
-    "serve-favicon": "~2.4.2"
+    "serve-favicon": "~2.4.2",
+    "swagger-ui-express": "^3.0.6"
   }
 }

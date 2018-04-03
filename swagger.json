@@ -1,0 +1,75 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Clique Lab API",
+      "description": "Clique Lab API - API for fronetend client and mobile app",
+      "license": {
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+      }
+    },
+    "host": "192.168.1.186:3200",
+    "basePath": "/",
+    "tags": [
+      {
+        "name": "Promoter",
+        "description": "API for promoter in the system"
+      }
+    ],
+    "schemes": [
+      "http"
+    ],
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
+    "paths": {
+      "/promoter/setting/{key}": {
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "Settings key",
+            "type": "string"
+          }
+        ],
+        "get": {
+          "tags": [
+            "Promoter"
+          ],
+          "summary": "Get settings value by key",
+          "responses": {
+            "200": {
+              "description": "Key is found",
+              "schema": {
+                "$ref": "#/definitions/settings"
+              }
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "settings": {
+        "required": [
+          "email",
+          "_id"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }

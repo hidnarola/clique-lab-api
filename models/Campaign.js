@@ -17,6 +17,12 @@ var CampaignModelSchema = new Schema({
     hash_tag: [String],
     at_tag: [String],
     privacy: { type: String, enum: ["public", "invite"], default: "public" },
+    media_format: [{type: String}],
+    location: String,
+    price: Number,
+    currency: String,
+    cover_image: String,
+    mood_board_images: [{type: String}],
     status :Boolean,
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
