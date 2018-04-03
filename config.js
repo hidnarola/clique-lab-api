@@ -12,6 +12,7 @@ module.exports = {
 
     // Database config
     "database": "mongodb://127.0.0.1:27017/clique_lab",
+    "database": "mongodb://clique:WkEV9rTcS7@13.55.64.183/clique",
 
     // JWT
     "ACCESS_TOKEN_SECRET_KEY": "clique_lab_jwt_token",
