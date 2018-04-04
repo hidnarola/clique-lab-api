@@ -90,7 +90,7 @@ router.get("/:campaign_id", async (req, res) => {
  * @apiSuccess (Success 200) {Array} Array of Offered Campaign document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/myoffer", async (req, res) => {
+router.get("/approved", async (req, res) => {
   user_id = req.userInfo;
   console.log("id",user_id);
   logger.trace("Get all Offered Campaign API called");

@@ -13,15 +13,15 @@ var campaign_helper = {};
  */
 campaign_helper.get_campaign_by_user_id = async (id) => {
     try {
-        var campaigns = Campaign_Applied.aggregate([
+        var campaigns = await Campaign_User.aggregate([
             {
                 $lookup: {
-                    from: "Campaign_applied",
+                    from: "Campaign_user",
                     localField: "_id",
                     foreignField: "campaign_id",
                     as: "Private_Campaign"
                 }
-            }, +
+            },
             {
                 $match: {
                     $and: [
@@ -31,13 +31,13 @@ campaign_helper.get_campaign_by_user_id = async (id) => {
             },
         ])
 
-        if (campaigns) {
+        if (campaigns && campaigns.length > 0) {
             return { "status": 1, "message": "campaign found", "campaign": campaigns };
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
     } catch (err) {
-        console.log("7");
+      
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
@@ -59,47 +59,6 @@ campaign_helper.get_all_campaign = async () => {
             return { "status": 2, "message": "No campaign available" };
         }
     } catch (err) {
-        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
-    }
-}
-
-/*
- * get_campaign_by_id is used to fetch all campaign data
- * 
- * @return  status 0 - If any campaign error occured while fetching campaign data, with error
- *          status 1 - If campaign data found, with campaign object
- *          status 2 - If campaign not found, with appropriate message
- */
-campaign_helper.get_all_approved_campaign = async (id) => {
-    try {
-        var campaigns = Campaign_User.aggregate([
-            {
-                $lookup: {
-                    from: "campaign_user",
-                    localField: "_id",
-                    foreignField: "campaign_id",
-                    as: "Private_Campaign"
-                }
-            },
-            {
-                $match: {
-                    $and: [
-                        {
-                            campaign_id: { $eq: 'user_id' },
-                            status: 'true'
-                        },
-                    ]
-                }
-            },
-        ])
-
-        if (campaigns) {
-            return { "status": 1, "message": "campaign found", "campaign": campaigns };
-        } else {
-            return { "status": 2, "message": "No campaign available" };
-        }
-    } catch (err) {
-        console.log("7");
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
@@ -139,7 +98,12 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
  */
 campaign_helper.insert_campaign_applied = async (campaign_object) => {
     let campaign = new Campaign_Applied(campaign_object)
-    return { "status": 0, "message": "Error occured while inserting Campaign Applied", "error": err };
+    try {
+        let campaign_data = await campaign.save();
+        return { "status": 1, "message": "Campaign inserted", "campaign": campaign_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting Campaign Applied", "error": err };
+    }
 };
 
 /*
@@ -161,4 +125,48 @@ campaign_helper.insert_campaign = async (campaign_object) => {
         return { "status": 0, "message": "Error occured while inserting campaign", "error": err };
     }
 };
+
+
+/*
+ * get_campaign_by_id is used to fetch all campaign data
+ * 
+ * @return  status 0 - If any campaign error occured while fetching campaign data, with error
+ *          status 1 - If campaign data found, with campaign object
+ *          status 2 - If campaign not found, with appropriate message
+ */
+campaign_helper.get_all_offered_campaign = async (id) => {
+    try {
+        var campaigns = Campaign_User.aggregate([
+            {
+                $lookup: {
+                    from: "campaign_user",
+                    localField: "_id",
+                    foreignField: "campaign_id",
+                    as: "Private_Campaign"
+                }
+            },
+            {
+                $match: {
+                    $and: [
+                        {
+                            campaign_id: { $eq: 'user_id' },
+                            status: 'true'
+                        },
+                    ]
+                }
+            },
+        ])
+
+        if (campaigns) {
+            return { "status": 1, "message": "campaign found", "campaign": campaigns };
+        } else {
+            return { "status": 2, "message": "No campaign available" };
+        }
+    } catch (err) {
+        console.log("7");
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
+    }
+}
+
+
 module.exports = campaign_helper;
