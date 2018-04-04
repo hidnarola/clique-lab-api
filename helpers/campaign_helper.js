@@ -21,7 +21,7 @@ campaign_helper.get_campaign_by_user_id = async (id) => {
                     foreignField: "campaign_id",
                     as: "Private_Campaign"
                 }
-            }, +
+            },
             {
                 $match: {
                     $and: [

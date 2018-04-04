@@ -97,9 +97,9 @@ router.post('/', async (req, res) => {
                 "start_date": req.body.start_date,
                 "end_date": req.body.end_date,
                 "call_to_action": req.body.call_to_action,
-                "social_media_platform": req.body.social_media_platform,
+                "social_media_platform": JSON.parse(req.body.social_media_platform),
                 "privacy": req.body.privacy,
-                "media_format": req.body.media_format,
+                "media_format": JSON.parse(req.body.media_format),
                 "location": req.body.location,
                 "price": req.body.price,
                 "currency": req.body.currency,
@@ -108,8 +108,8 @@ router.post('/', async (req, res) => {
 
             if (req.body.discount_code) { campaign_obj.discount_code = req.body.discount_code; }
             if (req.body.description) { campaign_obj.description = req.body.description; }
-            if (req.body.hash_tag) { campaign_obj.hash_tag = req.body.hash_tag; }
-            if (req.body.at_tag) { campaign_obj.at_tag = req.body.at_tag; }
+            if (req.body.hash_tag) { campaign_obj.hash_tag = JSON.parse(req.body.hash_tag); }
+            if (req.body.at_tag) { campaign_obj.at_tag = JSON.parse(req.body.at_tag); }
 
             async.parallel({
                 "cover": function (callback) {
