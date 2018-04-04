@@ -557,7 +557,7 @@
   },
   {
     "type": "post",
-    "url": "/user/promoter",
+    "url": "/user/promoter/inspired_submission",
     "title": "Brand Add",
     "name": "Brand___Add____",
     "group": "User",
@@ -848,6 +848,103 @@
     "groupTitle": "User"
   },
   {
+    "type": "post",
+    "url": "/user/bank_detail",
+    "title": "Update bank detail",
+    "name": "Update_bank_detail",
+    "group": "User",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "id",
+            "description": "<p>User Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "bank_name",
+            "description": "<p>User Bank name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "account_no",
+            "description": "<p>User Bank Account Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "account_name",
+            "description": "<p>User Bank Account Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "bsb",
+            "description": "<p>User bsb</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "bank",
+            "description": "<p>detail</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/wallet_screen.js",
+    "groupTitle": "User"
+  },
+  {
     "type": "put",
     "url": "/user/profile",
     "title": "Update profile",
@@ -1116,6 +1213,55 @@
     },
     "version": "0.0.0",
     "filename": "routes/index.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "get",
+    "url": "/user/bank_detail",
+    "title": "Bank detail - Get",
+    "name": "get_profile_by_id___Get",
+    "group": "User",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "bank",
+            "description": "<p>detail as per id</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/wallet_screen.js",
     "groupTitle": "User"
   },
   {

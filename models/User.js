@@ -77,7 +77,7 @@ var UserModelSchema = new Schema({
     interested_in: { type: String, enum: ["male", "female", "both"] },
     relationship_status: { type: String, enum: ["Married", "Unmarried", "Single"] },
     wallet_balance: { type: Number, default: 0 },
-    bank: BankSchema,
+    bank: [BankSchema],
     status :Boolean,
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });

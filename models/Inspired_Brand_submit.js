@@ -9,7 +9,8 @@ var InspiredBrandModelSchema = new Schema({
     image: String,
     social_media_platform:String,
    text:String,
-   price:Number
+   price:Number,
+   status:Boolean,
 }, { versionKey: false });
 
 // Compile modyel from schema

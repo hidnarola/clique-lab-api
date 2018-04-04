@@ -11,7 +11,7 @@ var profile_helper = {};
  * @return  status  0 - If any error occur in inserting profile, with error
  *          status  1 - If profile inserted, with inserted profile's document and appropriate message
  * 
- * @developed by "mansi"
+ * @developed by "mm"
  */
 profile_helper.insert_profile = async (profile_object) => {
     let profile = new Profile(profile_object)

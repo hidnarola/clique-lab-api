@@ -35,8 +35,8 @@ router.get("/", async (req, res) => {
   });
 
 
-  /**
- * @api {post} /user/promoter Brand Add
+/* *
+ * @api {post} /user/promoter/inspired_submission Brand Add
  * @apiName Brand - Add
 /**
   * @apiGroup User
@@ -51,8 +51,9 @@ router.get("/", async (req, res) => {
  
  * @apiSuccess (Success 200) {JSON} inspired Inspired details
  * @apiError (Error 4xx) {String} message Validation or error message.
- */
-  router.post("/", async (req, res) => {
+ * */
+
+  router.post("/inspired_submission", async (req, res) => {
    
       
     var schema = {
