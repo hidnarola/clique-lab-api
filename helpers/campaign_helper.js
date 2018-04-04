@@ -52,6 +52,7 @@ campaign_helper.get_campaign_by_user_id = async (id) => {
 campaign_helper.get_all_campaign = async () => {
     try {
         var campaign = await Campaign.find();
+        console.log(campaign);
         if (campaign) {
             return { "status": 1, "message": "campaign found", "Campaign": campaign };
         } else {
@@ -100,4 +101,46 @@ campaign_helper.get_all_approved_campaign = async (id) => {
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
+
+/*
+ * campaign_helper is used to fetch  capaign data by id
+ * 
+ * @return  status 0 - If any internal error occured while fetching campaign data, with error
+ *          status 1 - If campaign data found, with campaign object
+ *          status 2 - If campaign not found, with appropriate message
+ */
+campaign_helper.get_campaign_by_id = async (campaign_id) => {
+    try {
+        var campaign = await Campaign.find({_id:campaign_id});
+        if (campaign) {
+            return { "status": 1, "message": "campaign found", "Campaign": campaign };
+        } else {
+            return { "status": 2, "message": "No campaign available" };   
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
+    }
+}
+
+
+
+/*
+ * insert_campaign_applied is used to insert into User collection
+ * 
+ * @param   campaign_object     JSON object consist of all property that need to insert in collection
+ * 
+ * @return  status  0 - If any error occur in inserting campaign applied, with error
+ *          status  1 - If campaign applied inserted, with inserted campaign applied's document and appropriate message
+ * 
+ * @developed by "mm"
+ */
+campaign_helper.insert_campaign_applied = async (campaign_object) => {
+    let campaign = new Campaign_Applied(campaign_object)
+    try {
+        let campaign_data = await campaign.save();
+        return { "status": 1, "message": "Campaign inserted", "campaign": campaign_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting Campaign Applied", "error": err };
+    }
+};
 module.exports = campaign_helper;

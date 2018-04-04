@@ -107,8 +107,8 @@ router.put('/', function (req, res) {
                 "user_interest": req.body.user_interest,
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
-                "facebook": { "token": req.body.facebook.token, "no_of_friends": req.body.facebook.no_of_friends },
-                "instagram": { "token": req.body.instagram.token, "no_of_followers": req.body.instagram.no_of_followers },
+               // "facebook": { "token": req.body.facebook.token, "no_of_friends": req.body.facebook.no_of_friends },
+               // "instagram": { "token": req.body.instagram.token, "no_of_followers": req.body.instagram.no_of_followers },
             };
             if (req.body.is_active && req.body.is_active != null) {
                 obj.is_active = req.body.is_active;
@@ -133,4 +133,78 @@ router.put('/', function (req, res) {
     });
 });
 
+
+
+
+  /**
+ * @api {post} /profile profile  Add
+ * @apiName Profile - Add
+ * @apiGroup User
+
+ * @apiHeader {String}  Content-Type application/json
+ * @apiHeader {String}  x-access-token  unique access-key
+ * @apiParam {String} name Name of profile
+ * @apiParam {String} username Username of profile
+ *  @apiParam {String} email Email of profile
+ *  @apiParam {String} job_industry Job Industry of profile
+ *  @apiParam {String} music_taste Music Taste of profile
+ *  @apiParam {String} interest Interest of profile
+
+ * @apiSuccess (Success 200) {JSON}profile details
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/signup', async (req, res) => {
+    var schema = {
+      "name": {
+        notEmpty: true,
+        errorMessage: "Name is required"
+      },
+      "username": {
+        notEmpty: true,
+        errorMessage: "Username is required"
+      },
+      "email": {
+        notEmpty: true,
+        errorMessage: "Email is required"
+      },
+      "user_interest": {
+        notEmpty: true,
+        errorMessage: "User Interest is required"
+      },
+      "job_industry": {
+        notEmpty: true,
+        errorMessage: "Job Industry is required"
+      },
+      "music_taste": {
+        notEmpty: true,
+        errorMessage: "Music taste is required"
+      },
+    };
+  
+    req.checkBody(schema);
+    var errors = req.validationErrors();
+    if (!errors) {
+      var profile_obj = {
+        "name": req.body.name,
+        "username": req.body.username,
+        "email": req.body.email,
+        "user_interest": req.body.user_interest,
+        "job_industry": req.body.job_industry,
+        "music_taste": req.body.music_taste
+  
+      };
+  
+      let profile_data = await profile.insert_profile(profile_obj);
+      if (profile_data.status === 0) {
+  
+        logger.error("Error while inserting Profile data = ", profile_data);
+        res.status(config.BAD_REQUEST).json({ profile_data });
+      } else {
+        res.status(config.OK_STATUS).json(profile_data);
+      }
+    } else {
+      logger.error("Validation Error = ", errors);
+      res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+  });
 module.exports = router;

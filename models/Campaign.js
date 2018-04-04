@@ -28,6 +28,6 @@ var CampaignModelSchema = new Schema({
 }, { versionKey: false });
 
 // Compile model from schema
-var Compaign = mongoose.model('campaign', CampaignModelSchema, 'campaign');
+var Campaign = mongoose.model('campaign', CampaignModelSchema, 'campaign');
 
-module.exports = Compaign;
+module.exports = Campaign;

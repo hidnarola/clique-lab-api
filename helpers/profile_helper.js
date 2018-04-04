@@ -33,9 +33,12 @@ profile_helper.insert_profile = async (profile_object) => {
 profile_helper.get_profile_by_id = async (id) => {
     try {
         var profile = await Profile.findOne({ _id: id }).lean();
+       
         if (profile) {
+
             var power = profile.facebook.no_of_friends + profile.instagram.no_of_followers;
             profile.power = power;
+            
             return { "status": 1, "message": "Profile found", "Profile": profile };
 
         } else {
