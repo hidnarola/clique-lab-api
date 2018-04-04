@@ -26,7 +26,7 @@ var PinterestSchema = new Schema({
 });
 
 var LinkedInSchema = new Schema({
-    no_of_coonections: Number,
+    no_of_connections: Number,
     username: String
 });
 
