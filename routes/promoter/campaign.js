@@ -5,45 +5,91 @@ var async = require("async");
 var router = express.Router();
 
 var config = require('./../../config');
-var promoter_helper = require('./../../helpers/promoter_helper');
-var setting_helper = require('./../../helpers/setting_helper');
+// var setting_helper = require('./../../helpers/setting_helper');
 var logger = config.logger;
 
 /** 
- * @api {post} /promoter/update_profile Update promoter profile
- * @apiName Update promoter profile
- * @apiGroup Promoter
+ * @api {post} /promoter/campaign Add new campaign
+ * @apiName Add new campaign
+ * @apiGroup Promoter-Campaign
  * 
- * @apiDescription  Update promoter info
+ * @apiDescription  Add new campaign
  * 
  * @apiHeader {String}  Content-Type multipart/form-data
  * @apiHeader {String}  x-access-token promoter's unique access-key
  * 
- * @apiParam {String} [name] Full name of promoter
- * @apiParam {String} [company] Company name of the company
- * @apiParam {String} industry_category Industry category id
- * @apiParam {String} industry_description Industry description
- * @apiParam {File} [avatar] Industry avatar/logo
+ * @apiParam {String} name Name of campaign
+ * @apiParam {String} start_date Campaign start date
+ * @apiParam {String} end_date Camoaign end date
+ * @apiParam {String} call_to_action Call to action
+ * @apiParam {String} [discount_code] _id of discount code
+ * @apiParam {String} [description] Description
+ * @apiParam {Array} social_media_platform Social media platform
+ * @apiParam {String} [hash_tag] Hash tag for campaign
+ * @apiParam {String} [at_tag] At tag for campaign
+ * @apiParam {String} privacy Privacy for campaign i.e. public or invite
+ * @apiParam {Array} media_format Privacy for campaign i.e. public or invite
+ * @apiParam {Array} location Location of campaign
+ * @apiParam {Number} price Price of campaign
+ * @apiParam {string} currency Currency of given price
+ * @apiParam {File} cover_image Cover image of campaign
+ * @apiParam {Array of file} board_image Mood board images of campaign
  * 
  * @apiSuccess (Success 200) {String} message Success message
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post('/update_profile', async (req, res) => {
     var schema = {
-        'industry_category': {
+        'name': {
             notEmpty: true,
-            errorMessage: "Industry category is required"
+            errorMessage: "Campaign name is required"
         },
-        'industry_description': {
+        'start_date': {
             notEmpty: true,
-            errorMessage: "Description is required"
+            errorMessage: "Start date of campaign is required"
+        },
+        'end_date': {
+            notEmpty: true,
+            errorMessage: "End date of campaign is required"
+        },
+        'call_to_action': {
+            notEmpty: true,
+            errorMessage: "Call to action is required"
+        },
+        'call_to_action': {
+            notEmpty: true,
+            errorMessage: "Call to action is required"
+        },
+        'social_media_platform': {
+            notEmpty: true,
+            errorMessage: "Social media platform is required"
+        },
+        'privacy': {
+            notEmpty: true,
+            errorMessage: "Privacy is required"
+        },
+        'media_format': {
+            notEmpty: true,
+            errorMessage: "Media format is required"
+        },
+        'location': {
+            notEmpty: true,
+            errorMessage: "Location is required"
+        },
+        'price': {
+            notEmpty: true,
+            errorMessage: "Price is required"
+        },
+        'currency': {
+            notEmpty: true,
+            errorMessage: "Currency is required"
         }
     };
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var promoter_obj = {
-            "industry_category": req.body.industry_category,
+        var campaign_obj = {
+            "name": req.body.name,
             "industry_description": req.body.industry_description
         }
 
@@ -101,27 +147,6 @@ router.post('/update_profile', async (req, res) => {
         });
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
-    }
-});
-
-/** 
- * @api {get} /promoter/setting/:key Get settings value
- * @apiName Get settings value
- * @apiGroup Promoter
- * 
- * @apiDescription  Get settings value by key
- * 
- * @apiHeader {String}  x-access-token promoter's unique access-key
- * 
- * @apiSuccess (Success 200) {String} value Appropriate value for given key
- * @apiError (Error 4xx) {String} message Validation or error message.
- */
-router.get('/setting/:key', async(req,res) => {
-    var settings = await setting_helper.get_setting_by_key(req.params.key);
-    if(settings.status === 1){
-        res.status(config.OK_STATUS).json({"status":1,"message":"Setting value found","value":settings.setting.value});
-    } else {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"Setting not found"});
     }
 });
 

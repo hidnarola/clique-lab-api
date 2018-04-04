@@ -1,5 +1,55 @@
 define({ "api": [
   {
+    "type": "get",
+    "url": "/promoter/setting/:key",
+    "title": "Get settings value",
+    "name": "Get_settings_value",
+    "group": "Promoter",
+    "description": "<p>Get settings value by key</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>promoter's unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "value",
+            "description": "<p>Appropriate value for given key</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/index.js",
+    "groupTitle": "Promoter"
+  },
+  {
     "type": "post",
     "url": "/update_profile",
     "title": "Update promoter profile",
@@ -15,6 +65,13 @@ define({ "api": [
             "optional": false,
             "field": "Content-Type",
             "description": "<p>multipart/form-data</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>promoter's unique access-key</p>"
           }
         ]
       }
