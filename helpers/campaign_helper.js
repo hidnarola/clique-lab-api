@@ -1,11 +1,18 @@
+var mongoose = require('mongoose');
+
 var Campaign_Applied = require("./../models/Campaign_applied");
 var Campaign_User = require("./../models/Campaign_user");
 var Campaign = require("./../models/Campaign");
+var Campaign_invite = require("./../models/Campaign_invite");
+
+var ObjectId = mongoose.Types.ObjectId;
 
 var campaign_helper = {};
 
 /*
  * get_campaign_by_id is used to fetch all campaign data
+ * 
+ * @params id string user_id
  * 
  * @return  status 0 - If any internal error occured while fetching campaign data, with error
  *          status 1 - If campaign data found, with campaign object
@@ -13,22 +20,23 @@ var campaign_helper = {};
  */
 campaign_helper.get_campaign_by_user_id = async (id) => {
     try {
-        var campaigns = await Campaign_User.aggregate([
+        console.log("user_id = ", id);
+        var campaigns = await Campaign.aggregate([
             {
                 $lookup: {
-                    from: "Campaign_user",
+                    from: "campaign_user",
                     localField: "_id",
                     foreignField: "campaign_id",
-                    as: "Private_Campaign"
+                    as: "approved_campaign"
                 }
             },
             {
+                $unwind: "$approved_campaign"
+            }, {
                 $match: {
-                    $and: [
-                        { campaign_id: { $eq: 'user_id' } },
-                    ]
+                    "approved_campaign.user_id": { "$eq": new ObjectId(id) }
                 }
-            },
+            }
         ])
 
         if (campaigns && campaigns.length > 0) {
@@ -37,7 +45,7 @@ campaign_helper.get_campaign_by_user_id = async (id) => {
             return { "status": 2, "message": "No campaign available" };
         }
     } catch (err) {
-      
+
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
@@ -73,11 +81,11 @@ campaign_helper.get_all_campaign = async () => {
 
 campaign_helper.get_campaign_by_id = async (campaign_id) => {
     try {
-        var campaign = await Campaign.find({_id:campaign_id});
+        var campaign = await Campaign.find({ _id: campaign_id });
         if (campaign) {
             return { "status": 1, "message": "campaign found", "Campaign": campaign };
         } else {
-            return { "status": 2, "message": "No campaign available" };   
+            return { "status": 2, "message": "No campaign available" };
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
@@ -136,25 +144,23 @@ campaign_helper.insert_campaign = async (campaign_object) => {
  */
 campaign_helper.get_all_offered_campaign = async (id) => {
     try {
-        var campaigns = Campaign_User.aggregate([
+        console.log("user_id = ", id);
+        var campaigns = await Campaign.aggregate([
             {
                 $lookup: {
-                    from: "campaign_user",
+                    from: "campaign_invite",
                     localField: "_id",
                     foreignField: "campaign_id",
-                    as: "Private_Campaign"
+                    as: "offered_campaign"
                 }
             },
             {
+                $unwind: "$offered_campaign"
+            }, {
                 $match: {
-                    $and: [
-                        {
-                            campaign_id: { $eq: 'user_id' },
-                            status: 'true'
-                        },
-                    ]
+                    "offered_campaign.user_id": { "$eq": new ObjectId(id) }
                 }
-            },
+            }
         ])
 
         if (campaigns) {

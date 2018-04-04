@@ -88,11 +88,11 @@ router.get("/:campaign_id", async (req, res) => {
  * @apiSuccess (Success 200) {Array} Array of Offered Campaign document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/approved", async (req, res) => {
+router.get("/myoffer", async (req, res) => {
   user_id = req.userInfo;
   console.log("id", user_id);
   logger.trace("Get all Offered Campaign API called");
-  var resp_data = await campaign_helper.get_all_approved_campaign(user_id);
+  var resp_data = await campaign_helper.get_all_offered_campaign(user_id);
   if (resp_data.status == 0) {
     logger.error("Error occured while fetching offered Campaign = ", resp_data);
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
