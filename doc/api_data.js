@@ -256,7 +256,7 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "Array",
+            "type": "String",
             "optional": false,
             "field": "location",
             "description": "<p>Location of campaign</p>"
@@ -788,10 +788,6 @@ define({ "api": [
     "groupTitle": "Root"
   },
   {
-    "type": "post",
-    "url": "/user/promoter/inspired_submission",
-    "title": "Brand Add",
-    "name": "Brand___Add____",
     "group": "User",
     "header": {
       "fields": {
@@ -873,9 +869,12 @@ define({ "api": [
         ]
       }
     },
+    "type": "",
+    "url": "",
     "version": "0.0.0",
     "filename": "routes/user/brand.js",
-    "groupTitle": "User"
+    "groupTitle": "User",
+    "name": ""
   },
   {
     "type": "get",
@@ -1077,6 +1076,110 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/index.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "post",
+    "url": "/profile",
+    "title": "profile  Add",
+    "name": "Profile___Add",
+    "group": "User",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Username of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "job_industry",
+            "description": "<p>Job Industry of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "music_taste",
+            "description": "<p>Music Taste of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "interest",
+            "description": "<p>Interest of profile</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "profile",
+            "description": "<p>details</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/profile.js",
     "groupTitle": "User"
   },
   {
@@ -1337,6 +1440,96 @@ define({ "api": [
     "groupTitle": "User"
   },
   {
+    "type": "post",
+    "url": "/user/campaign/campaign_applied",
+    "title": "Campaign  Add",
+    "name": "campaign_applied___Add",
+    "group": "User",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "user_id",
+            "description": "<p>User id of campaign</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "campaign_id",
+            "description": "<p>Campaign id of campaign</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>description of campaign</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "imaged",
+            "description": "<p>Image of campaign</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "Campaign",
+            "description": "<p>details</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/campaign.js",
+    "groupTitle": "User"
+  },
+  {
     "type": "get",
     "url": "/user/campaign/approved",
     "title": "campaigns - Get by ID",
@@ -1449,55 +1642,6 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/user/bank_detail",
-    "title": "Bank detail - Get",
-    "name": "get_profile_by_id___Get",
-    "group": "User",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "x-access-token",
-            "description": "<p>unique access-key</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Array",
-            "optional": false,
-            "field": "bank",
-            "description": "<p>detail as per id</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>Validation or error message.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/user/wallet_screen.js",
-    "groupTitle": "User"
-  },
-  {
-    "type": "get",
     "url": "/user/profile",
     "title": "Profile - Get",
     "name": "get_profile_by_id___Get",
@@ -1547,6 +1691,55 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/user/bank_detail",
+    "title": "Bank detail - Get",
+    "name": "get_profile_by_id___Get",
+    "group": "User",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "bank",
+            "description": "<p>detail as per id</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/wallet_screen.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "get",
     "url": "/user/campaign/public_campaign",
     "title": "Campaign  - Get all",
     "name": "public_campaign___Get_all",
@@ -1573,6 +1766,55 @@ define({ "api": [
             "optional": false,
             "field": "Campaign",
             "description": "<p>Array of Campaign document</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/campaign.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "get",
+    "url": "/user/campaign/:id",
+    "title": "Campaign  - Get all",
+    "name": "public_campaign___Get_by_id",
+    "group": "User",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "Campaign",
+            "description": "<p>of Campaign document</p>"
           }
         ]
       }
