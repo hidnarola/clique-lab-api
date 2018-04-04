@@ -23,7 +23,7 @@ var CampaignModelSchema = new Schema({
     currency: String,
     cover_image: String,
     mood_board_images: [{type: String}],
-    status :Boolean,
+    status : { type:Boolean, default:true},
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
