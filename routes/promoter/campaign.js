@@ -8,10 +8,6 @@ var config = require('./../../config');
 var campaign_helper = require('./../../helpers/campaign_helper');
 var logger = config.logger;
 
-router.get('/',async (req,res) => {
-    res.send("Done");
-})
-
 /** 
  * @api {post} /promoter/campaign Add new campaign
  * @apiName Add new campaign
