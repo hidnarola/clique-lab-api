@@ -103,7 +103,7 @@ promoter_helper.update_promoter_by_id = async (promoter_id, promoter_object) => 
  */
 promoter_helper.get_all_brand = async () => {
     try {
-        var brand = await Promoter.find({},{"industry_description":1,"company":1});
+        var brand = await Promoter.find({status:true},{"industry_description":1,"company":1});
         if (brand) {
             return { "status": 1, "message": "Brand details found", "brand": brand };
         } else {
