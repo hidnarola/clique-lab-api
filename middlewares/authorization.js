@@ -1,6 +1,7 @@
 var config = require('../config');
 
 module.exports = function (req, res, next) {
+    console.log("In authrization = ",req.body);
     if (req.decoded.role == "promoter" && req.baseUrl.match('/promoter')) {
         req.userInfo = req.decoded;
         next();

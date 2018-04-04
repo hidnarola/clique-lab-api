@@ -3,6 +3,7 @@ var Campaign_User = require("./../models/Campaign_user");
 var Campaign = require("./../models/Campaign");
 
 var campaign_helper = {};
+
 /*
  * get_campaign_by_id is used to fetch all campaign data
  * 
@@ -12,24 +13,24 @@ var campaign_helper = {};
  */
 campaign_helper.get_campaign_by_user_id = async (id) => {
     try {
-       var campaigns=  Campaign_Applied.aggregate([
-            { 
-               $lookup: { 
+        var campaigns = Campaign_Applied.aggregate([
+            {
+                $lookup: {
                     from: "Campaign_applied",
                     localField: "_id",
                     foreignField: "campaign_id",
-                    as: "Private_Campaign" 
-                } 
-            },+
-            { 
-                 $match: { 
+                    as: "Private_Campaign"
+                }
+            }, +
+            {
+                $match: {
                     $and: [
-                        { campaign_id: { $eq: 'user_id' } }, 
-                    ]                   
-                }  
+                        { campaign_id: { $eq: 'user_id' } },
+                    ]
+                }
             },
         ])
-    
+
         if (campaigns) {
             return { "status": 1, "message": "campaign found", "campaign": campaigns };
         } else {
@@ -40,7 +41,6 @@ campaign_helper.get_campaign_by_user_id = async (id) => {
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
-
 
 /*
  * campaign_helper is used to fetch all capaign data
@@ -55,7 +55,7 @@ campaign_helper.get_all_campaign = async () => {
         if (campaign) {
             return { "status": 1, "message": "campaign found", "Campaign": campaign };
         } else {
-            return { "status": 2, "message": "No campaign available" };   
+            return { "status": 2, "message": "No campaign available" };
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
@@ -71,25 +71,27 @@ campaign_helper.get_all_campaign = async () => {
  */
 campaign_helper.get_all_approved_campaign = async (id) => {
     try {
-       var campaigns=  Campaign_User.aggregate([
-            { 
-               $lookup: { 
+        var campaigns = Campaign_User.aggregate([
+            {
+                $lookup: {
                     from: "campaign_user",
                     localField: "_id",
                     foreignField: "campaign_id",
-                    as: "Private_Campaign" 
-                } 
+                    as: "Private_Campaign"
+                }
             },
-            { 
-                 $match: { 
+            {
+                $match: {
                     $and: [
-                        { campaign_id: { $eq: 'user_id' } ,
-                            status : 'true'}, 
-                    ]                   
-                }  
+                        {
+                            campaign_id: { $eq: 'user_id' },
+                            status: 'true'
+                        },
+                    ]
+                }
             },
         ])
-    
+
         if (campaigns) {
             return { "status": 1, "message": "campaign found", "campaign": campaigns };
         } else {
@@ -100,4 +102,25 @@ campaign_helper.get_all_approved_campaign = async (id) => {
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
+
+/*
+ * insert_campaign is used to insert into campaign collection
+ * 
+ * @param   campaign_object     JSON object consist of all property that need to insert in collection
+ * 
+ * @return  status  0 - If any error occur in inserting campaign, with error
+ *          status  1 - If campaign inserted, with inserted faculty's document and appropriate message
+ * 
+ * @developed by "ar"
+ */
+campaign_helper.insert_campaign = async (campaign_object) => {
+    let campaign = new Campaign(campaign_object);
+    try {
+        let campaign_data = await campaign.save();
+        return { "status": 1, "message": "Campaign inserted", "campaign": campaign_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting campaign", "error": err };
+    }
+};
+
 module.exports = campaign_helper;

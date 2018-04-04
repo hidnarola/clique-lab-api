@@ -51,7 +51,7 @@
   },
   {
     "type": "post",
-    "url": "/update_profile",
+    "url": "/promoter/update_profile",
     "title": "Update promoter profile",
     "name": "Update_promoter_profile",
     "group": "Promoter",
@@ -146,6 +146,181 @@
     "version": "0.0.0",
     "filename": "routes/promoter/index.js",
     "groupTitle": "Promoter"
+  },
+  {
+    "type": "post",
+    "url": "/promoter/campaign",
+    "title": "Add new campaign",
+    "name": "Add_new_campaign",
+    "group": "Promoter_Campaign",
+    "description": "<p>Add new campaign</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>multipart/form-data</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>promoter's unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of campaign</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "start_date",
+            "description": "<p>Campaign start date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "end_date",
+            "description": "<p>Camoaign end date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "call_to_action",
+            "description": "<p>Call to action</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "discount_code",
+            "description": "<p>_id of discount code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": false,
+            "field": "social_media_platform",
+            "description": "<p>Social media platform</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": true,
+            "field": "hash_tag",
+            "description": "<p>Hash tag for campaign</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": true,
+            "field": "at_tag",
+            "description": "<p>At tag for campaign</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "privacy",
+            "description": "<p>Privacy for campaign i.e. public or invite</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": false,
+            "field": "media_format",
+            "description": "<p>Privacy for campaign i.e. public or invite</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": false,
+            "field": "location",
+            "description": "<p>Location of campaign</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "price",
+            "description": "<p>Price of campaign</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "currency",
+            "description": "<p>Currency of given price</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "File",
+            "optional": false,
+            "field": "cover_image",
+            "description": "<p>Cover image of campaign</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array_of_file",
+            "optional": false,
+            "field": "board_image",
+            "description": "<p>Mood board images of campaign</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Success message</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/campaign.js",
+    "groupTitle": "Promoter_Campaign"
   },
   {
     "type": "get",

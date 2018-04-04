@@ -5,7 +5,9 @@ var auth = require("./../middlewares/auth");
 var authorization = require("./../middlewares/authorization");
 
 var index = require("./promoter/index");
+var campaign = require("./promoter/campaign");
 
 router.use("/",auth, authorization, index);
+router.use("/campaign", campaign);
 
 module.exports = router;
