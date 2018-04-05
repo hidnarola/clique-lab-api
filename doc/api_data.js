@@ -324,6 +324,56 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/promoter/user",
+    "title": "Get all user",
+    "name": "Get_all_user",
+    "group": "Promoter_User",
+    "description": "<p>Get all user</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>promoter's unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "users",
+            "description": "<p>Users details</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/user.js",
+    "groupTitle": "Promoter_User"
+  },
+  {
+    "type": "get",
     "url": "/job_industry",
     "title": "Get all job industry",
     "name": "Get_all_job_industry",
