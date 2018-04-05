@@ -5,29 +5,57 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var FacebookSchema = new Schema({
-    no_of_friends: Number,
+    id : String,
     username: String,
-    token:String
+    access_token : String,
+    expiry_time:Date,
+    refresh_token:String,
+    profile_url : String,
+    no_of_friends: Number
 });
 
 var InstagramSchema = new Schema({
-    no_of_followers: Number,
-    username: String
+    id : String,
+    username: String,
+    access_token : String,
+    expiry_time:Date,
+    refresh_token:String,
+    profile_url : String,
+    no_of_followers: Number
+    
 });
 
 var TwitterSchema = new Schema({
-    no_of_followers: Number,
-    username: String
+    id : String,
+    username: String,
+    access_token : String,
+    expiry_time:Date,
+    refresh_token:String,
+    profile_url : String,
+    no_of_followers: Number
+    
 });
 
 var PinterestSchema = new Schema({
-    no_of_followers: Number,
-    username: String
+    id : String,
+    username: String,
+    access_token : String,
+    expiry_time:Date,
+    refresh_token:String,
+    profile_url : String,
+    no_of_followers: Number
+    
 });
 
 var LinkedInSchema = new Schema({
-    no_of_connections: Number,
-    username: String
+    id : String,
+    username: String,
+    access_token : String,
+    expiry_time:Date,
+    refresh_token:String,
+    profile_url : String,
+    no_of_connections: Number
+    
 });
 
 var BankSchema = new Schema({
