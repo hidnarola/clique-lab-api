@@ -86,7 +86,7 @@ router.post('/promoter_login', async (req, res) => {
             expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
           });
 
-          if(promoter_resp.promoter.industry_fill){
+          if(!promoter_resp.promoter.industry_fill){
             promoter_resp.promoter.first_login = true;
           } else {
             promoter_resp.promoter.first_login = false;
