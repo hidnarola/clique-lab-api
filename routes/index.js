@@ -86,16 +86,17 @@ router.post('/promoter_login', async (req, res) => {
             expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
           });
 
-          if(promoter_resp.promoter.last_login_date){
-            promoter_resp.promoter.first_login = false;
-          } else {
+          if(promoter_resp.promoter.industry_fill){
             promoter_resp.promoter.first_login = true;
+          } else {
+            promoter_resp.promoter.first_login = false;
           }
 
           delete promoter_resp.promoter.password;
           delete promoter_resp.promoter.status;
           delete promoter_resp.promoter.refresh_token;
           delete promoter_resp.promoter.last_login_date;
+          delete promoter_resp.promoter.industry_fill;
           delete promoter_resp.promoter.created_at;
 
           logger.info("Token generated");

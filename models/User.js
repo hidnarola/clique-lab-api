@@ -102,6 +102,7 @@ var UserModelSchema = new Schema({
     education: String,
     language: { type: String },
     ethnicity: { type: String },
+    industry_fill : {type: Boolean, default: false},
     interested_in: { type: String, enum: ["male", "female", "both"] },
     relationship_status: { type: String, enum: ["Married", "Unmarried", "Single"] },
     wallet_balance: { type: Number, default: 0 },
