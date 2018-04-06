@@ -16,7 +16,42 @@ var ObjectId = mongoose.Types.ObjectId;
  * @apiName Get all user
  * @apiGroup Promoter-User
  * 
- * @apiDescription  Get all user
+ * @apiDescription  Get user based on given criteria
+ * 
+ * {"filter":[
+ * 
+ * {"field":"gender","type":"exact","value":"female"},
+ * 
+ * {"field":"age", "type":"between", "min_value":21,"max_value":25},
+ * 
+ * {"field":"location","type":"like","value":"surat"},
+ * 
+ * {"field":"fb_friends", "type":"between", "min_value":250,"max_value":500},
+ * 
+ * {"field":"insta_followers", "type":"between", "min_value":250,"max_value":500},
+ * 
+ * {"field":"twitter_followers", "type":"between", "min_value":250,"max_value":500},
+ * 
+ * {"field":"pinterest_followers", "type":"between", "min_value":250,"max_value":500},
+ * 
+ * {"field":"job_industry", "type":"id", "value":"5ac1a4147111f5d4332a4324"},
+ * 
+ * {"field":"year_in_industry", "type":"exact", "value":5},
+ * 
+ * {"field":"education", "type":"exact", "value":"greduate"},
+ * 
+ * {"field":"language", "type":"exact", "value":"english"},
+ * 
+ * {"field":"ethnicity", "type":"exact", "value":"indian"},
+ * 
+ * {"field":"interested_in", "type":"exact", "value":"male"},
+ * 
+ * {"field":"relationship_status", "type":"exact", "value":"Unmarried"},
+ * 
+ * {"field":"music_taste", "type":"id", "value":"5ac1a4477111f5d4332a4351"}],
+ * 
+ * "page_size":2,
+ * "page_no":1 }
  * 
  * @apiHeader {String}  x-access-token promoter's unique access-key
  * @apiHeader {String}  Content-Type application/json
@@ -29,7 +64,7 @@ var ObjectId = mongoose.Types.ObjectId;
  * @apiSuccess (Success 200) {Array} users Users details
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.post('/', async(req,res) => {
+router.post('/', async (req, res) => {
 
     var schema = {
         'page_size': {
@@ -45,36 +80,36 @@ router.post('/', async(req,res) => {
     const errors = req.validationErrors();
     if (!errors) {
         var match_filter = {};
-        if(req.body.filter){
+        if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
-                if(filter_criteria.type === "exact"){
+                if (filter_criteria.type === "exact") {
                     match_filter[filter_criteria.field] = filter_criteria.value;
-                } else if(filter_criteria.type === "between"){
-                    match_filter[filter_criteria.field] = {"$gte":filter_criteria.min_value, "$lte":filter_criteria.max_value};
-                } else if(filter_criteria.type === "like"){
+                } else if (filter_criteria.type === "between") {
+                    match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
+                } else if (filter_criteria.type === "like") {
                     var regex = new RegExp(filter_criteria.value);
-                    match_filter[filter_criteria.field] = { "$regex":regex,"$options":"i"};
-                } else if(filter_criteria.type === "id"){
-                    match_filter[filter_criteria.field] = {"$eq": new ObjectId(filter_criteria.value) };
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                } else if (filter_criteria.type === "id") {
+                    match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
                 }
             });
 
             let keys = {
-                "fb_friends":"facebook.no_of_friends",
-                "insta_followers":"instagram.no_of_followers",
-                "twitter_followers":"twitter.no_of_followers",
-                "pinterest_followers":"pinterest.no_of_followers",
-                "linkedin_connection":"linkedin.no_of_connections",
-                "year_in_industry":"experience"
+                "fb_friends": "facebook.no_of_friends",
+                "insta_followers": "instagram.no_of_followers",
+                "twitter_followers": "twitter.no_of_followers",
+                "pinterest_followers": "pinterest.no_of_followers",
+                "linkedin_connection": "linkedin.no_of_connections",
+                "year_in_industry": "experience"
             };
-            match_filter = await global_helper.rename_keys(match_filter,keys);
+            match_filter = await global_helper.rename_keys(match_filter, keys);
         }
 
-        var users = await user_helper.get_filtered_user(req.body.page_no,req.body.page_size,match_filter);
-        if(users.status === 1){
-            res.status(config.OK_STATUS).json({"status":1,"message":"Users found","users":users.users});
+        var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter);
+        if (users.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "users": users.users });
         } else {
-            res.status(config.BAD_REQUEST).json({"status":0,"message":"Users not found"});
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Users not found" });
         }
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });

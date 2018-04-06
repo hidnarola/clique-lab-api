@@ -323,12 +323,12 @@
     "groupTitle": "Promoter_Campaign"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/promoter/user",
     "title": "Get all user",
     "name": "Get_all_user",
     "group": "Promoter_User",
-    "description": "<p>Get all user</p>",
+    "description": "<p>Get user based on given criteria</p> <p>{&quot;filter&quot;:[</p> <p>{&quot;field&quot;:&quot;gender&quot;,&quot;type&quot;:&quot;exact&quot;,&quot;value&quot;:&quot;female&quot;},</p> <p>{&quot;field&quot;:&quot;age&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:21,&quot;max_value&quot;:25},</p> <p>{&quot;field&quot;:&quot;location&quot;,&quot;type&quot;:&quot;like&quot;,&quot;value&quot;:&quot;surat&quot;},</p> <p>{&quot;field&quot;:&quot;fb_friends&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:250,&quot;max_value&quot;:500},</p> <p>{&quot;field&quot;:&quot;insta_followers&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:250,&quot;max_value&quot;:500},</p> <p>{&quot;field&quot;:&quot;twitter_followers&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:250,&quot;max_value&quot;:500},</p> <p>{&quot;field&quot;:&quot;pinterest_followers&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:250,&quot;max_value&quot;:500},</p> <p>{&quot;field&quot;:&quot;job_industry&quot;, &quot;type&quot;:&quot;id&quot;, &quot;value&quot;:&quot;5ac1a4147111f5d4332a4324&quot;},</p> <p>{&quot;field&quot;:&quot;year_in_industry&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:5},</p> <p>{&quot;field&quot;:&quot;education&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;greduate&quot;},</p> <p>{&quot;field&quot;:&quot;language&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;english&quot;},</p> <p>{&quot;field&quot;:&quot;ethnicity&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;indian&quot;},</p> <p>{&quot;field&quot;:&quot;interested_in&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;male&quot;},</p> <p>{&quot;field&quot;:&quot;relationship_status&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;Unmarried&quot;},</p> <p>{&quot;field&quot;:&quot;music_taste&quot;, &quot;type&quot;:&quot;id&quot;, &quot;value&quot;:&quot;5ac1a4477111f5d4332a4351&quot;}],</p> <p>&quot;page_size&quot;:2, &quot;page_no&quot;:1 }</p>",
     "header": {
       "fields": {
         "Header": [
@@ -338,6 +338,47 @@
             "optional": false,
             "field": "x-access-token",
             "description": "<p>promoter's unique access-key</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": true,
+            "field": "filter",
+            "description": "<p>Filter array contains field by which records need to filter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": true,
+            "field": "sort",
+            "description": "<p>Sort field array contains field by which records need to sort</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "page_size",
+            "description": "<p>Total number of record on page</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "page_no",
+            "description": "<p>Current page</p>"
           }
         ]
       }
@@ -519,8 +560,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "email",
-            "description": "<p>Email</p>"
+            "field": "login_id",
+            "description": "<p>Email or username</p>"
           },
           {
             "group": "Parameter",
@@ -1094,6 +1135,13 @@
             "optional": false,
             "field": "interest",
             "description": "<p>Interest of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "image",
+            "optional": false,
+            "field": "image",
+            "description": "<p>Image of profile</p>"
           }
         ]
       }

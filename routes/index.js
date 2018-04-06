@@ -31,7 +31,7 @@ router.get('/', function (req, res, next) {
  * 
  * @apiHeader {String}  Content-Type application/json
  * 
- * @apiParam {String} email Email
+ * @apiParam {String} login_id Email or username
  * @apiParam {String} password Password
  * 
  * @apiSuccess (Success 200) {JSON} promoter Promoter object.
@@ -496,7 +496,6 @@ var schema = {
     notEmpty: true,
     errorMessage: "Email is required"
   },
- 
   "user_interest": {
     notEmpty: true,
     errorMessage: "User Interest is required"
@@ -508,7 +507,7 @@ var schema = {
   "music_taste": {
     notEmpty: true,
     errorMessage: "Music taste is required"
-  }, 
+  }
 };
 req.checkBody(schema);
 var errors = req.validationErrors();
