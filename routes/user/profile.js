@@ -83,15 +83,7 @@ router.put('/', function (req, res) {
             notEmpty: true,
             errorMessage: "Music taste is required"
         }
-        // ,
-        // "facebook": {
-        //     "token": { notEmpty: true },
-        //     "no_of_friends": { notEmpty: true },
-        // },
-        // "instagram": {
-        //     "token": { notEmpty: true },
-        //     "no_of_followers": { notEmpty: true },
-        // },
+       
     };
 
     req.checkBody(schema);
@@ -107,9 +99,7 @@ router.put('/', function (req, res) {
                 "user_interest": req.body.user_interest,
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
-               // "facebook": { "token": req.body.facebook.token, "no_of_friends": req.body.facebook.no_of_friends },
-               // "instagram": { "token": req.body.instagram.token, "no_of_followers": req.body.instagram.no_of_followers },
-            };
+         };
             if (req.body.is_active && req.body.is_active != null) {
                 obj.is_active = req.body.is_active;
             }
