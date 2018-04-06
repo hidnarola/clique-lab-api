@@ -32,12 +32,11 @@ user_helper.get_all_user = async () => {
  */
 user_helper.get_filtered_user = async (page_no,page_size,filter) => {
     try {
-
         var aggregate = [];
         if(filter){
-            console.log("filter123 = ",filter);
             aggregate.push({"$match":filter});
         }
+
         aggregate.push({"$skip":page_size * (page_no - 1)});
         aggregate.push({"$limit":page_size});
 

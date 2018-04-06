@@ -100,7 +100,7 @@ var UserModelSchema = new Schema({
     job_title: String,
     experience: Number, // In year
     education: String,
-    languages: { type: String },
+    language: { type: String },
     ethnicity: { type: String },
     interested_in: { type: String, enum: ["male", "female", "both"] },
     relationship_status: { type: String, enum: ["Married", "Unmarried", "Single"] },

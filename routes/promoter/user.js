@@ -2,11 +2,14 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var async = require("async");
+var mongoose = require('mongoose');
 var router = express.Router();
 
 var config = require('./../../config');
 var user_helper = require('./../../helpers/user_helper');
+var global_helper = require("./../../helpers/global_helper");
 var logger = config.logger;
+var ObjectId = mongoose.Types.ObjectId;
 
 /** 
  * @api {post} /promoter/user Get all user
@@ -41,20 +44,31 @@ router.post('/', async(req,res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-
         var match_filter = {};
         if(req.body.filter){
             req.body.filter.forEach(filter_criteria => {
                 if(filter_criteria.type === "exact"){
-                    console.log("inside");
                     match_filter[filter_criteria.field] = filter_criteria.value;
-                    console.log("filter = ",match_filter);
                 } else if(filter_criteria.type === "between"){
-                    
+                    match_filter[filter_criteria.field] = {"$gte":filter_criteria.min_value, "$lte":filter_criteria.max_value};
+                } else if(filter_criteria.type === "like"){
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex":regex,"$options":"i"};
+                } else if(filter_criteria.type === "id"){
+                    match_filter[filter_criteria.field] = {"$eq": new ObjectId(filter_criteria.value) };
                 }
             });
+
+            let keys = {
+                "fb_friends":"facebook.no_of_friends",
+                "insta_followers":"instagram.no_of_followers",
+                "twitter_followers":"twitter.no_of_followers",
+                "pinterest_followers":"pinterest.no_of_followers",
+                "linkedin_connection":"linkedin.no_of_connections",
+                "year_in_industry":"experience"
+            };
+            match_filter = await global_helper.rename_keys(match_filter,keys);
         }
-        console.log("outside");
 
         var users = await user_helper.get_filtered_user(req.body.page_no,req.body.page_size,match_filter);
         if(users.status === 1){
