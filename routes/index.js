@@ -4,8 +4,9 @@ var config = require('../config');
 var jwt = require('jsonwebtoken');
 var moment = require('moment');
 var bcrypt = require('bcrypt');
+var fs = require("fs");
 const saltRounds = 10;
-
+var async = require("async");
 var promoter_helper = require('./../helpers/promoter_helper');
 var mail_helper = require('./../helpers/mail_helper');
 var interest_helper = require("../helpers/interest_helper");
@@ -469,63 +470,117 @@ router.get("/music_taste", async (req, res) => {
  *  @apiParam {String} job_industry Job Industry of profile
  *  @apiParam {String} music_taste Music Taste of profile
  *  @apiParam {String} interest Interest of profile
+ *  @apiParam {image} image Image of profile
 
  * @apiSuccess (Success 200) {JSON}profile details
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post('/signup', async (req, res) => {
-  var schema = {
-    "name": {
-      notEmpty: true,
-      errorMessage: "Name is required"
-    },
-    "username": {
-      notEmpty: true,
-      errorMessage: "Username is required"
-    },
-    "email": {
-      notEmpty: true,
-      errorMessage: "Email is required"
-    },
-    "user_interest": {
-      notEmpty: true,
-      errorMessage: "User Interest is required"
-    },
-    "job_industry": {
-      notEmpty: true,
-      errorMessage: "Job Industry is required"
-    },
-    "music_taste": {
-      notEmpty: true,
-      errorMessage: "Music taste is required"
-    },
-  };
+var schema = {
+  "name": {
+    notEmpty: true,
+    errorMessage: "Name is required"
+  },
+  "username": {
+    notEmpty: true,
+    errorMessage: "Username is required"
+  },
+  "email": {
+    notEmpty: true,
+    errorMessage: "Email is required"
+  },
+ 
+  "user_interest": {
+    notEmpty: true,
+    errorMessage: "User Interest is required"
+  },
+  "job_industry": {
+    notEmpty: true,
+    errorMessage: "Job Industry is required"
+  },
+  "music_taste": {
+    notEmpty: true,
+    errorMessage: "Music taste is required"
+  }, 
+};
+req.checkBody(schema);
+var errors = req.validationErrors();
 
-  req.checkBody(schema);
-  var errors = req.validationErrors();
-  if (!errors) {
-    var profile_obj = {
-      "name": req.body.name,
+if (!errors) {
+ 
+  var profile_obj = {
+    "name": req.body.name,
       "username": req.body.username,
       "email": req.body.email,
       "user_interest": req.body.user_interest,
       "job_industry": req.body.job_industry,
       "music_taste": req.body.music_taste
+  };
 
-    };
+ 
+ 
+  async.waterfall(
+    [
+      function(callback) {
+        //image upload
+        if (req.files && req.files["image"]) {
+          var file_path_array = [];
+          // var files = req.files['images'];
+          var file =req.files.image;
+          var dir = "./uploads/registration";
+          var mimetype = ["image/png", "image/jpeg", "image/jpg"];
 
-    let profile_data = await profile.insert_profile(profile_obj);
-    if (profile_data.status === 0) {
+          // assuming openFiles is an array of file names
+          
+          if (mimetype.indexOf(file.mimetype) != -1) {
+            logger.trace("Uploading image");
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir);
+            }
 
-      logger.error("Error while inserting Profile data = ", profile_data);
-      res.status(config.BAD_REQUEST).json({ profile_data });
+            extension = ".jpg";
+            filename = "image_" + new Date().getTime() + extension;
+            file.mv(dir + '/' + filename, function (err) {
+                if (err) {
+                    logger.trace("Problem in uploading image");
+                    callback({"status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image"});
+                } else {
+                    logger.trace("Image uploaded");
+                    callback(null, filename);
+                }
+            });
+        } else {
+            logger.trace("Invalid image format");
+            callback({"status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid"});
+        }
     } else {
-      res.status(config.OK_STATUS).json(profile_data);
+        logger.trace("Avatar is not available");
+        callback(null, user, null);
     }
-  } else {
-    logger.error("Validation Error = ", errors);
-    res.status(config.BAD_REQUEST).json({ message: errors });
-  }
+        }
+     
+    ],
+    async (err, filename) => {
+      //End image upload
+     
+      if(filename)
+      {
+        profile_obj.image = filename;
+      }
+      
+      let profile_data = await profile.insert_profile(profile_obj);
+      if (profile_data.status === 0) {
+        logger.error("Error while inserting Inspire  data = ", profile_data);
+        return res.status(config.BAD_REQUEST).json({ profile_data });
+      } else {
+        return res.status(config.OK_STATUS).json(profile_data);
+      }
+    }
+  );
+} else {
+  logger.error("Validation Error = ", errors);
+  res.status(config.BAD_REQUEST).json({ message: errors });
+}
 });
 
 
@@ -558,7 +613,7 @@ router.post('/login', async (req, res) => {
       errorMessage: "Email is required.",
       isEmail: { errorMessage: "Please enter valid email address" }
     },
-    'token': {
+    'access_token': {
       notEmpty: true,
       errorMessage: "token is required."
     }
@@ -582,7 +637,7 @@ router.post('/login', async (req, res) => {
       logger.trace("User found. Executing next instruction");
 
       // Checking password
-      if (req.body.token === login_resp.user.facebook.token) {
+      if (req.body.token === login_resp.user.facebook.access_token) {
         logger.trace("valid token. Generating token");
         var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
         let update_resp = await login_helper.update_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
