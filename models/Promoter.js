@@ -36,6 +36,7 @@ var PromoterSchema = new Schema({
     email_verified: {type:Boolean, default:false},
     refresh_token: {type: String},
     last_login_date: {type: Date},
+    industry_fill : {type: Boolean, default: false},
     password_changed_date: {type: Date},
     creditcard: CreditcardSchema,
     bank_details: BankSchema,
