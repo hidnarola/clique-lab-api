@@ -56,27 +56,6 @@ router.get("/public_campaign", async (req, res) => {
   }
 });
 
-/**
- * @api {get} /user/campaign/:id Campaign  - Get all
- * @apiName public campaign - Get by id
-  * @apiGroup User
- * @apiHeader {String}  x-access-token unique access-key
- *
- * @apiSuccess (Success 200) {Array} Campaign  of Campaign document
- * @apiError (Error 4xx) {String} message Validation or error message.
- */
-router.get("/:campaign_id", async (req, res) => {
-  campaign_id = req.params.campaign_id;
-  logger.trace("Get all  Campaign API called");
-  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id);
-  if (resp_data.status == 0) {
-    logger.error("Error occured while fetching Public Campaign = ", resp_data);
-    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-  } else {
-    logger.trace(" Campaign got successfully = ", resp_data);
-    res.status(config.OK_STATUS).json(resp_data);
-  }
-});
 
 /**
  * @api {get} /user/campaign/myoffer My offer Campaign  - Get all
@@ -88,16 +67,42 @@ router.get("/:campaign_id", async (req, res) => {
  * @apiSuccess (Success 200) {Array} Array of Offered Campaign document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/approved", async (req, res) => {
-  user_id = req.userInfo;
-  console.log("id", user_id);
-  logger.trace("Get all Offered Campaign API called");
-  var resp_data = await campaign_helper.get_all_approved_campaign(user_id);
+router.get("/myoffer", async (req, res) => {
+
+  user_id = req.userInfo.id;
+  console.log(user_id);
+  logger.trace("Get all campaign API called");
+  var resp_data = await campaign_helper.get_all_offered_campaign(user_id);
   if (resp_data.status == 0) {
-    logger.error("Error occured while fetching offered Campaign = ", resp_data);
+    logger.error("Error occured while fetching campaign = ", resp_data);
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
   } else {
-    logger.trace("Offered Campaign got successfully = ", resp_data);
+    logger.trace("Campaigns got successfully = ", resp_data);
+    res.status(config.OK_STATUS).json(resp_data);
+  }
+});
+
+/**
+ * @api {get} /user/campaign/:id Campaign  - Get all
+ * @apiName public campaign - Get by id
+  * @apiGroup User
+ * @apiHeader {String}  x-access-token unique access-key
+ *
+ * @apiSuccess (Success 200) {Array} Campaign  of Campaign document
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get("/:campaign_id", async (req, res) => {
+
+  console.log("Going here");
+
+  campaign_id = req.params.campaign_id;
+  logger.trace("Get all  Campaign API called");
+  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id);
+  if (resp_data.status == 0) {
+    logger.error("Error occured while fetching Public Campaign = ", resp_data);
+    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  } else {
+    logger.trace(" Campaign got successfully = ", resp_data);
     res.status(config.OK_STATUS).json(resp_data);
   }
 });

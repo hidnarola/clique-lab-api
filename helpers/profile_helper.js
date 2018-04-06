@@ -32,11 +32,23 @@ profile_helper.insert_profile = async (profile_object) => {
  */
 profile_helper.get_profile_by_id = async (id) => {
     try {
+        count=0;
+        field=100/28;
         var profile = await Profile.findOne({ _id: id }).lean();
-       
+        Object.keys(profile) .forEach(async (num) => {
+          
+           if(profile[num]!= " ")
+           {
+               count++;
+           } 
+           
+        })
+       var searchable=field *count;
+       profile.searchable = searchable;
         if (profile) {
-
-            var power = profile.facebook.no_of_friends + profile.instagram.no_of_followers;
+           
+            var power = (profile.facebook.no_of_friends + profile.instagram.no_of_followers +
+                        profile.pinterest.no_of_followers + profile.twitter.no_of_followers);
             profile.power = power;
             
             return { "status": 1, "message": "Profile found", "Profile": profile };
