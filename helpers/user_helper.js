@@ -1,15 +1,14 @@
 var User = require("./../models/User");
 var user_helper = {};
 
-
 /*
- * get_login_by_email is used to fetch single promoter by email address
+ * get_login_by_email is used to fetch single user by email address
  * 
- * @param   email   Specify email address of promoter
+ * @param   email   Specify email address of user
  * 
- * @return  status  0 - If any error occur in finding promoter, with error
- *          status  1 - If Promoter found, with found promoter document
- *          status  2 - If Promoter not found, with appropriate error message
+ * @return  status  0 - If any error occur in finding user, with error
+ *          status  1 - If User found, with found user document
+ *          status  2 - If User not found, with appropriate error message
  * 
  * @developed by "ar"
  */
@@ -25,6 +24,42 @@ user_helper.get_login_by_email = async (email) => {
         return { "status": 0, "message": "Error occured while finding user", "error": err }
     }
 };
+
+/*
+ * get_user_by_id is used to fetch User by id
+ * 
+ * @param id String Specify _id of user collection
+ * 
+ * @return  status 0 - If any internal error occured while fetching user data, with error
+ *          status 1 - If User data found, with user object
+ *          status 2 - If User not found, with appropriate message
+ */
+user_helper.get_user_by_id = async (id) => {
+    try {
+        var user = await User.findOne({ _id: id }).lean();
+
+        // Find searchable value
+        var field_need_counted = ["name","short_bio","email"];
+
+        var count = 0;
+        Object.keys(user).forEach(async (key) => {
+            if (field_need_counted.indexOf(key) > -1) {
+                count++;
+            }
+        });
+        user.searchable = Math.ceil(100 * count / field_need_counted.length);
+
+        // Find social power
+        if (user) {
+            user.power = (user.facebook.no_of_friends + user.instagram.no_of_followers + user.pinterest.no_of_followers + user.twitter.no_of_followers);
+            return { "status": 1, "message": "User found", "User": user };
+        } else {
+            return { "status": 2, "message": "User available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding User", "error": err }
+    }
+}
 
 /*
  * get_all_user is used to get all user
@@ -76,6 +111,26 @@ user_helper.get_filtered_user = async (page_no, page_size, filter) => {
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding Brand", "error": err }
+    }
+};
+
+/*
+ * insert_user is used to insert into User collection
+ * 
+ * @param   user_object     JSON object consist of all property that need to insert in collection
+ * 
+ * @return  status  0 - If any error occur in inserting user, with error
+ *          status  1 - If user inserted, with inserted user's document and appropriate message
+ * 
+ * @developed by "mm"
+ */
+user_helper.insert_user = async (user_object) => {
+    let user = new User(user_object)
+    try {
+        let user_data = await user.save();
+        return { "status": 1, "message": "Record inserted", "user": user_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting user", "error": err };
     }
 };
 

@@ -8,32 +8,7 @@ var router = express.Router();
 var config = require("./../../config");
 var logger = config.logger;
 
-var profile_helper = require("./../../helpers/profile_helper");
-
-/**
- * @api {get} /user/profile Profile - Get 
- * @apiName get_profile_by_id - Get
- * @apiGroup User
- *
- * @apiHeader {String}  x-access-token unique access-key
- *
- * @apiSuccess (Success 200) {Array} Profile as per id
- * @apiError (Error 4xx) {String} message Validation or error message.
- */
-router.get("/", async (req, res) => {
-    user_id = req.userInfo.id;
-    logger.trace("Get all Profile API called");
-    var resp_data = await profile_helper.get_profile_by_id(user_id);
-    if (resp_data.status == 0) {
-        logger.error("Error occured while fetching Profile = ", resp_data);
-        res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-    } else {
-        logger.trace("Profile got successfully = ", resp_data);
-        res.status(config.OK_STATUS).json(resp_data);
-    }
-});
-
-
+var user_helper = require("./../../helpers/user_helper");
 
 
 /**
@@ -83,7 +58,7 @@ router.put('/', function (req, res) {
             notEmpty: true,
             errorMessage: "Music taste is required"
         }
-       
+
     };
 
     req.checkBody(schema);
@@ -99,20 +74,20 @@ router.put('/', function (req, res) {
                 "user_interest": req.body.user_interest,
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
-         };
+            };
             if (req.body.is_active && req.body.is_active != null) {
                 obj.is_active = req.body.is_active;
             }
 
-            console.log("obj = ",obj);
-           var profile= profile_helper.update_by_id(user_id, obj);
+            console.log("obj = ", obj);
+            var profile = profile_helper.update_by_id(user_id, obj);
 
-                if (profile.status == 0) {
-                    res.status(config.INTERNAL_SERVER_ERROR).json({ "error": resp.err });
-                } else {
-                    res.status(config.OK_STATUS).json({ "message": "Profile has been updated successfully" });
-                }
-           
+            if (profile.status == 0) {
+                res.status(config.INTERNAL_SERVER_ERROR).json({ "error": resp.err });
+            } else {
+                res.status(config.OK_STATUS).json({ "message": "Profile has been updated successfully" });
+            }
+
         } else {
             var result = {
                 message: "Validation Error",
@@ -126,50 +101,52 @@ router.put('/', function (req, res) {
 
 
 
-  /**
- * @api {post} /create_profile Create Profile
- * @apiName Profile - Add
- * @apiGroup User
+/**
+* @api {post} /user/profile/create_profile Create Profile
+* @apiName Profile - Add
+* @apiGroup User
 
- * @apiHeader {String}  Content-Type application/json
- * @apiHeader {String}  x-access-token  unique access-key
- * @apiParam {String} name Name of profile
- * @apiParam {String} username Username of profile
- *  @apiParam {String} email Email of profile
- *  @apiParam {String} job_industry Job Industry of profile
- *  @apiParam {String} music_taste Music Taste of profile
- *  @apiParam {String} interest Interest of profile
+* @apiHeader {String}  Content-Type application/json
+* @apiHeader {String}  x-access-token  unique access-key
+* 
+* @apiParam {String} name Name of profile
+* @apiParam {String} username Username of profile
+*  @apiParam {String} email Email of profile
+*  @apiParam {String} job_industry Job Industry of profile
+*  @apiParam {String} music_taste Music Taste of profile
+*  @apiParam {String} interest Interest of profile
 
- * @apiSuccess (Success 200) {JSON}profile details
- * @apiError (Error 4xx) {String} message Validation or error message.
- */
+* @apiSuccess (Success 200) {JSON}profile details
+* @apiError (Error 4xx) {String} message Validation or error message.
+*/
 router.post("/create_profile", async (req, res) => {
     user_id = req.userInfo.id;
     var schema = {
         "name": {
             notEmpty: true,
             errorMessage: "Name is required"
-          },
-          "username": {
+        },
+        "username": {
             notEmpty: true,
             errorMessage: "Username is required"
-          },
-          "email": {
+        },
+        "email": {
             notEmpty: true,
             errorMessage: "Email is required"
-          },
-          "user_interest": {
+        },
+        "user_interest": {
             notEmpty: true,
             errorMessage: "User Interest is required"
-          },
-          "job_industry": {
+        },
+        "job_industry": {
             notEmpty: true,
             errorMessage: "Job Industry is required"
-          },
-          "music_taste": {
+        },
+        "music_taste": {
             notEmpty: true,
             errorMessage: "Music taste is required"
-          },    };
+        },
+    };
     req.checkBody(schema);
     var errors = req.validationErrors();
 
@@ -181,10 +158,9 @@ router.post("/create_profile", async (req, res) => {
             "user_interest": req.body.user_interest,
             "job_industry": req.body.job_industry,
             "music_taste": req.body.music_taste
-      
         };
         console.log(obj);
-        let user_data = await profile_helper.insert_profile(obj);
+        let user_data = await user_helper.insert_user(obj);
         if (user_data.status === 0) {
             logger.error("Error while updating User data = ", user_data);
             return res.status(config.BAD_REQUEST).json({ user_data });
