@@ -366,18 +366,18 @@ router.post('/promoter_reset_password', async (req, res) => {
       } else {
         logger.trace("Valid token. Reseting password for promoter");
         if (decoded.promoter_id) {
-            var update_resp = await promoter_helper.update_promoter_by_id(decoded.promoter_id, { "password": bcrypt.hashSync(req.body.password, saltRounds) });
-            if (update_resp.status === 0) {
-              logger.trace("Error occured while updating promoter : ", update_resp.error);
-              res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while verifying user's email" });
-            } else if (update_resp.status === 2) {
-              logger.trace("Promoter has not updated");
-              res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while reseting password of promoter" });
-            } else {
-              // Password reset!
-              logger.trace("Password has been changed for promoter - ",decoded.promoter_id);
-              res.status(config.OK_STATUS).json({ "status": 1, "message": "Password has been changed" });
-            }
+          var update_resp = await promoter_helper.update_promoter_by_id(decoded.promoter_id, { "password": bcrypt.hashSync(req.body.password, saltRounds) });
+          if (update_resp.status === 0) {
+            logger.trace("Error occured while updating promoter : ", update_resp.error);
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while verifying user's email" });
+          } else if (update_resp.status === 2) {
+            logger.trace("Promoter has not updated");
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while reseting password of promoter" });
+          } else {
+            // Password reset!
+            logger.trace("Password has been changed for promoter - ", decoded.promoter_id);
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Password has been changed" });
+          }
         } else {
 
         }
@@ -457,133 +457,165 @@ router.get("/music_taste", async (req, res) => {
 });
 
 
-  /**
- * @api {post} /profile profile  Add
- * @apiName Profile - Add
- * @apiGroup User
+/**
+* @api {post} /social_registration Social Registration
+* @apiName Social Registration
+* @apiGroup User
 
- * @apiHeader {String}  Content-Type application/json
- * @apiHeader {String}  x-access-token  unique access-key
- * @apiParam {String} name Name of profile
- * @apiParam {String} username Username of profile
- *  @apiParam {String} email Email of profile
- *  @apiParam {String} job_industry Job Industry of profile
- *  @apiParam {String} music_taste Music Taste of profile
- *  @apiParam {String} interest Interest of profile
- *  @apiParam {image} image Image of profile
+* @apiHeader {String}  Content-Type application/json
+* @apiHeader {String}  x-access-token  unique access-key
+* @apiParam {String} name Name of User
+* @apiParam {String} username Username of User
+*  @apiParam {String} email Email of User
+*  @apiParam {String} gender Gender of User
+*  @apiParam {String} social_type Social Type of User
+*  @apiParam {String}social_id Social Id of User
 
- * @apiSuccess (Success 200) {JSON}profile details
- * @apiError (Error 4xx) {String} message Validation or error message.
- */
-router.post('/signup', async (req, res) => {
-var schema = {
-  "name": {
-    notEmpty: true,
-    errorMessage: "Name is required"
-  },
-  "username": {
-    notEmpty: true,
-    errorMessage: "Username is required"
-  },
-  "email": {
-    notEmpty: true,
-    errorMessage: "Email is required"
-  },
- 
-  "user_interest": {
-    notEmpty: true,
-    errorMessage: "User Interest is required"
-  },
-  "job_industry": {
-    notEmpty: true,
-    errorMessage: "Job Industry is required"
-  },
-  "music_taste": {
-    notEmpty: true,
-    errorMessage: "Music taste is required"
-  }, 
-};
-req.checkBody(schema);
-var errors = req.validationErrors();
 
-if (!errors) {
- 
-  var profile_obj = {
-    "name": req.body.name,
-      "username": req.body.username,
-      "email": req.body.email,
-      "user_interest": req.body.user_interest,
-      "job_industry": req.body.job_industry,
-      "music_taste": req.body.music_taste
+* @apiSuccess (Success 200) {JSON} User details
+* @apiError (Error 4xx) {String} message Validation or error message
+**/
+router.post('/social_registration', async (req, res) => {
+  var schema = {
+    "name": {
+      notEmpty: true,
+      errorMessage: "Name is required"
+    },
+    "email": {
+      notEmpty: true,
+      errorMessage: "Email is required"
+    },
+    "gender": {
+      notEmpty: true,
+      errorMessage: "Gender is required"
+    },
+    "social_type": {
+      notEmpty: true,
+      errorMessage: "Social Type is required"
+    },
+    "social_id": {
+      notEmpty: true,
+      errorMessage: "Social identification is required"
+    },
+    "access_token": {
+      notEmpty: true,
+      errorMessage: "Access Token is required"
+    },
   };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
 
- 
- 
-  async.waterfall(
-    [
-      function(callback) {
-        //image upload
-        if (req.files && req.files["image"]) {
-          var file_path_array = [];
-          // var files = req.files['images'];
-          var file =req.files.image;
-          var dir = "./uploads/registration";
-          var mimetype = ["image/png", "image/jpeg", "image/jpg"];
+  if (!errors) {
 
-          // assuming openFiles is an array of file names
-          
-          if (mimetype.indexOf(file.mimetype) != -1) {
-            logger.trace("Uploading image");
-            if (!fs.existsSync(dir)) {
+    var reg_obj = {
+      "name": req.body.name,
+      "email": req.body.email,
+      "gender": req.body.gender
+    };
+    if (req.body.social_type == "facebook") {
+      reg_obj.facebook = {
+        "id": req.body.social_id,
+        "access_token": req.body.access_token
+      };
+      if (req.body.username) {
+        reg_obj.facebook['username'] = req.body.username;
+      }
+    }else if(req.body.social_type == "instagram"){
+      reg_obj.instagram = {
+        "id": req.body.social_id,
+        "access_token": req.body.access_token
+      };
+      if (req.body.username) {
+        reg_obj.instagram['username'] = req.body.username;
+      }
+    }
+    else if(req.body.social_type == "pinterest"){
+      reg_obj.pinterest = {
+        "id": req.body.social_id,
+        "access_token": req.body.access_token
+      };
+      if (req.body.username) {
+        reg_obj.pinterest['username'] = req.body.username;
+      }
+    }
+    else if(req.body.social_type == "twitter"){
+      reg_obj.twitter = {
+        "id": req.body.social_id,
+        "access_token": req.body.access_token
+      };
+      if (req.body.username) {
+        reg_obj.twitter['username'] = req.body.username;
+      }
+    }
+    else if(req.body.social_type == "linkedin"){
+      reg_obj.linkedin = {
+        "id": req.body.social_id,
+        "access_token": req.body.access_token
+      };
+      if (req.body.username) {
+        reg_obj.linkedin['username'] = req.body.username;
+      }
+    }
+   
+    async.waterfall(
+      [
+        function (callback) {
+          //image upload
+          if (req.files && req.files["image"]) {
+            var file_path_array = [];
+            // var files = req.files['images'];
+            var file = req.files.image;
+            var dir = "./uploads/registration";
+            var mimetype = ["image/png", "image/jpeg", "image/jpg"];
+
+            // assuming openFiles is an array of file names
+
+            if (mimetype.indexOf(file.mimetype) != -1) {
+              logger.trace("Uploading image");
+              if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir);
-            }
+              }
 
-            extension = ".jpg";
-            filename = "image_" + new Date().getTime() + extension;
-            file.mv(dir + '/' + filename, function (err) {
+              extension = ".jpg";
+              filename = "image_" + new Date().getTime() + extension;
+              file.mv(dir + '/' + filename, function (err) {
                 if (err) {
-                    logger.trace("Problem in uploading image");
-                    callback({"status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image"});
+                  logger.trace("Problem in uploading image");
+                  callback({ "status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image" });
                 } else {
-                    logger.trace("Image uploaded");
-                    callback(null, filename);
+                  logger.trace("Image uploaded");
+                  callback(null, filename);
                 }
-            });
+              });
+            } else {
+              logger.trace("Invalid image format");
+              callback({ "status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid" });
+            }
+          } else {
+            callback(null,null);
+          }
+        }
+      ], async (err, filename) => {
+        //End image upload
+
+        if (filename) {
+          reg_obj.image = filename;
+        }
+
+        let reg_data = await profile.registration(reg_obj);
+        if (reg_data.status === 0) {
+          logger.error("Error while inserting Inspire  data = ", reg_data);
+          return res.status(config.BAD_REQUEST).json({ reg_data });
         } else {
-            logger.trace("Invalid image format");
-            callback({"status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid"});
+          return res.status(config.OK_STATUS).json(reg_data);
         }
-    } else {
-        logger.trace("Avatar is not available");
-        callback(null, user, null);
-    }
-        }
-     
-    ],
-    async (err, filename) => {
-      //End image upload
-     
-      if(filename)
-      {
-        profile_obj.image = filename;
       }
-      
-      let profile_data = await profile.insert_profile(profile_obj);
-      if (profile_data.status === 0) {
-        logger.error("Error while inserting Inspire  data = ", profile_data);
-        return res.status(config.BAD_REQUEST).json({ profile_data });
-      } else {
-        return res.status(config.OK_STATUS).json(profile_data);
-      }
-    }
-  );
-} else {
-  logger.error("Validation Error = ", errors);
-  res.status(config.BAD_REQUEST).json({ message: errors });
-}
+    );
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
 });
-
-
 
 /**
  * @api {post} /login Login
@@ -595,7 +627,7 @@ if (!errors) {
  * @apiHeader {String}  Content-Type application/json
  * 
  * @apiParam {String} email Email
- * @apiParam {String} token as facebook token
+ * @apiParam {String} access_token as facebook token
  * 
  * @apiSuccess (Success 200) {JSON} user  user object.
  * @apiSuccess (Success 200) {String} token Unique token which needs to be passed in subsequent requests.
@@ -641,11 +673,11 @@ router.post('/login', async (req, res) => {
         logger.trace("valid token. Generating token");
         var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
         let update_resp = await login_helper.update_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
-        var LoginJson = { id: login_resp.user._id, email: login_resp.email, role:"user" };
-        console.log("id= ",login_resp.user._id);
+        var LoginJson = { id: login_resp.user._id, email: login_resp.email, role: "user" };
+        console.log("id= ", login_resp.user._id);
         var token = jwt.sign(LoginJson, config.ACCESS_TOKEN_SECRET_KEY, {
           expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
-        
+
         });
 
         delete login_resp.user.password;

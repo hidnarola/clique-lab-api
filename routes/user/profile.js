@@ -127,7 +127,7 @@ router.put('/', function (req, res) {
 
 
   /**
- * @api {post} /profile profile  Add
+ * @api {post} /create_profile Create Profile
  * @apiName Profile - Add
  * @apiGroup User
 
@@ -143,58 +143,59 @@ router.put('/', function (req, res) {
  * @apiSuccess (Success 200) {JSON}profile details
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.post('/signup', async (req, res) => {
+router.post("/create_profile", async (req, res) => {
+    user_id = req.userInfo.id;
     var schema = {
-      "name": {
-        notEmpty: true,
-        errorMessage: "Name is required"
-      },
-      "username": {
-        notEmpty: true,
-        errorMessage: "Username is required"
-      },
-      "email": {
-        notEmpty: true,
-        errorMessage: "Email is required"
-      },
-      "user_interest": {
-        notEmpty: true,
-        errorMessage: "User Interest is required"
-      },
-      "job_industry": {
-        notEmpty: true,
-        errorMessage: "Job Industry is required"
-      },
-      "music_taste": {
-        notEmpty: true,
-        errorMessage: "Music taste is required"
-      },
-    };
-  
+        "name": {
+            notEmpty: true,
+            errorMessage: "Name is required"
+          },
+          "username": {
+            notEmpty: true,
+            errorMessage: "Username is required"
+          },
+          "email": {
+            notEmpty: true,
+            errorMessage: "Email is required"
+          },
+          "user_interest": {
+            notEmpty: true,
+            errorMessage: "User Interest is required"
+          },
+          "job_industry": {
+            notEmpty: true,
+            errorMessage: "Job Industry is required"
+          },
+          "music_taste": {
+            notEmpty: true,
+            errorMessage: "Music taste is required"
+          },    };
     req.checkBody(schema);
     var errors = req.validationErrors();
+
     if (!errors) {
-      var profile_obj = {
-        "name": req.body.name,
-        "username": req.body.username,
-        "email": req.body.email,
-        "user_interest": req.body.user_interest,
-        "job_industry": req.body.job_industry,
-        "music_taste": req.body.music_taste
-  
-      };
-  
-      let profile_data = await profile.insert_profile(profile_obj);
-      if (profile_data.status === 0) {
-  
-        logger.error("Error while inserting Profile data = ", profile_data);
-        res.status(config.BAD_REQUEST).json({ profile_data });
-      } else {
-        res.status(config.OK_STATUS).json(profile_data);
-      }
+        var obj = {
+            "name": req.body.name,
+            "username": req.body.username,
+            "email": req.body.email,
+            "user_interest": req.body.user_interest,
+            "job_industry": req.body.job_industry,
+            "music_taste": req.body.music_taste
+      
+        };
+        console.log(obj);
+        let user_data = await profile_helper.insert_profile(obj);
+        if (user_data.status === 0) {
+            logger.error("Error while updating User data = ", user_data);
+            return res.status(config.BAD_REQUEST).json({ user_data });
+        } else {
+            return res.status(config.OK_STATUS).json(user_data);
+        }
     } else {
-      logger.error("Validation Error = ", errors);
-      res.status(config.BAD_REQUEST).json({ message: errors });
+        logger.error("Validation Error = ", errors);
+        res.status(config.BAD_REQUEST).json({ message: errors });
     }
-  });
+
+});
+
 module.exports = router;

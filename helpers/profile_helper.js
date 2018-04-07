@@ -4,6 +4,28 @@ var profile_helper = {};
 
 
 /*
+ * registration is used to insert into User collection
+ * 
+ * @param   profile_object     JSON object consist of all property that need to insert in collection
+ * 
+ * @return  status  0 - If any error occur in inserting profile, with error
+ *          status  1 - If profile inserted, with inserted profile's document and appropriate message
+ * 
+ * @developed by "mm"
+ */
+profile_helper.registration = async (reg_object) => {
+    let profile = new Profile(reg_object)
+    try {
+        let reg_data = await profile.save();
+        return { "status": 1, "message": "Record inserted", "user": reg_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting Record", "error": err };
+    }
+};
+
+
+
+/*
  * insert_profile is used to insert into User collection
  * 
  * @param   profile_object     JSON object consist of all property that need to insert in collection
@@ -17,12 +39,11 @@ profile_helper.insert_profile = async (profile_object) => {
     let profile = new Profile(profile_object)
     try {
         let profile_data = await profile.save();
-        return { "status": 1, "message": "Profile inserted", "promoter": profile_data };
+        return { "status": 1, "message": "Record inserted", "user": profile_data };
     } catch (err) {
-        return { "status": 0, "message": "Error occured while inserting Profile", "error": err };
+        return { "status": 0, "message": "Error occured while inserting Record", "error": err };
     }
 };
-
 /*
  * get_profile_by_id is used to fetch Profile for the user
  * 
