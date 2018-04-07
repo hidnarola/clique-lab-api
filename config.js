@@ -14,7 +14,7 @@ module.exports = {
     "database": process.env.DATABASE,
 
     // JWT
-    "ACCESS_TOKEN_SECRET_KEY": process.env.clique_lab_jwt_token,
+    "ACCESS_TOKEN_SECRET_KEY": process.env.ACCESS_TOKEN_SECRET_KEY,
     "REFRESH_TOKEN_SECRET_KEY": process.env.REFRESH_TOKEN_SECRET_KEY,
     "ACCESS_TOKEN_EXPIRE_TIME" : 60 * 60 * 24 * 7, // 7 days
 

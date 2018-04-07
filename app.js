@@ -20,7 +20,6 @@ var numCPUs = require('os').cpus().length;
 
 /* config files */
 
-console.log("env = ",process.env.node_port);
 var config = require('./config');
 var dbConnect = require('./database/mongoDbConnection');
 var swaggerUi = require('swagger-ui-express'),

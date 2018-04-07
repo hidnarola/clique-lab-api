@@ -13,7 +13,7 @@ var interest_helper = require("../helpers/interest_helper");
 var job_industry = require("../helpers/job_industry_helper");
 var profile = require("../helpers/profile_helper");
 var music_taste = require("../helpers/music_taste_helper");
-var login_helper = require('./../helpers/login_helper');
+var user_helper = require('./../helpers/user_helper');
 
 var logger = config.logger;
 
@@ -465,23 +465,22 @@ router.get("/music_taste", async (req, res) => {
 
 
 /**
-* @api {post} /social_registration Social Registration
-* @apiName Social Registration
-* @apiGroup User
-
-* @apiHeader {String}  Content-Type application/json
-* @apiHeader {String}  x-access-token  unique access-key
-* @apiParam {String} name Name of User
-* @apiParam {String} username Username of User
-*  @apiParam {String} email Email of User
-*  @apiParam {String} gender Gender of User
-*  @apiParam {String} social_type Social Type of User
-*  @apiParam {String}social_id Social Id of User
-
-
-* @apiSuccess (Success 200) {JSON} User details
-* @apiError (Error 4xx) {String} message Validation or error message
-**/
+ * @api {post} /social_registration Social Registration
+ * @apiName Social Registration
+ * @apiGroup User
+ *
+ * @apiHeader {String}  Content-Type application/json
+ * @apiHeader {String}  x-access-token  unique access-key
+ * @apiParam {String} name Name of User
+ * @apiParam {String} username Username of User
+ *  @apiParam {String} email Email of User
+ *  @apiParam {String} gender Gender of User
+ *  @apiParam {String} social_type Social Type of User
+ *  @apiParam {String}social_id Social Id of User
+ *
+ * @apiSuccess (Success 200) {JSON} User details
+ * @apiError (Error 4xx) {String} message Validation or error message
+ */
 router.post('/social_registration', async (req, res) => {
   var schema = {
     "name": {
@@ -643,7 +642,7 @@ router.post('/social_registration', async (req, res) => {
  */
 router.post('/login', async (req, res) => {
 
-  logger.trace("API - Promoter login called");
+  logger.trace("API - User login called");
   logger.debug("req.body = ", req.body);
 
   var schema = {
@@ -663,9 +662,9 @@ router.post('/login', async (req, res) => {
     logger.trace("Valid request of login");
 
     // Checking for promoter availability
-    logger.trace("Checking for promoter availability");
+    logger.trace("Checking for user availability");
 
-    let login_resp = await login_helper.get_login_by_email(req.body.email);
+    let login_resp = await user_helper.get_login_by_email(req.body.email);
     logger.trace("Login checked resp = ", login_resp);
     if (login_resp.status === 0) {
       logger.trace("Login checked resp = ", login_resp);
@@ -679,7 +678,7 @@ router.post('/login', async (req, res) => {
       if (req.body.token === login_resp.user.facebook.access_token) {
         logger.trace("valid token. Generating token");
         var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
-        let update_resp = await login_helper.update_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
+        let update_resp = await user_helper.update_user_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
         var LoginJson = { id: login_resp.user._id, email: login_resp.email, role: "user" };
         console.log("id= ", login_resp.user._id);
         var token = jwt.sign(LoginJson, config.ACCESS_TOKEN_SECRET_KEY, {
