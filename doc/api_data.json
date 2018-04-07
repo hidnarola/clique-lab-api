@@ -328,7 +328,7 @@
     "title": "Get all user",
     "name": "Get_all_user",
     "group": "Promoter_User",
-    "description": "<p>Get all user</p>",
+    "description": "<p>Get user based on given criteria</p> <p>{&quot;filter&quot;:[</p> <p>{&quot;field&quot;:&quot;gender&quot;,&quot;type&quot;:&quot;exact&quot;,&quot;value&quot;:&quot;female&quot;},</p> <p>{&quot;field&quot;:&quot;age&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:21,&quot;max_value&quot;:25},</p> <p>{&quot;field&quot;:&quot;location&quot;,&quot;type&quot;:&quot;like&quot;,&quot;value&quot;:&quot;surat&quot;},</p> <p>{&quot;field&quot;:&quot;fb_friends&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:250,&quot;max_value&quot;:500},</p> <p>{&quot;field&quot;:&quot;insta_followers&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:250,&quot;max_value&quot;:500},</p> <p>{&quot;field&quot;:&quot;twitter_followers&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:250,&quot;max_value&quot;:500},</p> <p>{&quot;field&quot;:&quot;pinterest_followers&quot;, &quot;type&quot;:&quot;between&quot;, &quot;min_value&quot;:250,&quot;max_value&quot;:500},</p> <p>{&quot;field&quot;:&quot;job_industry&quot;, &quot;type&quot;:&quot;id&quot;, &quot;value&quot;:&quot;5ac1a4147111f5d4332a4324&quot;},</p> <p>{&quot;field&quot;:&quot;year_in_industry&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:5},</p> <p>{&quot;field&quot;:&quot;education&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;greduate&quot;},</p> <p>{&quot;field&quot;:&quot;language&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;english&quot;},</p> <p>{&quot;field&quot;:&quot;ethnicity&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;indian&quot;},</p> <p>{&quot;field&quot;:&quot;interested_in&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;male&quot;},</p> <p>{&quot;field&quot;:&quot;relationship_status&quot;, &quot;type&quot;:&quot;exact&quot;, &quot;value&quot;:&quot;Unmarried&quot;},</p> <p>{&quot;field&quot;:&quot;music_taste&quot;, &quot;type&quot;:&quot;id&quot;, &quot;value&quot;:&quot;5ac1a4477111f5d4332a4351&quot;}],</p> <p>&quot;page_size&quot;:2, &quot;page_no&quot;:1 }</p>",
     "header": {
       "fields": {
         "Header": [
@@ -535,110 +535,6 @@
   },
   {
     "type": "post",
-    "url": "/create_profile",
-    "title": "Create Profile",
-    "name": "Profile___Add",
-    "group": "Root",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "Content-Type",
-            "description": "<p>application/json</p>"
-          },
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "x-access-token",
-            "description": "<p>unique access-key</p>"
-          }
-        ]
-      }
-    },
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "name",
-            "description": "<p>Name of profile</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>Username of profile</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>Email of profile</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "job_industry",
-            "description": "<p>Job Industry of profile</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "music_taste",
-            "description": "<p>Music Taste of profile</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "interest",
-            "description": "<p>Interest of profile</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "JSON",
-            "optional": false,
-            "field": "profile",
-            "description": "<p>details</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>Validation or error message.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/user/profile.js",
-    "groupTitle": "Root"
-  },
-  {
-    "type": "post",
     "url": "/promoter_login",
     "title": "Promoter Login",
     "name": "Promoter_Login",
@@ -664,8 +560,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "email",
-            "description": "<p>Email</p>"
+            "field": "login_id",
+            "description": "<p>Email or username</p>"
           },
           {
             "group": "Parameter",
@@ -1167,6 +1063,110 @@
     },
     "version": "0.0.0",
     "filename": "routes/index.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "post",
+    "url": "/create_profile",
+    "title": "Create Profile",
+    "name": "Profile___Add",
+    "group": "User",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Username of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "job_industry",
+            "description": "<p>Job Industry of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "music_taste",
+            "description": "<p>Music Taste of profile</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "interest",
+            "description": "<p>Interest of profile</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "profile",
+            "description": "<p>details</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/profile.js",
     "groupTitle": "User"
   },
   {
@@ -1733,55 +1733,6 @@
   },
   {
     "type": "get",
-    "url": "/user/bank_detail",
-    "title": "Bank detail - Get",
-    "name": "get_profile_by_id___Get",
-    "group": "User",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "x-access-token",
-            "description": "<p>unique access-key</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Array",
-            "optional": false,
-            "field": "bank",
-            "description": "<p>detail as per id</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>Validation or error message.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/user/wallet_screen.js",
-    "groupTitle": "User"
-  },
-  {
-    "type": "get",
     "url": "/user/profile",
     "title": "Profile - Get",
     "name": "get_profile_by_id___Get",
@@ -1827,6 +1778,55 @@
     },
     "version": "0.0.0",
     "filename": "routes/user/profile.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "get",
+    "url": "/user/bank_detail",
+    "title": "Bank detail - Get",
+    "name": "get_profile_by_id___Get",
+    "group": "User",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "bank",
+            "description": "<p>detail as per id</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user/wallet_screen.js",
     "groupTitle": "User"
   },
   {
