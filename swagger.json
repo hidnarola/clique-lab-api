@@ -1,75 +1,92 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "version": "1.0.0",
-      "title": "Clique Lab API",
-      "description": "Clique Lab API - API for fronetend client and mobile app",
-      "license": {
-        "name": "MIT",
-        "url": "https://opensource.org/licenses/MIT"
-      }
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Clique Lab API",
+    "description": "Clique Lab API - API for fronetend client and mobile app"
+  },
+  "host": "192.168.1.186:3200",
+  "basePath": "/",
+  "securityDefinitions": {
+    "jwt": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-access-token"
+    }
+  },
+  "security": [
+    {
+      "jwt": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Root",
+      "description": "API can be access without token (Guest user)"
     },
-    "host": "192.168.1.186:3200",
-    "basePath": "/",
-    "tags": [
-      {
-        "name": "Promoter",
-        "description": "API for promoter in the system"
-      }
-    ],
-    "schemes": [
-      "http"
-    ],
-    "consumes": [
-      "application/json"
-    ],
-    "produces": [
-      "application/json"
-    ],
-    "paths": {
-      "/promoter/setting/{key}": {
-        "parameters": [
-          {
-            "name": "key",
-            "in": "path",
-            "required": true,
-            "description": "Settings key",
-            "type": "string"
-          }
+    {
+      "name": "Promoter",
+      "description": "API for Promoter role (Web app)"
+    },
+    {
+      "name": "User",
+      "description": "API for User role (Mobile app)"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json",
+    "multipart/form-data"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/promoter/setting/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "Settings key",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Promoter"
         ],
-        "get": {
-          "tags": [
-            "Promoter"
-          ],
-          "summary": "Get settings value by key",
-          "responses": {
-            "200": {
-              "description": "Key is found",
-              "schema": {
-                "$ref": "#/definitions/settings"
-              }
+        "summary": "Get settings value by key",
+        "responses": {
+          "200": {
+            "description": "Key is found",
+            "schema": {
+              "$ref": "#/definitions/settings"
             }
           }
         }
       }
-    },
-    "definitions": {
-      "settings": {
-        "required": [
-          "email",
-          "_id"
-        ],
-        "properties": {
-          "status": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
+    }
+  },
+  "definitions": {
+    "settings": {
+      "required": [
+        "email",
+        "_id"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
         }
       }
     }
   }
+}

@@ -44,8 +44,11 @@ router.post('/update_profile', async (req, res) => {
     if (!errors) {
         var promoter_obj = {
             "industry_category": req.body.industry_category,
-            "industry_description": req.body.industry_description
+            "industry_description": req.body.industry_description,
+            "industry_fill": true
         }
+
+        console.log("promoter = ",promoter_obj);
 
         if (req.body.name) { promoter_obj.full_name = req.body.name; }
         if (req.body.company) { promoter_obj.company = req.body.company; }
