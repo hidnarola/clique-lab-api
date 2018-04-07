@@ -61,10 +61,20 @@
         "summary": "Get settings value by key",
         "responses": {
           "200": {
-            "description": "Key is found",
-            "schema": {
-              "$ref": "#/definitions/settings"
-            }
+            "description": "Key is found"
+          }
+        }
+      }
+    },
+    "/job_industry":{
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Get all job industry",
+        "responses": {
+          "200": {
+            "description": "Job industry found"
           }
         }
       }
@@ -72,10 +82,6 @@
   },
   "definitions": {
     "settings": {
-      "required": [
-        "email",
-        "_id"
-      ],
       "properties": {
         "status": {
           "type": "string"

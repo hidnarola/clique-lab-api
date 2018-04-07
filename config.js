@@ -3,20 +3,19 @@ log4js.configure({
   appenders: { development: { type: 'file', filename: 'log_file.log' } },
   categories: { default: { appenders: ['development'], level: 'trace' } }
 });
+var dotenv = require('dotenv').config();
 
 module.exports = {
-
     // App config
-    "node_port": 3200,
+    "node_port": process.env.NODE_PORT,
     "logger": log4js.getLogger( "development" ),
 
     // Database config
-    // "database": "mongodb://127.0.0.1:27017/clique_lab",
-    "database": "mongodb://clique:WkEV9rTcS7@13.55.64.183/clique",
+    "database": process.env.DATABASE,
 
     // JWT
-    "ACCESS_TOKEN_SECRET_KEY": "clique_lab_jwt_token",
-    "REFRESH_TOKEN_SECRET_KEY": "clique_lab_jwt_refresh_token",
+    "ACCESS_TOKEN_SECRET_KEY": process.env.clique_lab_jwt_token,
+    "REFRESH_TOKEN_SECRET_KEY": process.env.REFRESH_TOKEN_SECRET_KEY,
     "ACCESS_TOKEN_EXPIRE_TIME" : 60 * 60 * 24 * 7, // 7 days
 
     // HTTP Status
@@ -30,5 +29,5 @@ module.exports = {
     "INTERNAL_SERVER_ERROR": 500,
 
     // Other configuration
-    "website_url" : "http://localhost:8080"
+    "website_url" : process.env.WEBSITE_URL
 };

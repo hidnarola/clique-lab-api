@@ -9,6 +9,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var dotenv = require('dotenv').config();
 
 var fileUpload = require('express-fileupload');
 var expressValidator = require('express-validator');
@@ -18,6 +19,8 @@ var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 
 /* config files */
+
+console.log("env = ",process.env.node_port);
 var config = require('./config');
 var dbConnect = require('./database/mongoDbConnection');
 var swaggerUi = require('swagger-ui-express'),
