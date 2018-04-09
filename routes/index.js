@@ -520,7 +520,7 @@ router.post('/social_registration', async (req, res) => {
     if (req.body.social_type == "facebook") {
       reg_obj.facebook = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.facebook['username'] = req.body.username;
@@ -528,7 +528,7 @@ router.post('/social_registration', async (req, res) => {
     } else if (req.body.social_type == "instagram") {
       reg_obj.instagram = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.instagram['username'] = req.body.username;
@@ -537,7 +537,7 @@ router.post('/social_registration', async (req, res) => {
     else if (req.body.social_type == "pinterest") {
       reg_obj.pinterest = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.pinterest['username'] = req.body.username;
@@ -546,7 +546,7 @@ router.post('/social_registration', async (req, res) => {
     else if (req.body.social_type == "twitter") {
       reg_obj.twitter = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.twitter['username'] = req.body.username;
@@ -555,7 +555,7 @@ router.post('/social_registration', async (req, res) => {
     else if (req.body.social_type == "linkedin") {
       reg_obj.linkedin = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.linkedin['username'] = req.body.username;
@@ -585,7 +585,7 @@ router.post('/social_registration', async (req, res) => {
  * @apiHeader {String}  Content-Type application/json
  * 
  * @apiParam {String} email Email
- * @apiParam {String} access_token as facebook token
+ * @apiParam {String} social_id as Social identification
  * 
  * @apiSuccess (Success 200) {JSON} user  user object.
  * @apiSuccess (Success 200) {String} token Unique token which needs to be passed in subsequent requests.
@@ -603,9 +603,9 @@ router.post('/login', async (req, res) => {
       errorMessage: "Email is required.",
       isEmail: { errorMessage: "Please enter valid email address" }
     },
-    'access_token': {
+    'social_id': {
       notEmpty: true,
-      errorMessage: "token is required."
+      errorMessage: "Social identification is required."
     }
   };
   req.checkBody(schema);
@@ -627,7 +627,7 @@ router.post('/login', async (req, res) => {
       logger.trace("User found. Executing next instruction");
 
       // Checking password
-      if (req.body.access_token == login_resp.user.facebook.access_token) {
+      if (req.body.social_id == login_resp.user.facebook.id) {
         logger.trace("valid token. Generating token");
         var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
         let update_resp = await user_helper.update_user_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
