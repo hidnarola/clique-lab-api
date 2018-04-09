@@ -463,25 +463,24 @@ router.get("/music_taste", async (req, res) => {
   }
 });
 
-
 /**
-* @api {post} /social_registration Social Registration
-* @apiName Social Registration
-* @apiGroup User
+  * @api {post} /social_registration Social Registration
+  * @apiName Social Registration
+  * @apiGroup User
 
-* @apiHeader {String}  Content-Type application/json
-* @apiHeader {String}  x-access-token  unique access-key
-* @apiParam {String} name Name of User
-* @apiParam {String} username Username of User
-*  @apiParam {String} email Email of User
-*  @apiParam {String} gender Gender of User
-*  @apiParam {String} social_type Social Type of User
-*  @apiParam {String}social_id Social Id of User
+  * @apiHeader {String}  Content-Type application/json
+  * @apiHeader {String}  x-access-token  unique access-key
+  * @apiParam {String} name Name of User
+  * @apiParam {String} username Username of User
+  *  @apiParam {String} email Email of User
+  *  @apiParam {String} gender Gender of User
+  *  @apiParam {String} social_type Social Type of User
+  *  @apiParam {String}social_id Social Id of User
 
 
-* @apiSuccess (Success 200) {JSON} User details
-* @apiError (Error 4xx) {String} message Validation or error message
-**/
+  * @apiSuccess (Success 200) {JSON} User details
+  * @apiError (Error 4xx) {String} message Validation or error message
+  **/
 router.post('/social_registration', async (req, res) => {
   var schema = {
     "name": {
