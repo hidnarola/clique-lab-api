@@ -90,11 +90,15 @@ user_helper.get_all_user = async () => {
  *          status 1 - If user data found, with user's documents
  *          status 2 - If user not found, with appropriate message
  */
-user_helper.get_filtered_user = async (page_no, page_size, filter) => {
+user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
     try {
         var aggregate = [];
         if (filter) {
             aggregate.push({ "$match": filter });
+        }
+
+        if (sort) {
+            aggregate.push({ "$sort": sort });
         }
 
         aggregate.push({ "$skip": page_size * (page_no - 1) });
