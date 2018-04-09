@@ -86,7 +86,7 @@ router.post('/promoter_login', async (req, res) => {
             expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
           });
 
-          if(!promoter_resp.promoter.industry_fill){
+          if (!promoter_resp.promoter.industry_fill) {
             promoter_resp.promoter.first_login = true;
           } else {
             promoter_resp.promoter.first_login = false;
@@ -526,7 +526,7 @@ router.post('/social_registration', async (req, res) => {
       if (req.body.username) {
         reg_obj.facebook['username'] = req.body.username;
       }
-    }else if(req.body.social_type == "instagram"){
+    } else if (req.body.social_type == "instagram") {
       reg_obj.instagram = {
         "id": req.body.social_id,
         "access_token": req.body.access_token
@@ -535,7 +535,7 @@ router.post('/social_registration', async (req, res) => {
         reg_obj.instagram['username'] = req.body.username;
       }
     }
-    else if(req.body.social_type == "pinterest"){
+    else if (req.body.social_type == "pinterest") {
       reg_obj.pinterest = {
         "id": req.body.social_id,
         "access_token": req.body.access_token
@@ -544,7 +544,7 @@ router.post('/social_registration', async (req, res) => {
         reg_obj.pinterest['username'] = req.body.username;
       }
     }
-    else if(req.body.social_type == "twitter"){
+    else if (req.body.social_type == "twitter") {
       reg_obj.twitter = {
         "id": req.body.social_id,
         "access_token": req.body.access_token
@@ -553,7 +553,7 @@ router.post('/social_registration', async (req, res) => {
         reg_obj.twitter['username'] = req.body.username;
       }
     }
-    else if(req.body.social_type == "linkedin"){
+    else if (req.body.social_type == "linkedin") {
       reg_obj.linkedin = {
         "id": req.body.social_id,
         "access_token": req.body.access_token
@@ -562,61 +562,16 @@ router.post('/social_registration', async (req, res) => {
         reg_obj.linkedin['username'] = req.body.username;
       }
     }
+
+    let reg_data = await profile.registration(reg_obj);
+    if (reg_data.status === 0) {
+      logger.error("Error while inserting Inspire  data = ", reg_data);
+      return res.status(config.BAD_REQUEST).json({ reg_data });
+    } else {
+      return res.status(config.OK_STATUS).json(reg_data);
+    }
+
    
-    async.waterfall(
-      [
-        function (callback) {
-          //image upload
-          if (req.files && req.files["image"]) {
-            var file_path_array = [];
-            // var files = req.files['images'];
-            var file = req.files.image;
-            var dir = "./uploads/registration";
-            var mimetype = ["image/png", "image/jpeg", "image/jpg"];
-
-            // assuming openFiles is an array of file names
-
-            if (mimetype.indexOf(file.mimetype) != -1) {
-              logger.trace("Uploading image");
-              if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir);
-              }
-
-              extension = ".jpg";
-              filename = "image_" + new Date().getTime() + extension;
-              file.mv(dir + '/' + filename, function (err) {
-                if (err) {
-                  logger.trace("Problem in uploading image");
-                  callback({ "status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image" });
-                } else {
-                  logger.trace("Image uploaded");
-                  callback(null, filename);
-                }
-              });
-            } else {
-              logger.trace("Invalid image format");
-              callback({ "status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid" });
-            }
-          } else {
-            callback(null,null);
-          }
-        }
-      ], async (err, filename) => {
-        //End image upload
-
-        if (filename) {
-          reg_obj.image = filename;
-        }
-
-        let reg_data = await profile.registration(reg_obj);
-        if (reg_data.status === 0) {
-          logger.error("Error while inserting Inspire  data = ", reg_data);
-          return res.status(config.BAD_REQUEST).json({ reg_data });
-        } else {
-          return res.status(config.OK_STATUS).json(reg_data);
-        }
-      }
-    );
   } else {
     logger.error("Validation Error = ", errors);
     res.status(config.BAD_REQUEST).json({ message: errors });
