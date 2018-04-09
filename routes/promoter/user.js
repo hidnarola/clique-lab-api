@@ -50,6 +50,8 @@ var ObjectId = mongoose.Types.ObjectId;
  * 
  * {"field":"music_taste", "type":"id", "value":"5ac1a4477111f5d4332a4351"}],
  * 
+ * "sort":[{"field":"name", "value":1}, {"field":"email", "value":-1}] // -1 for descending, 1 for ascending
+ * 
  * "page_size":2,
  * "page_no":1 }
  * 
@@ -102,7 +104,7 @@ router.post('/', async (req, res) => {
 
         if (req.body.sort) {
             req.body.sort.forEach(sort_criteria => {
-                
+                sort[sort_criteria.field] = sort_criteria.value;
             });
         }
 
@@ -116,7 +118,8 @@ router.post('/', async (req, res) => {
             "age": "date_of_birth"
         };
         match_filter = await global_helper.rename_keys(match_filter, keys);
-        var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter);
+        sort = await global_helper.rename_keys(sort, keys);
+        var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter,sort);
         if (users.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "users": users.users });
         } else {
