@@ -85,7 +85,12 @@ router.post('/', async (req, res) => {
                 if (filter_criteria.type === "exact") {
                     match_filter[filter_criteria.field] = filter_criteria.value;
                 } else if (filter_criteria.type === "between") {
-                    match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
+                    if (filter_criteria.field === "age") {
+                        // Age is derived attribute and need to calculate based on date of birth
+                        match_filter[filter_criteria.field] = { "$gte": moment().subtract(filter_criteria.min_value, "years"), "$lte": moment().subtract(filter_criteria.max_value, "years") };
+                    } else {
+                        match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
+                    }
                 } else if (filter_criteria.type === "like") {
                     var regex = new RegExp(filter_criteria.value);
                     match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
@@ -100,7 +105,8 @@ router.post('/', async (req, res) => {
                 "twitter_followers": "twitter.no_of_followers",
                 "pinterest_followers": "pinterest.no_of_followers",
                 "linkedin_connection": "linkedin.no_of_connections",
-                "year_in_industry": "experience"
+                "year_in_industry": "experience",
+                "age":"date_of_birth"
             };
             match_filter = await global_helper.rename_keys(match_filter, keys);
         }

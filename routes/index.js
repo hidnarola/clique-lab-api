@@ -569,8 +569,6 @@ router.post('/social_registration', async (req, res) => {
     } else {
       return res.status(config.OK_STATUS).json(reg_data);
     }
-
-   
   } else {
     logger.error("Validation Error = ", errors);
     res.status(config.BAD_REQUEST).json({ message: errors });
@@ -629,7 +627,7 @@ router.post('/login', async (req, res) => {
       logger.trace("User found. Executing next instruction");
 
       // Checking password
-      if (req.body.token === login_resp.user.facebook.access_token) {
+      if (req.body.access_token == login_resp.user.facebook.access_token) {
         logger.trace("valid token. Generating token");
         var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
         let update_resp = await user_helper.update_user_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
