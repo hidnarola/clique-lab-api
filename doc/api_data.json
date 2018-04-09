@@ -483,8 +483,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "access_token",
-            "description": "<p>as facebook token</p>"
+            "field": "social_id",
+            "description": "<p>as Social identification</p>"
           }
         ]
       }
