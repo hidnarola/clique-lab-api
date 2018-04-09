@@ -11,7 +11,7 @@ music_taste_helper.get_all_music_taste = async () => {
     try {
         var music_taste = await Music_taste.find();
         if (music_taste) {
-            return { "status": 1, "message": "Music taste found", "Music Taste": music_taste };
+            return { "status": 1, "message": "Music taste found", "music_taste": music_taste };
         } else {
             return { "status": 2, "message": "Music taste available" };   
         }

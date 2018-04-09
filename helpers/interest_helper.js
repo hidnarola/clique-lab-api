@@ -11,7 +11,7 @@ interest_helper.get_all_interest = async () => {
     try {
         var interest = await Interest.find();
         if (interest) {
-            return { "status": 1, "message": "Interest found", "Interest": interest };
+            return { "status": 1, "message": "Interest found", "interest": interest };
         } else {
             return { "status": 2, "message": "No Interest available" };   
         }

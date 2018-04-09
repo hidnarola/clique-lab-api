@@ -397,7 +397,6 @@ router.post('/promoter_reset_password', async (req, res) => {
 
 
 // Can be used by both, user and promoter
-
 /**
  * @api {get} /job_industry Get all job industry
  * @apiName Get all job industry
@@ -421,7 +420,7 @@ router.get("/job_industry", async (req, res) => {
 /**
  * @api {get} /interest Interest - Get all
  * @apiName get_interest - Get all
- * @apiGroup User
+ * @apiGroup Root
  *
  * @apiHeader {String}  x-access-token  unique access-key
  *
@@ -444,7 +443,7 @@ router.get("/interest", async (req, res) => {
 /**
  * @api {get} /music_taste/ Music Taste - Get all
  * @apiName Music taste - Get all
- * @apiGroup User
+ * @apiGroup Root
 
  * @apiHeader {String}  x-access-token unique access-key
  *
