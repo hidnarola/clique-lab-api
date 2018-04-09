@@ -99,26 +99,24 @@ router.put('/', function (req, res) {
 });
 
 
+/** 
+ * @api {post} /user/profile/create_profile Create Profile
+ * @apiName Profile - Add
+ * @apiGroup User
 
+ * @apiHeader {String}  Content-Type application/json
+ * @apiHeader {String}  x-access-token  unique access-key
+ * 
+ * @apiParam {String} name Name of profile
+ * @apiParam {String} username Username of profile
+ *  @apiParam {String} email Email of profile
+ *  @apiParam {String} job_industry Job Industry of profile
+ *  @apiParam {String} music_taste Music Taste of profile
+ *  @apiParam {String} interest Interest of profile 
 
-/**
-* @api {post} /user/profile/create_profile Create Profile
-* @apiName Profile - Add
-* @apiGroup User
-
-* @apiHeader {String}  Content-Type application/json
-* @apiHeader {String}  x-access-token  unique access-key
-* 
-* @apiParam {String} name Name of profile
-* @apiParam {String} username Username of profile
-*  @apiParam {String} email Email of profile
-*  @apiParam {String} job_industry Job Industry of profile
-*  @apiParam {String} music_taste Music Taste of profile
-*  @apiParam {String} interest Interest of profile
-
-* @apiSuccess (Success 200) {JSON}profile details
-* @apiError (Error 4xx) {String} message Validation or error message.
-*/
+ * @apiSuccess (Success 200) {JSON}profile details
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
 router.post("/create_profile", async (req, res) => {
     user_id = req.userInfo.id;
     var schema = {
@@ -259,8 +257,7 @@ router.put("/:id", async (req, res) => {
     }
   });
 
-
-  /**
+/**
  * @api {get} /user/bank_detail Bank detail - Get 
  * @apiName get_profile_by_id - Get
  * @apiGroup User
