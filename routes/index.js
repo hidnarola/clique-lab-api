@@ -306,9 +306,9 @@ router.post('/promoter_forgot_password', async (req, res) => {
       res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available with given email" });
     } else {
       // Send mail on user's email address
-      var reset_token = jwt.sign({ "promoter_id": promoter_resp.promoter._id }, config.ACCESS_TOKEN_SECRET_KEY, {
+      var reset_token = btoa(jwt.sign({ "promoter_id": promoter_resp.promoter._id }, config.ACCESS_TOKEN_SECRET_KEY, {
         expiresIn: 60 * 60 * 2 // expires in 2 hour
-      });
+      }));
 
       let mail_resp = await mail_helper.send("reset_password", {
         "to": promoter_resp.promoter.email,
@@ -361,7 +361,7 @@ router.post('/promoter_reset_password', async (req, res) => {
   if (!errors) {
 
     logger.trace("Verifying JWT");
-    jwt.verify(req.body.token, config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
+    jwt.verify(atob(req.body.token), config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
       if (err) {
         if (err.name === "TokenExpiredError") {
           logger.trace("Link has expired");
