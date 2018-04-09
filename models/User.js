@@ -77,36 +77,36 @@ var NotificationSettings = new Schema({
 });
 
 var UserModelSchema = new Schema({
-    name: { type: String, required: true },
-    short_bio: String,
+    name: { type: String, required: true }, // 1
+    short_bio: String, // 2
     // username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    image: String,
-    user_interest: { type: mongoose.Schema.Types.ObjectId, ref: 'user_interest' },
-    job_industry: { type: mongoose.Schema.Types.ObjectId, ref: 'job_industry' },
-    music_taste: { type: mongoose.Schema.Types.ObjectId, ref: 'music_taste' },
-    age: Number,
-    gender: { type: String, enum: ["male", "female"] },
-    date_of_birth: Date,
-    location: String,
-    state: String,
-    suburb: String,
-    facebook: FacebookSchema,
-    instagram: InstagramSchema,
-    twitter: TwitterSchema,
-    pinterest: PinterestSchema,
-    linkedin: LinkedInSchema,
+    email: { type: String, required: true, unique: true }, // 3
+    image: String, // 4
+    user_interest: { type: mongoose.Schema.Types.ObjectId, ref: 'user_interest' }, // 5
+    job_industry: { type: mongoose.Schema.Types.ObjectId, ref: 'job_industry' }, // 6
+    music_taste: { type: mongoose.Schema.Types.ObjectId, ref: 'music_taste' }, // 7
+    age: Number, // 8
+    gender: { type: String, enum: ["male", "female"] }, // 9
+    date_of_birth: Date, // 10
+    location: String, // 11
+    state: String, 
+    suburb: String, // 12
+    facebook: FacebookSchema, // 13
+    instagram: InstagramSchema, // 14
+    twitter: TwitterSchema, // 15
+    pinterest: PinterestSchema, // 16
+    linkedin: LinkedInSchema, // 17
     notification_settings: NotificationSettings,
-    job_title: String,
-    experience: Number, // In year
-    education: String,
-    language: { type: String },
-    ethnicity: { type: String },
-    interested_in: { type: String, enum: ["male", "female", "both"] },
-    relationship_status: { type: String, enum: ["Married", "Unmarried", "Single"] },
+    job_title: String, // 18
+    experience: Number, // In year // 19
+    education: String, // 20
+    language: { type: String }, // 21
+    ethnicity: { type: String }, // 22
+    interested_in: { type: String, enum: ["male", "female", "both"] }, // 23
+    relationship_status: { type: String, enum: ["Married", "Unmarried", "Single"] }, // 24
     wallet_balance: { type: Number, default: 0 },
-    bank: [BankSchema],
-    status :{ type:Boolean, default:true},
+    bank: [BankSchema], // 25
+    status :{ type:Boolean, default:true}, 
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
