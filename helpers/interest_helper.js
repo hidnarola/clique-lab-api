@@ -9,7 +9,7 @@ var interest_helper = {};
  */
 interest_helper.get_all_interest = async () => {
     try {
-        var interest = await Interest.find();
+        var interest = await Interest.find({},{"name":1});
         if (interest) {
             return { "status": 1, "message": "Interest found", "interest": interest };
         } else {

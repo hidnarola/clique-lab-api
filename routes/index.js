@@ -562,7 +562,7 @@ router.post('/social_registration', async (req, res) => {
       }
     }
 
-    let reg_data = await profile.registration(reg_obj);
+    let reg_data = await user_helper.insert_user(reg_obj);
     if (reg_data.status === 0) {
       logger.error("Error while inserting Inspire  data = ", reg_data);
       return res.status(config.BAD_REQUEST).json({ reg_data });

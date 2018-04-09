@@ -9,7 +9,7 @@ var music_taste_helper = {};
  */
 music_taste_helper.get_all_music_taste = async () => {
     try {
-        var music_taste = await Music_taste.find();
+        var music_taste = await Music_taste.find({},{"name":1});
         if (music_taste) {
             return { "status": 1, "message": "Music taste found", "music_taste": music_taste };
         } else {
