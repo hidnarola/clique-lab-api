@@ -1067,7 +1067,7 @@ define({ "api": [
   },
   {
     "type": "post",
-    "url": "/create_profile",
+    "url": "/user/profile/create_profile",
     "title": "Create Profile",
     "name": "Profile___Add",
     "group": "User",
@@ -1367,14 +1367,14 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user/wallet_screen.js",
+    "filename": "routes/user/profile.js",
     "groupTitle": "User"
   },
   {
     "type": "put",
-    "url": "/user/profile",
-    "title": "Update profile",
-    "name": "Update_profile",
+    "url": "/user",
+    "title": "Update user profile",
+    "name": "Update_user_profile",
     "group": "User",
     "header": {
       "fields": {
@@ -1384,7 +1384,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "Content-Type",
-            "description": "<p>application/json</p>"
+            "description": "<p>multipart/form-data</p>"
           },
           {
             "group": "Header",
@@ -1403,22 +1403,8 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "id",
-            "description": "<p>User Id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
             "field": "name",
             "description": "<p>User name</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>User username</p>"
           },
           {
             "group": "Parameter",
@@ -1447,6 +1433,13 @@ define({ "api": [
             "optional": false,
             "field": "music_taste",
             "description": "<p>User Music taste</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "File",
+            "optional": true,
+            "field": "avatar",
+            "description": "<p>User avatar image</p>"
           }
         ]
       }
@@ -1458,7 +1451,7 @@ define({ "api": [
             "group": "Success 200",
             "type": "JSON",
             "optional": false,
-            "field": "profile",
+            "field": "user",
             "description": "<p>User details</p>"
           }
         ]
@@ -1478,7 +1471,7 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user/profile.js",
+    "filename": "routes/user/index.js",
     "groupTitle": "User"
   },
   {
@@ -1733,7 +1726,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/user/profile",
+    "url": "/user",
     "title": "Profile - Get",
     "name": "get_profile_by_id___Get",
     "group": "User",
@@ -1777,7 +1770,7 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user/profile.js",
+    "filename": "routes/user/index.js",
     "groupTitle": "User"
   },
   {
@@ -1826,7 +1819,7 @@ define({ "api": [
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user/wallet_screen.js",
+    "filename": "routes/user/profile.js",
     "groupTitle": "User"
   },
   {
