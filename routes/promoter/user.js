@@ -50,6 +50,8 @@ var ObjectId = mongoose.Types.ObjectId;
  * 
  * {"field":"music_taste", "type":"id", "value":"5ac1a4477111f5d4332a4351"}],
  * 
+ * "sort":[{"field":"name", "value":1}, {"field":"email", "value":-1}] // -1 for descending, 1 for ascending
+ * 
  * "page_size":2,
  * "page_no":1 }
  * 
@@ -57,7 +59,7 @@ var ObjectId = mongoose.Types.ObjectId;
  * @apiHeader {String}  Content-Type application/json
  * 
  * @apiParam {Array} [filter] Filter array contains field by which records need to filter
- * @apiParam {Array} [sort] Sort field array contains field by which records need to sort
+ * @apiParam {Object} [sort] Sort contains field by which records need to sort
  * @apiParam {Number} page_size Total number of record on page
  * @apiParam {Number} page_no Current page
  * 
@@ -65,7 +67,6 @@ var ObjectId = mongoose.Types.ObjectId;
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post('/', async (req, res) => {
-
     var schema = {
         'page_size': {
             notEmpty: true,
@@ -80,12 +81,18 @@ router.post('/', async (req, res) => {
     const errors = req.validationErrors();
     if (!errors) {
         var match_filter = {};
+        var sort = {};
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
                     match_filter[filter_criteria.field] = filter_criteria.value;
                 } else if (filter_criteria.type === "between") {
-                    match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
+                    if (filter_criteria.field === "age") {
+                        // Age is derived attribute and need to calculate based on date of birth
+                        match_filter[filter_criteria.field] = { "$gte": moment().subtract(filter_criteria.min_value, "years"), "$lte": moment().subtract(filter_criteria.max_value, "years") };
+                    } else {
+                        match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
+                    }
                 } else if (filter_criteria.type === "like") {
                     var regex = new RegExp(filter_criteria.value);
                     match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
@@ -93,19 +100,26 @@ router.post('/', async (req, res) => {
                     match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
                 }
             });
-
-            let keys = {
-                "fb_friends": "facebook.no_of_friends",
-                "insta_followers": "instagram.no_of_followers",
-                "twitter_followers": "twitter.no_of_followers",
-                "pinterest_followers": "pinterest.no_of_followers",
-                "linkedin_connection": "linkedin.no_of_connections",
-                "year_in_industry": "experience"
-            };
-            match_filter = await global_helper.rename_keys(match_filter, keys);
         }
 
-        var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter);
+        if (req.body.sort) {
+            req.body.sort.forEach(sort_criteria => {
+                sort[sort_criteria.field] = sort_criteria.value;
+            });
+        }
+
+        let keys = {
+            "fb_friends": "facebook.no_of_friends",
+            "insta_followers": "instagram.no_of_followers",
+            "twitter_followers": "twitter.no_of_followers",
+            "pinterest_followers": "pinterest.no_of_followers",
+            "linkedin_connection": "linkedin.no_of_connections",
+            "year_in_industry": "experience",
+            "age": "date_of_birth"
+        };
+        match_filter = await global_helper.rename_keys(match_filter, keys);
+        sort = await global_helper.rename_keys(sort, keys);
+        var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter,sort);
         if (users.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "users": users.users });
         } else {

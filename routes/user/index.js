@@ -8,6 +8,9 @@ var config = require("./../../config");
 var logger = config.logger;
 
 var user_helper = require("./../../helpers/user_helper");
+var interest_helper = require("./../../helpers/interest_helper");
+var job_industry = require("./../../helpers/job_industry_helper");
+var music_taste_helper = require("./../../helpers/music_taste_helper");
 
 /**
  * @api {get} /user Profile - Get 
@@ -32,6 +35,30 @@ router.get("/", async (req, res) => {
     }
 });
 
+/**
+ * @api {get} /user/interest_details Get interest details
+ * @apiName Get interest details
+ * @apiGroup User
+ *
+ * @apiSuccess (Success 200) {Array} job_industry Array of Job_industry document
+ * @apiSuccess (Success 200) {Array} interest Array of possible user interest
+ * @apiSuccess (Success 200) {Array} music_taste Array of possible user's music_taste
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get("/interest_details", async (req, res) => {
+    logger.trace("Get interest details API called");
+    var job_industry_resp = await job_industry.get_all_job_industry();
+    var interest_resp = await interest_helper.get_all_interest();
+    var music_taste_resp = await music_taste_helper.get_all_music_taste();
+
+    if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1) { 
+        logger.trace("got details successfully");
+        res.status(config.OK_STATUS).json({"status":1,"job_industry":job_industry_resp.job_industry,"interest":interest_resp.interest,"music_taste":music_taste_resp.music_taste});
+    } else {
+        logger.error("Error occured while fetching Job Industry = ", resp_data);
+        res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+    }
+})
 
 /**
  * @api {put} /user Update user profile
@@ -129,7 +156,7 @@ router.put('/', function (req, res) {
                         var file = req.files['avatar'];
                         var dir = "./uploads/users";
                         var mimetype = ['image/png', 'image/jpeg', 'image/jpg'];
-    
+
                         if (mimetype.indexOf(file.mimetype) !== -1) {
                             if (!fs.existsSync(dir)) {
                                 fs.mkdirSync(dir);

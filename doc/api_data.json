@@ -483,8 +483,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "access_token",
-            "description": "<p>as facebook token</p>"
+            "field": "social_id",
+            "description": "<p>as Social identification</p>"
           }
         ]
       }
@@ -512,6 +512,55 @@
             "optional": false,
             "field": "refresh_token",
             "description": "<p>Unique token which needs to be passed to generate next access token.</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Root"
+  },
+  {
+    "type": "get",
+    "url": "/music_taste/",
+    "title": "Music Taste - Get all",
+    "name": "Music_taste___Get_all",
+    "group": "Root",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "Music",
+            "description": "<p>taste of User document</p>"
           }
         ]
       }
@@ -879,6 +928,55 @@
     "groupTitle": "Root"
   },
   {
+    "type": "get",
+    "url": "/interest",
+    "title": "Interest - Get all",
+    "name": "get_interest___Get_all",
+    "group": "Root",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "Interest",
+            "description": "<p>of User document</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Root"
+  },
+  {
     "group": "User",
     "header": {
       "fields": {
@@ -1018,23 +1116,10 @@
   },
   {
     "type": "get",
-    "url": "/music_taste/",
-    "title": "Music Taste - Get all",
-    "name": "Music_taste___Get_all",
+    "url": "/user/interest_details",
+    "title": "Get interest details",
+    "name": "Get_interest_details",
     "group": "User",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "x-access-token",
-            "description": "<p>unique access-key</p>"
-          }
-        ]
-      }
-    },
     "success": {
       "fields": {
         "Success 200": [
@@ -1042,8 +1127,22 @@
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "Music",
-            "description": "<p>taste of User document</p>"
+            "field": "job_industry",
+            "description": "<p>Array of Job_industry document</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "interest",
+            "description": "<p>Array of possible user interest</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "music_taste",
+            "description": "<p>Array of possible user's music_taste</p>"
           }
         ]
       }
@@ -1062,7 +1161,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/index.js",
+    "filename": "routes/user/index.js",
     "groupTitle": "User"
   },
   {
@@ -1673,55 +1772,6 @@
     },
     "version": "0.0.0",
     "filename": "routes/user/campaign.js",
-    "groupTitle": "User"
-  },
-  {
-    "type": "get",
-    "url": "/interest",
-    "title": "Interest - Get all",
-    "name": "get_interest___Get_all",
-    "group": "User",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "x-access-token",
-            "description": "<p>unique access-key</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Array",
-            "optional": false,
-            "field": "Interest",
-            "description": "<p>of User document</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>Validation or error message.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/index.js",
     "groupTitle": "User"
   },
   {

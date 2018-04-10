@@ -306,9 +306,9 @@ router.post('/promoter_forgot_password', async (req, res) => {
       res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available with given email" });
     } else {
       // Send mail on user's email address
-      var reset_token = jwt.sign({ "promoter_id": promoter_resp.promoter._id }, config.ACCESS_TOKEN_SECRET_KEY, {
+      var reset_token = btoa(jwt.sign({ "promoter_id": promoter_resp.promoter._id }, config.ACCESS_TOKEN_SECRET_KEY, {
         expiresIn: 60 * 60 * 2 // expires in 2 hour
-      });
+      }));
 
       let mail_resp = await mail_helper.send("reset_password", {
         "to": promoter_resp.promoter.email,
@@ -361,7 +361,7 @@ router.post('/promoter_reset_password', async (req, res) => {
   if (!errors) {
 
     logger.trace("Verifying JWT");
-    jwt.verify(req.body.token, config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
+    jwt.verify(atob(req.body.token), config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
       if (err) {
         if (err.name === "TokenExpiredError") {
           logger.trace("Link has expired");
@@ -397,7 +397,6 @@ router.post('/promoter_reset_password', async (req, res) => {
 
 
 // Can be used by both, user and promoter
-
 /**
  * @api {get} /job_industry Get all job industry
  * @apiName Get all job industry
@@ -421,7 +420,7 @@ router.get("/job_industry", async (req, res) => {
 /**
  * @api {get} /interest Interest - Get all
  * @apiName get_interest - Get all
- * @apiGroup User
+ * @apiGroup Root
  *
  * @apiHeader {String}  x-access-token  unique access-key
  *
@@ -444,7 +443,7 @@ router.get("/interest", async (req, res) => {
 /**
  * @api {get} /music_taste/ Music Taste - Get all
  * @apiName Music taste - Get all
- * @apiGroup User
+ * @apiGroup Root
 
  * @apiHeader {String}  x-access-token unique access-key
  *
@@ -521,7 +520,7 @@ router.post('/social_registration', async (req, res) => {
     if (req.body.social_type == "facebook") {
       reg_obj.facebook = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.facebook['username'] = req.body.username;
@@ -529,7 +528,7 @@ router.post('/social_registration', async (req, res) => {
     } else if (req.body.social_type == "instagram") {
       reg_obj.instagram = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.instagram['username'] = req.body.username;
@@ -538,7 +537,7 @@ router.post('/social_registration', async (req, res) => {
     else if (req.body.social_type == "pinterest") {
       reg_obj.pinterest = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.pinterest['username'] = req.body.username;
@@ -547,7 +546,7 @@ router.post('/social_registration', async (req, res) => {
     else if (req.body.social_type == "twitter") {
       reg_obj.twitter = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.twitter['username'] = req.body.username;
@@ -556,22 +555,20 @@ router.post('/social_registration', async (req, res) => {
     else if (req.body.social_type == "linkedin") {
       reg_obj.linkedin = {
         "id": req.body.social_id,
-        "access_token": req.body.access_token
+        "access_token": req.body.social_id
       };
       if (req.body.username) {
         reg_obj.linkedin['username'] = req.body.username;
       }
     }
 
-    let reg_data = await profile.registration(reg_obj);
+    let reg_data = await user_helper.insert_user(reg_obj);
     if (reg_data.status === 0) {
       logger.error("Error while inserting Inspire  data = ", reg_data);
       return res.status(config.BAD_REQUEST).json({ reg_data });
     } else {
       return res.status(config.OK_STATUS).json(reg_data);
     }
-
-   
   } else {
     logger.error("Validation Error = ", errors);
     res.status(config.BAD_REQUEST).json({ message: errors });
@@ -588,7 +585,7 @@ router.post('/social_registration', async (req, res) => {
  * @apiHeader {String}  Content-Type application/json
  * 
  * @apiParam {String} email Email
- * @apiParam {String} access_token as facebook token
+ * @apiParam {String} social_id as Social identification
  * 
  * @apiSuccess (Success 200) {JSON} user  user object.
  * @apiSuccess (Success 200) {String} token Unique token which needs to be passed in subsequent requests.
@@ -606,9 +603,9 @@ router.post('/login', async (req, res) => {
       errorMessage: "Email is required.",
       isEmail: { errorMessage: "Please enter valid email address" }
     },
-    'access_token': {
+    'social_id': {
       notEmpty: true,
-      errorMessage: "token is required."
+      errorMessage: "Social identification is required."
     }
   };
   req.checkBody(schema);
@@ -630,7 +627,7 @@ router.post('/login', async (req, res) => {
       logger.trace("User found. Executing next instruction");
 
       // Checking password
-      if (req.body.token === login_resp.user.facebook.access_token) {
+      if (req.body.social_id == login_resp.user.facebook.id) {
         logger.trace("valid token. Generating token");
         var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
         let update_resp = await user_helper.update_user_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
