@@ -71,12 +71,7 @@ router.get("/interest_details", async (req, res) => {
  * @apiHeader {String}  x-access-token  unique access-key
  * 
  * @apiParam {String} name User name
-<<<<<<< HEAD
- * @apiParam {String} user_interest User Interest
-=======
- * @apiParam {String} email User Email
  * @apiParam {Array} user_interest User Interest
->>>>>>> 73bf1699109d5cd4b9bf3b3e7d876b8e2f0befc3
  * @apiParam {String} job_industry User Job Industry
  * @apiParam {String} music_taste User Music taste
  * @apiParam {File} [avatar] User avatar image
@@ -111,12 +106,7 @@ router.put('/', function (req, res) {
         if (result.isEmpty()) {
             var obj = {
                 "name": req.body.name,
-<<<<<<< HEAD
-                "user_interest": req.body.user_interest,
-=======
-                "email": req.body.email,
                 "user_interest": JSON.parse(req.body.user_interest),
->>>>>>> 73bf1699109d5cd4b9bf3b3e7d876b8e2f0befc3
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
             };
