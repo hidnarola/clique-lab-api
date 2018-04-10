@@ -306,15 +306,15 @@ router.post('/promoter_forgot_password', async (req, res) => {
       res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available with given email" });
     } else {
       // Send mail on user's email address
-      var reset_token = btoa(jwt.sign({ "promoter_id": promoter_resp.promoter._id }, config.ACCESS_TOKEN_SECRET_KEY, {
+      var reset_token = Buffer.from(jwt.sign({ "promoter_id": promoter_resp.promoter._id }, config.ACCESS_TOKEN_SECRET_KEY, {
         expiresIn: 60 * 60 * 2 // expires in 2 hour
-      }));
+      })).toString('base64');
 
       let mail_resp = await mail_helper.send("reset_password", {
         "to": promoter_resp.promoter.email,
         "subject": "Clique Lab - Reset password request"
       }, {
-          "reset_link": config.website_url + "/forget_password/" + reset_token
+          "reset_link": config.website_url + "/forgot_password/" + reset_token
         });
 
       if (mail_resp.status === 0) {
@@ -361,7 +361,7 @@ router.post('/promoter_reset_password', async (req, res) => {
   if (!errors) {
 
     logger.trace("Verifying JWT");
-    jwt.verify(atob(req.body.token), config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
+    jwt.verify(Buffer.from(req.body.token,'base64').toString(), config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
       if (err) {
         if (err.name === "TokenExpiredError") {
           logger.trace("Link has expired");
@@ -394,7 +394,6 @@ router.post('/promoter_reset_password', async (req, res) => {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
 })
-
 
 // Can be used by both, user and promoter
 /**

@@ -108,6 +108,10 @@ router.post('/', async (req, res) => {
             });
         }
 
+        if(Object.keys(sort).length === 0){
+            sort["_id"] = 1;
+        }
+
         let keys = {
             "fb_friends": "facebook.no_of_friends",
             "insta_followers": "instagram.no_of_followers",
@@ -129,5 +133,10 @@ router.post('/', async (req, res) => {
         res.status(config.BAD_REQUEST).json({ message: errors });
     }
 });
+
+/**
+ * 
+ */
+
 
 module.exports = router;
