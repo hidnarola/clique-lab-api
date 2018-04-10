@@ -113,7 +113,42 @@ router.put('/', function (req, res) {
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
             };
-
+            if(req.body.job_title && req.body.job_title != null)
+            {
+                obj.job_title=req.body.job_title;
+            }
+            if(req.body.education  && req.body.education != null)
+            {
+                obj.education=req.body.education;
+            }
+            if(req.body.language && req.body.language != null)
+            {
+                obj.language=req.body.language;
+            }
+            if(req.body.ethnicity && req.body.ethnicity != null)
+            {
+                obj.ethnicity=req.body.ethnicity;
+            }
+            if(req.body.relationship_status && req.body.relationship_status != null)
+            {
+                obj.relationship_status=req.body.relationship_status;
+            }
+            if(req.body.state && req.body.state != null)
+            {
+                obj.state=req.body.state;
+            }
+            if(req.body.suburb && req.body.suburb != null)
+            {
+                obj.suburb=req.body.suburb;
+            }
+            if(req.body.gender && req.body.gender != null)
+            {
+                obj.gender=req.body.gender;
+            }
+            if(req.body.date_of_birth && req.body.date_of_birth != null)
+            {
+                obj.date_of_birth=req.body.date_of_birth;
+            }
             async.waterfall([
                 function (callback) {
                     if (req.files && req.files['avatar']) {
