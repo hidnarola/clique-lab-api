@@ -224,7 +224,7 @@ campaign_helper.get_all_offered_campaign = async (id) => {
  *          status 1 - If user data found, with user's documents
  *          status 2 - If user not found, with appropriate message
  */
-campaign_helper.get_filtered_campaign = async (page_no, page_size, filter) => {
+/*campaign_helper.get_filtered_campaign = async (page_no, page_size, filter) => {
     try {
         var aggregate = [];
         if (filter) {
@@ -246,5 +246,5 @@ campaign_helper.get_filtered_campaign = async (page_no, page_size, filter) => {
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding Campaign", "error": err }
     }
-};
+};*/
 module.exports = campaign_helper;

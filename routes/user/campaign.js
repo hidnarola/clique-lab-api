@@ -216,7 +216,7 @@ router.post("/campaign_applied", async (req, res) => {
 });
 
 
-router.post('/', async (req, res) => {
+/*router.post('/', async (req, res) => {
 
   var schema = {
       'page_size': {
@@ -243,5 +243,5 @@ router.post('/', async (req, res) => {
   } else {
       res.status(config.BAD_REQUEST).json({ message: errors });
   }
-});
+});*/
 module.exports = router;
