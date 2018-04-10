@@ -82,7 +82,7 @@ var UserModelSchema = new Schema({
     // username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true }, // 3
     image: String, // 4
-    user_interest: { type: mongoose.Schema.Types.ObjectId, ref: 'user_interest' }, // 5
+    user_interest: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user_interest' }], // 5
     job_industry: { type: mongoose.Schema.Types.ObjectId, ref: 'job_industry' }, // 6
     music_taste: { type: mongoose.Schema.Types.ObjectId, ref: 'music_taste' }, // 7
     age: Number, // 8

@@ -137,6 +137,8 @@ router.post('/', async (req, res) => {
 /**
  * 
  */
+router.post('/add_campaign/:campaign_id', async(req,res) => {
 
+});
 
 module.exports = router;

@@ -70,7 +70,7 @@ router.get("/interest_details", async (req, res) => {
  * 
  * @apiParam {String} name User name
  * @apiParam {String} email User Email
- * @apiParam {String} user_interest User Interest
+ * @apiParam {Array} user_interest User Interest
  * @apiParam {String} job_industry User Job Industry
  * @apiParam {String} music_taste User Music taste
  * @apiParam {File} [avatar] User avatar image
@@ -109,7 +109,7 @@ router.put('/', function (req, res) {
             var obj = {
                 "name": req.body.name,
                 "email": req.body.email,
-                "user_interest": req.body.user_interest,
+                "user_interest": JSON.parse(req.body.user_interest),
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
             };
@@ -190,7 +190,7 @@ router.put('/', function (req, res) {
                 }
                 var user_resp = await user_helper.update_user_by_id(req.userInfo.id, obj);
                 if (user_resp.status === 0) {
-                    res.status(config.INTERNAL_SERVER_ERROR).json({ "error": resp.err });
+                    res.status(config.INTERNAL_SERVER_ERROR).json({ "error": user_resp.error });
                 } else {
                     res.status(config.OK_STATUS).json({ "message": "Profile has been updated successfully" });
                 }
