@@ -16,9 +16,13 @@ var campaign_helper = {};
  *          status 1 - If campaign data found, with campaign object
  *          status 2 - If campaign not found, with appropriate message
  */
-campaign_helper.get_campaign_by_user_id = async (id) => {
+campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size) => {
     try {
-        console.log("user_id = ", id);
+        console.log("user_id = ",id);
+       console.log("filter = ", filter);
+       console.log("page_no = ", page_no);
+       console.log("page_size = ", page_size);
+       
         var campaigns = await Campaign.aggregate([
             {
                 $lookup: {
@@ -30,32 +34,48 @@ campaign_helper.get_campaign_by_user_id = async (id) => {
             },
             {
                 $unwind: "$approved_campaign"
-            }, {
+            },
+            {
                 $match: {
                     "approved_campaign.user_id": { "$eq": new ObjectId(id) },
-                    "status" :true
+                   "status": true,
+                   //"social_media_platform": filter
                 }
             },
-            { $project :
-                { 
-                    social_media_platform: 1,
-                   hash_tag : 1 , at_tag : 1,
-                   privacy:1,media_format:1,
-                   mood_board_images:1,
-                   name:1,
-                   start_date:1,
-                   end_date:1,
-                   call_to_action:1,
-                   location:1,
-                   price:1,
-                   currency:1,
-                   promoter_id:1,
-                   description:1,
-                   cover_image:1
-                }
-            }
-        ])
+            {
+                $project:
+                    {
+                        social_media_platform: 1,
+                        hash_tag: 1, at_tag: 1,
+                        privacy: 1, media_format: 1,
+                        mood_board_images: 1,
+                        name: 1,
+                        start_date: 1,
+                        end_date: 1,
+                        call_to_action: 1,
+                        location: 1,
+                        price: 1,
+                        currency: 1,
+                        promoter_id: 1,
+                        description: 1,
+                        cover_image: 1
+                    }
+            },
+            {
+                $skip: page_no > 0 ? ((page_no - 1) * page_size) : 0
+            },
+            {
+                $limit : page_size
 
+            }
+            /*{
+                $sort: {price : sort} 
+            },*/
+
+        ]
+        )
+
+        console.log("campaign = ",campaigns);
         if (campaigns && campaigns.length > 0) {
             return { "status": 1, "message": "campaign found", "campaign": campaigns };
         } else {
@@ -74,11 +94,13 @@ campaign_helper.get_campaign_by_user_id = async (id) => {
  *          status 1 - If campaign data found, with campaign object
  *          status 2 - If campaign not found, with appropriate message
  */
-campaign_helper.get_all_campaign = async () => {
+campaign_helper.get_all_campaign = async (filter, sort, page_no, page_size) => {
     try {
-        var campaign = await Campaign.find();
-        console.log(campaign);
-        if (campaign) {
+        var campaign = await Campaign
+            .find(filter)
+            .sort(sort)
+            .skip(page_no > 0 ? ((page_no - 1) * page_size) : 0).limit(page_size);
+        if (campaign.length > 0 && campaign) {
             return { "status": 1, "message": "campaign found", "Campaign": campaign };
         } else {
             return { "status": 2, "message": "No campaign available" };
@@ -108,7 +130,6 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
-
 
 
 /*
@@ -159,50 +180,56 @@ campaign_helper.insert_campaign = async (campaign_object) => {
  *          status 1 - If campaign data found, with campaign object
  *          status 2 - If campaign not found, with appropriate message
  */
-campaign_helper.get_all_offered_campaign = async (id) => {
-    console.log("1");
-
+campaign_helper.get_all_offered_campaign = async (id,filter, sort, page_no, page_size) => {
     try {
         var campaigns = await Campaign.aggregate([
             {
-                $lookup: 
-                {
-                    from: "campaign_invite",
-                    localField: "_id",
-                    foreignField: "campaign_id",
-                    as: "offered_campaign"
-                }
+                $lookup:
+                    {
+                        from: "campaign_invite",
+                        localField: "_id",
+                        foreignField: "campaign_id",
+                        as: "offered_campaign"
+                    }
             },
             {
                 $unwind: "$offered_campaign"
-            }, 
-            {
-                $match: 
-                {
-                    "offered_campaign.user_id": { "$eq": new ObjectId(id) },
-                    "status" : true
-                }
             },
-            { $project :
-                 { 
-                    social_media_platform: 1,
-                    hash_tag : 1 , at_tag : 1,
-                    privacy:1,media_format:1,
-                    mood_board_images:1,
-                    name:1,
-                    start_date:1,
-                    end_date:1,
-                    call_to_action:1,
-                    location:1,
-                    price:1,
-                    currency:1,
-                    promoter_id:1,
-                    description:1,
-                    cover_image:1
-                 }
-             }
-       
-            ])
+            {
+                $match:
+                    {
+                        "offered_campaign.user_id": { "$eq": new ObjectId(id) },
+                        "status": true
+                    }
+            },
+            {
+                $project:
+                    {
+                        social_media_platform: 1,
+                        hash_tag: 1, at_tag: 1,
+                        privacy: 1, media_format: 1,
+                        mood_board_images: 1,
+                        name: 1,
+                        start_date: 1,
+                        end_date: 1,
+                        call_to_action: 1,
+                        location: 1,
+                        price: 1,
+                        currency: 1,
+                        promoter_id: 1,
+                        description: 1,
+                        cover_image: 1
+                    }
+            },
+            {
+                $skip: page_no > 0 ? ((page_no - 1) * page_size) : 0
+            },
+            {
+                $limit : page_size
+
+            }
+
+        ])
 
         if (campaigns && campaigns.length > 0) {
             return { "status": 1, "message": "campaign found", "campaign": campaigns };
@@ -215,36 +242,4 @@ campaign_helper.get_all_offered_campaign = async (id) => {
     }
 }
 
-/*
- * get_filtered_campaign is used to get user based on given filter
- * 
- * @param   
- * 
- * @return  status 0 - If any internal error occured while fetching user data, with error
- *          status 1 - If user data found, with user's documents
- *          status 2 - If user not found, with appropriate message
- */
-/*campaign_helper.get_filtered_campaign = async (page_no, page_size, filter) => {
-    try {
-        var aggregate = [];
-        if (filter) {
-            aggregate.push({ "$match": filter });
-        }
-
-        aggregate.push({ "$skip": page_size * (page_no - 1) });
-        aggregate.push({ "$limit": page_size });
-
-        console.log("aggregate = ", aggregate);
-
-        var campaign = await User.aggregate(aggregate);
-        // var users = await User.find({status:true},{"name":1,"username":1,"avatar":1,"facebook":1,"instagram":1,"twitter":1,"pinterest":1,"linkedin":1});
-        if (users && users.length > 0) {
-            return { "status": 1, "message": "Campaign found", "campaign": campaign };
-        } else {
-            return { "status": 2, "message": "No Campaign found" };
-        }
-    } catch (err) {
-        return { "status": 0, "message": "Error occured while finding Campaign", "error": err }
-    }
-};*/
 module.exports = campaign_helper;

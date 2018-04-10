@@ -20,18 +20,63 @@ var campaign_helper = require("./../../helpers/campaign_helper");
  * @apiSuccess (Success 200) {Array} Approved Campaign Array of campaigns 
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/approved", async (req, res) => {
+router.post("/approved", async (req, res) => {
+
+  console.log("1");
   user_id = req.userInfo.id;
+
   logger.trace("Get all campaign API called");
-  var resp_data = await campaign_helper.get_campaign_by_user_id(user_id);
-  if (resp_data.status == 0) {
-    logger.error("Error occured while fetching campaign = ", resp_data);
-    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  var filter = {};
+  var sort = {};
+  var page_no = {};
+  var page_size = {};
+
+  var schema = {
+    "page_no": {
+      notEmpty: true,
+      errorMessage: "page_no is required"
+    },
+    "page_size": {
+      notEmpty: true,
+      errorMessage: "page_size is required"
+    },
+
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+
+  if (!errors) {
+    console.log("2");
+    if (req.body.social_media_platform) {
+      filter["social_media_platform"] = req.body.social_media_platform;
+    }
+
+    if (typeof req.body.price != "undefined") {
+      sort["price"] = req.body.price;
+    }
+    if (typeof req.body.page_no) {
+      page_no = req.body.page_no;
+    }
+    if (typeof req.body.page_size) {
+      page_size = req.body.page_size;
+    }
+    console.log("3");
+    var resp_data = await campaign_helper.get_campaign_by_user_id(user_id, filter, page_no, page_size);
+    console.log("4");
+    if (resp_data.status == 0) {
+      logger.error("Error occured while fetching campaign = ", resp_data);
+      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+    }
+    else {
+      logger.trace("Public Campaign got successfully = ", resp_data);
+      res.status(config.OK_STATUS).json(resp_data);
+    }
   } else {
-    logger.trace("Campaigns got successfully = ", resp_data);
-    res.status(config.OK_STATUS).json(resp_data);
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
+
 
 
 /**
@@ -43,16 +88,50 @@ router.get("/approved", async (req, res) => {
  * @apiSuccess (Success 200) {Array} Campaign Array of Campaign document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/public_campaign", async (req, res) => {
-  user_id = req.userInfo.id;
+router.post("/public_campaign", async (req, res) => {
   logger.trace("Get all Public Campaign API called");
-  var resp_data = await campaign_helper.get_all_campaign();
-  if (resp_data.status == 0) {
-    logger.error("Error occured while fetching Public Campaign = ", resp_data);
-    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-  } else {
-    logger.trace("Public Campaign got successfully = ", resp_data);
-    res.status(config.OK_STATUS).json(resp_data);
+  var filter = {};
+  var sort = {};
+  var page_no = {};
+  var page_size = {};
+
+  var schema = {
+    "page_no": {
+      notEmpty: true,
+      errorMessage: "page_no is required"
+    },
+    "page_size": {
+      notEmpty: true,
+      errorMessage: "page_size is required"
+    },
+
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+
+  if (!errors) {
+    if (req.body.social_media_platform) {
+      filter["social_media_platform"] = req.body.social_media_platform;
+    }
+
+    if (typeof req.body.price != "undefined") {
+      sort["price"] = req.body.price;
+    }
+
+    page_no = req.body.page_no;
+    page_size = req.body.page_size;
+    var resp_data = await campaign_helper.get_all_campaign(filter, sort, page_no, page_size);
+    if (resp_data.status == 0) {
+      logger.error("Error occured while fetching Public Campaign = ", resp_data);
+      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+    } else {
+      logger.trace("Public Campaign got successfully = ", resp_data);
+      res.status(config.OK_STATUS).json(resp_data);
+    }
+  }
+  else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
 
@@ -67,19 +146,59 @@ router.get("/public_campaign", async (req, res) => {
  * @apiSuccess (Success 200) {Array} Array of Offered Campaign document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/myoffer", async (req, res) => {
+router.post("/myoffer", async (req, res) => {
 
   user_id = req.userInfo.id;
   console.log(user_id);
   logger.trace("Get all campaign API called");
-  var resp_data = await campaign_helper.get_all_offered_campaign(user_id);
+  var filter = {};
+  var sort = {};
+  var page_no = {};
+  var page_size = {};
+
+  var schema = {
+    "page_no": {
+      notEmpty: true,
+      errorMessage: "page_no is required"
+    },
+    "page_size": {
+      notEmpty: true,
+      errorMessage: "page_size is required"
+    },
+
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+
+  if (!errors) {
+    console.log("2");
+    if (req.body.social_media_platform) {
+      filter["social_media_platform"] = req.body.social_media_platform;
+    }
+
+    if (typeof req.body.price != "undefined") {
+      sort["price"] = req.body.price;
+    }
+    if (typeof req.body.page_no) {
+      page_no = req.body.page_no;
+    }
+    if (typeof req.body.page_size) {
+      page_size = req.body.page_size;
+    }
+    console.log("3");
+ 
+  var resp_data = await campaign_helper.get_all_offered_campaign(user_id,filter, sort, page_no, page_size);
   if (resp_data.status == 0) {
     logger.error("Error occured while fetching campaign = ", resp_data);
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-  } else {
-    logger.trace("Campaigns got successfully = ", resp_data);
+  }  else {
+    logger.trace("Public Campaign got successfully = ", resp_data);
     res.status(config.OK_STATUS).json(resp_data);
   }
+} else {
+  logger.error("Validation Error = ", errors);
+  res.status(config.BAD_REQUEST).json({ message: errors });
+}
 });
 
 /**
@@ -188,7 +307,7 @@ router.post("/campaign_applied", async (req, res) => {
               logger.trace("Invalid image format");
               callback({ "status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid" });
             }
-          
+
           }
         }
 

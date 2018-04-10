@@ -90,7 +90,7 @@ router.post("/create_profile", async (req, res) => {
 
 
 /**
- * @api {post} /user/bank_detail Update bank detail
+ * @api {post} /user/profile/bank_detail Update bank detail
  * @apiName Update bank detail
  * @apiGroup User
  * 
@@ -107,7 +107,7 @@ router.post("/create_profile", async (req, res) => {
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 
-router.post("/", async (req, res) => {
+router.post("/bank_detail", async (req, res) => {
     user_id = req.userInfo.id;
     var schema = {
 
@@ -172,7 +172,7 @@ router.put("/:id", async (req, res) => {
   });
 
 /**
- * @api {get} /user/bank_detail Bank detail - Get 
+ * @api {get} /user/profile/bank_detail Bank detail - Get 
  * @apiName get_profile_by_id - Get
  * @apiGroup User
  *
@@ -181,7 +181,7 @@ router.put("/:id", async (req, res) => {
  * @apiSuccess (Success 200) {Array} bank detail as per id
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/", async (req, res) => {
+router.get("/bank_detail", async (req, res) => {
     user_id = req.userInfo.id;
     logger.trace("Get all Bank Detail API called");
     var resp_data = await user_helper.get_bank_detail(user_id);
