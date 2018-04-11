@@ -107,8 +107,6 @@ router.get("/:campaign_id", async (req, res) => {
   }
 });
 
-
-
 /**
  * @api {post} /user/campaign/campaign_applied Campaign  Add
  * @apiName campaign_applied - Add
@@ -214,7 +212,6 @@ router.post("/campaign_applied", async (req, res) => {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
-
 
 /*router.post('/', async (req, res) => {
 

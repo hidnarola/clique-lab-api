@@ -324,6 +324,82 @@
   },
   {
     "type": "post",
+    "url": "/promoter/group",
+    "title": "Add group",
+    "name": "Add_group",
+    "group": "Promoter_Group",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>multipart/form-data</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>Promoter's unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Group name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "file",
+            "optional": true,
+            "field": "image",
+            "description": "<p>Group image</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "group",
+            "description": "<p>Group details</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/group.js",
+    "groupTitle": "Promoter_Group"
+  },
+  {
+    "type": "post",
     "url": "/promoter/user",
     "title": "Get all user",
     "name": "Get_all_user",
@@ -1514,7 +1590,7 @@
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "Array",
             "optional": false,
             "field": "user_interest",
             "description": "<p>User Interest</p>"

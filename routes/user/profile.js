@@ -10,9 +10,6 @@ var logger = config.logger;
 
 var user_helper = require("./../../helpers/user_helper");
 
-
-
-
 /** 
  * @api {post} /user/profile/create_profile Create Profile
  * @apiName Profile - Add
@@ -33,6 +30,7 @@ var user_helper = require("./../../helpers/user_helper");
  */
 router.post("/create_profile", async (req, res) => {
     user_id = req.userInfo.id;
+
     var schema = {
         "name": {
             notEmpty: true,
@@ -59,6 +57,7 @@ router.post("/create_profile", async (req, res) => {
             errorMessage: "Music taste is required"
         },
     };
+
     req.checkBody(schema);
     var errors = req.validationErrors();
 
@@ -86,9 +85,6 @@ router.post("/create_profile", async (req, res) => {
 
 });
 
-
-
-
 /**
  * @api {post} /user/bank_detail Update bank detail
  * @apiName Update bank detail
@@ -106,11 +102,9 @@ router.post("/create_profile", async (req, res) => {
  * @apiSuccess (Success 200) {JSON} bank detail
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-
 router.post("/", async (req, res) => {
     user_id = req.userInfo.id;
     var schema = {
-
         "bank_name": {
             notEmpty: true,
             errorMessage: "Bank Name is required"
@@ -126,8 +120,7 @@ router.post("/", async (req, res) => {
         "account_name": {
             notEmpty: true,
             errorMessage: "Account Name is required"
-        },
-
+        }
     };
     req.checkBody(schema);
     var errors = req.validationErrors();

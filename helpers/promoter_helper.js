@@ -52,8 +52,8 @@ promoter_helper.get_promoter_by_email_or_username = async (email_or_username) =>
  * 
  * @param   promoter_object     JSON object consist of all property that need to insert in collection
  * 
- * @return  status  0 - If any error occur in inserting faculty, with error
- *          status  1 - If faculty inserted, with inserted faculty's document and appropriate message
+ * @return  status  0 - If any error occur in inserting promoter, with error
+ *          status  1 - If faculty inserted, with inserted promoter's document and appropriate message
  * 
  * @developed by "ar"
  */
