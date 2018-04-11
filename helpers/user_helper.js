@@ -51,7 +51,23 @@ user_helper.get_user_by_id = async (id) => {
 
         // Find social power
         if (user) {
-            user.power = (user.facebook.no_of_friends + user.instagram.no_of_followers + user.pinterest.no_of_followers + user.twitter.no_of_followers);
+
+            user.power = 0;
+            if(user.facebook){
+                user.power += user.facebook.no_of_friends;
+            }
+            if(user.pinterset){
+                user.power += user.pinterset.no_of_followers;
+            }
+            if(user.linkedin){
+                user.power += user.linkedin.no_of_followers;
+            }
+            if(user.twitter){
+                user.power += user.twitter.no_of_followers;
+            }
+            if(user.instagram){
+                user.power += user.instagram.no_of_followers;
+            }
             return { "status": 1, "message": "User found", "User": user };
         } else {
             return { "status": 2, "message": "User available" };
@@ -173,9 +189,9 @@ user_helper.update_user_by_id = async (user_id, login_object) => {
  */
 user_helper.get_bank_detail = async (user_id) => {
     try {
-        var user = await User.find({_id: user_id},{"bank.bank_name":1,"bank.account_name":1,"bank.account_number":1,"bank.bsb":1});
+        var user = await User.findOne({_id: user_id},{"bank.bank_name":1,"bank.account_name":1,"bank.account_number":1,"bank.bsb":1});
         if (user) {
-            return { "status": 1, "message": "bank detail", "user": user };
+            return { "status": 1, "message": "bank detail", "bank": user.bank };
         } else {
             return { "status": 2, "message": "No bank Detail available" };   
         }

@@ -24,8 +24,10 @@ var music_taste_helper = require("./../../helpers/music_taste_helper");
  */
 router.get("/", async (req, res) => {
     user_id = req.userInfo.id;
+    console.log(user_id);
     logger.trace("Get all Profile API called");
     var resp_data = await user_helper.get_user_by_id(user_id);
+    console.log(resp_data);
     if (resp_data.status == 0) {
         logger.error("Error occured while fetching Profile = ", resp_data);
         res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
@@ -69,7 +71,6 @@ router.get("/interest_details", async (req, res) => {
  * @apiHeader {String}  x-access-token  unique access-key
  * 
  * @apiParam {String} name User name
- * @apiParam {String} email User Email
  * @apiParam {Array} user_interest User Interest
  * @apiParam {String} job_industry User Job Industry
  * @apiParam {String} music_taste User Music taste
@@ -85,10 +86,7 @@ router.put('/', function (req, res) {
             notEmpty: true,
             errorMessage: "Name is required"
         },
-        "email": {
-            notEmpty: true,
-            errorMessage: "Email is required"
-        },
+        
         "user_interest": {
             notEmpty: true,
             errorMessage: "User Interest is required"
@@ -108,7 +106,6 @@ router.put('/', function (req, res) {
         if (result.isEmpty()) {
             var obj = {
                 "name": req.body.name,
-                "email": req.body.email,
                 "user_interest": JSON.parse(req.body.user_interest),
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,

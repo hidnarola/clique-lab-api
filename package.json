@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "array-sort": "^1.0.0",
     "async": "^2.6.0",
     "bcrypt": "^1.0.3",
     "body-parser": "~1.17.1",
