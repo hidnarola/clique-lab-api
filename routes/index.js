@@ -605,14 +605,17 @@ router.post('/login', async (req, res) => {
     'social_id': {
       notEmpty: true,
       errorMessage: "Social identification is required."
+    },
+    'social_type': {
+      notEmpty: true,
+      errorMessage: "Social Type is required."
     }
   };
   req.checkBody(schema);
   var errors = req.validationErrors();
   if (!errors) {
     logger.trace("Valid request of login");
-
-    // Checking for promoter availability
+   s
     logger.trace("Checking for user availability");
 
     let login_resp = await user_helper.get_login_by_email(req.body.email);
@@ -624,9 +627,7 @@ router.post('/login', async (req, res) => {
       res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Something went wrong while finding promoter", "error": promoter_resp.error });
     } else if (login_resp.status === 1) {
       logger.trace("User found. Executing next instruction");
-
-      // Checking password
-      if (req.body.social_id == login_resp.user.facebook.id) {
+      if (req.body.social_id == login_resp.user[req.body.social_type]['id']) {
         logger.trace("valid token. Generating token");
         var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
         let update_resp = await user_helper.update_user_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
@@ -634,9 +635,7 @@ router.post('/login', async (req, res) => {
         console.log("id= ", login_resp.user._id);
         var token = jwt.sign(LoginJson, config.ACCESS_TOKEN_SECRET_KEY, {
           expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
-
         });
-
         delete login_resp.user.password;
         delete login_resp.user.refresh_token;
         delete login_resp.user.last_login_date;
