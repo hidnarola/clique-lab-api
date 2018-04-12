@@ -96,11 +96,11 @@ router.post("/", async (req, res) => {
 
 
 /** 
- * @api {post} /promoter/group/filter Get all user
- * @apiName Get all user
- * @apiGroup Promoter-User
+ * @api {post} /promoter/group/filter Get all group
+ * @apiName Get all group
+ * @apiGroup Promoter-Group
  * 
- * @apiDescription  Get user based on given criteria
+ * @apiDescription  Get group based on given criteria
  * 
  * {"filter":[
  * 
