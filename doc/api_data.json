@@ -2033,7 +2033,7 @@
     "groupTitle": "User"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/user/campaign/public_campaign",
     "title": "Campaign  - Get all",
     "name": "public_campaign___Get_all",
@@ -2084,7 +2084,7 @@
   {
     "type": "get",
     "url": "/user/campaign/:id",
-    "title": "Campaign  - Get all",
+    "title": "Campaign  - Get by id",
     "name": "public_campaign___Get_by_id",
     "group": "User",
     "header": {

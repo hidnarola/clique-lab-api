@@ -98,7 +98,6 @@ router.post("/", async (req, res) => {
     }
 });
 
-
 /** 
  * @api {post} /promoter/group/filter Get all group
  * @apiName Get all group
@@ -182,6 +181,19 @@ router.post('/filter', async (req, res) => {
         }
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+
+/**
+ * 
+ */
+router.post('/add_user/:group_id', async(req,res) => {
+    var group_resp = await group_helper.insert_group_user({"group_id":req.params.group_id,"user_id":req.userInfo.id});
+    if(group_resp.status === 0){
+        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while adding user into group","error":group_resp.error});
+    } else {
+        res.status(config.OK_STATUS).json({"status":1,"message":"User has been added into group"});
     }
 });
 

@@ -10,6 +10,9 @@ var Campaign_userSchema = new Schema({
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
+// Campaign_userSchema.ensureIndex( { "firstname": 1, "lastname": 1 }, { unique: true } )
+
+
 // Compile model from schema
 var Campaign_user = mongoose.model('campaign_user', Campaign_userSchema, 'campaign_user');
 

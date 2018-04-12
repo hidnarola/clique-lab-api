@@ -1,4 +1,5 @@
 var Group = require("./../models/Group");
+var Group_User = require("./../models/Group_user");
 var group_helper = {};
 
 /*
@@ -83,15 +84,34 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
         console.log("aggregate = ", aggregate);
         var groups = await Group.aggregate(aggregate);
-        console.log("result = ",groups);
 
-        if (groups && groups[0].groups.length > 0) {
+        if (groups && groups[0] && groups[0].groups.length > 0) {
             return { "status": 1, "message": "Groups found", "results": groups[0] };
         } else {
             return { "status": 2, "message": "No group found" };
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding group", "error": err }
+    }
+};
+
+/*
+ * insert_group_user is used to insert into Group_user collection
+ * 
+ * @param   group_user_object     JSON object consist of all property that need to insert in collection
+ * 
+ * @return  status  0 - If any error occur in inserting group_user, with error
+ *          status  1 - If group_user inserted, with inserted group_user's document and appropriate message
+ * 
+ * @developed by "ar"
+ */
+group_helper.insert_group_user = async (group_user_object) => {
+    let group_user = new Group_User(group_user_object)
+    try {
+        let group_user_data = await group_user.save();
+        return { "status": 1, "message": "User added in group", "group_user": group_user_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting into group_user", "error": err };
     }
 };
 

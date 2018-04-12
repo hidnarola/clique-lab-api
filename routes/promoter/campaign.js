@@ -202,4 +202,17 @@ router.post('/', async (req, res) => {
     }
 });
 
+
+/**
+ * 
+ */
+router.post('/add_user/:campaign_id', async(req,res) => {
+    var campaign_resp = await campaign_helper.insert_campaign_user({"campaign_id":req.params.campaign_id,"user_id":req.userInfo.id});
+    if(campaign_resp.status === 0){
+        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while adding user into campaign","error":campaign_resp.error});
+    } else {
+        res.status(config.OK_STATUS).json({"status":1,"message":"User has been added into campaign"});
+    }
+});
+
 module.exports = router;

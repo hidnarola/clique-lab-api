@@ -80,7 +80,7 @@ router.post("/approved", async (req, res) => {
 
 
 /**
- * @api {get} /user/campaign/public_campaign Campaign  - Get all
+ * @api {post} /user/campaign/public_campaign Campaign  - Get all
  * @apiName public campaign - Get all
   * @apiGroup User
  * @apiHeader {String}  x-access-token unique access-key
@@ -202,7 +202,7 @@ router.post("/myoffer", async (req, res) => {
 });
 
 /**
- * @api {get} /user/campaign/:id Campaign  - Get all
+ * @api {get} /user/campaign/:id Campaign  - Get by id
  * @apiName public campaign - Get by id
   * @apiGroup User
  * @apiHeader {String}  x-access-token unique access-key

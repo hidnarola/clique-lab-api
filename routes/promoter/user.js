@@ -7,7 +7,6 @@ var router = express.Router();
 
 var config = require('./../../config');
 var user_helper = require('./../../helpers/user_helper');
-var campaign_helper = require('./../../helpers/campaign_helper');
 var global_helper = require("./../../helpers/global_helper");
 var logger = config.logger;
 var ObjectId = mongoose.Types.ObjectId;
@@ -132,18 +131,6 @@ router.post('/', async (req, res) => {
         }
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
-    }
-});
-
-/**
- * 
- */
-router.post('/add_campaign/:campaign_id', async(req,res) => {
-    var campaign_resp = await campaign_helper.insert_campaign_user({"campaign_id":req.params.campaign_id,"user_id":req.userInfo.id});
-    if(campaign_resp.status === 0){
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while adding user into campaign","error":campaign_resp.error});
-    } else {
-        res.status(config.OK_STATUS).json({"status":1,"message":"User has been added into campaign"});
     }
 });
 
