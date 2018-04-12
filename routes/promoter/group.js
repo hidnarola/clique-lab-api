@@ -58,36 +58,40 @@ router.post("/", async (req, res) => {
                         file.mv(dir + '/' + filename, async (err) => {
                             if (err) {
                                 logger.error("There was an issue in uploading group image");
-                                callback({"status":config.MEDIA_ERROR_STATUS,"resp":{"status":0,"message": "There was an issue in uploading group image"}});
+                                callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading group image" } });
                             } else {
                                 logger.trace("image has been uploaded for group. Image name = ", filename);
-                                callback(null,filename);
+                                callback(null, filename);
                                 // group_obj.image = await filename;
                             }
                         });
                     } else {
                         logger.error("Image format of group image is invalid");
-                        res.send({ "status": config.VALIDATION_FAILURE_STATUS, "err": "Image format of group image is invalid" });
+                        callback({ "status": config.VALIDATION_FAILURE_STATUS, "resp": { "status": 0, "message": "Image format of group image is invalid" } });
                     }
                 } else {
                     logger.info("Image not available to upload. Executing next instruction");
                     //res.send(config.MEDIA_ERROR_STATUS, "No image submitted");
-                    callback(null,null);
+                    callback(null, null);
                 }
             }
         ], async (err, resp) => {
-
+            if (err) {
+                res.status(err.status).json(err.resp);
+            } else {
+                if (resp && resp != null) {
+                    group_obj.image = await resp;
+                }
+                //End image upload
+                let group_resp = await group_helper.insert_group(group_obj);
+                if (group_resp.status === 0) {
+                    logger.error("Error while inserting group = ", group_resp);
+                    res.status(config.BAD_REQUEST).json({ group_resp });
+                } else {
+                    res.status(config.OK_STATUS).json(group_resp);
+                }
+            }
         });
-
-        //End image upload
-
-        let group_resp = await group_helper.insert_group(group_obj);
-        if (group_resp.status === 0) {
-            logger.error("Error while inserting group = ", group_resp);
-            res.status(config.BAD_REQUEST).json({ group_resp });
-        } else {
-            res.status(config.OK_STATUS).json(group_resp);
-        }
     } else {
         logger.error("Validation Error = ", errors);
         res.status(config.BAD_REQUEST).json({ message: errors });
@@ -159,18 +163,18 @@ router.post('/filter', async (req, res) => {
             });
         }
 
-        if(Object.keys(sort).length === 0){
+        if (Object.keys(sort).length === 0) {
             sort["_id"] = 1;
         }
 
         // let keys = {
-            
+
         // };
         // match_filter = await global_helper.rename_keys(match_filter, keys);
         // sort = await global_helper.rename_keys(sort, keys);
 
-        var groups = await group_helper.get_filtered_group(req.body.page_no, req.body.page_size, match_filter,sort);
-        console.log("resp = ",groups);
+        var groups = await group_helper.get_filtered_group(req.body.page_no, req.body.page_size, match_filter, sort);
+        console.log("resp = ", groups);
         if (groups.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Groups found", "results": groups.results });
         } else {
