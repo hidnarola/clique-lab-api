@@ -63,7 +63,7 @@ var ObjectId = mongoose.Types.ObjectId;
  * @apiParam {Number} page_size Total number of record on page
  * @apiParam {Number} page_no Current page
  * 
- * @apiSuccess (Success 200) {Array} users Users details
+ * @apiSuccess (Success 200) {JSON} results Users details with total user count
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post('/', async (req, res) => {
@@ -125,7 +125,7 @@ router.post('/', async (req, res) => {
         sort = await global_helper.rename_keys(sort, keys);
         var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter,sort);
         if (users.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "users": users.users });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "results": users.results });
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Users not found" });
         }
@@ -133,13 +133,5 @@ router.post('/', async (req, res) => {
         res.status(config.BAD_REQUEST).json({ message: errors });
     }
 });
-
-/**
- * 
- */
-router.post('/add_campaign/:campaign_id', async(req,res) => {
-
-});
-
 
 module.exports = router;

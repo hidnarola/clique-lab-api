@@ -153,6 +153,26 @@ campaign_helper.insert_campaign_applied = async (campaign_object) => {
 };
 
 /*
+ * insert_campaign_user is used to insert into Campaign_user collection
+ * 
+ * @param   campaign_user_object     JSON object consist of all property that need to insert in collection
+ * 
+ * @return  status  0 - If any error occur in inserting campaign_user, with error
+ *          status  1 - If campaign_user inserted, with inserted campaign_user's document and appropriate message
+ * 
+ * @developed by "ar"
+ */
+campaign_helper.insert_campaign_user = async (campaign_user_object) => {
+    let campaign_user = new Campaign_User(campaign_user_object)
+    try {
+        let campaign_user_data = await campaign_user.save();
+        return { "status": 1, "message": "User added in campaign", "campaign_user": campaign_user_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting into campaign_user", "error": err };
+    }
+};
+
+/*
  * insert_campaign is used to insert into campaign collection
  * 
  * @param   campaign_object     JSON object consist of all property that need to insert in collection

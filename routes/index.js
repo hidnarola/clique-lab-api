@@ -615,7 +615,6 @@ router.post('/login', async (req, res) => {
   var errors = req.validationErrors();
   if (!errors) {
     logger.trace("Valid request of login");
-   
     logger.trace("Checking for user availability");
 
     let login_resp = await user_helper.get_login_by_email(req.body.email);
@@ -655,4 +654,5 @@ router.post('/login', async (req, res) => {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
+
 module.exports = router;

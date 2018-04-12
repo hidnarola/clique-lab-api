@@ -32,7 +32,6 @@ var user_helper = require("./../../helpers/user_helper");
 router.post("/bank_detail", async (req, res) => {
     user_id = req.userInfo.id;
     var schema = {
-
         "bank_name": {
             notEmpty: true,
             errorMessage: "Bank Name is required"
@@ -48,8 +47,7 @@ router.post("/bank_detail", async (req, res) => {
         "account_name": {
             notEmpty: true,
             errorMessage: "Account Name is required"
-        },
-
+        }
     };
     req.checkBody(schema);
     var errors = req.validationErrors();
