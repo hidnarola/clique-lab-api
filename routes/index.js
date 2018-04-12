@@ -22,6 +22,7 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+// Tested - OK
 /**
  * @api {post} /promoter_login Promoter Login
  * @apiName Promoter Login
@@ -123,6 +124,7 @@ router.post('/promoter_login', async (req, res) => {
   }
 });
 
+// Tested - OK
 /**
  * @api {post} /promoter_signup Promoter Signup
  * @apiName Promoter Signup
@@ -225,6 +227,7 @@ router.post('/promoter_signup', async (req, res) => {
   }
 });
 
+// Tested - OK
 /**
  * @api {get} /promoter_email_verify/:token Promoter email verification
  * @apiName Promoter email verification
@@ -271,6 +274,7 @@ router.get('/promoter_email_verify/:promoter_id', async (req, res) => {
   }
 });
 
+// Tested - OK
 /**
  * @api {post} /promoter_forgot_password Promoter forgot password
  * @apiName Promoter forgot password
@@ -328,6 +332,7 @@ router.post('/promoter_forgot_password', async (req, res) => {
   }
 });
 
+// Tested - OK
 /**
  * @api {post} /promoter_reset_password Promoter reset password
  * @apiName Promoter reset password
@@ -361,7 +366,7 @@ router.post('/promoter_reset_password', async (req, res) => {
   if (!errors) {
 
     logger.trace("Verifying JWT");
-    jwt.verify(Buffer.from(req.body.token,'base64').toString(), config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
+    jwt.verify(Buffer.from(req.body.token, 'base64').toString(), config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
       if (err) {
         if (err.name === "TokenExpiredError") {
           logger.trace("Link has expired");
@@ -395,6 +400,7 @@ router.post('/promoter_reset_password', async (req, res) => {
   }
 })
 
+// Tested - OK
 // Can be used by both, user and promoter
 /**
  * @api {get} /job_industry Get all job industry
@@ -416,18 +422,16 @@ router.get("/job_industry", async (req, res) => {
   }
 });
 
+// Need to delete
 /**
  * @api {get} /interest Interest - Get all
  * @apiName get_interest - Get all
  * @apiGroup Root
  *
- * @apiHeader {String}  x-access-token  unique access-key
- *
- * @apiSuccess (Success 200) {Array} Interest  of User document
+ * @apiSuccess (Success 200) {Array} interest All possible user interest document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/interest", async (req, res) => {
-
   logger.trace("Get all Interest API called");
   var resp_data = await interest_helper.get_all_interest();
   if (resp_data.status == 0) {
@@ -439,6 +443,7 @@ router.get("/interest", async (req, res) => {
   }
 });
 
+// Need to remove
 /**
  * @api {get} /music_taste/ Music Taste - Get all
  * @apiName Music taste - Get all
@@ -461,24 +466,25 @@ router.get("/music_taste", async (req, res) => {
   }
 });
 
+// Need to add other social details and refresh_token
 /** 
-  * @api {post} /social_registration Social Registration
-  * @apiName Social Registration
-  * @apiGroup User
-
-  * @apiHeader {String}  Content-Type application/json
-  * @apiHeader {String}  x-access-token  unique access-key
-  * @apiParam {String} name Name of User
-  * @apiParam {String} username Username of User
-  *  @apiParam {String} email Email of User
-  *  @apiParam {String} gender Gender of User
-  *  @apiParam {String} social_type Social Type of User
-  *  @apiParam {String}social_id Social Id of User
-
-
-  * @apiSuccess (Success 200) {JSON} User details
-  * @apiError (Error 4xx) {String} message Validation or error message
-  **/
+ * @api {post} /social_registration Social Registration
+ * @apiName Social Registration
+ * @apiGroup Root
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} name Name of User
+ * @apiParam {String} email Email of User
+ * @apiParam {String} gender Gender of User
+ * @apiParam {String} social_type Social Type of User
+ * @apiParam {String} social_id Social Id of User
+ * @apiParam {String} [username] Username of social platform
+ * @apiParam {String} access_token Access token of social platform
+ * 
+ * @apiSuccess (Success 200) {JSON} User details
+ * @apiError (Error 4xx) {String} message Validation or error message
+ **/
 router.post('/social_registration', async (req, res) => {
   var schema = {
     "name": {
@@ -510,39 +516,37 @@ router.post('/social_registration', async (req, res) => {
   var errors = req.validationErrors();
 
   if (!errors) {
-
     var reg_obj = {
       "name": req.body.name,
       "email": req.body.email,
       "gender": req.body.gender
     };
-    if (req.body.social_type == "facebook") {
+
+    if (req.body.social_type === "facebook") {
       reg_obj.facebook = {
         "id": req.body.social_id,
-        "access_token": req.body.social_id
+        "access_token": req.body.access_token
       };
       if (req.body.username) {
         reg_obj.facebook['username'] = req.body.username;
       }
-    } else if (req.body.social_type == "instagram") {
+    } else if (req.body.social_type === "instagram") {
       reg_obj.instagram = {
         "id": req.body.social_id,
-        "access_token": req.body.social_id
+        "access_token": req.body.access_token
       };
       if (req.body.username) {
         reg_obj.instagram['username'] = req.body.username;
       }
-    }
-    else if (req.body.social_type == "pinterest") {
+    } else if (req.body.social_type == "pinterest") {
       reg_obj.pinterest = {
         "id": req.body.social_id,
-        "access_token": req.body.social_id
+        "access_token": req.body.access_token
       };
       if (req.body.username) {
         reg_obj.pinterest['username'] = req.body.username;
       }
-    }
-    else if (req.body.social_type == "twitter") {
+    } else if (req.body.social_type == "twitter") {
       reg_obj.twitter = {
         "id": req.body.social_id,
         "access_token": req.body.social_id
@@ -550,11 +554,10 @@ router.post('/social_registration', async (req, res) => {
       if (req.body.username) {
         reg_obj.twitter['username'] = req.body.username;
       }
-    }
-    else if (req.body.social_type == "linkedin") {
+    } else if (req.body.social_type == "linkedin") {
       reg_obj.linkedin = {
         "id": req.body.social_id,
-        "access_token": req.body.social_id
+        "access_token": req.body.access_token
       };
       if (req.body.username) {
         reg_obj.linkedin['username'] = req.body.username;
@@ -563,7 +566,6 @@ router.post('/social_registration', async (req, res) => {
 
     let reg_data = await user_helper.insert_user(reg_obj);
     if (reg_data.status === 0) {
-      logger.error("Error while inserting Inspire  data = ", reg_data);
       return res.status(config.BAD_REQUEST).json({ reg_data });
     } else {
       return res.status(config.OK_STATUS).json(reg_data);
