@@ -64,7 +64,7 @@ var ObjectId = mongoose.Types.ObjectId;
  * @apiParam {Number} page_size Total number of record on page
  * @apiParam {Number} page_no Current page
  * 
- * @apiSuccess (Success 200) {Array} users Users details
+ * @apiSuccess (Success 200) {JSON} results Users details with total user count
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post('/', async (req, res) => {

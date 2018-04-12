@@ -100,7 +100,10 @@ user_helper.get_all_user = async () => {
 /*
  * get_filtered_user is used to get user based on given filter
  * 
- * @param   
+ * @param   page_no     Integer page number
+ * @param   page_size   Integer Total number of record per page
+ * @param   filter      Array   Filter conditions for aggregate
+ * @param   sort        Array   Sorting criteria for aggregate
  * 
  * @return  status 0 - If any internal error occured while fetching user data, with error
  *          status 1 - If user data found, with user's documents
@@ -130,18 +133,16 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
 
-        console.log("aggregate = ", aggregate);
+        // console.log("aggregate = ", aggregate);
         var users = await User.aggregate(aggregate);
 
-        console.log("result = ",users);
-        // var users = await User.find({status:true},{"name":1,"username":1,"avatar":1,"facebook":1,"instagram":1,"twitter":1,"pinterest":1,"linkedin":1});
-        if (users && users.length > 0) {
+        if (users && users[0] && users[0].users.length > 0) {
             return { "status": 1, "message": "Users found", "results": users[0] };
         } else {
             return { "status": 2, "message": "No user found" };
         }
     } catch (err) {
-        return { "status": 0, "message": "Error occured while finding Brand", "error": err }
+        return { "status": 0, "message": "Error occured while finding user", "error": err }
     }
 };
 

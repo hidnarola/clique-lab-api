@@ -94,4 +94,91 @@ router.post("/", async (req, res) => {
     }
 });
 
+
+/** 
+ * @api {post} /promoter/group/filter Get all user
+ * @apiName Get all user
+ * @apiGroup Promoter-User
+ * 
+ * @apiDescription  Get user based on given criteria
+ * 
+ * {"filter":[
+ * 
+ * {"field":"name","type":"like","value":"surat"},
+ * 
+ * "sort":[{"field":"name", "value":1}] // -1 for descending, 1 for ascending
+ * 
+ * "page_size":6,
+ * "page_no":1 }
+ * 
+ * @apiHeader {String}  x-access-token promoter's unique access-key
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {Array} [filter] Filter array contains field by which records need to filter
+ * @apiParam {Object} [sort] Sort contains field by which records need to sort
+ * @apiParam {Number} page_size Total number of record on page
+ * @apiParam {Number} page_no Current page
+ * 
+ * @apiSuccess (Success 200) {JSON} results Groups details with total group count
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/filter', async (req, res) => {
+    var schema = {
+        'page_size': {
+            notEmpty: true,
+            errorMessage: "Page size is required"
+        },
+        'page_no': {
+            notEmpty: true,
+            errorMessage: "Page number is required"
+        }
+    };
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+    if (!errors) {
+        var match_filter = {};
+        var sort = {};
+        if (req.body.filter) {
+            req.body.filter.forEach(filter_criteria => {
+                if (filter_criteria.type === "exact") {
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                } else if (filter_criteria.type === "between") {
+                    match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
+                } else if (filter_criteria.type === "like") {
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                } else if (filter_criteria.type === "id") {
+                    match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+                }
+            });
+        }
+
+        if (req.body.sort) {
+            req.body.sort.forEach(sort_criteria => {
+                sort[sort_criteria.field] = sort_criteria.value;
+            });
+        }
+
+        if(Object.keys(sort).length === 0){
+            sort["_id"] = 1;
+        }
+
+        // let keys = {
+            
+        // };
+        // match_filter = await global_helper.rename_keys(match_filter, keys);
+        // sort = await global_helper.rename_keys(sort, keys);
+
+        var groups = await group_helper.get_filtered_group(req.body.page_no, req.body.page_size, match_filter,sort);
+        console.log("resp = ",groups);
+        if (groups.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Groups found", "results": groups.results });
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Groups not found" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
 module.exports = router;

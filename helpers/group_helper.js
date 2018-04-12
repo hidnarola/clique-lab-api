@@ -45,4 +45,54 @@ group_helper.insert_group = async (group_object) => {
     }
 };
 
+/*
+ * get_filtered_group is used to get group based on given filter
+ * 
+ * @param   page_no     Integer page number
+ * @param   page_size   Integer Total number of record per page
+ * @param   filter      Array   Filter conditions for aggregate
+ * @param   sort        Array   Sorting criteria for aggregate
+ * 
+ * @return  status 0 - If any internal error occured while fetching user data, with error
+ *          status 1 - If user data found, with user's documents
+ *          status 2 - If user not found, with appropriate message
+ */
+group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
+    try {
+        var aggregate = [];
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate.push({"$group":{
+            "_id":null,
+            "total":{"$sum":1},
+            'results':{"$push":'$$ROOT'}
+        }});
+
+        aggregate.push({"$project":{
+            "total":1,
+            'groups':{"$slice":["$results",page_size * (page_no - 1),page_size]}
+        }});
+
+        // aggregate.push({ "$skip": page_size * (page_no - 1) });
+        // aggregate.push({ "$limit": page_size });
+
+        console.log("aggregate = ", aggregate);
+        var groups = await Group.aggregate(aggregate);
+        console.log("result = ",groups);
+
+        if (groups && groups[0].groups.length > 0) {
+            return { "status": 1, "message": "Groups found", "results": groups[0] };
+        } else {
+            return { "status": 2, "message": "No group found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding group", "error": err }
+    }
+};
+
 module.exports = group_helper;

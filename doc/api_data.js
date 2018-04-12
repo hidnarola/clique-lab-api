@@ -464,10 +464,10 @@ define({ "api": [
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "Array",
+            "type": "JSON",
             "optional": false,
-            "field": "users",
-            "description": "<p>Users details</p>"
+            "field": "results",
+            "description": "<p>Users details with total user count</p>"
           }
         ]
       }
@@ -487,6 +487,97 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/promoter/user.js",
+    "groupTitle": "Promoter_User"
+  },
+  {
+    "type": "post",
+    "url": "/promoter/group/filter",
+    "title": "Get all user",
+    "name": "Get_all_user",
+    "group": "Promoter_User",
+    "description": "<p>Get user based on given criteria</p> <p>{&quot;filter&quot;:[</p> <p>{&quot;field&quot;:&quot;name&quot;,&quot;type&quot;:&quot;like&quot;,&quot;value&quot;:&quot;surat&quot;},</p> <p>&quot;sort&quot;:[{&quot;field&quot;:&quot;name&quot;, &quot;value&quot;:1}] // -1 for descending, 1 for ascending</p> <p>&quot;page_size&quot;:6, &quot;page_no&quot;:1 }</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>promoter's unique access-key</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": true,
+            "field": "filter",
+            "description": "<p>Filter array contains field by which records need to filter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "sort",
+            "description": "<p>Sort contains field by which records need to sort</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "page_size",
+            "description": "<p>Total number of record on page</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "page_no",
+            "description": "<p>Current page</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "results",
+            "description": "<p>Groups details with total group count</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/group.js",
     "groupTitle": "Promoter_User"
   },
   {
@@ -1450,7 +1541,7 @@ define({ "api": [
   },
   {
     "type": "post",
-    "url": "/user/bank_detail",
+    "url": "/user/profile/bank_detail",
     "title": "Update bank detail",
     "name": "Update_bank_detail",
     "group": "User",
@@ -1580,13 +1671,6 @@ define({ "api": [
             "optional": false,
             "field": "name",
             "description": "<p>User name</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>User Email</p>"
           },
           {
             "group": "Parameter",
@@ -1901,7 +1985,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/user/bank_detail",
+    "url": "/user/profile/bank_detail",
     "title": "Bank detail - Get",
     "name": "get_profile_by_id___Get",
     "group": "User",
