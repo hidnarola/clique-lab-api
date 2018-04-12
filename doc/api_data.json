@@ -1095,10 +1095,10 @@
     "groupTitle": "Root"
   },
   {
-    "type": "get",
-    "url": "/interest",
-    "title": "Interest - Get all",
-    "name": "get_interest___Get_all",
+    "type": "post",
+    "url": "/social_registration",
+    "title": "Social Registration",
+    "name": "Social_Registration",
     "group": "Root",
     "header": {
       "fields": {
@@ -1107,8 +1107,63 @@
             "group": "Header",
             "type": "String",
             "optional": false,
-            "field": "x-access-token",
-            "description": "<p>unique access-key</p>"
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of User</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email of User</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "gender",
+            "description": "<p>Gender of User</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "social_type",
+            "description": "<p>Social Type of User</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "social_id",
+            "description": "<p>Social Id of User</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "username",
+            "description": "<p>Username of social platform</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "access_token",
+            "description": "<p>Access token of social platform</p>"
           }
         ]
       }
@@ -1118,10 +1173,46 @@
         "Success 200": [
           {
             "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "User",
+            "description": "<p>details</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/index.js",
+    "groupTitle": "Root"
+  },
+  {
+    "type": "get",
+    "url": "/interest",
+    "title": "Interest - Get all",
+    "name": "get_interest___Get_all",
+    "group": "Root",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "Interest",
-            "description": "<p>of User document</p>"
+            "field": "interest",
+            "description": "<p>All possible user interest document</p>"
           }
         ]
       }
@@ -1329,110 +1420,6 @@
     },
     "version": "0.0.0",
     "filename": "routes/user/index.js",
-    "groupTitle": "User"
-  },
-  {
-    "type": "post",
-    "url": "/social_registration",
-    "title": "Social Registration",
-    "name": "Social_Registration",
-    "group": "User",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "Content-Type",
-            "description": "<p>application/json</p>"
-          },
-          {
-            "group": "Header",
-            "type": "String",
-            "optional": false,
-            "field": "x-access-token",
-            "description": "<p>unique access-key</p>"
-          }
-        ]
-      }
-    },
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "name",
-            "description": "<p>Name of User</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "username",
-            "description": "<p>Username of User</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>Email of User</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "gender",
-            "description": "<p>Gender of User</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "social_type",
-            "description": "<p>Social Type of User</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "social_id",
-            "description": "<p>Social Id of User</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "JSON",
-            "optional": false,
-            "field": "User",
-            "description": "<p>details</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>Validation or error message</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/index.js",
     "groupTitle": "User"
   },
   {
