@@ -10,7 +10,7 @@ var user_helper = require('./../../helpers/user_helper');
 var global_helper = require("./../../helpers/global_helper");
 var logger = config.logger;
 var ObjectId = mongoose.Types.ObjectId;
-
+    
 /** 
  * @api {post} /promoter/user Get all user
  * @apiName Get all user
@@ -140,5 +140,6 @@ router.post('/', async (req, res) => {
 router.post('/add_campaign/:campaign_id', async(req,res) => {
 
 });
+
 
 module.exports = router;

@@ -2,6 +2,7 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var async = require("async");
+var FB = require('fb');
 
 var router = express.Router();
 
@@ -9,6 +10,7 @@ var config = require("./../../config");
 var logger = config.logger;
 
 var campaign_helper = require("./../../helpers/campaign_helper");
+var user_helper =require("./../../helpers/user_helper");
 /**
  * @api {get} /user/campaign/approved campaigns - Get by ID
  * @apiName campaigns - Get campaigns by ID
@@ -332,6 +334,40 @@ router.post("/campaign_applied", async (req, res) => {
     logger.error("Validation Error = ", errors);
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
+});
+
+// /user/campaign/share/:campaign_id
+
+router.post('/share/:campaign_id', async (req, res) =>{ 
+ 
+ // access token get
+    user_id = req.userInfo.id;
+    logger.trace("Get all Profile API called");
+    var user = await user_helper.get_user_by_id(user_id);
+   var access_token=user.User.facebook.access_token;
+  
+  // Get campaign details by campaign id
+  campaign_id = req.params.campaign_id;
+  logger.trace("Get all  Campaign API called");
+  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id);
+  var image = resp_data.Campaign.cover_image;
+  var caption = resp_data.Campaign.description;
+  console.log(resp_data);
+  FB.setAccessToken(access_token);
+
+  FB.api('me/photos', 'post', { source: fs.createReadStream('uploads/campaign_applied/' + image), caption: caption}, function (res) {
+      if (!res || res.error) {
+          console.log(!res ? 'error occurred' : res.error);
+          return;
+      } else {
+
+        // Store post_id in database, campaign_id, user_id
+
+
+        console.log('Post Id: ' + res.post_id);
+      }
+
+  });
 });
 
 

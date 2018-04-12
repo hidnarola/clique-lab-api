@@ -11,6 +11,7 @@ var user_helper = require("./../../helpers/user_helper");
 var interest_helper = require("./../../helpers/interest_helper");
 var job_industry = require("./../../helpers/job_industry_helper");
 var music_taste_helper = require("./../../helpers/music_taste_helper");
+var FB = require('fb');
 
 /**
  * @api {get} /user Profile - Get 
@@ -53,9 +54,9 @@ router.get("/interest_details", async (req, res) => {
     var interest_resp = await interest_helper.get_all_interest();
     var music_taste_resp = await music_taste_helper.get_all_music_taste();
 
-    if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1) { 
+    if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1) {
         logger.trace("got details successfully");
-        res.status(config.OK_STATUS).json({"status":1,"job_industry":job_industry_resp.job_industry,"interest":interest_resp.interest,"music_taste":music_taste_resp.music_taste});
+        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste });
     } else {
         logger.error("Error occured while fetching Job Industry = ", resp_data);
         res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
@@ -86,7 +87,7 @@ router.put('/', function (req, res) {
             notEmpty: true,
             errorMessage: "Name is required"
         },
-        
+
         "user_interest": {
             notEmpty: true,
             errorMessage: "User Interest is required"
@@ -110,41 +111,32 @@ router.put('/', function (req, res) {
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
             };
-            if(req.body.job_title && req.body.job_title != null)
-            {
-                obj.job_title=req.body.job_title;
+            if (req.body.job_title && req.body.job_title != null) {
+                obj.job_title = req.body.job_title;
             }
-            if(req.body.education  && req.body.education != null)
-            {
-                obj.education=req.body.education;
+            if (req.body.education && req.body.education != null) {
+                obj.education = req.body.education;
             }
-            if(req.body.language && req.body.language != null)
-            {
-                obj.language=req.body.language;
+            if (req.body.language && req.body.language != null) {
+                obj.language = req.body.language;
             }
-            if(req.body.ethnicity && req.body.ethnicity != null)
-            {
-                obj.ethnicity=req.body.ethnicity;
+            if (req.body.ethnicity && req.body.ethnicity != null) {
+                obj.ethnicity = req.body.ethnicity;
             }
-            if(req.body.relationship_status && req.body.relationship_status != null)
-            {
-                obj.relationship_status=req.body.relationship_status;
+            if (req.body.relationship_status && req.body.relationship_status != null) {
+                obj.relationship_status = req.body.relationship_status;
             }
-            if(req.body.state && req.body.state != null)
-            {
-                obj.state=req.body.state;
+            if (req.body.state && req.body.state != null) {
+                obj.state = req.body.state;
             }
-            if(req.body.suburb && req.body.suburb != null)
-            {
-                obj.suburb=req.body.suburb;
+            if (req.body.suburb && req.body.suburb != null) {
+                obj.suburb = req.body.suburb;
             }
-            if(req.body.gender && req.body.gender != null)
-            {
-                obj.gender=req.body.gender;
+            if (req.body.gender && req.body.gender != null) {
+                obj.gender = req.body.gender;
             }
-            if(req.body.date_of_birth && req.body.date_of_birth != null)
-            {
-                obj.date_of_birth=req.body.date_of_birth;
+            if (req.body.date_of_birth && req.body.date_of_birth != null) {
+                obj.date_of_birth = req.body.date_of_birth;
             }
             async.waterfall([
                 function (callback) {
@@ -201,4 +193,7 @@ router.put('/', function (req, res) {
         }
     });
 });
+
+
+
 module.exports = router;

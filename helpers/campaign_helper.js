@@ -120,7 +120,7 @@ campaign_helper.get_all_campaign = async (filter, sort, page_no, page_size) => {
 
 campaign_helper.get_campaign_by_id = async (campaign_id) => {
     try {
-        var campaign = await Campaign.find({ _id: campaign_id });
+        var campaign = await Campaign.findOne({ _id: campaign_id });
         if (campaign) {
             return { "status": 1, "message": "campaign found", "Campaign": campaign };
         } else {
@@ -241,5 +241,8 @@ campaign_helper.get_all_offered_campaign = async (id,filter, sort, page_no, page
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
+
+
+
 
 module.exports = campaign_helper;

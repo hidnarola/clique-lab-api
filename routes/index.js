@@ -615,7 +615,7 @@ router.post('/login', async (req, res) => {
   var errors = req.validationErrors();
   if (!errors) {
     logger.trace("Valid request of login");
-   s
+   
     logger.trace("Checking for user availability");
 
     let login_resp = await user_helper.get_login_by_email(req.body.email);
