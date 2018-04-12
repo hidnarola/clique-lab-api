@@ -115,18 +115,28 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
         if (sort) {
             aggregate.push({ "$sort": sort });
         }
-        aggregate.push({ "$skip": page_size * (page_no - 1) });
-        aggregate.push({ "$limit": page_size });
+
+        aggregate.push({"$group":{
+            "_id":null,
+            "total":{"$sum":1},
+            'results':{"$push":'$$ROOT'}
+        }});
+
+        aggregate.push({"$project":{
+            "total":1,
+            'users':{"$slice":["$results",page_size * (page_no - 1),page_size]}
+        }});
+
+        // aggregate.push({ "$skip": page_size * (page_no - 1) });
+        // aggregate.push({ "$limit": page_size });
 
         console.log("aggregate = ", aggregate);
         var users = await User.aggregate(aggregate);
 
-        // Find total number of user
-        var count = await User.aggregate(aggregate);
-
+        console.log("result = ",users);
         // var users = await User.find({status:true},{"name":1,"username":1,"avatar":1,"facebook":1,"instagram":1,"twitter":1,"pinterest":1,"linkedin":1});
         if (users && users.length > 0) {
-            return { "status": 1, "message": "Users found", "users": users };
+            return { "status": 1, "message": "Users found", "results": users[0] };
         } else {
             return { "status": 2, "message": "No user found" };
         }

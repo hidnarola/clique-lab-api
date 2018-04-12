@@ -126,7 +126,7 @@ router.post('/', async (req, res) => {
         sort = await global_helper.rename_keys(sort, keys);
         var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter,sort);
         if (users.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "users": users.users });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "results": users.results });
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Users not found" });
         }
