@@ -11,7 +11,7 @@ var user_helper = require('./../../helpers/user_helper');
 var global_helper = require("./../../helpers/global_helper");
 var logger = config.logger;
 var ObjectId = mongoose.Types.ObjectId;
-    
+
 /** 
  * @api {post} /promoter/user Get all user
  * @apiName Get all user
@@ -90,8 +90,8 @@ router.post('/', async (req, res) => {
                 } else if (filter_criteria.type === "between") {
                     if (filter_criteria.field === "age") {
                         // Age is derived attribute and need to calculate based on date of birth
-                        match_filter[filter_criteria.field] = { 
-                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(), 
+                        match_filter[filter_criteria.field] = {
+                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
                             "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                         };
                     } else {

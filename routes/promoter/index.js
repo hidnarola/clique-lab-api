@@ -7,6 +7,9 @@ var router = express.Router();
 var config = require('./../../config');
 var promoter_helper = require('./../../helpers/promoter_helper');
 var setting_helper = require('./../../helpers/setting_helper');
+var job_industry_helper = require('./../../helpers/job_industry_helper');
+var interest_helper = require('./../../helpers/interest_helper');
+
 var logger = config.logger;
 
 /** 
@@ -48,7 +51,7 @@ router.post('/update_profile', async (req, res) => {
             "industry_fill": true
         }
 
-        console.log("promoter = ",promoter_obj);
+        console.log("promoter = ", promoter_obj);
 
         if (req.body.name) { promoter_obj.full_name = req.body.name; }
         if (req.body.company) { promoter_obj.company = req.body.company; }
@@ -119,13 +122,40 @@ router.post('/update_profile', async (req, res) => {
  * @apiSuccess (Success 200) {String} value Appropriate value for given key
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get('/setting/:key', async(req,res) => {
+router.get('/setting/:key', async (req, res) => {
     var settings = await setting_helper.get_setting_by_key(req.params.key);
-    if(settings.status === 1){
-        res.status(config.OK_STATUS).json({"status":1,"message":"Setting value found","value":settings.setting.value});
+    if (settings.status === 1) {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Setting value found", "value": settings.setting.value });
     } else {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"Setting not found"});
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Setting not found" });
     }
 });
+
+/** 
+ * @api {get} /promoter/filter_preference Get preference value
+ * @apiName Get preference value
+ * @apiGroup Promoter
+ * 
+ * @apiDescription  Get preference value by key
+ * 
+ * @apiHeader {String}  x-access-token promoter's unique access-key
+ * 
+ * @apiSuccess (Success 200) {Array} job_industry all job industry
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get('/filter_preference', async (req, res) => {
+    logger.trace("Get filter_preference API called");
+    var job_industry_resp = await job_industry_helper.get_all_job_industry();
+    var interest_resp = await interest_helper.get_all_interest();
+    var music_taste_resp = await music_taste_helper.get_all_music_taste();
+
+    if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1) {
+        logger.trace("got details successfully");
+        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste });
+    } else {
+        logger.error("Error occured while fetching Job Industry = ", resp_data);
+        res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+    }
+})
 
 module.exports = router;
