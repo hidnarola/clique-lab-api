@@ -154,8 +154,7 @@ router.post('/', async (req, res) => {
                                     loop_callback({ status: config.MEDIA_ERROR_STATUS, resp: { "status": 0, "message": "There was an issue in uploading image" } });
                                 } else {
                                     logger.trace("image has been uploaded. Image name = ", filename);
-                                    location = "uploads/exercise/" + filename;
-                                    file_path_array.push(location);
+                                    file_path_array.push(filename);
                                     loop_callback();
                                 }
                             });
