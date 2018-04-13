@@ -90,10 +90,12 @@ router.post('/', async (req, res) => {
                 } else if (filter_criteria.type === "between") {
                     if (filter_criteria.field === "age") {
                         // Age is derived attribute and need to calculate based on date of birth
-                        match_filter[filter_criteria.field] = { "$gte": {"$date":moment().subtract(filter_criteria.min_value, "years").toString()}, "$lte": {"$date":moment().subtract(filter_criteria.max_value, "years").toString()} };
-                        console.log("filter = ",match_filter);
+                        match_filter[filter_criteria.field] = { 
+                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(), 
+                            "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                        };
                     } else {
-                        match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
+                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
                     var regex = new RegExp(filter_criteria.value);
@@ -124,8 +126,6 @@ router.post('/', async (req, res) => {
             "age": "date_of_birth"
         };
         match_filter = await global_helper.rename_keys(match_filter, keys);
-
-        console.log("filter = ",match_filter);
 
         sort = await global_helper.rename_keys(sort, keys);
         var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter,sort);
