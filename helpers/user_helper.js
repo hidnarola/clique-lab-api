@@ -136,6 +136,7 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
         // console.log("aggregate = ", aggregate);
         var users = await User.aggregate(aggregate);
 
+        console.log("users12 = ",users);
         if (users && users[0] && users[0].users.length > 0) {
             return { "status": 1, "message": "Users found", "results": users[0] };
         } else {

@@ -2,6 +2,7 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var async = require("async");
+var moment = require("moment");
 var mongoose = require('mongoose');
 var router = express.Router();
 
@@ -89,7 +90,8 @@ router.post('/', async (req, res) => {
                 } else if (filter_criteria.type === "between") {
                     if (filter_criteria.field === "age") {
                         // Age is derived attribute and need to calculate based on date of birth
-                        match_filter[filter_criteria.field] = { "$gte": moment().subtract(filter_criteria.min_value, "years"), "$lte": moment().subtract(filter_criteria.max_value, "years") };
+                        match_filter[filter_criteria.field] = { "$gte": {"$date":moment().subtract(filter_criteria.min_value, "years").toString()}, "$lte": {"$date":moment().subtract(filter_criteria.max_value, "years").toString()} };
+                        console.log("filter = ",match_filter);
                     } else {
                         match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                     }
@@ -122,8 +124,13 @@ router.post('/', async (req, res) => {
             "age": "date_of_birth"
         };
         match_filter = await global_helper.rename_keys(match_filter, keys);
+
+        console.log("filter = ",match_filter);
+
         sort = await global_helper.rename_keys(sort, keys);
         var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter,sort);
+
+        console.log("users = ",users);
         if (users.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "results": users.results });
         } else {

@@ -2,6 +2,7 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var async = require("async");
+var moment = require("moment");
 var mongoose = require('mongoose');
 var router = express.Router();
 
@@ -9,6 +10,7 @@ var config = require('./../../config');
 var group_helper = require('./../../helpers/group_helper');
 
 var logger = config.logger;
+var ObjectId = mongoose.Types.ObjectId;
 
 /**
  * @api {post} /promoter/group Add group
@@ -139,7 +141,7 @@ router.post('/filter', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var match_filter = {};
+        var match_filter = {"promoter_id":{ "$eq": new ObjectId(req.userInfo.id) }};
         var sort = {};
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
