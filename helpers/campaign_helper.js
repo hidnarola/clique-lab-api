@@ -96,12 +96,14 @@ campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size)
  */
 campaign_helper.get_all_campaign = async (filter, sort, page_no, page_size) => {
     try {
+        var count = await Campaign.count();
         var campaign = await Campaign
             .find(filter)
             .sort(sort)
-            .skip(page_no > 0 ? ((page_no - 1) * page_size) : 0).limit(page_size);
+            .skip(page_no > 0 ? ((page_no - 1) * page_size) : 0).limit(page_size).lean();
+            campaign.count= count;
         if (campaign.length > 0 && campaign) {
-            return { "status": 1, "message": "campaign found", "Campaign": campaign };
+            return { "status": 1, "message": "campaign found", "Campaign": campaign ,count};
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
@@ -120,6 +122,7 @@ campaign_helper.get_all_campaign = async (filter, sort, page_no, page_size) => {
 
 campaign_helper.get_campaign_by_id = async (campaign_id) => {
     try {
+      x
         var campaign = await Campaign.findOne({ _id: campaign_id });
         if (campaign) {
             return { "status": 1, "message": "campaign found", "Campaign": campaign };

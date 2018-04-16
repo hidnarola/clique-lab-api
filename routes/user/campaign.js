@@ -8,9 +8,17 @@ var router = express.Router();
 
 var config = require("./../../config");
 var logger = config.logger;
-
+var PinIt = require('pin-it-node');
 var campaign_helper = require("./../../helpers/campaign_helper");
 var user_helper = require("./../../helpers/user_helper");
+<<<<<<< HEAD
+var campaign_post_helper = require("./../../helpers/campaign_post_helper");
+
+//var PDK = require('node-pinterest');
+//var pinterest = PDK.init('AVYSkGTuxc-WUJpdRHkXyu8gEsfEFST4h8o1jBZE2WRMweA4YAAAAAA');
+//pinterest.api('me').then(console.log);
+=======
+>>>>>>> 9c656f7b80af3923b6c7862c9ed8cb8c8027fec8
 
 /**
  * @api {get} /user/campaign/approved campaigns - Get by ID
@@ -190,19 +198,19 @@ router.post("/myoffer", async (req, res) => {
       page_size = req.body.page_size;
     }
     console.log("3");
- 
-  var resp_data = await campaign_helper.get_all_offered_campaign(user_id,filter, sort, page_no, page_size);
-  if (resp_data.status == 0) {
-    logger.error("Error occured while fetching campaign = ", resp_data);
-    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-  }  else {
-    logger.trace("Public Campaign got successfully = ", resp_data);
-    res.status(config.OK_STATUS).json(resp_data);
+
+    var resp_data = await campaign_helper.get_all_offered_campaign(user_id, filter, sort, page_no, page_size);
+    if (resp_data.status == 0) {
+      logger.error("Error occured while fetching campaign = ", resp_data);
+      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+    } else {
+      logger.trace("Public Campaign got successfully = ", resp_data);
+      res.status(config.OK_STATUS).json(resp_data);
+    }
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
   }
-} else {
-  logger.error("Validation Error = ", errors);
-  res.status(config.BAD_REQUEST).json({ message: errors });
-}
 });
 
 /**
@@ -338,65 +346,86 @@ router.post("/campaign_applied", async (req, res) => {
 
 // /user/campaign/share/:campaign_id
 
-router.post('/share/:campaign_id', async (req, res) =>{ 
- 
- // access token get
-    user_id = req.userInfo.id;
-    logger.trace("Get all Profile API called");
-    var user = await user_helper.get_user_by_id(user_id);
-   var access_token=user.User.facebook.access_token;
-  
+router.post('/share/:campaign_id', async (req, res) => {
+
+  // access token get
+  user_id = req.userInfo.id;
+  logger.trace("Get all Profile API called");
+  var user = await user_helper.get_user_by_id(user_id);
+  var access_token = user.User.facebook.access_token;
+
   // Get campaign details by campaign id
   campaign_id = req.params.campaign_id;
   logger.trace("Get all  Campaign API called");
-  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id);
-  var image = resp_data.Campaign.cover_image;
-  var caption = resp_data.Campaign.description;
-  console.log(resp_data);
-  FB.setAccessToken(access_token);
+  var campaign_data = await campaign_helper.get_campaign_by_id(campaign_id);
+  var caption = campaign_data.Campaign.name + ' - ' + campaign_data.Campaign.description;
+  console.log("campaign = ", campaign_data.Campaign);
 
-  FB.api('me/photos', 'post', { source: fs.createReadStream('uploads/campaign_applied/' + image), caption: caption}, function (res) {
-      if (!res || res.error) {
-          console.log(!res ? 'error occurred' : res.error);
-          return;
-      } else {
+  try {
+    FB.setAccessToken(access_token);
+    var images = [];
 
-        // Store post_id in database, campaign_id, user_id
+    console.log("image = ", config.base_url + '/uploads/campaign/' + campaign_data.Campaign.cover_image);
 
+    // Add cover images
+    var cover_image_id = await FB.api('me/photos', 'post', { url: config.base_url + '/uploads/campaign/' + campaign_data.Campaign.cover_image, caption: caption, published: false });
+    images.push({ "media_fbid": cover_image_id.id });
 
-        console.log('Post Id: ' + res.post_id);
-      }
+    if (campaign_data.Campaign.mood_board_images && campaign_data.Campaign.mood_board_images.length > 0) {
+      async.waterfall([
+        function (callback) {
+          async.eachSeries(campaign_data.Campaign.mood_board_images, function(image, loop_callback) {
 
-  });
-});
+            FB.api('me/photos', 'post', { url: config.base_url + '/uploads/campaign/' + image, caption: caption, published: false },function(resp){
+              console.log("resp = ",resp);
+              images.push({ "media_fbid": resp.id });
+              loop_callback();
+            });
+          }, async(err) => {
+            if(err){
+              callback(err);
+            } else {
+              callback(null);
+            }
+          });
+        }
+      ], async (err, resp) => {
+        if (err) {
+          console.log("error = ", err);
+          res.status(500).send("error in uploading images");
+        } else {
+          var post_id = await FB.api('me/feed', 'post', { attached_media: images, message: caption });
+          var campaign_obj = {
+           "user_id": user_id,
+           "campaign_id" : campaign_id,
+           "post_id":post_id.id
+          };
+          let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
+          return res.status(config.OK_STATUS).json(campaign_data);
+        }
+      });
 
-
-/*router.post('/', async (req, res) => {
-
-  var schema = {
-      'page_size': {
-          notEmpty: true,
-          errorMessage: "Page size is required"
-      },
-      'page_no': {
-          notEmpty: true,
-          errorMessage: "Page number is required"
-      }
-  };
-  req.checkBody(schema);
-  const errors = req.validationErrors();
-  if (!errors) {
-      var match_filter = {};
-     
-    
-      var users = await campaign_helper.get_filtered_campaign(req.body.page_no, req.body.page_size, match_filter);
-      if (users.status === 1) {
-          res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "users": users.users });
-      } else {
-          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Users not found" });
-      }
-  } else {
-      res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+  } catch (error) {
+    res.status(500).send({ "Error": error });
   }
+});      
+
+
+
+/*pinterest.api('me/boards').then(function(json) {
+  console.log(json);
+  pinterest.api('pins', {
+      method: 'POST',
+      body: {
+          board: json.data[0].id, // grab the first board from the previous response
+          note: 'this is a test',
+          image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
+      }
+  }).then(function(json) {
+      pinterest.api('me/pins').then(console.log);
+  });
 });*/
+
+
 module.exports = router;
