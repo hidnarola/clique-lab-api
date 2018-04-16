@@ -11,14 +11,11 @@ var logger = config.logger;
 var PinIt = require('pin-it-node');
 var campaign_helper = require("./../../helpers/campaign_helper");
 var user_helper = require("./../../helpers/user_helper");
-<<<<<<< HEAD
 var campaign_post_helper = require("./../../helpers/campaign_post_helper");
 
 //var PDK = require('node-pinterest');
 //var pinterest = PDK.init('AVYSkGTuxc-WUJpdRHkXyu8gEsfEFST4h8o1jBZE2WRMweA4YAAAAAA');
 //pinterest.api('me').then(console.log);
-=======
->>>>>>> 9c656f7b80af3923b6c7862c9ed8cb8c8027fec8
 
 /**
  * @api {get} /user/campaign/approved campaigns - Get by ID
