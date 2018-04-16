@@ -1,6 +1,6 @@
 var User = require("./../models/User");
 var user_helper = {};
-
+var brand =require("./../models/Inspired_Brand_submit");
 /*
  * get_login_by_email is used to fetch single user by email address
  * 
@@ -278,5 +278,8 @@ user_helper.add_bank_to_user = async (user_id, bank) => {
         return { "status": 0, "message": "Error occured while updating user", "error": err }
     }
 };
+
+
+
 
 module.exports = user_helper;

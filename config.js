@@ -29,5 +29,6 @@ module.exports = {
     "INTERNAL_SERVER_ERROR": 500,
 
     // Other configuration
-    "website_url" : process.env.WEBSITE_URL
+    "website_url" : process.env.WEBSITE_URL,
+    "base_url": process.env.BASE+':'+process.env.NODE_PORT
 };
