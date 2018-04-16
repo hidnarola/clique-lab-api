@@ -10,15 +10,17 @@ var config = require("./../../config");
 var logger = config.logger;
 
 var campaign_helper = require("./../../helpers/campaign_helper");
-var user_helper =require("./../../helpers/user_helper");
+var user_helper = require("./../../helpers/user_helper");
+
 /**
  * @api {get} /user/campaign/approved campaigns - Get by ID
  * @apiName campaigns - Get campaigns by ID
  * @apiGroup User
  *
  * @apiHeader {String}  x-access-token  unique access-key
- * * @apiParam {String} user_id ID of campaigns
-
+ * 
+ * @apiParam {String} user_id ID of campaigns
+ * 
  * @apiSuccess (Success 200) {Array} Approved Campaign Array of campaigns 
  * @apiError (Error 4xx) {String} message Validation or error message.
  */

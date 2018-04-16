@@ -9,6 +9,11 @@ var promoter_helper = require('./../../helpers/promoter_helper');
 var setting_helper = require('./../../helpers/setting_helper');
 var job_industry_helper = require('./../../helpers/job_industry_helper');
 var interest_helper = require('./../../helpers/interest_helper');
+var music_taste_helper = require('./../../helpers/music_taste_helper');
+var language_helper = require('./../../helpers/language_helper');
+var education_helper = require('./../../helpers/education_helper');
+var job_title_helper = require('./../../helpers/job_title_helper');
+var ethnicity_helper = require('./../../helpers/ethnicity_helper');
 
 var logger = config.logger;
 
@@ -140,7 +145,13 @@ router.get('/setting/:key', async (req, res) => {
  * 
  * @apiHeader {String}  x-access-token promoter's unique access-key
  * 
- * @apiSuccess (Success 200) {Array} job_industry all job industry
+ * @apiSuccess (Success 200) {Array} job_industry All job industry
+ * @apiSuccess (Success 200) {Array} interest All user interest
+ * @apiSuccess (Success 200) {Array} music_taste All Music taste
+ * @apiSuccess (Success 200) {Array} language All language
+ * @apiSuccess (Success 200) {Array} education All Education
+ * @apiSuccess (Success 200) {Array} job_title All Job title
+ * @apiSuccess (Success 200) {Array} ethnicity All Ethnicity
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get('/filter_preference', async (req, res) => {
@@ -148,10 +159,14 @@ router.get('/filter_preference', async (req, res) => {
     var job_industry_resp = await job_industry_helper.get_all_job_industry();
     var interest_resp = await interest_helper.get_all_interest();
     var music_taste_resp = await music_taste_helper.get_all_music_taste();
+    var language_resp = await language_helper.get_all_language();
+    var education_resp = await education_helper.get_all_education();
+    var job_title_resp = await job_title_helper.get_all_job_title();
+    var ethnicity_resp = await ethnicity_helper.get_all_ethnicity();
 
     if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1) {
         logger.trace("got details successfully");
-        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste });
+        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste, "language":language_resp.language, "education":education_resp.education, "job_title":job_title_resp.job_title, "ethnicity":ethnicity_resp.ethnicity });
     } else {
         logger.error("Error occured while fetching Job Industry = ", resp_data);
         res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);

@@ -1,6 +1,98 @@
 [
   {
     "type": "get",
+    "url": "/promoter/filter_preference",
+    "title": "Get preference value",
+    "name": "Get_preference_value",
+    "group": "Promoter",
+    "description": "<p>Get preference value by key</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>promoter's unique access-key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "job_industry",
+            "description": "<p>All job industry</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "interest",
+            "description": "<p>All user interest</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "music_taste",
+            "description": "<p>All Music taste</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "language",
+            "description": "<p>All language</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "education",
+            "description": "<p>All Education</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "job_title",
+            "description": "<p>All Job title</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "ethnicity",
+            "description": "<p>All Ethnicity</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/index.js",
+    "groupTitle": "Promoter"
+  },
+  {
+    "type": "get",
     "url": "/promoter/setting/:key",
     "title": "Get settings value",
     "name": "Get_settings_value",
