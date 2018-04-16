@@ -14,7 +14,6 @@ var Campaign_postSchema = new Schema({
 
 // Campaign_userSchema.ensureIndex( { "firstname": 1, "lastname": 1 }, { unique: true } )
 
-
 // Compile model from schema
 var Campaign_post = mongoose.model('campaign_post', Campaign_postSchema, 'campaign_post');
 

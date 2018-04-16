@@ -280,9 +280,6 @@ campaign_helper.user_not_exist_campaign_for_promoter = async(user_id,promoter_id
                 }
             },
             {
-                "$unwind":{"path":"$campaign_user", "preserveNullAndEmptyArrays":true}
-            },
-            {
                 "$match":{"campaign_user.user_id":{$ne:new ObjectId(user_id)}}
             }
         ]);
