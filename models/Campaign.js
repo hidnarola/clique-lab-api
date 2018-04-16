@@ -6,7 +6,6 @@ var Schema = mongoose.Schema;
 
 var CampaignModelSchema = new Schema({
     promoter_id: { type: mongoose.Schema.Types.ObjectId, ref: 'promoters', required: true },
-
     name: { type: String, required: true },
     start_date: { type: Date, required: true },
     end_date: { type: Date, required: true },

@@ -201,12 +201,16 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.get('/list_for_user/:user_id',async(req,res) => {
+    var campaign_resp = await campaign_helper.user_not_exist_campaign_for_promoter(req.params.user_id,req.userInfo.id);
+    res.status(200).json({"resp":campaign_resp});
+});
 
 /**
  * 
  */
-router.post('/add_user/:campaign_id', async(req,res) => {
-    var campaign_resp = await campaign_helper.insert_campaign_user({"campaign_id":req.params.campaign_id,"user_id":req.userInfo.id});
+router.post('/:campaign_id/add_user/:user_id', async(req,res) => {
+    var campaign_resp = await campaign_helper.insert_campaign_user({"campaign_id":req.params.campaign_id,"user_id":req.params.user_id});
     if(campaign_resp.status === 0){
         res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while adding user into campaign","error":campaign_resp.error});
     } else {

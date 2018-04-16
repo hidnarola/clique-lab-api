@@ -7,10 +7,10 @@ var Schema = mongoose.Schema;
 var InspiredBrandModelSchema = new Schema({
     company: String,
     image: String,
-    social_media_platform:String,
-   text:String,
-   price:Number,
-   status:Boolean,
+    social_media_platform: String,
+    text: String,
+    price: Number,
+    status: Boolean,
 }, { versionKey: false });
 
 // Compile modyel from schema

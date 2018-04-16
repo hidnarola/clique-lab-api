@@ -262,7 +262,37 @@ campaign_helper.get_all_offered_campaign = async (id,filter, sort, page_no, page
     }
 }
 
-
+campaign_helper.user_not_exist_campaign_for_promoter = async(user_id,promoter_id)=>{
+    try {
+        var campaigns = await Campaign.aggregate([
+            {
+                "$match":{"promoter_id":new ObjectId(promoter_id)}
+            },
+            {
+                "$lookup": {
+                    "from": "campaign_user",
+                    "localField": "_id",
+                    "foreignField": "campaign_id",
+                    "as": "campaign_user"
+                }
+            },
+            {
+                "$unwind":{"path":"$campaign_user", "preserveNullAndEmptyArrays":true}
+            },
+            {
+                "$match":{"campaign_user.user_id":{$ne:new ObjectId(user_id)}}
+            }
+        ]);
+                                    
+        if (campaigns && campaigns.length > 0) {
+            return { "status": 1, "message": "campaign found", "campaigns": campaigns };
+        } else {
+            return { "status": 2, "message": "No campaign available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
+    }
+}
 
 
 module.exports = campaign_helper;
