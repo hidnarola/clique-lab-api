@@ -1,6 +1,10 @@
+var mongoose = require('mongoose');
+
 var Group = require("./../models/Group");
 var Group_User = require("./../models/Group_user");
 var group_helper = {};
+
+var ObjectId = mongoose.Types.ObjectId;
 
 /*
  * get_group_by_id is used to fetch group details by group id
@@ -114,5 +118,34 @@ group_helper.insert_group_user = async (group_user_object) => {
         return { "status": 0, "message": "Error occured while inserting into group_user", "error": err };
     }
 };
+
+group_helper.user_not_exist_group_for_promoter = async(user_id,promoter_id)=>{
+    try {
+        var groups = await Group.aggregate([
+            {
+                "$match":{"promoter_id":new ObjectId(promoter_id)}
+            },
+            {
+                "$lookup": {
+                    "from": "group_user",
+                    "localField": "_id",
+                    "foreignField": "group_id",
+                    "as": "group_user"
+                }
+            },
+            {
+                "$match":{"group_user.user_id":{$ne:new ObjectId(user_id)}}
+            }
+        ]);
+                                    
+        if (groups && groups.length > 0) {
+            return { "status": 1, "message": "groups found", "groups": groups };
+        } else {
+            return { "status": 2, "message": "No group available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding group", "error": err }
+    }
+}
 
 module.exports = group_helper;
