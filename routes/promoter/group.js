@@ -209,4 +209,12 @@ router.post('/:group_id/add_user/:user_id', async(req,res) => {
     }
 });
 
+/**
+ * /promoter/group/:group_id/members
+ */
+router.post('/:group_id/members',async(req,res) => {
+    var members = await group_helper.get_member_of_group(req.params.group_id);
+    
+});
+
 module.exports = router;

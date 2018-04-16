@@ -72,16 +72,20 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             aggregate.push({ "$sort": sort });
         }
 
-        aggregate.push({"$group":{
-            "_id":null,
-            "total":{"$sum":1},
-            'results':{"$push":'$$ROOT'}
-        }});
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$$ROOT' }
+            }
+        });
 
-        aggregate.push({"$project":{
-            "total":1,
-            'groups':{"$slice":["$results",page_size * (page_no - 1),page_size]}
-        }});
+        aggregate.push({
+            "$project": {
+                "total": 1,
+                'groups': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+            }
+        });
 
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
@@ -119,11 +123,11 @@ group_helper.insert_group_user = async (group_user_object) => {
     }
 };
 
-group_helper.user_not_exist_group_for_promoter = async(user_id,promoter_id)=>{
+group_helper.user_not_exist_group_for_promoter = async (user_id, promoter_id) => {
     try {
         var groups = await Group.aggregate([
             {
-                "$match":{"promoter_id":new ObjectId(promoter_id)}
+                "$match": { "promoter_id": new ObjectId(promoter_id) }
             },
             {
                 "$lookup": {
@@ -134,10 +138,10 @@ group_helper.user_not_exist_group_for_promoter = async(user_id,promoter_id)=>{
                 }
             },
             {
-                "$match":{"group_user.user_id":{$ne:new ObjectId(user_id)}}
+                "$match": { "group_user.user_id": { $ne: new ObjectId(user_id) } }
             }
         ]);
-                                    
+
         if (groups && groups.length > 0) {
             return { "status": 1, "message": "groups found", "groups": groups };
         } else {
@@ -147,5 +151,35 @@ group_helper.user_not_exist_group_for_promoter = async(user_id,promoter_id)=>{
         return { "status": 0, "message": "Error occured while finding group", "error": err }
     }
 }
+
+group_helper.get_members_of_group = async (group_id) => {
+    try {
+        var members = Group_User.aggregate([
+            {
+                "$match": { "group_id": new ObjectId(group_id) }
+            },
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "user_id",
+                    "foreignField": "_id",
+                    "as": "members"
+                }
+            },
+            {
+                "$unwind":"$members"
+            },
+            {
+                "$project":{
+                    "_id":"group_id",
+                    "memebers":"$members"
+                }
+            }
+        ]);
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding group", "error": err }
+    }
+
+};
 
 module.exports = group_helper;
