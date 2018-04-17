@@ -181,7 +181,7 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
             "$group": {
                 "_id": null,
                 "total": { "$sum": 1 },
-                'results': { "$push": '$$ROOT' }
+                'results': { "$push": '$members' }
             }
         });
 
@@ -192,8 +192,10 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
             }
         });
 
-        // console.log("aggregate = ", aggregate);
+        console.log("aggregate = ", JSON.stringify(aggregate));
+        
         var members = await Group_User.aggregate(aggregate);
+        console.log(members[0].results);
 
         if (members && members[0] && members[0].members.length > 0) {
             return { "status": 1, "message": "Members found", "results": members[0] };
