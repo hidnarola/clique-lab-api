@@ -14,7 +14,7 @@ var brand =require("./../models/Inspired_Brand_submit");
  */
 user_helper.get_login_by_email = async (email) => {
     try {
-        var user = await User.findOne({ "email": email });
+        var user = await User.findOne({ "email": email }).lean();
         if (user) {
             return { "status": 1, "message": "User details found", "user": user };
         } else {

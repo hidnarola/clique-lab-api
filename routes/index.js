@@ -637,6 +637,9 @@ router.post('/login', async (req, res) => {
         var token = jwt.sign(LoginJson, config.ACCESS_TOKEN_SECRET_KEY, {
           expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
         });
+
+        
+        delete login_resp.user.status;
         delete login_resp.user.password;
         delete login_resp.user.refresh_token;
         delete login_resp.user.last_login_date;
