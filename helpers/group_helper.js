@@ -167,14 +167,6 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
         },
         {
             "$unwind": "$members"
-        },
-        {
-            '$group': {
-                "_id": "$group_id",
-                "members": {
-                    "$push": "$members"
-                }
-            }
         }];
 
         // Apply additional filter
@@ -200,7 +192,7 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
             }
         });
 
-        console.log("aggregate = ", aggregate);
+        console.log("aggregate = ", JSON.stringify(aggregate));
         
         var members = await Group_User.aggregate(aggregate);
         console.log(members[0].results);
