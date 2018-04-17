@@ -154,17 +154,4 @@ router.get("/", async (req, res) => {
   });
   
 
- /* router.delete("/:id", async (req, res) => {
-
-    logger.trace("Delete  API - Id = ", req.query.id);
-    let user_data = await promoter_helper.delete_by_id(
-      req.params.id
-    );
-  
-    if (user_data.status === 0) {
-      res.status(config.INTERNAL_SERVER_ERROR).json(user_data);
-    } else {
-      res.status(config.OK_STATUS).json(user_data);
-    }
-  });*/
 module.exports = router;

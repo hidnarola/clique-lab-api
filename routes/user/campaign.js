@@ -18,7 +18,7 @@ var campaign_post_helper = require("./../../helpers/campaign_post_helper");
 //pinterest.api('me').then(console.log);
 
 /**
- * @api {get} /user/campaign/approved campaigns - Get by ID
+ * @api {post} /user/campaign/approved campaigns - Get by ID
  * @apiName campaigns - Get campaigns by ID
  * @apiGroup User
  *
@@ -146,7 +146,7 @@ router.post("/public_campaign", async (req, res) => {
 
 
 /**
- * @api {get} /user/campaign/myoffer My offer Campaign  - Get all
+ * @api {post} /user/campaign/myoffer My offer Campaign  - Get all
  * @apiName approved_campaign - Get all
  * @apiGroup User
  *
@@ -220,9 +220,6 @@ router.post("/myoffer", async (req, res) => {
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get("/:campaign_id", async (req, res) => {
-
-  console.log("Going here");
-
   campaign_id = req.params.campaign_id;
   logger.trace("Get all  Campaign API called");
   var resp_data = await campaign_helper.get_campaign_by_id(campaign_id);
@@ -371,15 +368,15 @@ router.post('/share/:campaign_id', async (req, res) => {
     if (campaign_data.Campaign.mood_board_images && campaign_data.Campaign.mood_board_images.length > 0) {
       async.waterfall([
         function (callback) {
-          async.eachSeries(campaign_data.Campaign.mood_board_images, function(image, loop_callback) {
+          async.eachSeries(campaign_data.Campaign.mood_board_images, function (image, loop_callback) {
 
-            FB.api('me/photos', 'post', { url: config.base_url + '/uploads/campaign/' + image, caption: caption, published: false },function(resp){
-              console.log("resp = ",resp);
+            FB.api('me/photos', 'post', { url: config.base_url + '/uploads/campaign/' + image, caption: caption, published: false }, function (resp) {
+              console.log("resp = ", resp);
               images.push({ "media_fbid": resp.id });
               loop_callback();
             });
-          }, async(err) => {
-            if(err){
+          }, async (err) => {
+            if (err) {
               callback(err);
             } else {
               callback(null);
@@ -393,9 +390,9 @@ router.post('/share/:campaign_id', async (req, res) => {
         } else {
           var post_id = await FB.api('me/feed', 'post', { attached_media: images, message: caption });
           var campaign_obj = {
-           "user_id": user_id,
-           "campaign_id" : campaign_id,
-           "post_id":post_id.id
+            "user_id": user_id,
+            "campaign_id": campaign_id,
+            "post_id": post_id.id
           };
           let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
           return res.status(config.OK_STATUS).json(campaign_data);
@@ -406,7 +403,7 @@ router.post('/share/:campaign_id', async (req, res) => {
   } catch (error) {
     res.status(500).send({ "Error": error });
   }
-});      
+});
 
 
 

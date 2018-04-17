@@ -132,17 +132,5 @@ promoter_helper.insert_inspired_brand = async (promoter_object) => {
     }
 };
 
-/*promoter_helper.delete_by_id = async (id) => {
-    try {
-        let resp = await Promoter.findOneAndRemove({ _id: id });
-        if (!resp) {
-            return { "status": 2, "message": "User found" };
-        } else {
-            return { "status": 1, "message": "User deleted" };
-        }
-    } catch (err) {
-        return { "status": 0, "message": "Error occured while deleting ", "error": err };
-    }
-}
-*/
+
 module.exports = promoter_helper;

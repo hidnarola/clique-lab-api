@@ -122,7 +122,7 @@ campaign_helper.get_all_campaign = async (filter, sort, page_no, page_size) => {
 
 campaign_helper.get_campaign_by_id = async (campaign_id) => {
     try {
-      x
+      
         var campaign = await Campaign.findOne({ _id: campaign_id });
         if (campaign) {
             return { "status": 1, "message": "campaign found", "Campaign": campaign };

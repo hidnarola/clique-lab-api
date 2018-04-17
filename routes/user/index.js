@@ -107,7 +107,7 @@ router.put('/', function (req, res) {
         if (result.isEmpty()) {
             var obj = {
                 "name": req.body.name,
-                "user_interest": JSON.parse(req.body.user_interest),
+                "user_interest": req.body.user_interest,
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
             };
@@ -194,19 +194,7 @@ router.put('/', function (req, res) {
     });
 });
 
-router.delete("/:id", async (req, res) => {
 
-    logger.trace("Delete  API - Id = ", req.query.id);
-    let user_data = await user_helper.delete_by_id(
-      req.params.id
-    );
-  
-    if (user_data.status === 0) {
-      res.status(config.INTERNAL_SERVER_ERROR).json(user_data);
-    } else {
-      res.status(config.OK_STATUS).json(user_data);
-    }
-  });
 
 
 module.exports = router;
