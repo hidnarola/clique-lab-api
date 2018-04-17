@@ -192,7 +192,7 @@ router.get('/list_for_user/:user_id',async(req,res) => {
     if(group_resp.status === 0){
         res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while fetching group list","error":group_resp.error});
     } else if(group_resp.status === 1) {
-        res.status(config.OK_STATUS).json({"status":1,"message":"Groups found", "groups" :group_resp.groups});
+        res.status(config.OK_STATUS).json({"status":1,"message":"Groups found", "results" :group_resp.groups});
     } else {
         res.status(config.BAD_REQUEST).json({"status":0,"message":"No group found for given user"});
     }

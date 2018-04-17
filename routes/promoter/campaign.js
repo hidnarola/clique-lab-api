@@ -206,7 +206,7 @@ router.get('/list_for_user/:user_id',async(req,res) => {
     if(campaign_resp.status === 0){
         res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while fetching campaign list","error":campaign_resp.error});
     } else if(campaign_resp.status === 1) {
-        res.status(config.OK_STATUS).json({"status":1,"message":"Campaigns found", "campaigns" :campaign_resp.campaigns});
+        res.status(config.OK_STATUS).json({"status":1,"message":"Campaigns found", "results" :campaign_resp.campaigns});
     } else {
         res.status(config.BAD_REQUEST).json({"status":0,"message":"No campaign found for given user"});
     }
