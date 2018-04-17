@@ -152,32 +152,56 @@ group_helper.user_not_exist_group_for_promoter = async (user_id, promoter_id) =>
     }
 }
 
-group_helper.get_members_of_group = async (group_id) => {
+group_helper.get_members_of_group = async (group_id, page_no, page_size, filter, sort) => {
     try {
-        var members = Group_User.aggregate([
-            {
-                "$match": { "group_id": new ObjectId(group_id) }
-            },
-            {
-                "$lookup": {
-                    "from": "users",
-                    "localField": "user_id",
-                    "foreignField": "_id",
-                    "as": "members"
-                }
-            },
-            {
-                "$unwind":"$members"
-            },
-            {
-                "$project":{
-                    "_id":"group_id",
-                    "memebers":"$members"
-                }
+        var aggregate = [{
+            "$match": { "group_id": new ObjectId(group_id) }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user_id",
+                "foreignField": "_id",
+                "as": "members"
             }
-        ]);
+        },
+        {
+            "$unwind": "$members"
+        }];
+
+        // Apply additional filter
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$$ROOT' }
+            }
+        });
+
+        aggregate.push({
+            "$project": {
+                "total": 1,
+                'members': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+            }
+        });
+
+        // console.log("aggregate = ", aggregate);
+        var members = await Group_User.aggregate(aggregate);
+
+        if (members && members[0] && members[0].members.length > 0) {
+            return { "status": 1, "message": "Members found", "results": members[0] };
+        } else {
+            return { "status": 2, "message": "No member found" };
+        }
     } catch (err) {
-        return { "status": 0, "message": "Error occured while finding group", "error": err }
+        return { "status": 0, "message": "Error occured while finding group member", "error": err }
     }
 
 };

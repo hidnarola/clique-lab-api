@@ -643,7 +643,7 @@ router.post('/login', async (req, res) => {
         delete login_resp.user.created_at;
 
         logger.info("Token generated");
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "token": token, "refresh_token": refreshToken });
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "user":login_resp.user , "token": token, "refresh_token": refreshToken});
       } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or token" });
       }
