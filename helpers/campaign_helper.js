@@ -280,13 +280,10 @@ campaign_helper.user_not_exist_campaign_for_promoter = async(user_id,promoter_id
                 }
             },
             {
-                "$unwind":{"path":"$campaign_user", "preserveNullAndEmptyArrays":true}
-            },
-            {
                 "$match":{"campaign_user.user_id":{$ne:new ObjectId(user_id)}}
             }
         ]);
-                                    
+
         if (campaigns && campaigns.length > 0) {
             return { "status": 1, "message": "campaign found", "campaigns": campaigns };
         } else {
@@ -296,6 +293,5 @@ campaign_helper.user_not_exist_campaign_for_promoter = async(user_id,promoter_id
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
-
 
 module.exports = campaign_helper;

@@ -1,6 +1,10 @@
+var mongoose = require('mongoose');
+
 var Group = require("./../models/Group");
 var Group_User = require("./../models/Group_user");
 var group_helper = {};
+
+var ObjectId = mongoose.Types.ObjectId;
 
 /*
  * get_group_by_id is used to fetch group details by group id
@@ -68,16 +72,20 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             aggregate.push({ "$sort": sort });
         }
 
-        aggregate.push({"$group":{
-            "_id":null,
-            "total":{"$sum":1},
-            'results':{"$push":'$$ROOT'}
-        }});
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$$ROOT' }
+            }
+        });
 
-        aggregate.push({"$project":{
-            "total":1,
-            'groups':{"$slice":["$results",page_size * (page_no - 1),page_size]}
-        }});
+        aggregate.push({
+            "$project": {
+                "total": 1,
+                'groups': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+            }
+        });
 
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
@@ -113,6 +121,89 @@ group_helper.insert_group_user = async (group_user_object) => {
     } catch (err) {
         return { "status": 0, "message": "Error occured while inserting into group_user", "error": err };
     }
+};
+
+group_helper.user_not_exist_group_for_promoter = async (user_id, promoter_id) => {
+    try {
+        var groups = await Group.aggregate([
+            {
+                "$match": { "promoter_id": new ObjectId(promoter_id) }
+            },
+            {
+                "$lookup": {
+                    "from": "group_user",
+                    "localField": "_id",
+                    "foreignField": "group_id",
+                    "as": "group_user"
+                }
+            },
+            {
+                "$match": { "group_user.user_id": { $ne: new ObjectId(user_id) } }
+            }
+        ]);
+
+        if (groups && groups.length > 0) {
+            return { "status": 1, "message": "groups found", "groups": groups };
+        } else {
+            return { "status": 2, "message": "No group available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding group", "error": err }
+    }
+}
+
+group_helper.get_members_of_group = async (group_id, page_no, page_size, filter, sort) => {
+    try {
+        var aggregate = [{
+            "$match": { "group_id": new ObjectId(group_id) }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user_id",
+                "foreignField": "_id",
+                "as": "members"
+            }
+        },
+        {
+            "$unwind": "$members"
+        }];
+
+        // Apply additional filter
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$$ROOT' }
+            }
+        });
+
+        aggregate.push({
+            "$project": {
+                "total": 1,
+                'members': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+            }
+        });
+
+        // console.log("aggregate = ", aggregate);
+        var members = await Group_User.aggregate(aggregate);
+
+        if (members && members[0] && members[0].members.length > 0) {
+            return { "status": 1, "message": "Members found", "results": members[0] };
+        } else {
+            return { "status": 2, "message": "No member found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding group member", "error": err }
+    }
+
 };
 
 module.exports = group_helper;

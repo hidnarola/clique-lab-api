@@ -8,6 +8,7 @@ var router = express.Router();
 
 var config = require('./../../config');
 var group_helper = require('./../../helpers/group_helper');
+var global_helper = require("./../../helpers/global_helper");
 
 var logger = config.logger;
 var ObjectId = mongoose.Types.ObjectId;
@@ -186,16 +187,102 @@ router.post('/filter', async (req, res) => {
     }
 });
 
+router.get('/list_for_user/:user_id',async(req,res) => {
+    var group_resp = await group_helper.user_not_exist_group_for_promoter(req.params.user_id,req.userInfo.id);
+    if(group_resp.status === 0){
+        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while fetching group list","error":group_resp.error});
+    } else if(group_resp.status === 1) {
+        res.status(config.OK_STATUS).json({"status":1,"message":"Groups found", "groups" :group_resp.groups});
+    } else {
+        res.status(config.BAD_REQUEST).json({"status":0,"message":"No group found for given user"});
+    }
+});
 
 /**
  * 
  */
-router.post('/add_user/:group_id', async(req,res) => {
-    var group_resp = await group_helper.insert_group_user({"group_id":req.params.group_id,"user_id":req.userInfo.id});
+router.post('/:group_id/add_user/:user_id', async(req,res) => {
+    var group_resp = await group_helper.insert_group_user({"group_id":req.params.group_id,"user_id":req.params.user_id});
     if(group_resp.status === 0){
         res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while adding user into group","error":group_resp.error});
     } else {
         res.status(config.OK_STATUS).json({"status":1,"message":"User has been added into group"});
+    }
+});
+
+/**
+ * /promoter/group/:group_id/members
+ */
+router.post('/:group_id/members',async(req,res) => {
+    var schema = {
+        'page_size': {
+            notEmpty: true,
+            errorMessage: "Page size is required"
+        },
+        'page_no': {
+            notEmpty: true,
+            errorMessage: "Page number is required"
+        }
+    };
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+    if (!errors) {
+        var match_filter = {};
+        var sort = {};
+        if (req.body.filter) {
+            req.body.filter.forEach(filter_criteria => {
+                if (filter_criteria.type === "exact") {
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                } else if (filter_criteria.type === "between") {
+                    if (filter_criteria.field === "age") {
+                        // Age is derived attribute and need to calculate based on date of birth
+                        match_filter[filter_criteria.field] = {
+                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                            "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                        };
+                    } else {
+                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                    }
+                } else if (filter_criteria.type === "like") {
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                } else if (filter_criteria.type === "id") {
+                    match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+                }
+            });
+        }
+
+        if (req.body.sort) {
+            req.body.sort.forEach(sort_criteria => {
+                sort[sort_criteria.field] = sort_criteria.value;
+            });
+        }
+
+        if(Object.keys(sort).length === 0){
+            sort["_id"] = 1;
+        }
+
+        let keys = {
+            "fb_friends": "facebook.no_of_friends",
+            "insta_followers": "instagram.no_of_followers",
+            "twitter_followers": "twitter.no_of_followers",
+            "pinterest_followers": "pinterest.no_of_followers",
+            "linkedin_connection": "linkedin.no_of_connections",
+            "year_in_industry": "experience",
+            "age": "date_of_birth"
+        };
+        match_filter = await global_helper.rename_keys(match_filter, keys);
+
+        sort = await global_helper.rename_keys(sort, keys);
+        var members = await group_helper.get_members_of_group(req.params.group_id,req.body.page_no, req.body.page_size, match_filter,sort);
+
+        if (members.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Members found", "results": members.results });
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Members not found" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
     }
 });
 
