@@ -315,4 +315,40 @@ campaign_helper.user_not_exist_campaign_for_promoter = async (user_id, promoter_
     }
 }
 
+campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, page_size) => {
+    try {
+        var campaigns = await Campaign.aggregate([
+            {
+                "$match": {
+                    "promoter_id": new ObjectId(promoter_id),
+                    "start_date": { "$lt": new Date() },
+                    "end_date": { "$gt": new Date() }
+                }
+            },
+            { "$sort": { "created_at": -1 } },
+            {
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'results': { "$push": '$$ROOT' }
+                }
+            },
+            {
+                "$project": {
+                    "total": 1,
+                    'campaigns': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            }
+        ]);
+
+        if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
+            return { "status": 1, "message": "campaign found", "campaigns": campaigns };
+        } else {
+            return { "status": 2, "message": "No campaign available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
+    }
+}
+
 module.exports = campaign_helper;

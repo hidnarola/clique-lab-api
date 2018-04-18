@@ -201,26 +201,63 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.get('/list_for_user/:user_id',async(req,res) => {
-    var campaign_resp = await campaign_helper.user_not_exist_campaign_for_promoter(req.params.user_id,req.userInfo.id);
-    if(campaign_resp.status === 0){
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while fetching campaign list","error":campaign_resp.error});
-    } else if(campaign_resp.status === 1) {
-        res.status(config.OK_STATUS).json({"status":1,"message":"Campaigns found", "results" :campaign_resp.campaigns});
+// Fetch campaign in which given user is not available
+// /promoter/campaign/list_for_user/:user_id
+// Developed by "ar"
+router.get('/list_for_user/:user_id', async (req, res) => {
+    var campaign_resp = await campaign_helper.user_not_exist_campaign_for_promoter(req.params.user_id, req.userInfo.id);
+    if (campaign_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching campaign list", "error": campaign_resp.error });
+    } else if (campaign_resp.status === 1) {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaigns found", "results": campaign_resp.campaigns });
     } else {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"No campaign found for given user"});
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No campaign found for given user" });
     }
 });
 
 /**
- * 
+ * Add user to given campaign
+ * /promoter/campaign/:campaign_id/add_user/:user_id
+ * Developed by "ar"
  */
-router.post('/:campaign_id/add_user/:user_id', async(req,res) => {
-    var campaign_resp = await campaign_helper.insert_campaign_user({"campaign_id":req.params.campaign_id,"user_id":req.params.user_id});
-    if(campaign_resp.status === 0){
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while adding user into campaign","error":campaign_resp.error});
+router.post('/:campaign_id/add_user/:user_id', async (req, res) => {
+    var campaign_resp = await campaign_helper.insert_campaign_user({ "campaign_id": req.params.campaign_id, "user_id": req.params.user_id });
+    if (campaign_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while adding user into campaign", "error": campaign_resp.error });
     } else {
-        res.status(config.OK_STATUS).json({"status":1,"message":"User has been added into campaign"});
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been added into campaign" });
+    }
+});
+
+/**
+ * Fetch Campaign for logged-in promoter
+ * /promoter/campaign/active
+ * Developed by "ar"
+ */
+router.post('/active', async (req, res) => {
+    var schema = {
+        'page_size': {
+            notEmpty: true,
+            errorMessage: "Page size is required"
+        },
+        'page_no': {
+            notEmpty: true,
+            errorMessage: "Page number is required"
+        }
+    };
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+    if (!errors) {
+        var campaign_resp = await campaign_helper.get_active_campaign_by_promoter(req.userInfo.id,req.body.page_no, req.body.page_size);
+        if (campaign_resp.status === 0) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching active campaign", "error": campaign_resp.error });
+        } else if (campaign_resp.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaigns found", "results": campaign_resp.campaigns });
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No campaign found for given promoter" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
     }
 });
 
