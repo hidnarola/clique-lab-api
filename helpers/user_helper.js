@@ -125,10 +125,17 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
             'results':{"$push":'$$ROOT'}
         }});
 
-        aggregate.push({"$project":{
-            "total":1,
-            'users':{"$slice":["$results",page_size * (page_no - 1),page_size]}
-        }});
+        if(page_size && page_no){
+            aggregate.push({"$project":{
+                "total":1,
+                'users':{"$slice":["$results",page_size * (page_no - 1),page_size]}
+            }});
+        } else {
+            aggregate.push({"$project":{
+                "total":1,
+                'users':"$results"
+            }});
+        }
 
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
@@ -136,7 +143,6 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
         // console.log("aggregate = ", aggregate);
         var users = await User.aggregate(aggregate);
 
-        console.log("users12 = ",users);
         if (users && users[0] && users[0].users.length > 0) {
             return { "status": 1, "message": "Users found", "results": users[0] };
         } else {

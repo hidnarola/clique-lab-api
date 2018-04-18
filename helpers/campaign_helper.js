@@ -197,6 +197,15 @@ campaign_helper.insert_campaign_user = async (campaign_user_object) => {
     }
 };
 
+campaign_helper.insert_multiple_campaign_user = async (campaign_user_array) => {
+    try {
+        let campaign_user_data = await Campaign_User.insertMany(campaign_user_array);
+        return { "status": 1, "message": "User added in campaign", "campaign_user": campaign_user_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting into campaign_user", "error": err };
+    }
+};
+
 /*
  * insert_campaign is used to insert into campaign collection
  * 
@@ -351,5 +360,7 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
+
+
 
 module.exports = campaign_helper;
