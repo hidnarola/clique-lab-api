@@ -18,11 +18,11 @@ var campaign_helper = {};
  */
 campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size) => {
     try {
-        console.log("user_id = ",id);
-       console.log("filter = ", filter);
-       console.log("page_no = ", page_no);
-       console.log("page_size = ", page_size);
-       
+        console.log("user_id = ", id);
+        console.log("filter = ", filter);
+        console.log("page_no = ", page_no);
+        console.log("page_size = ", page_size);
+
         var campaigns = await Campaign.aggregate([
             {
                 $lookup: {
@@ -38,8 +38,8 @@ campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size)
             {
                 $match: {
                     "approved_campaign.user_id": { "$eq": new ObjectId(id) },
-                   "status": true,
-                   //"social_media_platform": filter
+                    "status": true,
+                    //"social_media_platform": filter
                 }
             },
             {
@@ -65,7 +65,7 @@ campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size)
                 $skip: page_no > 0 ? ((page_no - 1) * page_size) : 0
             },
             {
-                $limit : page_size
+                $limit: page_size
 
             }
             /*{
@@ -75,7 +75,7 @@ campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size)
         ]
         )
 
-        console.log("campaign = ",campaigns);
+        console.log("campaign = ", campaigns);
         if (campaigns && campaigns.length > 0) {
             return { "status": 1, "message": "campaign found", "campaign": campaigns };
         } else {
@@ -101,9 +101,9 @@ campaign_helper.get_all_campaign = async (filter, sort, page_no, page_size) => {
             .find(filter)
             .sort(sort)
             .skip(page_no > 0 ? ((page_no - 1) * page_size) : 0).limit(page_size).lean();
-            campaign.count= count;
+        campaign.count = count;
         if (campaign.length > 0 && campaign) {
-            return { "status": 1, "message": "campaign found", "Campaign": campaign ,count};
+            return { "status": 1, "message": "campaign found", "Campaign": campaign, count };
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
@@ -122,7 +122,7 @@ campaign_helper.get_all_campaign = async (filter, sort, page_no, page_size) => {
 
 campaign_helper.get_campaign_by_id = async (campaign_id) => {
     try {
-      
+
         var campaign = await Campaign.findOne({ _id: campaign_id });
         if (campaign) {
             return { "status": 1, "message": "campaign found", "Campaign": campaign };
@@ -147,13 +147,35 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
  */
 campaign_helper.insert_campaign_applied = async (campaign_object) => {
     let campaign = new Campaign_Applied(campaign_object)
+
     try {
+
         let campaign_data = await campaign.save();
+        // let camapign_applied = await campaign_user.findOneAndUpdate({user_id : user_id,campaign_id:campaign_id},obj);
         return { "status": 1, "message": "Campaign inserted", "campaign": campaign_data };
+
     } catch (err) {
+
         return { "status": 0, "message": "Error occured while inserting Campaign Applied", "error": err };
     }
 };
+
+
+campaign_helper.update_apply = async (user_id, campaign_id, obj) => {
+
+    try {
+        let user = await Campaign_User.findOneAndUpdate({ "user_id": new ObjectId(user_id), "campaign_id": new ObjectId(campaign_id) }, obj);
+       
+        if (!user) {
+            return { "status": 2, "message": "Record has not updated" };
+        } else {
+            return { "status": 1, "message": "Record has been updated", "user": user };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while updating user", "error": err }
+    }
+};
+
 
 /*
  * insert_campaign_user is used to insert into Campaign_user collection
@@ -203,7 +225,7 @@ campaign_helper.insert_campaign = async (campaign_object) => {
  *          status 1 - If campaign data found, with campaign object
  *          status 2 - If campaign not found, with appropriate message
  */
-campaign_helper.get_all_offered_campaign = async (id,filter, sort, page_no, page_size) => {
+campaign_helper.get_all_offered_campaign = async (id, filter, sort, page_no, page_size) => {
     try {
         var campaigns = await Campaign.aggregate([
             {
@@ -248,7 +270,7 @@ campaign_helper.get_all_offered_campaign = async (id,filter, sort, page_no, page
                 $skip: page_no > 0 ? ((page_no - 1) * page_size) : 0
             },
             {
-                $limit : page_size
+                $limit: page_size
 
             }
 
@@ -265,11 +287,11 @@ campaign_helper.get_all_offered_campaign = async (id,filter, sort, page_no, page
     }
 }
 
-campaign_helper.user_not_exist_campaign_for_promoter = async(user_id,promoter_id)=>{
+campaign_helper.user_not_exist_campaign_for_promoter = async (user_id, promoter_id) => {
     try {
         var campaigns = await Campaign.aggregate([
             {
-                "$match":{"promoter_id":new ObjectId(promoter_id)}
+                "$match": { "promoter_id": new ObjectId(promoter_id) }
             },
             {
                 "$lookup": {
@@ -280,7 +302,7 @@ campaign_helper.user_not_exist_campaign_for_promoter = async(user_id,promoter_id
                 }
             },
             {
-                "$match":{"campaign_user.user_id":{$ne:new ObjectId(user_id)}}
+                "$match": { "campaign_user.user_id": { $ne: new ObjectId(user_id) } }
             }
         ]);
 

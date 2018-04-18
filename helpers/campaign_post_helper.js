@@ -26,5 +26,19 @@ campaign_post_helper.insert_campaign_post = async (campaign_object) => {
     }
 };
 
+campaign_post_helper.update_post = async (user_id, campaign_id, obj) => {
+
+    try {
+        let user = await Campaign_User.findOneAndUpdate({ "user_id": new ObjectId(user_id), "campaign_id": new ObjectId(campaign_id) }, obj);
+       
+        if (!user) {
+            return { "status": 2, "message": "Record has not updated" };
+        } else {
+            return { "status": 1, "message": "Record has been updated", "user": user };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while updating user", "error": err }
+    }
+};
 
 module.exports = campaign_post_helper;
