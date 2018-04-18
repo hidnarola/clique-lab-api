@@ -425,21 +425,19 @@ router.post('/share/:campaign_id', async (req, res) => {
   }
 });
 
-
-
-pinterest.api('me/boards').then(function(json) {
-  console.log(json);
-  pinterest.api('pins', {
-      method: 'POST',
-      body: {
-          board: json.data[0].id, // grab the first board from the previous response
-          note: 'this is a test1',
-          image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
-      }
-  }).then(function(json) {
-      pinterest.api('me/pins').then(console.log);
-  });
-});
+// pinterest.api('me/boards').then(function(json) {
+//   console.log(json);
+//   pinterest.api('pins', {
+//       method: 'POST',
+//       body: {
+//           board: json.data[0].id, // grab the first board from the previous response
+//           note: 'this is a test1',
+//           image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
+//       }
+//   }).then(function(json) {
+//       pinterest.api('me/pins').then(console.log);
+//   });
+// });
 
 
 module.exports = router;
