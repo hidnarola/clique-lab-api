@@ -12,8 +12,8 @@ var PinIt = require('pin-it-node');
 var campaign_helper = require("./../../helpers/campaign_helper");
 var user_helper = require("./../../helpers/user_helper");
 var campaign_post_helper = require("./../../helpers/campaign_post_helper");
-//var PDK = require('node-pinterest');
-//var pinterest = PDK.init('AVYSkGTuxc-WUJpdRHkXyu8gEsfEFST4h8o1jBZE2WRMweA4YAAAAAA');
+var PDK = require('node-pinterest');
+var pinterest = PDK.init('AYSihE_YGAfDVXbYU3P7e85xncTzFSaDpm_8EORE2WRMweA4YAAAAAA');
 //pinterest.api('me').then(console.log);
 
 /**
@@ -238,7 +238,7 @@ router.get("/:campaign_id", async (req, res) => {
  * @apiParam {number} user_id User id of campaign
  * @apiParam {number} campaign_id Campaign id of campaign
  *  @apiParam {String} description  description of campaign
- *  @apiParam {String} imaged Image of campaign
+ *  @apiParam {String} [image] Image of campaign
 
  * @apiSuccess (Success 200) {JSON}Campaign details
  * @apiError (Error 4xx) {String} message Validation or error message.
@@ -258,7 +258,7 @@ router.post("/campaign_applied", async (req, res) => {
       notEmpty: true,
       errorMessage: "Description is required"
     },
-
+   
   };
   req.checkBody(schema);
   var errors = req.validationErrors();
@@ -268,7 +268,8 @@ router.post("/campaign_applied", async (req, res) => {
     var campaign_obj = {
       "user_id": req.body.user_id,
       "campaign_id": req.body.campaign_id,
-      "desription": req.body.desription
+      "desription": req.body.desription,
+   
     };
 
     var campaign_id =campaign_obj.campaign_id;
@@ -309,6 +310,11 @@ router.post("/campaign_applied", async (req, res) => {
             }
 
           }
+          else{
+            logger.trace(" image required");
+              callback({  "err": "Image required" });
+       
+          }
         }
 
       ],
@@ -329,7 +335,7 @@ router.post("/campaign_applied", async (req, res) => {
         } else {
           var obj = {"is_apply":true};
         
-          let campaign_apply_update = await campaign_post_helper.update_apply(user_id,campaign_id,obj);
+          let campaign_apply_update = await campaign_helper.update_campaign_by_user(user_id,campaign_id,obj);
 
           return res.status(config.OK_STATUS).json(campaign_data);
         }
@@ -398,10 +404,17 @@ router.post('/share/:campaign_id', async (req, res) => {
             "campaign_id": campaign_id,
             "post_id": post_id.id
           };
+         
+          //console.log(user_id);
+
           let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
+          
+          user_id=campaign_obj.user_id;
+          campaign_id=campaign_obj.campaign_id;
+      
           var obj = {"is_posted":true};
         
-          let campaign_post_update = await campaign_post_helper.update_post(user_id,campaign_id,obj);
+          let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id,campaign_id,obj);
           return res.status(config.OK_STATUS).json(campaign_data);
         }
       });
@@ -414,19 +427,19 @@ router.post('/share/:campaign_id', async (req, res) => {
 
 
 
-/*pinterest.api('me/boards').then(function(json) {
+pinterest.api('me/boards').then(function(json) {
   console.log(json);
   pinterest.api('pins', {
       method: 'POST',
       body: {
           board: json.data[0].id, // grab the first board from the previous response
-          note: 'this is a test',
+          note: 'this is a test1',
           image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
       }
   }).then(function(json) {
       pinterest.api('me/pins').then(console.log);
   });
-});*/
+});
 
 
 module.exports = router;

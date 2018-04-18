@@ -161,8 +161,7 @@ campaign_helper.insert_campaign_applied = async (campaign_object) => {
 };
 
 
-campaign_helper.update_apply = async (user_id, campaign_id, obj) => {
-
+campaign_helper.update_campaign_by_user = async (user_id, campaign_id, obj) => {
     try {
         let user = await Campaign_User.findOneAndUpdate({ "user_id": new ObjectId(user_id), "campaign_id": new ObjectId(campaign_id) }, obj);
        

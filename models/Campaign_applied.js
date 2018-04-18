@@ -8,7 +8,7 @@ var Campaign_appliedSchema = new Schema({
     campaign_id: { type: mongoose.Schema.Types.ObjectId, ref: 'compaign', required: true },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
     desription: String,
-    Image: String,
+    image: String,
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
