@@ -147,13 +147,35 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
  */
 campaign_helper.insert_campaign_applied = async (campaign_object) => {
     let campaign = new Campaign_Applied(campaign_object)
+
     try {
+
         let campaign_data = await campaign.save();
+        // let camapign_applied = await campaign_user.findOneAndUpdate({user_id : user_id,campaign_id:campaign_id},obj);
         return { "status": 1, "message": "Campaign inserted", "campaign": campaign_data };
+
     } catch (err) {
+
         return { "status": 0, "message": "Error occured while inserting Campaign Applied", "error": err };
     }
 };
+
+
+campaign_helper.update_apply = async (user_id, campaign_id, obj) => {
+
+    try {
+        let user = await Campaign_User.findOneAndUpdate({ "user_id": new ObjectId(user_id), "campaign_id": new ObjectId(campaign_id) }, obj);
+       
+        if (!user) {
+            return { "status": 2, "message": "Record has not updated" };
+        } else {
+            return { "status": 1, "message": "Record has been updated", "user": user };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while updating user", "error": err }
+    }
+};
+
 
 /*
  * insert_campaign_user is used to insert into Campaign_user collection

@@ -7,6 +7,11 @@ var Schema = mongoose.Schema;
 var Campaign_userSchema = new Schema({
     campaign_id: { type: mongoose.Schema.Types.ObjectId, ref: 'campaign', required: true },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
+    is_invited: {type :Boolean , default :false}, 
+    is_apply: {type :Boolean , default :false}, 
+    is_purchase: {type :Boolean , default :false}, 
+    is_posted: {type :Boolean , default :false}, 
+    is_paid: {type :Boolean , default :false}, 
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 

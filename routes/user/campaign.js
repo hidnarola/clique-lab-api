@@ -12,7 +12,6 @@ var PinIt = require('pin-it-node');
 var campaign_helper = require("./../../helpers/campaign_helper");
 var user_helper = require("./../../helpers/user_helper");
 var campaign_post_helper = require("./../../helpers/campaign_post_helper");
-
 //var PDK = require('node-pinterest');
 //var pinterest = PDK.init('AVYSkGTuxc-WUJpdRHkXyu8gEsfEFST4h8o1jBZE2WRMweA4YAAAAAA');
 //pinterest.api('me').then(console.log);
@@ -30,10 +29,7 @@ var campaign_post_helper = require("./../../helpers/campaign_post_helper");
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post("/approved", async (req, res) => {
-
-  console.log("1");
   user_id = req.userInfo.id;
-
   logger.trace("Get all campaign API called");
   var filter = {};
   var sort = {};
@@ -275,8 +271,8 @@ router.post("/campaign_applied", async (req, res) => {
       "desription": req.body.desription
     };
 
-    //console.log(inspire_obj);
-
+    var campaign_id =campaign_obj.campaign_id;
+    var user_id = campaign_obj.user_id;
     async.waterfall(
       [
         function (callback) {
@@ -322,14 +318,22 @@ router.post("/campaign_applied", async (req, res) => {
         if (filename) {
           campaign_obj.image = filename;
         }
+       
 
         let campaign_data = await campaign_helper.insert_campaign_applied(campaign_obj);
+     
+       
         if (campaign_data.status === 0) {
           logger.error("Error while inserting camapign  data = ", campaign_data);
           return res.status(config.BAD_REQUEST).json({ campaign_data });
         } else {
+          var obj = {"is_apply":true};
+        
+          let campaign_apply_update = await campaign_post_helper.update_apply(user_id,campaign_id,obj);
+
           return res.status(config.OK_STATUS).json(campaign_data);
         }
+
       }
     );
   } else {
@@ -395,6 +399,9 @@ router.post('/share/:campaign_id', async (req, res) => {
             "post_id": post_id.id
           };
           let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
+          var obj = {"is_posted":true};
+        
+          let campaign_post_update = await campaign_post_helper.update_post(user_id,campaign_id,obj);
           return res.status(config.OK_STATUS).json(campaign_data);
         }
       });
