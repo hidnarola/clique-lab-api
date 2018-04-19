@@ -403,6 +403,59 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
     }
 }
 
+campaign_helper.get_future_campaign_by_promoter = async (promoter_id, page_no, page_size) => {
+    try {
+        var campaigns = await Campaign.aggregate([
+            {
+                "$match": {
+                    "promoter_id": new ObjectId(promoter_id),
+                    "start_date": { "$gt": new Date() }
+                }
+            },
+            { "$sort": { "created_at": -1 } },
+            {
+                "$skip": page_size * (page_no - 1)
+            },
+            {
+                "$limit": page_size
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "name": 1,
+                    "start_date": 1,
+                    "end_date": 1,
+                    "social_media_platform": 1,
+                    "media_format": 1,
+                    "location": 1,
+                    "price": 1,
+                    "currency": 1,
+                    "description": 1,
+                    "cover_image": 1,
+                    // "remianing_days": { $subtract: ["$end_date",new Date()] }
+                }
+            },
+            {
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'campaigns': { "$push": '$$ROOT' }
+                }
+            },
+        ]);
 
+        if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
+            _.map(campaigns[0].campaigns, function (campaign) {
+                campaign.starts_in = moment(campaign.start_date).diff(moment(), 'days');
+                return campaign;
+            });
+            return { "status": 1, "message": "campaign found", "campaigns": campaigns };
+        } else {
+            return { "status": 2, "message": "No campaign available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
+    }
+}
 
 module.exports = campaign_helper;
