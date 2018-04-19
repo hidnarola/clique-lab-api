@@ -350,23 +350,48 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
             },
             { "$sort": { "created_at": -1 } },
             {
-                "$group": {
-                    "_id": null,
-                    "total": { "$sum": 1 },
-                    'results': { "$push": '$$ROOT' }
+                "$skip": page_size * (page_no - 1)
+            },
+            {
+                "$limit": page_size
+            },
+            {
+                "$lookup": {
+                    "from": "campaign_user",
+                    "localField": "_id",
+                    "foreignField": "campaign_id",
+                    "as": "campaign_user"
                 }
             },
             {
                 "$project": {
-                    "total": 1,
-                    'campaigns': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                    "_id": 1,
+                    "name": 1,
+                    "start_date": 1,
+                    "end_date": 1,
+                    "social_media_platform": 1,
+                    "media_format": 1,
+                    "location": 1,
+                    "price": 1,
+                    "currency": 1,
+                    "description": 1,
+                    "cover_image": 1,
+                    "submissions": { "$size": "$campaign_user" },
+                    // "remianing_days": { $subtract: ["$end_date",new Date()] }
                 }
-            }
+            },
+            {
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'campaigns': { "$push": '$$ROOT' }
+                }
+            },
         ]);
 
         if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
-            _.map(campaigns[0].campaigns,function(campaign){
-                campaign.remaining_days = moment(campaign.end_date).diff(moment(),'days');
+            _.map(campaigns[0].campaigns, function (campaign) {
+                campaign.remaining_days = moment(campaign.end_date).diff(moment(), 'days');
                 return campaign;
             });
             return { "status": 1, "message": "campaign found", "campaigns": campaigns };
