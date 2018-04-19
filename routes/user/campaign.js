@@ -14,6 +14,8 @@ var user_helper = require("./../../helpers/user_helper");
 var campaign_post_helper = require("./../../helpers/campaign_post_helper");
 var PDK = require('node-pinterest');
 var pinterest = PDK.init('AYSihE_YGAfDVXbYU3P7e85xncTzFSaDpm_8EORE2WRMweA4YAAAAAA');
+var Twitter = require('twitter');
+
 //pinterest.api('me').then(console.log);
 
 /**
@@ -425,19 +427,50 @@ router.post('/share/:campaign_id', async (req, res) => {
   }
 });
 
-// pinterest.api('me/boards').then(function(json) {
-//   console.log(json);
-//   pinterest.api('pins', {
-//       method: 'POST',
-//       body: {
-//           board: json.data[0].id, // grab the first board from the previous response
-//           note: 'this is a test1',
-//           image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
-//       }
-//   }).then(function(json) {
-//       pinterest.api('me/pins').then(console.log);
-//   });
-// });
 
 
+/*pinterest.api('me/boards').then(function(json) {
+  console.log(json);
+  pinterest.api('pins', {
+      method: 'POST',
+      body: {
+          board: json.data[0].id, // grab the first board from the previous response
+          note: 'this is a test1',
+          image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
+      }
+  }).then(function(json) {
+      pinterest.api('me/pins').then(console.log);
+  });
+});
+*/
+
+
+/*var client = new Twitter({
+  consumer_key: 'HMZWrgFh4A9hhoWhZdkPS1IyO',
+  consumer_secret: '10kLAI5ybuC1AxY7WmdHDba2r9uCN4k6LYbvGhSNHr9Igq7uZy',
+  access_token_key: '981822054855933952-TACqTt4v8J4dAFUv8jDMmT9a2QC0VAN',
+  access_token_secret: 'PKhVyKslUSxhXVe0hA2UbQNfpo3ugx79fumaPBApc4gVm'
+});
+
+var data = require('fs').readFileSync('uploads/campaign/image_1522825554987.jpg');
+client.post('media/upload', {media: data}, function(error, media, response) {
+
+
+  if (!error) {
+
+    // If successful, a media object will be returned.
+    
+    var status = {
+      status: 'I am a tweet',
+      media_ids: media.media_id_string // Pass the media id string
+    }
+
+    client.post('statuses/update', status, function(error, tweet, response) {
+      if (!error) {
+        console.log("uploaded ");
+      }
+    });
+
+  }
+});*/
 module.exports = router;
