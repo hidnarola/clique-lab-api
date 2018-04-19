@@ -1,4 +1,6 @@
 var mongoose = require('mongoose');
+var moment = require('moment');
+var _ = require('underscore');
 
 var Campaign_Applied = require("./../models/Campaign_applied");
 var Campaign_User = require("./../models/Campaign_user");
@@ -164,7 +166,7 @@ campaign_helper.insert_campaign_applied = async (campaign_object) => {
 campaign_helper.update_campaign_by_user = async (user_id, campaign_id, obj) => {
     try {
         let user = await Campaign_User.findOneAndUpdate({ "user_id": new ObjectId(user_id), "campaign_id": new ObjectId(campaign_id) }, obj);
-       
+
         if (!user) {
             return { "status": 2, "message": "Record has not updated" };
         } else {
@@ -175,6 +177,18 @@ campaign_helper.update_campaign_by_user = async (user_id, campaign_id, obj) => {
     }
 };
 
+campaign_helper.update_campaign_by_id = async (campaign_id, obj) => {
+    try {
+        let campaign = await Campaign.findOneAndUpdate({ "_id": new ObjectId(campaign_id) }, obj);
+        if (!campaign) {
+            return { "status": 2, "message": "Campaign has not updated" };
+        } else {
+            return { "status": 1, "message": "Campaign has been updated", "campaign": campaign };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while updating campaign", "error": err }
+    }
+};
 
 /*
  * insert_campaign_user is used to insert into Campaign_user collection
@@ -211,7 +225,7 @@ campaign_helper.insert_multiple_campaign_user = async (campaign_user_array) => {
  * @param   campaign_object     JSON object consist of all property that need to insert in collection
  * 
  * @return  status  0 - If any error occur in inserting campaign, with error
- *          status  1 - If campaign inserted, with inserted faculty's document and appropriate message
+ *          status  1 - If campaign inserted, with inserted campaign's document and appropriate message
  * 
  * @developed by "ar"
  */
@@ -351,6 +365,10 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
         ]);
 
         if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
+            _.map(campaigns[0].campaigns,function(campaign){
+                campaign.remaining_days = moment(campaign.end_date).diff(moment(),'days');
+                return campaign;
+            });
             return { "status": 1, "message": "campaign found", "campaigns": campaigns };
         } else {
             return { "status": 2, "message": "No campaign available" };

@@ -29,6 +29,7 @@
     "nodemailer": "^2.6.0",
     "pin-it-node": "^0.2.0",
     "serve-favicon": "~2.4.2",
-    "swagger-ui-express": "^3.0.6"
+    "swagger-ui-express": "^3.0.6",
+    "underscore": "^1.9.0"
   }
 }

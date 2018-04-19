@@ -406,4 +406,24 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
     }
 });
 
+/**
+ * Stop campaign by id
+ * /promoter/campaign/stop/:campaign_id
+ * Developed by "ar"
+ */
+router.post('/stop/:campaign_id', async (req, res) => {
+    var obj = {
+        "end_date":moment().toDate(),
+        "is_stop_by_promoter":true
+    };
+    var campaign_resp = await campaign_helper.update_campaign_by_id(req.params.campaign_id,obj);
+    if(campaign_resp.status === 0){
+        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while stoping campaign","error":campaign_resp.error});
+    } else if(campaign_resp.status === 2) {
+        res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't stop campaign"});
+    } else {
+        res.status(config.OK_STATUS).json({"status":1,"message":"Campaign has been stopped"});
+    }
+});
+
 module.exports = router;
