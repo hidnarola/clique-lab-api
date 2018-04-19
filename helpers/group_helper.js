@@ -185,17 +185,21 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
             }
         });
 
-        aggregate.push({
-            "$project": {
-                "total": 1,
-                'members': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
-            }
-        });
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'members': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({"$project":{
+                "total":1,
+                'members':"$results"
+            }});
+        }
 
-        console.log("aggregate = ", JSON.stringify(aggregate));
-        
         var members = await Group_User.aggregate(aggregate);
-        console.log(members[0].results);
 
         if (members && members[0] && members[0].members.length > 0) {
             return { "status": 1, "message": "Members found", "results": members[0] };
@@ -206,6 +210,15 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
         return { "status": 0, "message": "Error occured while finding group member", "error": err }
     }
 
+};
+
+group_helper.insert_multiple_group_user = async (group_user_array) => {
+    try {
+        let group_user_data = await Group_User.insertMany(group_user_array);
+        return { "status": 1, "message": "User added in group", "group_user": group_user_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting into group_user", "error": err };
+    }
 };
 
 module.exports = group_helper;

@@ -1,4 +1,6 @@
 var mongoose = require('mongoose');
+var moment = require('moment');
+var _ = require('underscore');
 
 var Campaign_Applied = require("./../models/Campaign_applied");
 var Campaign_User = require("./../models/Campaign_user");
@@ -164,7 +166,7 @@ campaign_helper.insert_campaign_applied = async (campaign_object) => {
 campaign_helper.update_campaign_by_user = async (user_id, campaign_id, obj) => {
     try {
         let user = await Campaign_User.findOneAndUpdate({ "user_id": new ObjectId(user_id), "campaign_id": new ObjectId(campaign_id) }, obj);
-       
+
         if (!user) {
             return { "status": 2, "message": "Record has not updated" };
         } else {
@@ -175,6 +177,18 @@ campaign_helper.update_campaign_by_user = async (user_id, campaign_id, obj) => {
     }
 };
 
+campaign_helper.update_campaign_by_id = async (campaign_id, obj) => {
+    try {
+        let campaign = await Campaign.findOneAndUpdate({ "_id": new ObjectId(campaign_id) }, obj);
+        if (!campaign) {
+            return { "status": 2, "message": "Campaign has not updated" };
+        } else {
+            return { "status": 1, "message": "Campaign has been updated", "campaign": campaign };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while updating campaign", "error": err }
+    }
+};
 
 /*
  * insert_campaign_user is used to insert into Campaign_user collection
@@ -196,13 +210,22 @@ campaign_helper.insert_campaign_user = async (campaign_user_object) => {
     }
 };
 
+campaign_helper.insert_multiple_campaign_user = async (campaign_user_array) => {
+    try {
+        let campaign_user_data = await Campaign_User.insertMany(campaign_user_array);
+        return { "status": 1, "message": "User added in campaign", "campaign_user": campaign_user_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting into campaign_user", "error": err };
+    }
+};
+
 /*
  * insert_campaign is used to insert into campaign collection
  * 
  * @param   campaign_object     JSON object consist of all property that need to insert in collection
  * 
  * @return  status  0 - If any error occur in inserting campaign, with error
- *          status  1 - If campaign inserted, with inserted faculty's document and appropriate message
+ *          status  1 - If campaign inserted, with inserted campaign's document and appropriate message
  * 
  * @developed by "ar"
  */
@@ -327,21 +350,105 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
             },
             { "$sort": { "created_at": -1 } },
             {
-                "$group": {
-                    "_id": null,
-                    "total": { "$sum": 1 },
-                    'results': { "$push": '$$ROOT' }
+                "$skip": page_size * (page_no - 1)
+            },
+            {
+                "$limit": page_size
+            },
+            {
+                "$lookup": {
+                    "from": "campaign_user",
+                    "localField": "_id",
+                    "foreignField": "campaign_id",
+                    "as": "campaign_user"
                 }
             },
             {
                 "$project": {
-                    "total": 1,
-                    'campaigns': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                    "_id": 1,
+                    "name": 1,
+                    "start_date": 1,
+                    "end_date": 1,
+                    "social_media_platform": 1,
+                    "media_format": 1,
+                    "location": 1,
+                    "price": 1,
+                    "currency": 1,
+                    "description": 1,
+                    "cover_image": 1,
+                    "submissions": { "$size": "$campaign_user" },
+                    // "remianing_days": { $subtract: ["$end_date",new Date()] }
                 }
-            }
+            },
+            {
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'campaigns': { "$push": '$$ROOT' }
+                }
+            },
         ]);
 
         if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
+            _.map(campaigns[0].campaigns, function (campaign) {
+                campaign.remaining_days = moment(campaign.end_date).diff(moment(), 'days');
+                return campaign;
+            });
+            return { "status": 1, "message": "campaign found", "campaigns": campaigns };
+        } else {
+            return { "status": 2, "message": "No campaign available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
+    }
+}
+
+campaign_helper.get_future_campaign_by_promoter = async (promoter_id, page_no, page_size) => {
+    try {
+        var campaigns = await Campaign.aggregate([
+            {
+                "$match": {
+                    "promoter_id": new ObjectId(promoter_id),
+                    "start_date": { "$gt": new Date() }
+                }
+            },
+            { "$sort": { "created_at": -1 } },
+            {
+                "$skip": page_size * (page_no - 1)
+            },
+            {
+                "$limit": page_size
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "name": 1,
+                    "start_date": 1,
+                    "end_date": 1,
+                    "social_media_platform": 1,
+                    "media_format": 1,
+                    "location": 1,
+                    "price": 1,
+                    "currency": 1,
+                    "description": 1,
+                    "cover_image": 1,
+                    // "remianing_days": { $subtract: ["$end_date",new Date()] }
+                }
+            },
+            {
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'campaigns': { "$push": '$$ROOT' }
+                }
+            },
+        ]);
+
+        if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
+            _.map(campaigns[0].campaigns, function (campaign) {
+                campaign.starts_in = moment(campaign.start_date).diff(moment(), 'days');
+                return campaign;
+            });
             return { "status": 1, "message": "campaign found", "campaigns": campaigns };
         } else {
             return { "status": 2, "message": "No campaign available" };

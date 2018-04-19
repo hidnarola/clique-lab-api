@@ -445,7 +445,7 @@ router.post('/share/:campaign_id', async (req, res) => {
 */
 
 
-var client = new Twitter({
+/*var client = new Twitter({
   consumer_key: 'HMZWrgFh4A9hhoWhZdkPS1IyO',
   consumer_secret: '10kLAI5ybuC1AxY7WmdHDba2r9uCN4k6LYbvGhSNHr9Igq7uZy',
   access_token_key: '981822054855933952-TACqTt4v8J4dAFUv8jDMmT9a2QC0VAN',
@@ -454,6 +454,7 @@ var client = new Twitter({
 
 var data = require('fs').readFileSync('uploads/campaign/image_1522825554987.jpg');
 client.post('media/upload', {media: data}, function(error, media, response) {
+
 
   if (!error) {
 
@@ -471,5 +472,5 @@ client.post('media/upload', {media: data}, function(error, media, response) {
     });
 
   }
-});
+});*/
 module.exports = router;

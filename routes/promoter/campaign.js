@@ -2,11 +2,18 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var async = require("async");
+var moment = require("moment");
+var mongoose = require('mongoose');
 var router = express.Router();
 
 var config = require('./../../config');
 var campaign_helper = require('./../../helpers/campaign_helper');
+var user_helper = require('./../../helpers/user_helper');
+var group_helper = require('./../../helpers/group_helper');
+var global_helper = require("./../../helpers/global_helper");
+
 var logger = config.logger;
+var ObjectId = mongoose.Types.ObjectId;
 
 /** 
  * @api {post} /promoter/campaign Add new campaign
@@ -230,7 +237,7 @@ router.post('/:campaign_id/add_user/:user_id', async (req, res) => {
 });
 
 /**
- * Fetch Campaign for logged-in promoter
+ * Fetch active campaign for logged-in promoter
  * /promoter/campaign/active
  * Developed by "ar"
  */
@@ -248,7 +255,7 @@ router.post('/active', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var campaign_resp = await campaign_helper.get_active_campaign_by_promoter(req.userInfo.id,req.body.page_no, req.body.page_size);
+        var campaign_resp = await campaign_helper.get_active_campaign_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size);
         if (campaign_resp.status === 0) {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching active campaign", "error": campaign_resp.error });
         } else if (campaign_resp.status === 1) {
@@ -258,6 +265,196 @@ router.post('/active', async (req, res) => {
         }
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/**
+ * Fetch future campaign for logged-in promoter
+ * /promoter/campaign/future
+ * Developed by "ar"
+ */
+router.post('/future', async (req, res) => {
+    var schema = {
+        'page_size': {
+            notEmpty: true,
+            errorMessage: "Page size is required"
+        },
+        'page_no': {
+            notEmpty: true,
+            errorMessage: "Page number is required"
+        }
+    };
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+    if (!errors) {
+        var campaign_resp = await campaign_helper.get_future_campaign_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size);
+        if (campaign_resp.status === 0) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching active campaign", "error": campaign_resp.error });
+        } else if (campaign_resp.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaigns found", "results": campaign_resp.campaigns });
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No campaign found for given promoter" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/**
+ * Save result as a campaign for everyday user
+ * /promoter/campaign/:campaign_id/add_filter_result_to_campaign
+ * Developed by "ar"
+ */
+router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
+    var match_filter = {};
+    if (req.body.filter) {
+        req.body.filter.forEach(filter_criteria => {
+            if (filter_criteria.type === "exact") {
+                match_filter[filter_criteria.field] = filter_criteria.value;
+            } else if (filter_criteria.type === "between") {
+                if (filter_criteria.field === "age") {
+                    // Age is derived attribute and need to calculate based on date of birth
+                    match_filter[filter_criteria.field] = {
+                        "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                        "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                    };
+                } else {
+                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                }
+            } else if (filter_criteria.type === "like") {
+                var regex = new RegExp(filter_criteria.value);
+                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+            } else if (filter_criteria.type === "id") {
+                match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+            }
+        });
+    }
+
+    let keys = {
+        "fb_friends": "facebook.no_of_friends",
+        "insta_followers": "instagram.no_of_followers",
+        "twitter_followers": "twitter.no_of_followers",
+        "pinterest_followers": "pinterest.no_of_followers",
+        "linkedin_connection": "linkedin.no_of_connections",
+        "year_in_industry": "experience",
+        "age": "date_of_birth"
+    };
+    match_filter = await global_helper.rename_keys(match_filter, keys);
+
+    var users = await user_helper.get_filtered_user(0, 0, match_filter, 0);
+
+    if (users.status === 1 && users.results && users.results.users) {
+        var user_campaign = [];
+
+        for (let user of users.results.users) {
+            await user_campaign.push({
+                "campaign_id": req.params.campaign_id,
+                "user_id": user._id
+            });
+        }
+
+        let campaign_users_resp = await campaign_helper.insert_multiple_campaign_user(user_campaign);
+        if (campaign_users_resp.status == 0) {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
+        } else {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been added to given campaign" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
+    }
+})
+
+/**
+ * Save result as a campaign for group member
+ * /promoter/campaign/:campaign_id/:group_id/add_filter_result_to_campaign
+ * Developed by "ar"
+ */
+router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req, res) => {
+    var match_filter = {};
+    if (req.body.filter) {
+        req.body.filter.forEach(filter_criteria => {
+            if (filter_criteria.type === "exact") {
+                match_filter[filter_criteria.field] = filter_criteria.value;
+            } else if (filter_criteria.type === "between") {
+                if (filter_criteria.field === "age") {
+                    // Age is derived attribute and need to calculate based on date of birth
+                    match_filter[filter_criteria.field] = {
+                        "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                        "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                    };
+                } else {
+                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                }
+            } else if (filter_criteria.type === "like") {
+                var regex = new RegExp(filter_criteria.value);
+                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+            } else if (filter_criteria.type === "id") {
+                match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+            }
+        });
+    }
+
+    let keys = {
+        "fb_friends": "members.facebook.no_of_friends",
+        "insta_followers": "members.instagram.no_of_followers",
+        "twitter_followers": "members.twitter.no_of_followers",
+        "pinterest_followers": "members.pinterest.no_of_followers",
+        "linkedin_connection": "members.linkedin.no_of_connections",
+        "year_in_industry": "members.experience",
+        "age": "members.date_of_birth",
+
+        "gender": "members.gender",
+        "location": "members.location",
+        "job_industry": "members.job_industry",
+        "education": "members.education",
+        "language": "members.language",
+        "ethnicity": "members.ethnicity",
+        "interested_in": "members.interested_in",
+        "relationship_status": "members.relationship_status",
+        "music_taste": "members.music_taste"
+    };
+    match_filter = await global_helper.rename_keys(match_filter, keys);
+
+    var members = await group_helper.get_members_of_group(req.params.group_id, 0, 0, match_filter, 0);
+
+    if (members.status === 1 && members.results && members.results.members) {
+        var user_campaign = [];
+
+        for (let user of members.results.members) {
+            await user_campaign.push({
+                "campaign_id": req.params.campaign_id,
+                "user_id": user._id
+            });
+        }
+
+        let campaign_users_resp = await campaign_helper.insert_multiple_campaign_user(user_campaign);
+        if (campaign_users_resp.status == 0) {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
+        } else {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been added to given campaign" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
+    }
+});
+
+/**
+ * Stop campaign by id
+ * /promoter/campaign/stop/:campaign_id
+ * Developed by "ar"
+ */
+router.post('/stop/:campaign_id', async (req, res) => {
+    var obj = {
+        "end_date":moment().toDate(),
+        "is_stop_by_promoter":true
+    };
+    var campaign_resp = await campaign_helper.update_campaign_by_id(req.params.campaign_id,obj);
+    if(campaign_resp.status === 0){
+        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while stoping campaign","error":campaign_resp.error});
+    } else if(campaign_resp.status === 2) {
+        res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't stop campaign"});
+    } else {
+        res.status(config.OK_STATUS).json({"status":1,"message":"Campaign has been stopped"});
     }
 });
 
