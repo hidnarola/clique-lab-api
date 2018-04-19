@@ -301,6 +301,38 @@ router.post('/future', async (req, res) => {
 });
 
 /**
+ * Fetch past campaign for logged-in promoter
+ * /promoter/campaign/past
+ * Developed by "ar"
+ */
+router.post('/past', async (req, res) => {
+    var schema = {
+        'page_size': {
+            notEmpty: true,
+            errorMessage: "Page size is required"
+        },
+        'page_no': {
+            notEmpty: true,
+            errorMessage: "Page number is required"
+        }
+    };
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+    if (!errors) {
+        var campaign_resp = await campaign_helper.get_past_campaign_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size);
+        if (campaign_resp.status === 0) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching past campaign", "error": campaign_resp.error });
+        } else if (campaign_resp.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaigns found", "results": campaign_resp.campaigns });
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No campaign found for given promoter" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/**
  * Save result as a campaign for everyday user
  * /promoter/campaign/:campaign_id/add_filter_result_to_campaign
  * Developed by "ar"
@@ -455,6 +487,22 @@ router.post('/stop/:campaign_id', async (req, res) => {
         res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't stop campaign"});
     } else {
         res.status(config.OK_STATUS).json({"status":1,"message":"Campaign has been stopped"});
+    }
+});
+
+/**
+ * Delete campaign by id
+ * /promoter/campaign/:campaign_id
+ * Developed by "ar"
+ */
+router.delete('/:campaign_id', async (req, res) => {
+    var campaign_resp = await campaign_helper.delete_campaign_by_id(req.params.campaign_id);
+    if(campaign_resp.status === 0){
+        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while deleting campaign","error":campaign_resp.error});
+    } else if(campaign_resp.status === 2) {
+        res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't delete campaign"});
+    } else {
+        res.status(config.OK_STATUS).json({"status":1,"message":"Campaign has been deleted"});
     }
 });
 

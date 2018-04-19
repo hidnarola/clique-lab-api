@@ -140,7 +140,6 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
 
-        // console.log("aggregate = ", aggregate);
         var users = await User.aggregate(aggregate);
 
         if (users && users[0] && users[0].users.length > 0) {
