@@ -518,17 +518,97 @@ campaign_helper.get_past_campaign_by_promoter = async (promoter_id, page_no, pag
     }
 }
 
-campaign_helper.delete_campaign_by_id = async(campaign_id) => {
+campaign_helper.delete_campaign_by_id = async (campaign_id) => {
     try {
-        let resp = await Campaign.findOneAndRemove({_id:campaign_id});
-        if(!resp){
-            return {"status":2,"message":"Campaign not found"};
+        let resp = await Campaign.findOneAndRemove({ _id: campaign_id });
+        if (!resp) {
+            return { "status": 2, "message": "Campaign not found" };
         } else {
             // Delete all data related to campaign
-            return {"status":1,"message":"Campaign deleted","resp":resp};
+            return { "status": 1, "message": "Campaign deleted", "resp": resp };
         }
-    } catch (err){
-        return {"status":0,"message":"Error occured while deleting campaign","error":err};
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while deleting campaign", "error": err };
+    }
+}
+
+campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, page_size, filter, sort) => {
+    try {
+        var aggregate = [
+            {
+                "$match": { "_id": new ObjectId(campaign_id) }
+            },
+            {
+                "$lookup": {
+                    "from": "campaign_user",
+                    "localField": "_id",
+                    "foreignField": "campaign_id",
+                    "as": "campaign_user"
+                }
+            },
+            {
+                "$unwind": "$campaign_user"
+            },
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "campaign_user.user_id",
+                    "foreignField": "_id",
+                    "as": "user"
+                }
+            },
+            {
+                "$unwind": "$user"
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "campaign_user": { $mergeObjects: ["$campaign_user", "$user"] }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id",
+                    "campaign_user": { $push: "$campaign_user" }
+                }
+            }
+        ];
+
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "_id": "$_id",
+                    "total": { "$size": "$campaign_user" },
+                    "campaign_user": { "$slice": ["$campaign_user", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({
+                "$project": {
+                    "_id": "$_id",
+                    "total": { "$size": "$campaign_user" },
+                    "campaign_user": "$campaign_user"
+                }
+            });
+        }
+
+        var campaign = await Campaign.aggregate(aggregate);
+        console.log("campaign = ", campaign);
+        if (campaign && campaign[0]) {
+            return { "status": 1, "message": "Campaign found", "campaign": campaign[0] };
+        } else {
+            return { "status": 2, "message": "No campaign found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
 

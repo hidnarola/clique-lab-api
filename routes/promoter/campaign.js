@@ -477,16 +477,16 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
  */
 router.post('/stop/:campaign_id', async (req, res) => {
     var obj = {
-        "end_date":moment().toDate(),
-        "is_stop_by_promoter":true
+        "end_date": moment().toDate(),
+        "is_stop_by_promoter": true
     };
-    var campaign_resp = await campaign_helper.update_campaign_by_id(req.params.campaign_id,obj);
-    if(campaign_resp.status === 0){
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while stoping campaign","error":campaign_resp.error});
-    } else if(campaign_resp.status === 2) {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't stop campaign"});
+    var campaign_resp = await campaign_helper.update_campaign_by_id(req.params.campaign_id, obj);
+    if (campaign_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while stoping campaign", "error": campaign_resp.error });
+    } else if (campaign_resp.status === 2) {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't stop campaign" });
     } else {
-        res.status(config.OK_STATUS).json({"status":1,"message":"Campaign has been stopped"});
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been stopped" });
     }
 });
 
@@ -497,12 +497,104 @@ router.post('/stop/:campaign_id', async (req, res) => {
  */
 router.delete('/:campaign_id', async (req, res) => {
     var campaign_resp = await campaign_helper.delete_campaign_by_id(req.params.campaign_id);
-    if(campaign_resp.status === 0){
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while deleting campaign","error":campaign_resp.error});
-    } else if(campaign_resp.status === 2) {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't delete campaign"});
+    if (campaign_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while deleting campaign", "error": campaign_resp.error });
+    } else if (campaign_resp.status === 2) {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't delete campaign" });
     } else {
-        res.status(config.OK_STATUS).json({"status":1,"message":"Campaign has been deleted"});
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been deleted" });
+    }
+});
+
+/**
+ * Get details of campaign by campaign_id
+ * /promoter/campaign/:campaign_id
+ * Developed by "ar"
+ */
+router.post('/:campaign_id', async (req, res) => {
+    var schema = {
+        'page_size': {
+            notEmpty: true,
+            errorMessage: "Page size is required"
+        },
+        'page_no': {
+            notEmpty: true,
+            errorMessage: "Page number is required"
+        }
+    };
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+    if (!errors) {
+        var match_filter = {};
+        var sort = {};
+        if (req.body.filter) {
+            req.body.filter.forEach(filter_criteria => {
+                if (filter_criteria.type === "exact") {
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                } else if (filter_criteria.type === "between") {
+                    if (filter_criteria.field === "age") {
+                        // Age is derived attribute and need to calculate based on date of birth
+                        match_filter[filter_criteria.field] = {
+                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                            "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                        };
+                    } else {
+                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                    }
+                } else if (filter_criteria.type === "like") {
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                } else if (filter_criteria.type === "id") {
+                    match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+                }
+            });
+        }
+
+        if (req.body.sort) {
+            req.body.sort.forEach(sort_criteria => {
+                sort[sort_criteria.field] = sort_criteria.value;
+            });
+        }
+
+        if(Object.keys(sort).length === 0){
+            sort["_id"] = 1;
+        }
+
+        let keys = {
+            "fb_friends": "campaign_user.facebook.no_of_friends",
+            "insta_followers": "campaign_user.instagram.no_of_followers",
+            "twitter_followers": "campaign_user.twitter.no_of_followers",
+            "pinterest_followers": "campaign_user.pinterest.no_of_followers",
+            "linkedin_connection": "campaign_user.linkedin.no_of_connections",
+            "year_in_industry": "campaign_user.experience",
+            "age": "campaign_user.date_of_birth",
+
+            "gender": "campaign_user.gender",
+            "location": "campaign_user.location",
+            "job_industry": "campaign_user.job_industry",
+            "education": "campaign_user.education",
+            "language": "campaign_user.language",
+            "ethnicity": "campaign_user.ethnicity",
+            "interested_in": "campaign_user.interested_in",
+            "relationship_status": "campaign_user.relationship_status",
+            "music_taste": "campaign_user.music_taste"
+        };
+        
+        match_filter = await global_helper.rename_keys(match_filter, keys);
+        sort = await global_helper.rename_keys(sort, keys);
+
+        var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, req.body.page_no, req.body.page_size, match_filter, sort);
+
+        if(campaign_user.status === 1){
+            res.status(config.OK_STATUS).json({"status":1,"message":"Campaign details found","campaign":campaign_user.campaign});
+        } else if(campaign_user.status === 2){
+            res.status(config.BAD_REQUEST).json({"status":0,"message":"Campaign not found"});
+        } else {
+            res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured during fetching campaign details",error:campaign_user.error});
+        }
+
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
     }
 });
 
