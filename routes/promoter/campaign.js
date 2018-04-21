@@ -491,6 +491,31 @@ router.post('/stop/:campaign_id', async (req, res) => {
 });
 
 /**
+ * Purchase post
+ * /promoter/campaign/purchase/:campaign_id/:user_id
+ * Developed by "ar"
+ */
+router.post('/purchase/:campaign_id/:user_id', async (req, res) => {
+    let campaign_resp = await campaign_helper.update_campaign_by_user(req.params.user_id, req.params.campaign_id, { "is_purchase": true });
+    if (campaign_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while purchasing campaign" });
+    } else if (campaign_resp.status === 2) {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't purchase campaign for given user" });
+    } else {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been purchased for given user" });
+    }
+})
+
+/**
+ * Purchase filter campaign
+ * /promoter/campaign/purchase_filter_campaign
+ * Developed by "ar"
+ */
+router.post('/purchase_filter_campaign', async (req, res) => {
+    
+})
+
+/**
  * Delete campaign by id
  * /promoter/campaign/:campaign_id
  * Developed by "ar"
@@ -556,7 +581,7 @@ router.post('/:campaign_id', async (req, res) => {
             });
         }
 
-        if(Object.keys(sort).length === 0){
+        if (Object.keys(sort).length === 0) {
             sort["_id"] = 1;
         }
 
@@ -579,18 +604,18 @@ router.post('/:campaign_id', async (req, res) => {
             "relationship_status": "campaign_user.relationship_status",
             "music_taste": "campaign_user.music_taste"
         };
-        
+
         match_filter = await global_helper.rename_keys(match_filter, keys);
         sort = await global_helper.rename_keys(sort, keys);
 
         var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, req.body.page_no, req.body.page_size, match_filter, sort);
 
-        if(campaign_user.status === 1){
-            res.status(config.OK_STATUS).json({"status":1,"message":"Campaign details found","campaign":campaign_user.campaign});
-        } else if(campaign_user.status === 2){
-            res.status(config.BAD_REQUEST).json({"status":0,"message":"Campaign not found"});
+        if (campaign_user.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "campaign": campaign_user.campaign });
+        } else if (campaign_user.status === 2) {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
         } else {
-            res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured during fetching campaign details",error:campaign_user.error});
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaign_user.error });
         }
 
     } else {
