@@ -15,7 +15,15 @@ var campaign_post_helper = require("./../../helpers/campaign_post_helper");
 var PDK = require('node-pinterest');
 var pinterest = PDK.init('AYSihE_YGAfDVXbYU3P7e85xncTzFSaDpm_8EORE2WRMweA4YAAAAAA');
 var Twitter = require('twitter');
+var parallel = require('async/parallel');
+var randomstring = require("randomstring");
+var request = require("request");
 
+
+//var Linkedin = require('node-linkedin')('81o2b6x3ddegiv', 'as2ICfiyNX87vvZc', 'https://www.linkedin.com/oauth/v2/accessToken');
+// var Linkedin = require('node-linked-in');
+// var cfg = {};
+// var linkedin = new Linkedin(cfg);
 //pinterest.api('me').then(console.log);
 
 /**
@@ -98,9 +106,8 @@ router.post("/approved", async (req, res) => {
 router.post("/public_campaign", async (req, res) => {
   logger.trace("Get all Public Campaign API called");
   var filter = {};
+  var redact = {};
   var sort = {};
-  var page_no = {};
-  var page_size = {};
 
   var schema = {
     "page_no": {
@@ -118,16 +125,26 @@ router.post("/public_campaign", async (req, res) => {
 
   if (!errors) {
     if (req.body.social_media_platform) {
-      filter["social_media_platform"] = req.body.social_media_platform;
+      filter["social_media_platform"] = { "$in": req.body.social_media_platform };
+    }
+
+    if (req.body.search) {
+      redact = {
+          "$or": [
+            { "$setIsSubset": [ [req.body.search], "$at_tag" ] },
+            { "$setIsSubset": [ [req.body.search], "$hash_tag" ] },
+            { "$eq": [ "$name", req.body.search ] }
+          ]
+      }
     }
 
     if (typeof req.body.price != "undefined") {
       sort["price"] = req.body.price;
     }
 
-    page_no = req.body.page_no;
-    page_size = req.body.page_size;
-    var resp_data = await campaign_helper.get_all_campaign(filter, sort, page_no, page_size);
+
+
+    var resp_data = await campaign_helper.get_all_campaign(filter,redact, sort, redact, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Public Campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
@@ -185,6 +202,9 @@ router.post("/myoffer", async (req, res) => {
 
     if (typeof req.body.price != "undefined") {
       sort["price"] = req.body.price;
+    }
+    if (typeof req.body.search != "undefined") {
+      filter["search"] = req.body.search;
     }
     if (typeof req.body.page_no) {
       page_no = req.body.page_no;
@@ -260,7 +280,7 @@ router.post("/campaign_applied", async (req, res) => {
       notEmpty: true,
       errorMessage: "Description is required"
     },
-   
+
   };
   req.checkBody(schema);
   var errors = req.validationErrors();
@@ -271,10 +291,10 @@ router.post("/campaign_applied", async (req, res) => {
       "user_id": req.body.user_id,
       "campaign_id": req.body.campaign_id,
       "desription": req.body.desription,
-   
+
     };
 
-    var campaign_id =campaign_obj.campaign_id;
+    var campaign_id = campaign_obj.campaign_id;
     var user_id = campaign_obj.user_id;
     async.waterfall(
       [
@@ -312,10 +332,10 @@ router.post("/campaign_applied", async (req, res) => {
             }
 
           }
-          else{
+          else {
             logger.trace(" image required");
-              callback({  "err": "Image required" });
-       
+            callback({ "err": "Image required" });
+
           }
         }
 
@@ -326,18 +346,19 @@ router.post("/campaign_applied", async (req, res) => {
         if (filename) {
           campaign_obj.image = filename;
         }
-       
+        /*var random = randomstring.generate(6);
+        console.log(random);*/
 
         let campaign_data = await campaign_helper.insert_campaign_applied(campaign_obj);
-     
-       
+
+
         if (campaign_data.status === 0) {
           logger.error("Error while inserting camapign  data = ", campaign_data);
           return res.status(config.BAD_REQUEST).json({ campaign_data });
         } else {
-          var obj = {"is_apply":true};
-        
-          let campaign_apply_update = await campaign_helper.update_campaign_by_user(user_id,campaign_id,obj);
+          var obj = { "is_apply": true };
+
+          let campaign_apply_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
 
           return res.status(config.OK_STATUS).json(campaign_data);
         }
@@ -406,17 +427,17 @@ router.post('/share/:campaign_id', async (req, res) => {
             "campaign_id": campaign_id,
             "post_id": post_id.id
           };
-         
+
           //console.log(user_id);
 
-          let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
-          
-          user_id=campaign_obj.user_id;
-          campaign_id=campaign_obj.campaign_id;
-      
-          var obj = {"is_posted":true};
-        
-          let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id,campaign_id,obj);
+          //   let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
+
+          user_id = campaign_obj.user_id;
+          campaign_id = campaign_obj.campaign_id;
+
+          var obj = { "is_posted": true };
+
+          let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
           return res.status(config.OK_STATUS).json(campaign_data);
         }
       });
@@ -426,6 +447,121 @@ router.post('/share/:campaign_id', async (req, res) => {
     res.status(500).send({ "Error": error });
   }
 });
+
+
+router.post('/share/twitter/:campaign_id', async (req, res) => {
+  // Get campaign details by campaign id
+  campaign_id = req.params.campaign_id;
+  var mood_board_image = [];
+  var cover_image = [];
+  user_id = req.userInfo.id;
+  logger.trace("Get all Profile API called");
+  var user = await user_helper.get_user_by_id(user_id);
+  // var access_token = user.User.twitter.access_token;
+
+  // Get campaign details by campaign id
+  campaign_id = req.params.campaign_id;
+  logger.trace("Get all  Campaign API called");
+  var campaign_data = await campaign_helper.get_campaign_by_id(campaign_id);
+  var caption = campaign_data.Campaign.name + ' - ' + campaign_data.Campaign.description;
+
+
+  var client = new Twitter({
+    consumer_key: 'HMZWrgFh4A9hhoWhZdkPS1IyO',
+    consumer_secret: '10kLAI5ybuC1AxY7WmdHDba2r9uCN4k6LYbvGhSNHr9Igq7uZy',
+    access_token_key: '981822054855933952-TACqTt4v8J4dAFUv8jDMmT9a2QC0VAN',
+    access_token_secret: 'PKhVyKslUSxhXVe0hA2UbQNfpo3ugx79fumaPBApc4gVm'
+  });
+  var images = [];
+  async.parallel([
+    function (cover) {
+      fs.readFile('./uploads/campaign/' + campaign_data.Campaign.cover_image, (err, data) => {
+        if (err) throw err;
+        client.post('media/upload', { media: data }, function (error, media, response) {
+          console.log("Medias", media);
+
+          cover_image = media.media_id_string;
+
+          cover(null, cover_image);
+        })
+      });
+    },
+    function (board) {
+      if (campaign_data.Campaign.mood_board_images && campaign_data.Campaign.mood_board_images.length > 0) {
+        var img = [];
+        async.eachSeries(campaign_data.Campaign.mood_board_images, function (image, loop_callback) {
+          fs.readFile('./uploads/campaign/' + campaign_data.Campaign.mood_board_images, (err, data) => {
+            if (err) throw err;
+            client.post('media/upload', { media: data }, function (error, media, response) {
+              img.push(media.media_id_string);
+              loop_callback();
+            })
+          });
+        }, async (err) => {
+          if (err) {
+            board(err);
+          } else {
+            board(null, img);
+          }
+        });
+      }
+    }
+  ],
+    // optional callback
+    function (err, results) {
+      console.log("cover image = ", results[0]);
+      console.log("Mood Board image = ", results[1]);
+
+      var arr = [results[0]].concat(results[1]);
+
+
+      var status = {
+        status: 'I am a tweet',
+        media_ids: arr.join()
+      }
+      client.post('statuses/update', status, async (error, tweet, response) => {
+        console.log("media_ids ", status.media_ids);
+        media_id = status.media_ids;
+        var campaign_obj = {
+          "user_id": user_id,
+          "campaign_id": campaign_id,
+          "post_id": media_id
+        };
+
+        //console.log(user_id);
+
+        let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
+
+        user_id = campaign_obj.user_id;
+        campaign_id = campaign_obj.campaign_id;
+
+        var obj = { "is_posted": true };
+
+        let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
+        return res.status(config.OK_STATUS).json(campaign_data);
+      })
+    });
+
+});
+
+/*
+request.post({
+  "url": 'https://www.linkedin.com/oauth/v2/accessToken',
+  "headers": {'content-type':'application/x-www-form-urlencoded'},
+  "body": {
+    "client_id": "81o2b6x3ddegiv",
+    "grant_type": "authorization_code",
+    "code": "AQRqqdPHFOSe6OW-iSyL8r1noIzN8-FfbUPfdCpiBV6MsbiO3J0b6z-93aIshORIaEOefg0zLFfDBEf3cnF6oj3oPHjxfqgAyORh_7txfR7lRUONLalcGdPLbJ1In_2xayUbcW6IvVqS3CR34D9MqX-Gg1AdcQ&state=DCEeFWf45A53sdfKef424",
+    "redirect_uri": "http://13.55.64.183:8080",
+    "client_secret": "as2ICfiyNX87vvZc"
+  },
+  json: true
+}, function (error, response, body) {
+  //console.log(response);
+  console.log(body);
+  // console.log(error);
+});*/
+
 
 
 
@@ -445,32 +581,12 @@ router.post('/share/:campaign_id', async (req, res) => {
 */
 
 
-/*var client = new Twitter({
-  consumer_key: 'HMZWrgFh4A9hhoWhZdkPS1IyO',
-  consumer_secret: '10kLAI5ybuC1AxY7WmdHDba2r9uCN4k6LYbvGhSNHr9Igq7uZy',
-  access_token_key: '981822054855933952-TACqTt4v8J4dAFUv8jDMmT9a2QC0VAN',
-  access_token_secret: 'PKhVyKslUSxhXVe0hA2UbQNfpo3ugx79fumaPBApc4gVm'
-});
-
-var data = require('fs').readFileSync('uploads/campaign/image_1522825554987.jpg');
-client.post('media/upload', {media: data}, function(error, media, response) {
-
-
-  if (!error) {
-
-    // If successful, a media object will be returned.
-    
-    var status = {
-      status: 'I am a tweet',
-      media_ids: media.media_id_string // Pass the media id string
-    }
-
-    client.post('statuses/update', status, function(error, tweet, response) {
-      if (!error) {
-        console.log("uploaded ");
-      }
-    });
-
-  }
-});*/
+/*request.get('/oauth/linkedin/callback', function(req, res) {
+  Linkedin.auth.getAccessToken('AQRqqdPHFOSe6OW-iSyL8r1noIzN8-FfbUPfdCpiBV6MsbiO3J0b6z-93aIshORIaEOefg0zLFfDBEf3cnF6oj3oPHjxfqgAyORh_7txfR7lRUONLalcGdPLbJ1In_2xayUbcW6IvVqS3CR34D9MqX-Gg1AdcQ&state=DCEeFWf45A53sdfKef424', req.query.state, function(err, results) {
+      if ( err )
+          return console.error(err);
+      console.log(results);
+     
+  });
+});*///
 module.exports = router;

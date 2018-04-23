@@ -8,6 +8,7 @@
   "dependencies": {
     "array-sort": "^1.0.0",
     "async": "^2.6.0",
+    "async-parallel": "^1.2.3",
     "bcrypt": "^1.0.3",
     "body-parser": "~1.17.1",
     "cookie-parser": "~1.4.3",
@@ -21,17 +22,22 @@
     "fb": "^2.0.0",
     "fs": "0.0.1-security",
     "jsonwebtoken": "^8.2.0",
+    "linkedin-js": "^0.1.4",
     "log4js": "^2.5.3",
     "moment": "^2.21.0",
     "mongoose": "^5.0.12",
     "morgan": "~1.8.1",
+    "node-linked-in": "0.0.7",
+    "node-linkedin": "^0.5.6",
     "node-pinterest": "0.0.4",
     "nodemailer": "^2.6.0",
     "pin-it-node": "^0.2.0",
+    "randomstring": "^1.1.5",
+    "request": "^2.85.0",
     "serve-favicon": "~2.4.2",
     "swagger-ui-express": "^3.0.6",
     "twitter": "^1.7.1",
-    "utf8": "^3.0.0",
-    "underscore": "^1.9.0"
+    "underscore": "^1.9.0",
+    "utf8": "^3.0.0"
   }
 }
