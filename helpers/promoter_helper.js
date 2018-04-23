@@ -103,13 +103,15 @@ promoter_helper.update_promoter_by_id = async (promoter_id, promoter_object) => 
  */
 promoter_helper.get_all_brand = async (filter,page_no, page_size) => {
     try {
-        
+        var r = new RegExp(filter);
+        var search = {"$regex":r,"$options":"i"};
         var count  = await Promoter
-            .find(filter,{"industry_description":1,"company":1,"avatar" : 1})
-            
-            .lean();  
-         var brand  = await Promoter
-            .find(filter,{"industry_description":1,"company":1,"avatar" : 1})
+            .find({"company":search},{"industry_description":1,"company":1,"avatar" : 1})
+            .lean();
+
+           
+            var brand  = await Promoter           
+            .find({"company":search},{"industry_description":1,"company":1,"avatar" : 1})
             .skip((page_size * page_no) - page_size)
             .limit(page_size)
             .lean();  

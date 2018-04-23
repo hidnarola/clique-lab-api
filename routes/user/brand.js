@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
  if(!errors)
  {
     logger.trace("Get all Brand API called");
-    var resp_data = await promoter_helper.get_all_brand(filter,req.body.page_no, req.body.page_size);
+    var resp_data = await promoter_helper.get_all_brand(req.body.filter,req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Brand = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
