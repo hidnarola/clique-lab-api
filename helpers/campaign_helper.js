@@ -99,29 +99,27 @@ campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size)
 campaign_helper.get_all_campaign = async (filter, redact, sort, page_no, page_size) => {
     try {
 
-        var aggregate = {};
-        if(filter){
-            aggregate.push({"$match":filter});
+        var aggregate = [];
+        if (filter) {
+            aggregate.push({ "$match": filter });
         }
 
-        if(redact){
-            aggregate.push( { "$redact": { "$cond": { "if": { redact } } } } );
+        if (redact) {
+            aggregate.push({ "$redact": { "$cond": { "if": redact, "then":"$$KEEP", "else":"$$PRUNE" } } });
         }
 
         if (sort) {
             aggregate.push({ "$sort": sort });
         }
 
-        campaign = await Campaign
-            .find(filter)
-            // .sort(sort)
-            // .skip(page_no > 0 ? ((page_no - 1) * page_size) : 0).limit(page_size)
-            .lean();
-        // campaign.count = count;
-       
-       console.log(campaign);
+        console.log("Agrregate = ",JSON.stringify(aggregate));
+
+        var campaign = await Campaign.aggregate(aggregate);
+
+        console.log("campaign = ", campaign);
+
         if (campaign.length > 0 && campaign) {
-            return { "status": 1, "message": "campaign found", "Campaign": campaign};
+            return { "status": 1, "message": "campaign found", "Campaign": campaign };
         } else {
             return { "status": 2, "message": "No campaign available" };
         }

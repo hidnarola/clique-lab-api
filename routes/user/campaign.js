@@ -117,8 +117,7 @@ router.post("/public_campaign", async (req, res) => {
     "page_size": {
       notEmpty: true,
       errorMessage: "page_size is required"
-    },
-
+    }
   };
   req.checkBody(schema);
   var errors = req.validationErrors();
@@ -129,11 +128,14 @@ router.post("/public_campaign", async (req, res) => {
     }
 
     if (req.body.search) {
+      console.log("search = ",req.body.search);
+      var r = new RegExp(req.body.search);
+      var regex = { "$regex": r, "$options": "i" };
       redact = {
           "$or": [
             { "$setIsSubset": [ [req.body.search], "$at_tag" ] },
-            { "$setIsSubset": [ [req.body.search], "$hash_tag" ] },
-            { "$eq": [ "$name", req.body.search ] }
+            { "$setIsSubset": [ [req.body.search], "$hash_tag" ] }
+            // { "$eq": [ "$name", regex ] }
           ]
       }
     }
@@ -142,9 +144,7 @@ router.post("/public_campaign", async (req, res) => {
       sort["price"] = req.body.price;
     }
 
-
-
-    var resp_data = await campaign_helper.get_all_campaign(filter,redact, sort, redact, req.body.page_no, req.body.page_size);
+    var resp_data = await campaign_helper.get_all_campaign(filter,redact, sort, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Public Campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
