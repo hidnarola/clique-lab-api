@@ -1,0 +1,199 @@
+var mongoose = require('mongoose');
+
+var Cart = require("./../models/Cart");
+var cart_helper = {};
+
+var ObjectId = mongoose.Types.ObjectId;
+
+/*
+ * insert_cart_item is used to insert cart item
+ * 
+ * @param   cart_object     JSON object consist of all property that need to insert in collection
+ * 
+ * @return  status  0 - If any error occur in inserting cart, with error
+ *          status  1 - If cart inserted, with inserted cart's document and appropriate message
+ * 
+ * @developed by "ar"
+ */
+group_helper.insert_cart_item = async (cart_object) => {
+    let cart = new Cart(cart_object)
+    try {
+        let cart_data = await cart.save();
+        return { "status": 1, "message": "Cart item has been added", "cart": cart_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while adding cart item", "error": err };
+    }
+};
+
+/*
+ * get_filtered_group is used to get group based on given filter
+ * 
+ * @param   page_no     Integer page number
+ * @param   page_size   Integer Total number of record per page
+ * @param   filter      Array   Filter conditions for aggregate
+ * @param   sort        Array   Sorting criteria for aggregate
+ * 
+ * @return  status 0 - If any internal error occured while fetching user data, with error
+ *          status 1 - If user data found, with user's documents
+ *          status 2 - If user not found, with appropriate message
+ */
+group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
+    try {
+        var aggregate = [];
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$$ROOT' }
+            }
+        });
+
+        aggregate.push({
+            "$project": {
+                "total": 1,
+                'groups': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+            }
+        });
+
+        // aggregate.push({ "$skip": page_size * (page_no - 1) });
+        // aggregate.push({ "$limit": page_size });
+
+        console.log("aggregate = ", aggregate);
+        var groups = await Group.aggregate(aggregate);
+
+        if (groups && groups[0] && groups[0].groups.length > 0) {
+            return { "status": 1, "message": "Groups found", "results": groups[0] };
+        } else {
+            return { "status": 2, "message": "No group found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding group", "error": err }
+    }
+};
+
+/*
+ * insert_group_user is used to insert into Group_user collection
+ * 
+ * @param   group_user_object     JSON object consist of all property that need to insert in collection
+ * 
+ * @return  status  0 - If any error occur in inserting group_user, with error
+ *          status  1 - If group_user inserted, with inserted group_user's document and appropriate message
+ * 
+ * @developed by "ar"
+ */
+group_helper.insert_group_user = async (group_user_object) => {
+    let group_user = new Group_User(group_user_object)
+    try {
+        let group_user_data = await group_user.save();
+        return { "status": 1, "message": "User added in group", "group_user": group_user_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting into group_user", "error": err };
+    }
+};
+
+group_helper.user_not_exist_group_for_promoter = async (user_id, promoter_id) => {
+    try {
+        var groups = await Group.aggregate([
+            {
+                "$match": { "promoter_id": new ObjectId(promoter_id) }
+            },
+            {
+                "$lookup": {
+                    "from": "group_user",
+                    "localField": "_id",
+                    "foreignField": "group_id",
+                    "as": "group_user"
+                }
+            },
+            {
+                "$match": { "group_user.user_id": { $ne: new ObjectId(user_id) } }
+            }
+        ]);
+
+        if (groups && groups.length > 0) {
+            return { "status": 1, "message": "groups found", "groups": groups };
+        } else {
+            return { "status": 2, "message": "No group available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding group", "error": err }
+    }
+}
+
+group_helper.get_members_of_group = async (group_id, page_no, page_size, filter, sort) => {
+    try {
+        var aggregate = [{
+            "$match": { "group_id": new ObjectId(group_id) }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user_id",
+                "foreignField": "_id",
+                "as": "members"
+            }
+        },
+        {
+            "$unwind": "$members"
+        }];
+
+        // Apply additional filter
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$members' }
+            }
+        });
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'users': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({"$project":{
+                "total":1,
+                'users':"$results"
+            }});
+        }
+
+        var members = await Group_User.aggregate(aggregate);
+
+        if (members && members[0] && members[0].users.length > 0) {
+            return { "status": 1, "message": "Members found", "results": members[0] };
+        } else {
+            return { "status": 2, "message": "No member found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding group member", "error": err }
+    }
+
+};
+
+group_helper.insert_multiple_group_user = async (group_user_array) => {
+    try {
+        let group_user_data = await Group_User.insertMany(group_user_array);
+        return { "status": 1, "message": "User added in group", "group_user": group_user_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting into group_user", "error": err };
+    }
+};
+
+module.exports = group_helper;

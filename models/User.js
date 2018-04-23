@@ -89,7 +89,7 @@ var UserModelSchema = new Schema({
     gender: { type: String, enum: ["male", "female"] }, // 9
     date_of_birth: Date, // 10
     location: String, // 11
-    state: String, 
+    state: String,
     suburb: String, // 12
     facebook: FacebookSchema, // 13
     instagram: InstagramSchema, // 14

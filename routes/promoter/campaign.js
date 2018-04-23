@@ -492,18 +492,21 @@ router.post('/stop/:campaign_id', async (req, res) => {
 
 /**
  * Purchase post
- * /promoter/campaign/purchase/:campaign_id/:user_id
+ * /promoter/campaign/add_to_cart/:campaign_id/:user_id
  * Developed by "ar"
  */
-router.post('/purchase/:campaign_id/:user_id', async (req, res) => {
-    let campaign_resp = await campaign_helper.update_campaign_by_user(req.params.user_id, req.params.campaign_id, { "is_purchase": true });
-    if (campaign_resp.status === 0) {
-        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while purchasing campaign" });
-    } else if (campaign_resp.status === 2) {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't purchase campaign for given user" });
-    } else {
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been purchased for given user" });
-    }
+router.post('/add_to_cart/:campaign_id/:user_id', async (req, res) => {
+
+    // let cart_resp = await 
+
+    // let campaign_resp = await campaign_helper.update_campaign_by_user(req.params.user_id, req.params.campaign_id, { "is_purchase": true });
+    // if (campaign_resp.status === 0) {
+    //     res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while purchasing campaign" });
+    // } else if (campaign_resp.status === 2) {
+    //     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't purchase campaign for given user" });
+    // } else {
+    //     res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been purchased for given user" });
+    // }
 })
 
 /**

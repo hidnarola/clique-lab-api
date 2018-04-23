@@ -112,14 +112,28 @@ campaign_helper.get_all_campaign = async (filter, redact, sort, page_no, page_si
             aggregate.push({ "$sort": sort });
         }
 
-        console.log("Agrregate = ",JSON.stringify(aggregate));
+        aggregate.push({"$group":{
+            "_id":null,
+            "total":{"$sum":1},
+            'results':{"$push":'$$ROOT'}
+        }});
+
+        if(page_size && page_no){
+            aggregate.push({"$project":{
+                "total":1,
+                'campaign':{"$slice":["$results",page_size * (page_no - 1),page_size]}
+            }});
+        } else {
+            aggregate.push({"$project":{
+                "total":1,
+                'campaign':"$results"
+            }});
+        }
 
         var campaign = await Campaign.aggregate(aggregate);
 
-        console.log("campaign = ", campaign);
-
-        if (campaign.length > 0 && campaign) {
-            return { "status": 1, "message": "campaign found", "Campaign": campaign };
+        if (campaign && campaign[0] && campaign[0].campaign.length > 0) {
+            return { "status": 1, "message": "campaign found", "Campaigns": campaign };
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
