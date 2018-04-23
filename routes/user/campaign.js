@@ -134,8 +134,8 @@ router.post("/public_campaign", async (req, res) => {
       redact = {
           "$or": [
             { "$setIsSubset": [ [req.body.search], "$at_tag" ] },
-            { "$setIsSubset": [ [req.body.search], "$hash_tag" ] }
-            // { "$eq": [ "$name", regex ] }
+            { "$setIsSubset": [ [req.body.search], "$hash_tag" ] },
+            { "$eq": [ { "$substr": [ "$name", 0, -1 ] }, req.body.search] }
           ]
       }
     }
