@@ -136,7 +136,7 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
                 'users':"$results"
             }});
         }
-
+        
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
 
