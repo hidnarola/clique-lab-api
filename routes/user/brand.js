@@ -21,10 +21,33 @@ var promoter_helper = require("./../../helpers/promoter_helper");
  * @apiSuccess (Success 200) {Array} brand Array of brand document
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
-router.get("/", async (req, res) => {
+router.post("/", async (req, res) => {
+  var filter = {};
+  var page_no = {};
+  var page_size = {};
 
+  var schema = {
+    "page_no": {
+      notEmpty: true,
+      errorMessage: "page_no is required"
+    },
+    "page_size": {
+      notEmpty: true,
+      errorMessage: "page_size is required"
+    },
+
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+
+  if (typeof req.body.filter != "undefined") {
+    filter["company"] = req.body.filter;
+  }
+
+ if(!errors)
+ {
     logger.trace("Get all Brand API called");
-    var resp_data = await promoter_helper.get_all_brand();
+    var resp_data = await promoter_helper.get_all_brand(filter,req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Brand = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
@@ -32,6 +55,10 @@ router.get("/", async (req, res) => {
       logger.trace("Brand got successfully = ", resp_data);
       res.status(config.OK_STATUS).json(resp_data);
     }
+  }else{
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
   });
 
 
