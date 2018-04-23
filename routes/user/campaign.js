@@ -19,8 +19,6 @@ var parallel = require('async/parallel');
 var randomstring = require("randomstring");
 var request = require("request");
 
-
-//var Linkedin = require('node-linkedin')('81o2b6x3ddegiv', 'as2ICfiyNX87vvZc', 'https://www.linkedin.com/oauth/v2/accessToken');
 // var Linkedin = require('node-linked-in');
 // var cfg = {};
 // var linkedin = new Linkedin(cfg);
@@ -75,7 +73,7 @@ router.post("/approved", async (req, res) => {
     if (typeof req.body.page_size) {
       page_size = req.body.page_size;
     }
-    console.log("3");
+   
     var resp_data = await campaign_helper.get_campaign_by_user_id(user_id, filter, page_no, page_size);
     console.log("4");
     if (resp_data.status == 0) {
@@ -582,11 +580,12 @@ request.post({
 
 
 /*request.get('/oauth/linkedin/callback', function(req, res) {
-  Linkedin.auth.getAccessToken('AQRqqdPHFOSe6OW-iSyL8r1noIzN8-FfbUPfdCpiBV6MsbiO3J0b6z-93aIshORIaEOefg0zLFfDBEf3cnF6oj3oPHjxfqgAyORh_7txfR7lRUONLalcGdPLbJ1In_2xayUbcW6IvVqS3CR34D9MqX-Gg1AdcQ&state=DCEeFWf45A53sdfKef424', req.query.state, function(err, results) {
+  Linkedin.auth.getAccessToken('AQRqqdPHFOSe6OW-iSyL8r1noIzN8-FfbUPfdCpiBV6MsbiO3J0b6z-93aIshORIaEOefg0zLFfDBEf3cnF6oj3oPHjxfqgAyORh_7txfR7lRUONLalcGdPLbJ1In_2xayUbcW6IvVqS3CR34D9MqX-Gg1AdcQ&state=DCEeFWf45A53sdfKef424', function(err, results) {
       if ( err )
           return console.error(err);
       console.log(results);
      
   });
-});*///
+});*/
+
 module.exports = router;

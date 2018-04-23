@@ -101,11 +101,26 @@ promoter_helper.update_promoter_by_id = async (promoter_id, promoter_object) => 
  *          status 1 - If promoter data found, with promoter object
  *          status 2 - If promoter not found, with appropriate message
  */
-promoter_helper.get_all_brand = async () => {
+promoter_helper.get_all_brand = async (filter,page_no, page_size) => {
     try {
-        var brand = await Promoter.find({status:true},{"industry_description":1,"company":1,"avatar" : 1});
+        
+        var count  = await Promoter
+            .find(filter,{"industry_description":1,"company":1,"avatar" : 1})
+            
+            .lean();  
+         var brand  = await Promoter
+            .find(filter,{"industry_description":1,"company":1,"avatar" : 1})
+            .skip((page_size * page_no) - page_size)
+            .limit(page_size)
+            .lean();  
+           
+            var tot_record = count.length;
+            console.log("Number of Records: ",count.length);
+
+           
+           
         if (brand) {
-            return { "status": 1, "message": "Brand details found", "brand": brand };
+            return { "status": 1, "message": "Brand details found", "brand": brand,"Total " :tot_record};
         } else {
             return { "status": 2, "message": "Brand not found" };
         }
@@ -113,6 +128,7 @@ promoter_helper.get_all_brand = async () => {
         return { "status": 0, "message": "Error occured while finding Brand", "error": err }
     }
 };
+
 /*
  * get_promoter_by_id is used to fetch promoter details by promoter id
  * 
