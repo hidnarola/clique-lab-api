@@ -14,6 +14,6 @@ var CartSchema = new Schema({
 // Campaign_userSchema.ensureIndex( { "firstname": 1, "lastname": 1 }, { unique: true } )
 
 // Compile model from schema
-var Campaign_post = mongoose.model('campaign_post', Campaign_postSchema, 'campaign_post');
+var cart = mongoose.model('cart', CartSchema, 'cart');
 
-module.exports = Campaign_post;
+module.exports = cart;

@@ -629,7 +629,7 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
         }
 
         var campaign = await Campaign.aggregate(aggregate);
-        console.log("campaign = ", campaign);
+
         if (campaign && campaign[0]) {
             return { "status": 1, "message": "Campaign found", "campaign": campaign[0] };
         } else {

@@ -8,6 +8,7 @@ var router = express.Router();
 
 var config = require('./../../config');
 var campaign_helper = require('./../../helpers/campaign_helper');
+var cart_helper = require('./../../helpers/cart_helper');
 var user_helper = require('./../../helpers/user_helper');
 var group_helper = require('./../../helpers/group_helper');
 var global_helper = require("./../../helpers/global_helper");
@@ -496,27 +497,96 @@ router.post('/stop/:campaign_id', async (req, res) => {
  * Developed by "ar"
  */
 router.post('/add_to_cart/:campaign_id/:user_id', async (req, res) => {
+    var cart = {
+        "promoter_id": req.userInfo.id,
+        "campaign_id": req.params.campaign_id
+    };
+    let cart_resp = await cart_helper.insert_cart_item(cart);
 
-    // let cart_resp = await 
-
-    // let campaign_resp = await campaign_helper.update_campaign_by_user(req.params.user_id, req.params.campaign_id, { "is_purchase": true });
-    // if (campaign_resp.status === 0) {
-    //     res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while purchasing campaign" });
-    // } else if (campaign_resp.status === 2) {
-    //     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't purchase campaign for given user" });
-    // } else {
-    //     res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been purchased for given user" });
-    // }
-})
+    if (cart_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while adding campaign into cart" });
+    } else {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added in cart" });
+    }
+});
 
 /**
  * Purchase filter campaign
- * /promoter/campaign/purchase_filter_campaign
+ * /promoter/campaign/:campaign_id/add_filtered_user_to_cart
  * Developed by "ar"
  */
-router.post('/purchase_filter_campaign', async (req, res) => {
-    
-})
+router.post('/:campaign_id/add_filtered_user_to_cart', async (req, res) => {
+    var match_filter = {};
+    if (req.body.filter) {
+        req.body.filter.forEach(filter_criteria => {
+            if (filter_criteria.type === "exact") {
+                match_filter[filter_criteria.field] = filter_criteria.value;
+            } else if (filter_criteria.type === "between") {
+                if (filter_criteria.field === "age") {
+                    // Age is derived attribute and need to calculate based on date of birth
+                    match_filter[filter_criteria.field] = {
+                        "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                        "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                    };
+                } else {
+                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                }
+            } else if (filter_criteria.type === "like") {
+                var regex = new RegExp(filter_criteria.value);
+                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+            } else if (filter_criteria.type === "id") {
+                match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+            }
+        });
+    }
+
+    let keys = {
+        "fb_friends": "campaign_user.facebook.no_of_friends",
+        "insta_followers": "campaign_user.instagram.no_of_followers",
+        "twitter_followers": "campaign_user.twitter.no_of_followers",
+        "pinterest_followers": "campaign_user.pinterest.no_of_followers",
+        "linkedin_connection": "campaign_user.linkedin.no_of_connections",
+        "year_in_industry": "campaign_user.experience",
+        "age": "campaign_user.date_of_birth",
+
+        "gender": "campaign_user.gender",
+        "location": "campaign_user.location",
+        "job_industry": "campaign_user.job_industry",
+        "education": "campaign_user.education",
+        "language": "campaign_user.language",
+        "ethnicity": "campaign_user.ethnicity",
+        "interested_in": "campaign_user.interested_in",
+        "relationship_status": "campaign_user.relationship_status",
+        "music_taste": "campaign_user.music_taste"
+    };
+
+    match_filter = await global_helper.rename_keys(match_filter, keys);
+
+    var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, 0, 0, match_filter, 0);
+
+    if (campaign_user.status === 1) {
+
+        var user_campaign = [];
+
+        for (let user of campaign_user.campaign.campaign_user) {
+            await user_camapign.push({
+                "campaign_id": req.params.campaign_id,
+                "user_id": user.user_id
+            });
+        }
+
+        let cart_users_resp = await cart_helper.insert_multiple_cart_item(user_campaign);
+        if (cart_users_resp.status == 0) {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
+        } else {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added to cart" });
+        }
+    } else if (campaign_user.status === 2) {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
+    } else {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaign_user.error });
+    }
+});
 
 /**
  * Delete campaign by id
