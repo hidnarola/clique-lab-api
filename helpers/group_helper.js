@@ -189,19 +189,19 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
             aggregate.push({
                 "$project": {
                     "total": 1,
-                    'members': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                    'users': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
                 }
             });
         } else {
             aggregate.push({"$project":{
                 "total":1,
-                'members':"$results"
+                'users':"$results"
             }});
         }
 
         var members = await Group_User.aggregate(aggregate);
 
-        if (members && members[0] && members[0].members.length > 0) {
+        if (members && members[0] && members[0].users.length > 0) {
             return { "status": 1, "message": "Members found", "results": members[0] };
         } else {
             return { "status": 2, "message": "No member found" };
