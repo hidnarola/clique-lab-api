@@ -98,7 +98,6 @@ campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size)
  */
 campaign_helper.get_all_campaign = async (filter, redact, sort, page_no, page_size) => {
     try {
-
         var aggregate = [];
         if (filter) {
             aggregate.push({ "$match": filter });
@@ -140,6 +139,30 @@ campaign_helper.get_all_campaign = async (filter, redact, sort, page_no, page_si
 
         if (campaign && campaign[0] && campaign[0].campaign.length > 0) {
             return { "status": 1, "message": "campaign found", "Campaigns": campaign };
+        } else {
+            return { "status": 2, "message": "No campaign available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
+    }
+}
+
+/**
+ * get all campaign of promoter
+ * Developed by "ar"
+ */
+campaign_helper.get_all_campaign_of_promoter = async(promoter_id) => {
+    try {
+        var aggregate = [{
+            "$match":{
+                "promoter_id":new ObjectId(promoter_id)
+            }
+        }];
+     
+        var campaign = await Campaign.aggregate(aggregate);
+
+        if (campaign) {
+            return { "status": 1, "message": "campaign found", "campaigns": campaign };
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
