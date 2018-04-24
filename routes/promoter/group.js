@@ -272,6 +272,7 @@ router.post('/:group_id/members',async(req,res) => {
             "year_in_industry": "members.experience",
             "age": "members.date_of_birth",
 
+            "name":"members.name",
             "gender":"members.gender",
             "location":"members.location",
             "job_industry":"members.job_industry",

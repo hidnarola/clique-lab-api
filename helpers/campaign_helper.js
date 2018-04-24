@@ -615,7 +615,7 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
                 "$project": {
                     "_id": "$_id",
                     "total": { "$size": "$campaign_user" },
-                    "campaign_user": { "$slice": ["$campaign_user", page_size * (page_no - 1), page_size] }
+                    "users": { "$slice": ["$campaign_user", page_size * (page_no - 1), page_size] }
                 }
             });
         } else {
@@ -623,7 +623,7 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
                 "$project": {
                     "_id": "$_id",
                     "total": { "$size": "$campaign_user" },
-                    "campaign_user": "$campaign_user"
+                    "users": "$campaign_user"
                 }
             });
         }
