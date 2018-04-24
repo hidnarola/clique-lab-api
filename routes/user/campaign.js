@@ -9,11 +9,13 @@ var router = express.Router();
 var config = require("./../../config");
 var logger = config.logger;
 var PinIt = require('pin-it-node');
+
 var campaign_helper = require("./../../helpers/campaign_helper");
 var user_helper = require("./../../helpers/user_helper");
 var campaign_post_helper = require("./../../helpers/campaign_post_helper");
 var PDK = require('node-pinterest');
 var pinterest = PDK.init('AYSihE_YGAfDVXbYU3P7e85xncTzFSaDpm_8EORE2WRMweA4YAAAAAA');
+var PinIt = require('pin-it-node');
 var Twitter = require('twitter');
 var parallel = require('async/parallel');
 var randomstring = require("randomstring");
@@ -140,7 +142,11 @@ router.post("/public_campaign", async (req, res) => {
 
     if (typeof req.body.price != "undefined") {
       sort["price"] = req.body.price;
+    } else {
+      sort["_id"] = 1;
     }
+
+
 
     var resp_data = await campaign_helper.get_all_campaign(filter,redact, sort, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
@@ -542,6 +548,135 @@ router.post('/share/twitter/:campaign_id', async (req, res) => {
 
 });
 
+router.post('/share/pinterest/:campaign_id', async (req, res) => {
+  // Get campaign details by campaign id
+  campaign_id = req.params.campaign_id;
+  var mood_board_image = [];
+  var cover_image = [];
+  user_id = req.userInfo.id;
+  logger.trace("Get all Profile API called");
+  var user = await user_helper.get_user_by_id(user_id);
+  // var access_token = user.User.twitter.access_token;
+
+  // Get campaign details by campaign id
+  campaign_id = req.params.campaign_id;
+  logger.trace("Get all  Campaign API called");
+  var campaign_data = await campaign_helper.get_campaign_by_id(campaign_id);
+  var caption = campaign_data.Campaign.name + ' - ' + campaign_data.Campaign.description;
+
+
+  var client = new Twitter({
+    consumer_key: 'HMZWrgFh4A9hhoWhZdkPS1IyO',
+    consumer_secret: '10kLAI5ybuC1AxY7WmdHDba2r9uCN4k6LYbvGhSNHr9Igq7uZy',
+    access_token_key: '981822054855933952-TACqTt4v8J4dAFUv8jDMmT9a2QC0VAN',
+    access_token_secret: 'PKhVyKslUSxhXVe0hA2UbQNfpo3ugx79fumaPBApc4gVm'
+  });
+  var images = [];
+  async.parallel([
+    function (cover) {
+      fs.readFile('./uploads/campaign/' + campaign_data.Campaign.cover_image, (err, data) => {
+        if (err) throw err;
+        client.post('media/upload', { media: data }, function (error, media, response) {
+          console.log("Medias", media);
+
+          cover_image = media.media_id_string;
+
+          cover(null, cover_image);
+        })
+      });
+    },
+    function (board) {
+      if (campaign_data.Campaign.mood_board_images && campaign_data.Campaign.mood_board_images.length > 0) {
+        var img = [];
+        async.eachSeries(campaign_data.Campaign.mood_board_images, function (image, loop_callback) {
+          fs.readFile('./uploads/campaign/' + campaign_data.Campaign.mood_board_images, (err, data) => {
+            if (err) throw err;
+            client.post('media/upload', { media: data }, function (error, media, response) {
+              img.push(media.media_id_string);
+              loop_callback();
+            })
+          });
+        }, async (err) => {
+          if (err) {
+            board(err);
+          } else {
+            board(null, img);
+          }
+        });
+      }
+    }
+  ],
+    // optional callback
+    function (err, results) {
+      console.log("cover image = ", results[0]);
+      console.log("Mood Board image = ", results[1]);
+
+      var arr = [results[0]].concat(results[1]);
+
+
+      var status = {
+        status: 'I am a tweet',
+        media_ids: arr.join()
+      }
+      client.post('statuses/update', status, async (error, tweet, response) => {
+        console.log("media_ids ", status.media_ids);
+        media_id = status.media_ids;
+        var campaign_obj = {
+          "user_id": user_id,
+          "campaign_id": campaign_id,
+          "post_id": media_id
+        };
+
+        //console.log(user_id);
+
+        let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
+
+        user_id = campaign_obj.user_id;
+        campaign_id = campaign_obj.campaign_id;
+
+        var obj = { "is_posted": true };
+
+        let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
+        return res.status(config.OK_STATUS).json(campaign_data);
+      })
+    });
+
+});
+ /*
+var pinIt = new PinIt({
+  username: 'blakehrowley',
+  userurl:  'http://www.pinterest.com/blakehrowley/',
+  password: 'tECHWITTY123'
+});
+pinIt.createBoard({
+  boardName: 'Campaign',
+  description: ' board of campaign',
+  boardCategory:  'geek',  
+  boardPrivacy:  'public'   
+  
+}, function(err, pinObj) {
+  if(err) {
+    
+      console.log(err);
+      return;
+  }
+
+  console.log('Success!  The board has been created.');
+  
+})
+pinterest.api('me/boards').then(function(json) {
+  console.log(json);
+  pinterest.api('pins', {
+      method: 'POST',
+      body: {
+          board: '801148289901861085', // grab the first board from the previous response
+          note: 'this is a test1',
+          image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
+      }
+  }).then(function(json) {
+      pinterest.api('me/pins').then(console.log);
+  });
+});*/
 /*
 request.post({
   "url": 'https://www.linkedin.com/oauth/v2/accessToken',
@@ -563,20 +698,8 @@ request.post({
 
 
 
-/*pinterest.api('me/boards').then(function(json) {
-  console.log(json);
-  pinterest.api('pins', {
-      method: 'POST',
-      body: {
-          board: json.data[0].id, // grab the first board from the previous response
-          note: 'this is a test1',
-          image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
-      }
-  }).then(function(json) {
-      pinterest.api('me/pins').then(console.log);
-  });
-});
-*/
+
+
 
 
 /*request.get('/oauth/linkedin/callback', function(req, res) {

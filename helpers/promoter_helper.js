@@ -122,7 +122,7 @@ promoter_helper.get_all_brand = async (filter,page_no, page_size) => {
            
            
         if (brand) {
-            return { "status": 1, "message": "Brand details found", "brand": brand,"Total " :tot_record};
+            return { "status": 1, "message": "Brand details found", "brand": brand,"Total" :tot_record};
         } else {
             return { "status": 2, "message": "Brand not found" };
         }
