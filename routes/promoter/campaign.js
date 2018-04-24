@@ -671,6 +671,7 @@ router.post('/:campaign_id', async (req, res) => {
             "year_in_industry": "campaign_user.experience",
             "age": "campaign_user.date_of_birth",
 
+            "name":"campaign_user.name",
             "gender": "campaign_user.gender",
             "location": "campaign_user.location",
             "job_industry": "campaign_user.job_industry",
