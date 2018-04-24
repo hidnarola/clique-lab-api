@@ -75,7 +75,7 @@ router.post("/approved", async (req, res) => {
     if (typeof req.body.page_size) {
       page_size = req.body.page_size;
     }
-   
+
     var resp_data = await campaign_helper.get_campaign_by_user_id(user_id, filter, page_no, page_size);
     console.log("4");
     if (resp_data.status == 0) {
@@ -128,15 +128,15 @@ router.post("/public_campaign", async (req, res) => {
     }
 
     if (req.body.search) {
-      console.log("search = ",req.body.search);
+      console.log("search = ", req.body.search);
       var r = new RegExp(req.body.search);
       var regex = { "$regex": r, "$options": "i" };
       redact = {
-          "$or": [
-            { "$setIsSubset": [ [req.body.search], "$at_tag" ] },
-            { "$setIsSubset": [ [req.body.search], "$hash_tag" ] },
-            { "$eq": [ { "$substr": [ "$name", 0, -1 ] }, req.body.search] }
-          ]
+        "$or": [
+          { "$setIsSubset": [[req.body.search], "$at_tag"] },
+          { "$setIsSubset": [[req.body.search], "$hash_tag"] },
+          { "$eq": [{ "$substr": ["$name", 0, -1] }, req.body.search] }
+        ]
       }
     }
 
@@ -148,7 +148,7 @@ router.post("/public_campaign", async (req, res) => {
 
 
 
-    var resp_data = await campaign_helper.get_all_campaign(filter,redact, sort, req.body.page_no, req.body.page_size);
+    var resp_data = await campaign_helper.get_all_campaign(filter, redact, sort, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Public Campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
@@ -383,15 +383,15 @@ router.post('/share/:campaign_id', async (req, res) => {
   user_id = req.userInfo.id;
   logger.trace("Get all Profile API called");
   var user = await user_helper.get_user_by_id(user_id);
- 
+
   var access_token = user.User.facebook.access_token;
-  
+
   // Get campaign details by campaign id
   campaign_id = req.params.campaign_id;
   logger.trace("Get all  Campaign API called");
   var campaign_data = await campaign_helper.get_campaign_by_id(campaign_id);
   var caption = campaign_data.Campaign.name + ' - ' + campaign_data.Campaign.description;
- 
+
 
   try {
 
@@ -410,7 +410,7 @@ router.post('/share/:campaign_id', async (req, res) => {
           async.eachSeries(campaign_data.Campaign.mood_board_images, function (image, loop_callback) {
 
             FB.api('me/photos', 'post', { url: config.base_url + '/uploads/campaign/' + image, caption: caption, published: false }, function (resp) {
-              console.log("resp = ", resp);
+              console.log("media_fbid = ", resp.id);
               images.push({ "media_fbid": resp.id });
               loop_callback();
             });
@@ -428,21 +428,22 @@ router.post('/share/:campaign_id', async (req, res) => {
           res.status(500).send("error in uploading images");
         } else {
           var post_id = await FB.api('me/feed', 'post', { attached_media: images, message: caption });
+          console.log("post resp = ", post_id);
           var campaign_obj = {
             "user_id": user_id,
             "campaign_id": campaign_id,
-            "post_id": post_id.id
+            "post_id": post_id
           };
           
-        
-       
-          user_id = campaign_obj.user_id;
-          campaign_id = campaign_obj.campaign_id;
+          let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
 
+          user_id = campaign_obj.user_id;
+          campaign_id = campaign_obj.post_id;
+            console.log(campaign_obj);
           var obj = { "is_posted": true };
 
           let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
-          return res.status(config.OK_STATUS).json(campaign_data);
+         return res.status(config.OK_STATUS).json(campaign_data);
         }
       });
 
@@ -451,23 +452,9 @@ router.post('/share/:campaign_id', async (req, res) => {
     res.status(500).send({ "Error": error });
   }
 });
-FB.setAccessToken("EAAFSgTjDYm0BAMkd775z9NIRakG5pQFSqYJpncoUO9nXcr5iVB84ANt5aEkB1w3uMv9BslfClqlkyn35ZCFYZCiFuBHgrWKsDB9fRZAsTtjBg5x7ZCODhXVZAetvQ0Hefv4nAabPnVCOWYvsxFxjEaRkSvtZASG3RnolmGjAEiRIVZAlGwqFfKEQDYjWbYEZCMa3l6myST0ZBJ6rWc55BSsZBZBcNoG2vWDEc4SUd38rh0i4dHrojKnwfXJ");
-FB.api(
- 
-  "/136527067201219/likes",
-  function (response) {
-    console.log(response);
-    if (response && !response.error) {
-     
-      var total_count = total_count
-      console.log(total_count);
-    }
-  
-  }
-  
-);
-  // Returns a `Facebook\FacebookResponse` object
-  
+
+// Returns a `Facebook\FacebookResponse` object
+
 router.post('/share/twitter/:campaign_id', async (req, res) => {
   // Get campaign details by campaign id
   campaign_id = req.params.campaign_id;
@@ -541,13 +528,14 @@ router.post('/share/twitter/:campaign_id', async (req, res) => {
       client.post('statuses/update', status, async (error, tweet, response) => {
         console.log("media_ids ", status.media_ids);
         media_id = status.media_ids;
+
         var campaign_obj = {
           "user_id": user_id,
           "campaign_id": campaign_id,
           "post_id": media_id
         };
 
-        //console.log(user_id);
+        console.log("campaign post", campaign_obj);
 
         let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
 
@@ -657,40 +645,40 @@ router.post('/share/pinterest/:campaign_id', async (req, res) => {
     });
 
 });
- /*
+/*
 var pinIt = new PinIt({
-  username: 'blakehrowley',
-  userurl:  'http://www.pinterest.com/blakehrowley/',
-  password: 'tECHWITTY123'
+ username: 'blakehrowley',
+ userurl:  'http://www.pinterest.com/blakehrowley/',
+ password: 'tECHWITTY123'
 });
 pinIt.createBoard({
-  boardName: 'Campaign',
-  description: ' board of campaign',
-  boardCategory:  'geek',  
-  boardPrivacy:  'public'   
-  
+ boardName: 'Campaign',
+ description: ' board of campaign',
+ boardCategory:  'geek',  
+ boardPrivacy:  'public'   
+ 
 }, function(err, pinObj) {
-  if(err) {
-    
-      console.log(err);
-      return;
-  }
+ if(err) {
+   
+     console.log(err);
+     return;
+ }
 
-  console.log('Success!  The board has been created.');
-  
+ console.log('Success!  The board has been created.');
+ 
 })
 pinterest.api('me/boards').then(function(json) {
-  console.log(json);
-  pinterest.api('pins', {
-      method: 'POST',
-      body: {
-          board: '801148289901861085', // grab the first board from the previous response
-          note: 'this is a test1',
-          image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
-      }
-  }).then(function(json) {
-      pinterest.api('me/pins').then(console.log);
-  });
+ console.log(json);
+ pinterest.api('pins', {
+     method: 'POST',
+     body: {
+         board: '801148289901861085', // grab the first board from the previous response
+         note: 'this is a test1',
+         image_url: 'http://i.kinja-img.com/gawker-media/image/upload/s--4Vp0Ks1S--/1451895062187798055.jpg'
+     }
+ }).then(function(json) {
+     pinterest.api('me/pins').then(console.log);
+ });
 });*/
 /*
 request.post({
