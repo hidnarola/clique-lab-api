@@ -102,6 +102,36 @@ router.post("/", async (req, res) => {
     }
 });
 
+
+/** 
+ * @api {get} /promoter/group Get all group
+ * @apiName Get all group
+ * @apiGroup Promoter-Group
+ * 
+ * @apiDescription  Get all group
+ * 
+ * @apiHeader {String}  x-access-token promoter's unique access-key
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiSuccess (Success 200) {JSON} results Groups details
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.get('/', async (req, res) => {
+    var match_filter = { "promoter_id": { "$eq": new ObjectId(req.userInfo.id) } };
+    var sort = {};
+
+    if (Object.keys(sort).length === 0) {
+        sort["_id"] = 1;
+    }
+
+    var groups = await group_helper.get_filtered_group(0, 0, match_filter, sort);
+    if (groups.status === 1) {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Groups found", "results": groups.results });
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Groups not found" });
+    }
+});
+
 /** 
  * @api {post} /promoter/group/filter Get all group
  * @apiName Get all group
@@ -143,7 +173,7 @@ router.post('/filter', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var match_filter = {"promoter_id":{ "$eq": new ObjectId(req.userInfo.id) }};
+        var match_filter = { "promoter_id": { "$eq": new ObjectId(req.userInfo.id) } };
         var sort = {};
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
@@ -188,33 +218,33 @@ router.post('/filter', async (req, res) => {
     }
 });
 
-router.get('/list_for_user/:user_id',async(req,res) => {
-    var group_resp = await group_helper.user_not_exist_group_for_promoter(req.params.user_id,req.userInfo.id);
-    if(group_resp.status === 0){
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while fetching group list","error":group_resp.error});
-    } else if(group_resp.status === 1) {
-        res.status(config.OK_STATUS).json({"status":1,"message":"Groups found", "results" :group_resp.groups});
+router.get('/list_for_user/:user_id', async (req, res) => {
+    var group_resp = await group_helper.user_not_exist_group_for_promoter(req.params.user_id, req.userInfo.id);
+    if (group_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching group list", "error": group_resp.error });
+    } else if (group_resp.status === 1) {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Groups found", "results": group_resp.groups });
     } else {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"No group found for given user"});
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No group found for given user" });
     }
 });
 
 /**
  * 
  */
-router.post('/:group_id/add_user/:user_id', async(req,res) => {
-    var group_resp = await group_helper.insert_group_user({"group_id":req.params.group_id,"user_id":req.params.user_id});
-    if(group_resp.status === 0){
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while adding user into group","error":group_resp.error});
+router.post('/:group_id/add_user/:user_id', async (req, res) => {
+    var group_resp = await group_helper.insert_group_user({ "group_id": req.params.group_id, "user_id": req.params.user_id });
+    if (group_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while adding user into group", "error": group_resp.error });
     } else {
-        res.status(config.OK_STATUS).json({"status":1,"message":"User has been added into group"});
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been added into group" });
     }
 });
 
 /**
  * /promoter/group/:group_id/members
  */
-router.post('/:group_id/members',async(req,res) => {
+router.post('/:group_id/members', async (req, res) => {
     var schema = {
         'page_size': {
             notEmpty: true,
@@ -259,7 +289,7 @@ router.post('/:group_id/members',async(req,res) => {
             });
         }
 
-        if(Object.keys(sort).length === 0){
+        if (Object.keys(sort).length === 0) {
             sort["_id"] = 1;
         }
 
@@ -272,21 +302,21 @@ router.post('/:group_id/members',async(req,res) => {
             "year_in_industry": "members.experience",
             "age": "members.date_of_birth",
 
-            "name":"members.name",
-            "gender":"members.gender",
-            "location":"members.location",
-            "job_industry":"members.job_industry",
-            "education":"members.education",
-            "language":"members.language",
-            "ethnicity":"members.ethnicity",
-            "interested_in":"members.interested_in",
-            "relationship_status":"members.relationship_status",
-            "music_taste":"members.music_taste"
+            "name": "members.name",
+            "gender": "members.gender",
+            "location": "members.location",
+            "job_industry": "members.job_industry",
+            "education": "members.education",
+            "language": "members.language",
+            "ethnicity": "members.ethnicity",
+            "interested_in": "members.interested_in",
+            "relationship_status": "members.relationship_status",
+            "music_taste": "members.music_taste"
         };
         match_filter = await global_helper.rename_keys(match_filter, keys);
 
         sort = await global_helper.rename_keys(sort, keys);
-        var members = await group_helper.get_members_of_group(req.params.group_id,req.body.page_no, req.body.page_size, match_filter,sort);
+        var members = await group_helper.get_members_of_group(req.params.group_id, req.body.page_no, req.body.page_size, match_filter, sort);
 
         if (members.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Members found", "results": members.results });
@@ -352,10 +382,10 @@ router.post('/:group_id/add_filter_result_to_group', async (req, res) => {
         }
 
         let group_users_resp = await group_helper.insert_multiple_group_user(user_group);
-        if(group_users_resp.status == 0){
+        if (group_users_resp.status == 0) {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
         } else {
-            res.status(config.OK_STATUS).json({"status":1,"message":"User has been added to given group"});
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been added to given group" });
         }
     } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });

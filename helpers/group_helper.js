@@ -80,12 +80,18 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             }
         });
 
-        aggregate.push({
-            "$project": {
-                "total": 1,
+        
+        if(page_size && page_no){
+            aggregate.push({"$project":{
+                "total":1,
                 'groups': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
-            }
-        });
+            }});
+        } else {
+            aggregate.push({"$project":{
+                "total":1,
+                'groups':"$results"
+            }});
+        }
 
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
