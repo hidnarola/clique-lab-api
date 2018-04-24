@@ -6,6 +6,7 @@ var Campaign_Applied = require("./../models/Campaign_applied");
 var Campaign_User = require("./../models/Campaign_user");
 var Campaign = require("./../models/Campaign");
 var ObjectId = mongoose.Types.ObjectId;
+var FB = require('fb');
 
 var campaign_helper = {};
 
@@ -180,11 +181,18 @@ campaign_helper.get_all_campaign_of_promoter = async(promoter_id) => {
  */
 
 campaign_helper.get_campaign_by_id = async (campaign_id) => {
+
     try {
 
-        var campaign = await Campaign.findOne({ _id: campaign_id });
+        var campaign = await Campaign.findOne({ _id: campaign_id }).lean();
+
         if (campaign) {
+           FB.setAccessToken("EAAFSgTjDYm0BAMkd775z9NIRakG5pQFSqYJpncoUO9nXcr5iVB84ANt5aEkB1w3uMv9BslfClqlkyn35ZCFYZCiFuBHgrWKsDB9fRZAsTtjBg5x7ZCODhXVZAetvQ0Hefv4nAabPnVCOWYvsxFxjEaRkSvtZASG3RnolmGjAEiRIVZAlGwqFfKEQDYjWbYEZCMa3l6myST0ZBJ6rWc55BSsZBZBcNoG2vWDEc4SUd38rh0i4dHrojKnwfXJ");
+           var response = await FB.api('105830773604182_136563987197527/likes');
+        campaign.response= response.data.length;
+          
             return { "status": 1, "message": "campaign found", "Campaign": campaign };
+
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
@@ -230,6 +238,7 @@ campaign_helper.update_campaign_by_user = async (user_id, campaign_id, obj) => {
             return { "status": 1, "message": "Record has been updated", "user": user };
         }
     } catch (err) {
+
         return { "status": 0, "message": "Error occured while updating user", "error": err }
     }
 };
