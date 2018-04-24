@@ -72,35 +72,30 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             aggregate.push({ "$sort": sort });
         }
 
-        aggregate.push({
-            "$group": {
-                "_id": null,
-                "total": { "$sum": 1 },
-                'results': { "$push": '$$ROOT' }
-            }
-        });
-
-        
         if(page_size && page_no){
+            aggregate.push({
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'results': { "$push": '$$ROOT' }
+                }
+            });
             aggregate.push({"$project":{
                 "total":1,
                 'groups': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
-            }});
-        } else {
-            aggregate.push({"$project":{
-                "total":1,
-                'groups':"$results"
             }});
         }
 
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
 
-        console.log("aggregate = ", aggregate);
         var groups = await Group.aggregate(aggregate);
-
-        if (groups && groups[0] && groups[0].groups.length > 0) {
-            return { "status": 1, "message": "Groups found", "results": groups[0] };
+        if (groups && groups[0]) {
+            if(page_no && page_size){
+                return { "status": 1, "message": "Groups found", "results": groups[0] };
+            } else {
+                return { "status": 1, "message": "Groups found", "results": groups };
+            }
         } else {
             return { "status": 2, "message": "No group found" };
         }
