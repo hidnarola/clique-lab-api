@@ -212,7 +212,7 @@ router.post('/', async (req, res) => {
  * get all campaign of promoter
  */
 router.get('/', async(req,res)=>{
-    var campaigns = await campaign_helper.get_all_campaign_of_promoter();
+    var campaigns = await campaign_helper.get_all_campaign_of_promoter(req.userInfo.id);
     if (campaigns.status === 1) {
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaigns found", "results": campaigns.campaigns });
     } else {

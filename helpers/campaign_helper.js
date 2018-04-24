@@ -161,7 +161,8 @@ campaign_helper.get_all_campaign_of_promoter = async(promoter_id) => {
         }];
      
         var campaign = await Campaign.aggregate(aggregate);
-
+        console.log("Campaign = ",campaign);
+        
         if (campaign) {
             return { "status": 1, "message": "campaign found", "campaigns": campaign };
         } else {
