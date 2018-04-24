@@ -6,6 +6,7 @@ var router = express.Router();
 var config = require('./../../config');
 
 var global_helper = require("./../../helpers/global_helper");
+var inspired_submission_helper = require('./../../helpers/inspired_submission_helper');
 
 var logger = config.logger;
 var ObjectId = mongoose.Types.ObjectId;
@@ -76,13 +77,12 @@ router.post('/',async (req,res) => {
         match_filter = await global_helper.rename_keys(match_filter, keys);
 
         sort = await global_helper.rename_keys(sort, keys);
-        var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter,sort);
+        var posts = await inspired_submission_helper.get_filtered_submission_for_promoter(req.userInfo.id, req.body.page_no, req.body.page_size, match_filter,sort);
 
-        console.log("users = ",users);
-        if (users.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "results": users.results });
+        if (posts.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Post found", "results": posts.submissions });
         } else {
-            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Users not found" });
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post not found" });
         }
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });

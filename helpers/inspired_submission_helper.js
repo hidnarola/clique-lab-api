@@ -1,46 +1,41 @@
+var mongoose = require('mongoose');
+var ObjectId = mongoose.Types.ObjectId;
+
 var Inspire_submission = require("./../models/Inspired_Brand_submit");
 var submission_helper = {};
 
 /**
  * Get inspired submission by filter based on user info
  */
-submission_helper.get_filtered_submission = async (page_no, page_size, filter, sort) => {
+submission_helper.get_filtered_submission_for_promoter = async (promoter_id, page_no, page_size, filter, sort) => {
     try {
-        var aggregate = [];
-        if (filter) {
-            aggregate.push({ "$match": filter });
-        }
-        if (sort) {
-            aggregate.push({ "$sort": sort });
-        }
+        var submissions = await Inspire_submission.aggregate([
+            {
+                "$match": {
+                    "promoter_id": new ObjectId(promoter_id)
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "user_id",
+                    "foreignField": "_id",
+                    "as": "users"
+                }
+            }
+        ]);
 
-        aggregate.push({"$group":{
-            "_id":null,
-            "total":{"$sum":1},
-            'results':{"$push":'$$ROOT'}
-        }});
-
-        if(page_size && page_no){
-            aggregate.push({"$project":{
-                "total":1,
-                'users':{"$slice":["$results",page_size * (page_no - 1),page_size]}
-            }});
+        if (submissions) {
+            // _.map(campaigns[0].campaigns, function (campaign) {
+            //     campaign.remaining_days = moment(campaign.end_date).diff(moment(), 'days');
+            //     return campaign;
+            // });
+            return { "status": 1, "message": "Post found", "submissions": submissions };
         } else {
-            aggregate.push({"$project":{
-                "total":1,
-                'users':"$results"
-            }});
-        }
-        
-        var users = await User.aggregate(aggregate);
-
-        if (users && users[0] && users[0].users.length > 0) {
-            return { "status": 1, "message": "Users found", "results": users[0] };
-        } else {
-            return { "status": 2, "message": "No user found" };
+            return { "status": 2, "message": "No post available" };
         }
     } catch (err) {
-        return { "status": 0, "message": "Error occured while finding user", "error": err }
+        return { "status": 0, "message": "Error occured while finding post", "error": err }
     }
 };
 
