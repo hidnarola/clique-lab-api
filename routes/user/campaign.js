@@ -383,16 +383,18 @@ router.post('/share/:campaign_id', async (req, res) => {
   user_id = req.userInfo.id;
   logger.trace("Get all Profile API called");
   var user = await user_helper.get_user_by_id(user_id);
+ 
   var access_token = user.User.facebook.access_token;
-
+  
   // Get campaign details by campaign id
   campaign_id = req.params.campaign_id;
   logger.trace("Get all  Campaign API called");
   var campaign_data = await campaign_helper.get_campaign_by_id(campaign_id);
   var caption = campaign_data.Campaign.name + ' - ' + campaign_data.Campaign.description;
-  console.log("campaign = ", campaign_data.Campaign);
+ 
 
   try {
+
     FB.setAccessToken(access_token);
     var images = [];
 
@@ -431,11 +433,9 @@ router.post('/share/:campaign_id', async (req, res) => {
             "campaign_id": campaign_id,
             "post_id": post_id.id
           };
-
-          //console.log(user_id);
-
-          //   let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
-
+          
+        
+       
           user_id = campaign_obj.user_id;
           campaign_id = campaign_obj.campaign_id;
 
@@ -451,8 +451,23 @@ router.post('/share/:campaign_id', async (req, res) => {
     res.status(500).send({ "Error": error });
   }
 });
-
-
+FB.setAccessToken("EAAFSgTjDYm0BAMkd775z9NIRakG5pQFSqYJpncoUO9nXcr5iVB84ANt5aEkB1w3uMv9BslfClqlkyn35ZCFYZCiFuBHgrWKsDB9fRZAsTtjBg5x7ZCODhXVZAetvQ0Hefv4nAabPnVCOWYvsxFxjEaRkSvtZASG3RnolmGjAEiRIVZAlGwqFfKEQDYjWbYEZCMa3l6myST0ZBJ6rWc55BSsZBZBcNoG2vWDEc4SUd38rh0i4dHrojKnwfXJ");
+FB.api(
+ 
+  "/136527067201219/likes",
+  function (response) {
+    console.log(response);
+    if (response && !response.error) {
+     
+      var total_count = total_count
+      console.log(total_count);
+    }
+  
+  }
+  
+);
+  // Returns a `Facebook\FacebookResponse` object
+  
 router.post('/share/twitter/:campaign_id', async (req, res) => {
   // Get campaign details by campaign id
   campaign_id = req.params.campaign_id;

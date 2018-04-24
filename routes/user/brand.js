@@ -89,19 +89,18 @@ router.post("/", async (req, res) => {
         notEmpty: true,
         errorMessage: "company is required"
       },
-      image: {
-        notEmpty: false,
-        errorMessage: "Image is required"
-      },
       text: {
         notEmpty: true,
         errorMessage: "Text is required"
       },
-      Price: {
-        notEmpty: false,
+      price: {
+        notEmpty: true,
         errorMessage: "price is required"
       },
-     
+      social_media_platform: {
+        notEmpty: true,
+        errorMessage: "Social media platform is required"
+      }
     };
     req.checkBody(schema);
     var errors = req.validationErrors();
@@ -111,7 +110,8 @@ router.post("/", async (req, res) => {
       var inspire_obj = {
         company: req.body.company,
         text: req.body.text,
-        price: req.body.price
+        price: req.body.price,
+        social_media_platform : req.body.social_media_platform
       };
   
       //console.log(inspire_obj);
