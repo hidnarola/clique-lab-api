@@ -105,29 +105,35 @@ campaign_helper.get_all_campaign = async (filter, redact, sort, page_no, page_si
         }
 
         if (redact) {
-            aggregate.push({ "$redact": { "$cond": { "if": redact, "then":"$$KEEP", "else":"$$PRUNE" } } });
+            aggregate.push({ "$redact": { "$cond": { "if": redact, "then": "$$KEEP", "else": "$$PRUNE" } } });
         }
 
         if (sort) {
             aggregate.push({ "$sort": sort });
         }
 
-        aggregate.push({"$group":{
-            "_id":null,
-            "total":{"$sum":1},
-            'results':{"$push":'$$ROOT'}
-        }});
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$$ROOT' }
+            }
+        });
 
-        if(page_size && page_no){
-            aggregate.push({"$project":{
-                "total":1,
-                'campaign':{"$slice":["$results",page_size * (page_no - 1),page_size]}
-            }});
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'campaign': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
         } else {
-            aggregate.push({"$project":{
-                "total":1,
-                'campaign':"$results"
-            }});
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'campaign': "$results"
+                }
+            });
         }
 
         var campaign = await Campaign.aggregate(aggregate);
@@ -593,12 +599,6 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
                     "_id": 1,
                     "campaign_user": { $mergeObjects: ["$campaign_user", "$user"] }
                 }
-            },
-            {
-                "$group": {
-                    "_id": "$_id",
-                    "campaign_user": { $push: "$campaign_user" }
-                }
             }
         ];
 
@@ -609,13 +609,20 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
             aggregate.push({ "$sort": sort });
         }
 
+        aggregate.push(
+            {
+                "$group": {
+                    "_id": "$_id",
+                    "campaign_user": { $push: "$campaign_user" }
+                }
+            });
 
         if (page_size && page_no) {
             aggregate.push({
                 "$project": {
                     "_id": "$_id",
                     "total": { "$size": "$campaign_user" },
-                    "campaign_user": { "$slice": ["$campaign_user", page_size * (page_no - 1), page_size] }
+                    "users": { "$slice": ["$campaign_user", page_size * (page_no - 1), page_size] }
                 }
             });
         } else {
@@ -623,10 +630,12 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
                 "$project": {
                     "_id": "$_id",
                     "total": { "$size": "$campaign_user" },
-                    "campaign_user": "$campaign_user"
+                    "users": "$campaign_user"
                 }
             });
         }
+
+        console.log("aggregate : ", JSON.stringify(aggregate));
 
         var campaign = await Campaign.aggregate(aggregate);
 

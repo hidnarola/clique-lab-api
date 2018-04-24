@@ -47,7 +47,6 @@ var ObjectId = mongoose.Types.ObjectId;
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post('/', async (req, res) => {
-    console.log("Campaign insert called");
     var schema = {
         'name': {
             notEmpty: true,
@@ -388,7 +387,7 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
 
         let campaign_users_resp = await campaign_helper.insert_multiple_campaign_user(user_campaign);
         if (campaign_users_resp.status == 0) {
-            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "No user available to add" });
         } else {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been added to given campaign" });
         }
@@ -499,7 +498,8 @@ router.post('/stop/:campaign_id', async (req, res) => {
 router.post('/add_to_cart/:campaign_id/:user_id', async (req, res) => {
     var cart = {
         "promoter_id": req.userInfo.id,
-        "campaign_id": req.params.campaign_id
+        "campaign_id": req.params.campaign_id,
+        "user_id": req.params.user_id
     };
     let cart_resp = await cart_helper.insert_cart_item(cart);
 
@@ -564,12 +564,15 @@ router.post('/:campaign_id/add_filtered_user_to_cart', async (req, res) => {
 
     var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, 0, 0, match_filter, 0);
 
+    console.log("user = ",campaign_user);
+
     if (campaign_user.status === 1) {
 
         var user_campaign = [];
 
         for (let user of campaign_user.campaign.campaign_user) {
-            await user_camapign.push({
+            await user_campaign.push({
+                "promoter_id": req.userInfo.id,
                 "campaign_id": req.params.campaign_id,
                 "user_id": user.user_id
             });
@@ -577,7 +580,8 @@ router.post('/:campaign_id/add_filtered_user_to_cart', async (req, res) => {
 
         let cart_users_resp = await cart_helper.insert_multiple_cart_item(user_campaign);
         if (cart_users_resp.status == 0) {
-            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
+            console.log("resp = ",cart_users_resp);
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "No user available to add" });
         } else {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added to cart" });
         }
@@ -667,6 +671,7 @@ router.post('/:campaign_id', async (req, res) => {
             "year_in_industry": "campaign_user.experience",
             "age": "campaign_user.date_of_birth",
 
+            "name":"campaign_user.name",
             "gender": "campaign_user.gender",
             "location": "campaign_user.location",
             "job_industry": "campaign_user.job_industry",
@@ -684,7 +689,7 @@ router.post('/:campaign_id', async (req, res) => {
         var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, req.body.page_no, req.body.page_size, match_filter, sort);
 
         if (campaign_user.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "campaign": campaign_user.campaign });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaign_user.campaign });
         } else if (campaign_user.status === 2) {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
         } else {
