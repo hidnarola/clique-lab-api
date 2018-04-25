@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var InspiredBrandModelSchema = new Schema({
-    company: { type: mongoose.Schema.Types.ObjectId, ref: 'promoter', required: true },
+    brand_id: { type: mongoose.Schema.Types.ObjectId, ref: 'promoter', required: true },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
     image: String,
     social_media_platform: String,

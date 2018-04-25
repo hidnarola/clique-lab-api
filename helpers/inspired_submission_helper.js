@@ -9,10 +9,11 @@ var submission_helper = {};
  */
 submission_helper.get_filtered_submission_for_promoter = async (promoter_id, page_no, page_size, filter, sort) => {
     try {
-        var submissions = await Inspire_submission.aggregate([
+
+        var aggregate = [
             {
                 "$match": {
-                    "promoter_id": new ObjectId(promoter_id)
+                    "brand_id": new ObjectId(promoter_id)
                 }
             },
             {
@@ -22,8 +23,22 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
                     "foreignField": "_id",
                     "as": "users"
                 }
+            },
+            {
+                "$unwind": "users"
             }
-        ]);
+        ];
+
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        console.log("aggregate = ",JSON.stringify(aggregate));
+
+        var submissions = await Inspire_submission.aggregate(aggregate);
 
         if (submissions) {
             // _.map(campaigns[0].campaigns, function (campaign) {
