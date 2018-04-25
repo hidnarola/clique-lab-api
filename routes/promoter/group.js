@@ -394,10 +394,10 @@ router.post('/:group_id/add_filter_result_to_group', async (req, res) => {
 
 /**
  * Save result as a group for group member
- * /promoter/group/:new_group_id/:old_group_id/add_filter_result_to_campaign
+ * /promoter/group/:new_group_id/:old_group_id/add_filter_result_to_group
  * Developed by "ar"
  */
-router.post('/:new_group_id/:old_group_id/add_filter_result_to_campaign', async (req, res) => {
+router.post('/:new_group_id/:old_group_id/add_filter_result_to_group', async (req, res) => {
     var match_filter = {};
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {

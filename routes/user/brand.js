@@ -82,8 +82,6 @@ router.post("/", async (req, res) => {
  * */
 
 router.post("/inspired_submission", async (req, res) => {
-
-
   var schema = {
     company: {
       notEmpty: true,
@@ -108,7 +106,7 @@ router.post("/inspired_submission", async (req, res) => {
   if (!errors) {
 
     var inspire_obj = {
-      company: req.body.company,
+      brand_id: req.body.company,
       text: req.body.text,
       price: req.body.price,
       social_media_platform: req.body.social_media_platform,
@@ -116,7 +114,6 @@ router.post("/inspired_submission", async (req, res) => {
     };
 
     //console.log(inspire_obj);
-
     async.waterfall(
       [
         function (callback) {
@@ -153,10 +150,9 @@ router.post("/inspired_submission", async (req, res) => {
             }
           } else {
             logger.trace("Avatar is not available");
-            callback(null, user, null);
+            callback(null, null);
           }
         }
-
       ],
       async (err, filename) => {
         //End image upload
