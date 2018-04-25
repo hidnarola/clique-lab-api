@@ -21,7 +21,7 @@ var campaign_helper = {};
  */
 campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size) => {
     try {
-        
+
         var campaigns = await Campaign.aggregate([
             {
                 $lookup: {
@@ -182,8 +182,6 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
     try {
 
         var campaign = await Campaign.findOne({ _id: campaign_id }).lean();
-
-          
         if (campaign) {
             FB.setAccessToken("EAAFSgTjDYm0BAMkd775z9NIRakG5pQFSqYJpncoUO9nXcr5iVB84ANt5aEkB1w3uMv9BslfClqlkyn35ZCFYZCiFuBHgrWKsDB9fRZAsTtjBg5x7ZCODhXVZAetvQ0Hefv4nAabPnVCOWYvsxFxjEaRkSvtZASG3RnolmGjAEiRIVZAlGwqFfKEQDYjWbYEZCMa3l6myST0ZBJ6rWc55BSsZBZBcNoG2vWDEc4SUd38rh0i4dHrojKnwfXJ");
             var response = await FB.api('105830773604182_136563987197527/likes');
@@ -679,4 +677,95 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
     }
 }
 
+
+
+campaign_helper.get_purchased_post_by_promoter = async (promoter_id) => {
+    try {
+        var post = await Campaign.aggregate([
+            {
+                "$match": { "promoter_id": new ObjectId(promoter_id) },
+
+            },
+            {
+                $lookup: {
+                    from: "campaign_user",
+                    localField: "_id",
+                    foreignField: "campaign_id",
+                    as: "campaign_user"
+                }
+            },
+            {
+                $unwind: "$campaign_user"
+            },
+            {
+                "$match":{
+                    "campaign_user.is_purchase":true
+                }
+            },
+            {
+                "$lookup":{
+                    "from":"users",
+                    "localField":"campaign_user.user_id",
+                    "foreignField":"_id",
+                    "as":"user"
+                }
+            },
+            {
+                "$unwind":"$user"
+            }
+        ]);
+
+        // var promoter = await Campaign_User.aggregate([
+        //     {
+        //         $match: { is_purchase: true },
+        //     },
+        //     {
+        //         $lookup: {
+        //             from: "campaign",
+        //             localField: "campaign_id",
+        //             foreignField: "_id",
+        //             as: "campaign"
+        //         }
+        //     },
+        //     {
+        //         $unwind: "$campaign"
+        //     },
+        //     {
+        //         $group: {
+        //             _id: "$_id",
+
+        //             campaign: { $addToSet: "$campaign" },
+        //             is_purchase: { $first: "$is_purchase" },
+        //         }
+        //     },
+
+        //     {
+        //         $match: { "campaign.promoter_id": new ObjectId(id) },
+
+        //     },
+        //     {
+        //         $lookup: {
+        //             from: "user",
+        //             localField: "user_id",
+        //             foreignField: "_id",
+        //             as: "user"
+        //         }
+        //     },
+        //     {
+        //         $unwind: "$user"
+        //     },
+        // ]);
+
+        console.log("posts = ", post);
+
+        if (post) {
+            return { "status": 1, "message": "post found", "post": post };
+        } else {
+            return { "status": 2, "message": "No post available" };
+        }
+    } catch (err) {
+        console.log("Error = ",err);
+        return { "status": 0, "message": "Error occured while finding purchase post", "error": err }
+    }
+}
 module.exports = campaign_helper;
