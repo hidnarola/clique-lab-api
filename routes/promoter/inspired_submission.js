@@ -6,6 +6,7 @@ var router = express.Router();
 var config = require('./../../config');
 
 var global_helper = require("./../../helpers/global_helper");
+var cart_helper = require('./../../helpers/cart_helper');
 var inspired_submission_helper = require('./../../helpers/inspired_submission_helper');
 
 var logger = config.logger;
@@ -96,6 +97,26 @@ router.post('/',async (req,res) => {
         }
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/**
+ * add_to_cart purchase post
+ * /promoter/inspired_submission/add_to_cart/:post_id/:user_id
+ * Developed by "ar"
+ */
+router.post('/add_to_cart/:post_id/:user_id', async (req, res) => {
+    var cart = {
+        "promoter_id": req.userInfo.id,
+        "inspired_post_id": req.params.post_id,
+        "user_id": req.params.user_id
+    };
+    let cart_resp = await cart_helper.insert_cart_item(cart);
+
+    if (cart_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while adding post into cart" });
+    } else {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Post has been added in cart" });
     }
 });
 

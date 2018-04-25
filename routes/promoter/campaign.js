@@ -503,7 +503,7 @@ router.post('/stop/:campaign_id', async (req, res) => {
 });
 
 /**
- * Purchase post
+ * Add to cart campaign
  * /promoter/campaign/add_to_cart/:campaign_id/:user_id
  * Developed by "ar"
  */
@@ -582,7 +582,7 @@ router.post('/:campaign_id/add_filtered_user_to_cart', async (req, res) => {
 
         var user_campaign = [];
 
-        for (let user of campaign_user.campaign.campaign_user) {
+        for (let user of campaign_user.campaign.users) {
             await user_campaign.push({
                 "promoter_id": req.userInfo.id,
                 "campaign_id": req.params.campaign_id,

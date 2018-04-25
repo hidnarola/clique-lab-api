@@ -36,12 +36,11 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
             aggregate.push({ "$sort": sort });
         }
 
-        
         aggregate.push({
             "$group": {
                 "_id": null,
                 "total": { "$sum": 1 },
-                'results': { "$push": '$users' }
+                'posts': { "$push": '$$ROOT' }
             }
         });
 
@@ -49,21 +48,25 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
             aggregate.push({
                 "$project": {
                     "total": 1,
-                    'users': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                    'posts': { "$slice": ["$posts", page_size * (page_no - 1), page_size] }
                 }
             });
         } else {
-            aggregate.push({"$project":{
-                "total":1,
-                'users':"$results"
-            }});
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'posts': "$$ROOT"
+                }
+            });
         }
 
-        console.log("aggregate = ",JSON.stringify(aggregate));
+        
+
+        console.log("aggregate = ", JSON.stringify(aggregate));
 
         var submissions = await Inspire_submission.aggregate(aggregate);
 
-        console.log("submission = ",submissions);
+        console.log("submission = ", submissions);
 
         if (submissions) {
             return { "status": 1, "message": "Post found", "submissions": submissions };
@@ -71,7 +74,7 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
             return { "status": 2, "message": "No post available" };
         }
     } catch (err) {
-        console.log("Error = ",err);
+        console.log("Error = ", err);
         return { "status": 0, "message": "Error occured while finding post", "error": err }
     }
 };
