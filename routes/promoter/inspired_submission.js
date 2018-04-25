@@ -66,13 +66,23 @@ router.post('/',async (req,res) => {
         }
 
         let keys = {
-            "fb_friends": "facebook.no_of_friends",
-            "insta_followers": "instagram.no_of_followers",
-            "twitter_followers": "twitter.no_of_followers",
-            "pinterest_followers": "pinterest.no_of_followers",
-            "linkedin_connection": "linkedin.no_of_connections",
-            "year_in_industry": "experience",
-            "age": "date_of_birth"
+            "fb_friends": "users.facebook.no_of_friends",
+            "insta_followers": "users.instagram.no_of_followers",
+            "twitter_followers": "users.twitter.no_of_followers",
+            "pinterest_followers": "users.pinterest.no_of_followers",
+            "linkedin_connection": "users.linkedin.no_of_connections",
+            "year_in_industry": "users.experience",
+            "age": "users.date_of_birth",
+    
+            "gender": "users.gender",
+            "location": "users.location",
+            "job_industry": "users.job_industry",
+            "education": "users.education",
+            "language": "users.language",
+            "ethnicity": "users.ethnicity",
+            "interested_in": "users.interested_in",
+            "relationship_status": "users.relationship_status",
+            "music_taste": "users.music_taste"
         };
         match_filter = await global_helper.rename_keys(match_filter, keys);
 
