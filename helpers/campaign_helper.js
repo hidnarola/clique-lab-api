@@ -163,10 +163,10 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
 
         var campaign = await Campaign.findOne({ _id: campaign_id }).lean();
 
-        if (campaign) {
-           FB.setAccessToken("EAAFSgTjDYm0BAMkd775z9NIRakG5pQFSqYJpncoUO9nXcr5iVB84ANt5aEkB1w3uMv9BslfClqlkyn35ZCFYZCiFuBHgrWKsDB9fRZAsTtjBg5x7ZCODhXVZAetvQ0Hefv4nAabPnVCOWYvsxFxjEaRkSvtZASG3RnolmGjAEiRIVZAlGwqFfKEQDYjWbYEZCMa3l6myST0ZBJ6rWc55BSsZBZBcNoG2vWDEc4SUd38rh0i4dHrojKnwfXJ");
+       if (campaign) {
+        /*   FB.setAccessToken("EAAFSgTjDYm0BAMkd775z9NIRakG5pQFSqYJpncoUO9nXcr5iVB84ANt5aEkB1w3uMv9BslfClqlkyn35ZCFYZCiFuBHgrWKsDB9fRZAsTtjBg5x7ZCODhXVZAetvQ0Hefv4nAabPnVCOWYvsxFxjEaRkSvtZASG3RnolmGjAEiRIVZAlGwqFfKEQDYjWbYEZCMa3l6myST0ZBJ6rWc55BSsZBZBcNoG2vWDEc4SUd38rh0i4dHrojKnwfXJ");
            var response = await FB.api('105830773604182_136563987197527/likes');
-        campaign.response= response.data.length;
+        campaign.response= response.data.length;*/
           
             return { "status": 1, "message": "campaign found", "Campaign": campaign };
 

@@ -157,7 +157,7 @@ router.post("/", async (req, res) => {
             }
          
         ],
-        async (err, filename) => {
+        async (err,user, filename) => {
           //End image upload
          
           if(filename)

@@ -434,16 +434,14 @@ router.post('/share/:campaign_id', async (req, res) => {
             "campaign_id": campaign_id,
             "post_id": post_id
           };
-          
           let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
 
           user_id = campaign_obj.user_id;
           campaign_id = campaign_obj.post_id;
-            console.log(campaign_obj);
           var obj = { "is_posted": true };
 
           let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
-         return res.status(config.OK_STATUS).json(campaign_data);
+          return res.status(config.OK_STATUS).json(campaign_data);
         }
       });
 
@@ -453,7 +451,19 @@ router.post('/share/:campaign_id', async (req, res) => {
   }
 });
 
-// Returns a `Facebook\FacebookResponse` object
+router.get('/share/facefook/friends', async (req, res) => {
+  user_id = req.userInfo.id;
+  logger.trace("Get all Profile API called");
+  var user = await user_helper.get_user_by_id(user_id);
+
+  var access_token = user.User.facebook.access_token;
+
+FB.setAccessToken(access_token);
+FB.api('/me/friends', function(response) {
+  return res.status(config.OK_STATUS).json(response);
+})
+});
+
 
 router.post('/share/twitter/:campaign_id', async (req, res) => {
   // Get campaign details by campaign id
