@@ -101,7 +101,11 @@ router.put('/', function (req, res) {
         "music_taste": {
             notEmpty: true,
             errorMessage: "Music taste is required"
-        }
+        },
+        "country": {
+            notEmpty: true,
+            errorMessage: "country is required"
+        },
     };
 
     req.checkBody(schema);
@@ -112,6 +116,7 @@ router.put('/', function (req, res) {
                 "user_interest": req.body.user_interest,
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
+                "country": req.body.country,
             };
             if (req.body.job_title && req.body.job_title != null) {
                 obj.job_title = req.body.job_title;
@@ -180,6 +185,7 @@ router.put('/', function (req, res) {
                     }
                 }
                 var user_resp = await user_helper.update_user_by_id(req.userInfo.id, obj);
+                console.log(obj);
                 if (user_resp.status === 0) {
                     res.status(config.INTERNAL_SERVER_ERROR).json({ "error": user_resp.error });
                 } else {

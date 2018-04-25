@@ -113,58 +113,13 @@ promoter_helper.get_all_brand = async (filter,page_no, page_size) => {
 
             var brand  = await Promoter           
             .find({"company":search},{"company":1,"avatar" : 1})
-            .populate('industry_category')
-            // .populate({ 
-            //         model: 'Job_industry', 
-            //         path: '_id', 
-            //         select: 'name'
-            //     })
+            .populate('industry_category',['name'])
             .skip((page_size * page_no) - page_size)
             .limit(page_size)
             .lean();  
           console.log(brand);
             var tot_record = count.length;
             console.log("Number of Records: ",count.length);
-
-           
-           /* var brand  = await Promoter.aggregate([
-                {
-                    $lookup: {
-                        from: "Job_industry",
-                        localField: "_id",
-                        foreignField: "industry_category",
-                        as: "industry_category"
-                    }
-                },
-                {
-                    $unwind: "$industry_category"
-                },
-                {
-                    $match: {
-                        "brand.industry_category": { "$eq": new ObjectId(id) },
-                        "status": true,
-                        //"social_media_platform": filter
-                    }
-                },
-                {
-                    $project:
-                        {
-                            company: 1,
-                            avatar: 1, 
-                           
-                        }
-                },
-                {
-                    $skip: page_no > 0 ? ((page_no - 1) * page_size) : 0
-                },
-                {
-                    $limit: page_size
-    
-                }
-                
-    
-            ]
-            )*/
     
         if (brand) {
             return { "status": 1, "message": "Brand details found", "brand": brand};
