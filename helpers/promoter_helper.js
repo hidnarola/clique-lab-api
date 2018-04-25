@@ -1,4 +1,5 @@
 var Promoter = require("./../models/Promoter");
+var Job_industry =require("./../models/Job_industry");
 var promoter_helper = {};
 
 /*
@@ -103,25 +104,25 @@ promoter_helper.update_promoter_by_id = async (promoter_id, promoter_object) => 
  */
 promoter_helper.get_all_brand = async (filter,page_no, page_size) => {
     try {
+       
         var r = new RegExp(filter);
         var search = {"$regex":r,"$options":"i"};
         var count  = await Promoter
-            .find({"company":search},{"industry_description":1,"company":1,"avatar" : 1})
+            .find({"company":search},{"company":1,"avatar" : 1})
             .lean();
 
             var brand  = await Promoter           
-            .find({"company":search},{"industry_description":1,"company":1,"avatar" : 1})
+            .find({"company":search},{"company":1,"avatar" : 1})
+            .populate('industry_category',['name'])
             .skip((page_size * page_no) - page_size)
             .limit(page_size)
             .lean();  
-           
+          console.log(brand);
             var tot_record = count.length;
             console.log("Number of Records: ",count.length);
-
-           
-           
+    
         if (brand) {
-            return { "status": 1, "message": "Brand details found", "brand": brand,"Total" :tot_record};
+            return { "status": 1, "message": "Brand details found", "brand": brand};
         } else {
             return { "status": 2, "message": "Brand not found" };
         }
