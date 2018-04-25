@@ -25,7 +25,7 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
                 }
             },
             {
-                "$unwind": "users"
+                "$unwind": "$users"
             }
         ];
 
@@ -36,20 +36,45 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
             aggregate.push({ "$sort": sort });
         }
 
-        console.log("aggregate = ",JSON.stringify(aggregate));
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'posts': { "$push": '$$ROOT' }
+            }
+        });
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'posts': { "$slice": ["$posts", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'posts': "$$ROOT"
+                }
+            });
+        }
+
+        
+
+        console.log("aggregate = ", JSON.stringify(aggregate));
 
         var submissions = await Inspire_submission.aggregate(aggregate);
 
+        console.log("submission = ", submissions);
+
         if (submissions) {
-            // _.map(campaigns[0].campaigns, function (campaign) {
-            //     campaign.remaining_days = moment(campaign.end_date).diff(moment(), 'days');
-            //     return campaign;
-            // });
             return { "status": 1, "message": "Post found", "submissions": submissions };
         } else {
             return { "status": 2, "message": "No post available" };
         }
     } catch (err) {
+        console.log("Error = ", err);
         return { "status": 0, "message": "Error occured while finding post", "error": err }
     }
 };

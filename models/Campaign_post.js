@@ -12,7 +12,6 @@ var Campaign_postSchema = new Schema({
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
-
 var Campaign_post = mongoose.model('campaign_post', Campaign_postSchema, 'campaign_post');
 
 module.exports = Campaign_post;

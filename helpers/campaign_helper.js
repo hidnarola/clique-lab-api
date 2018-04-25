@@ -182,6 +182,11 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
     try {
 
         var campaign = await Campaign.findOne({ _id: campaign_id }).lean();
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 1e2b01aa32620bdd9d99c885a8f3196cf312d580
         if (campaign) {
             FB.setAccessToken("EAAFSgTjDYm0BAMkd775z9NIRakG5pQFSqYJpncoUO9nXcr5iVB84ANt5aEkB1w3uMv9BslfClqlkyn35ZCFYZCiFuBHgrWKsDB9fRZAsTtjBg5x7ZCODhXVZAetvQ0Hefv4nAabPnVCOWYvsxFxjEaRkSvtZASG3RnolmGjAEiRIVZAlGwqFfKEQDYjWbYEZCMa3l6myST0ZBJ6rWc55BSsZBZBcNoG2vWDEc4SUd38rh0i4dHrojKnwfXJ");
             var response = await FB.api('105830773604182_136563987197527/likes');
@@ -355,7 +360,6 @@ campaign_helper.get_all_offered_campaign = async (id, filter, sort, page_no, pag
             },
             {
                 $limit: page_size
-
             }
 
         ])
