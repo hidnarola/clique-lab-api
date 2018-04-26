@@ -104,7 +104,6 @@ promoter_helper.update_promoter_by_id = async (promoter_id, promoter_object) => 
  */
 promoter_helper.get_all_brand = async (filter,page_no, page_size) => {
     try {
-       
         var r = new RegExp(filter);
         var search = {"$regex":r,"$options":"i"};
         var count  = await Promoter
@@ -117,9 +116,8 @@ promoter_helper.get_all_brand = async (filter,page_no, page_size) => {
             .skip((page_size * page_no) - page_size)
             .limit(page_size)
             .lean();  
-          console.log(brand);
+
             var tot_record = count.length;
-            console.log("Number of Records: ",count.length);
     
         if (brand) {
             return { "status": 1, "message": "Brand details found", "brand": brand};

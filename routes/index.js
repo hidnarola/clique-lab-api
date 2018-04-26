@@ -405,7 +405,7 @@ router.post('/promoter_reset_password', async (req, res) => {
   } else {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
-})
+});
 
 // Tested - OK
 // Can be used by both, user and promoter
