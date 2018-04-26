@@ -712,6 +712,13 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id,page_no,page
             {
                 "$unwind":"$user"
             },
+           {
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'results': { "$push": '$$ROOT' }
+                }
+            },
             {
                 "$skip": page_size * (page_no - 1)
             },
@@ -720,10 +727,9 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id,page_no,page
             },
         ]);
 
-        console.log("posts = ", post);
-         count = post.length;
+       
         if (post && post.length > 0) {
-            return { "status": 1, "message": "post found", "post": post, "count" :count };
+            return { "status": 1, "message": "post found", "post": post };
         } else {
             return { "status": 2, "message": "No post available" };
         }

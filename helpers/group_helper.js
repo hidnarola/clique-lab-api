@@ -210,7 +210,6 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding group member", "error": err }
     }
-
 };
 
 group_helper.insert_multiple_group_user = async (group_user_array) => {

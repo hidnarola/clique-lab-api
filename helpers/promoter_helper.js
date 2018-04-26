@@ -117,7 +117,8 @@ promoter_helper.get_all_brand = async (filter,page_no, page_size,country_id) => 
             .skip((page_size * page_no) - page_size)
             .limit(page_size)
             .lean();  
-          console.log(brand);
+         
+
             var tot_record = count.length;
             console.log("Number of Records: ",count.length);
     

@@ -4,6 +4,7 @@ var path = require("path");
 var async = require("async");
 var moment = require("moment");
 var mongoose = require('mongoose');
+var archiver = require('archiver');
 var router = express.Router();
 
 var config = require('./../../config');
@@ -211,7 +212,7 @@ router.post('/', async (req, res) => {
 /**
  * get all campaign of promoter
  */
-router.get('/', async(req,res)=>{
+router.get('/', async (req, res) => {
     var campaigns = await campaign_helper.get_all_campaign_of_promoter(req.userInfo.id);
     if (campaigns.status === 1) {
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaigns found", "results": campaigns.campaigns });
@@ -576,7 +577,7 @@ router.post('/:campaign_id/add_filtered_user_to_cart', async (req, res) => {
 
     var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, 0, 0, match_filter, 0);
 
-    console.log("user = ",campaign_user);
+    console.log("user = ", campaign_user);
 
     if (campaign_user.status === 1) {
 
@@ -592,7 +593,7 @@ router.post('/:campaign_id/add_filtered_user_to_cart', async (req, res) => {
 
         let cart_users_resp = await cart_helper.insert_multiple_cart_item(user_campaign);
         if (cart_users_resp.status == 0) {
-            console.log("resp = ",cart_users_resp);
+            console.log("resp = ", cart_users_resp);
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "No user available to add" });
         } else {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added to cart" });
@@ -756,7 +757,7 @@ router.post('/:campaign_id', async (req, res) => {
             "year_in_industry": "campaign_user.experience",
             "age": "campaign_user.date_of_birth",
 
-            "name":"campaign_user.name",
+            "name": "campaign_user.name",
             "gender": "campaign_user.gender",
             "location": "campaign_user.location",
             "job_industry": "campaign_user.job_industry",
@@ -786,10 +787,10 @@ router.post('/:campaign_id', async (req, res) => {
     }
 });
 
-router.get('/purchased', async(req,res)=>{
+router.get('/purchased', async (req, res) => {
     var campaigns = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id);
-    
-    if (campaigns.status === 1 ) {
+
+    if (campaigns.status === 1) {
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaigns found", "results": campaigns.post });
     } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaigns not found" });
@@ -800,12 +801,37 @@ router.get('/purchased', async(req,res)=>{
  * Download campaign images
  * /promoter/campaign/:campaign_id/download
  */
-router.get('/:campaign_id/download',async(req,res)=>{
+router.get('/:campaign_id/download', async (req, res) => {
     try {
-        let campaign = await campaign_helper.get_campaign_by_id(req.params.campaign_id);
-        res.send(campaign);
-    } catch (err){
-        console.log("error = ",err);
+        let campaign_resp = await campaign_helper.get_campaign_by_id(req.params.campaign_id);
+
+        if (campaign_resp.status == 1) {
+
+            var filename = new Date().getTime() + (Math.floor(Math.random() * 90000) + 10000) + '.zip';
+            // create a file to stream archive data to.
+            var output = fs.createWriteStream(__dirname + '/../../uploads/campaign/zip/'+filename);
+            var archive = archiver('zip', {
+                zlib: { level: 9 } // Sets the compression level.
+            });
+
+            // pipe archive data to the file
+            archive.pipe(output);
+
+            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/'+campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
+
+            campaign_resp.Campaign.mood_board_images.forEach(image => {
+                archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/'+image), { name: image });
+            });
+
+            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/'+campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
+            archive.finalize();
+
+            res.status(200).json({"status":1,"message":"file is ready to download","filename":filename});
+        } else {
+            res.status(200).json({"status":0,"message":"campaign not found"});
+        }
+    } catch (err) {
+        console.log("error = ", err);
         res.send(err);
     }
 });
