@@ -25,7 +25,7 @@
     "jsonwebtoken": "^8.2.0",
     "linkedin-js": "^0.1.4",
     "log4js": "^2.5.3",
-    "moment": "^2.21.0",
+    "moment": "^2.22.1",
     "mongoose": "^5.0.12",
     "morgan": "~1.8.1",
     "node-linked-in": "0.0.7",
