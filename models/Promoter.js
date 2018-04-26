@@ -28,6 +28,7 @@ var PromoterSchema = new Schema({
     password: { type: String, required: true },
     avatar: String,
     industry_category: { type: mongoose.Schema.Types.ObjectId, ref: 'job_industry' },
+    country: { type: mongoose.Schema.Types.ObjectId, ref: 'country' },
     industry_description: String,
     referal_link: String,
     wallet_balance: Number,

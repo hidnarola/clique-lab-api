@@ -29,6 +29,7 @@ var logger = config.logger;
  * 
  * @apiParam {String} [name] Full name of promoter
  * @apiParam {String} [company] Company name of the company
+ * @apiParam {String} [country] Country of the brand
  * @apiParam {String} industry_category Industry category id
  * @apiParam {String} industry_description Industry description
  * @apiParam {File} [avatar] Industry avatar/logo
@@ -56,10 +57,9 @@ router.post('/update_profile', async (req, res) => {
             "industry_fill": true
         }
 
-        console.log("promoter = ", promoter_obj);
-
         if (req.body.name) { promoter_obj.full_name = req.body.name; }
         if (req.body.company) { promoter_obj.company = req.body.company; }
+        if (req.body.country) { promoter_obj.country = req.body.country; }
 
         async.waterfall([
             function (callback) {

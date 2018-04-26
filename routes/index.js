@@ -14,6 +14,7 @@ var job_industry = require("../helpers/job_industry_helper");
 //var profile = require("../helpers/profile_helper");
 var music_taste = require("../helpers/music_taste_helper");
 var user_helper = require('./../helpers/user_helper');
+var country_helper = require("./../helpers/country_helper");
 
 var logger = config.logger;
 
@@ -139,6 +140,7 @@ router.post('/promoter_login', async (req, res) => {
  * @apiParam {String} email Email address
  * @apiParam {String} company Name of the company
  * @apiParam {String} password Password
+ * @apiParam {String} country Country
  * 
  * @apiSuccess (Success 200) {String} message Success message
  * @apiError (Error 4xx) {String} message Validation or error message.
@@ -168,6 +170,10 @@ router.post('/promoter_signup', async (req, res) => {
     'password': {
       notEmpty: true,
       errorMessage: "Password is required"
+    },
+    'country': {
+      notEmpty: true,
+      errorMessage: "Country is required"
     }
   };
   req.checkBody(schema);
@@ -179,7 +185,8 @@ router.post('/promoter_signup', async (req, res) => {
       "email": req.body.email,
       "username": req.body.username,
       "company": req.body.company,
-      "password": req.body.password
+      "password": req.body.password,
+      "country": req.body.country
     };
 
     // Check email availability
@@ -398,7 +405,7 @@ router.post('/promoter_reset_password', async (req, res) => {
   } else {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
-})
+});
 
 // Tested - OK
 // Can be used by both, user and promoter
@@ -659,5 +666,24 @@ router.post('/login', async (req, res) => {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
+
+/**
+ * Get country list
+ * /country
+ * Developed by "mm",
+ * Changed by "ar"
+ */
+router.get("/country", async (req, res) => {
+  logger.trace("Get country  API called");
+  var resp_data = await country_helper.get_all_country();
+
+  if (resp_data.status === 0 ) {
+      logger.error("Error occured while fetching Countries= ", resp_data);
+      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  } else {
+      logger.trace("got countries successfully");
+      res.status(config.OK_STATUS).json(resp_data);
+  }
+})
 
 module.exports = router;
