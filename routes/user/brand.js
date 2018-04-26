@@ -8,17 +8,17 @@ var router = express.Router();
 var config = require("./../../config");
 var logger = config.logger;
 
-var user_helper = require("./../../helpers/user_helper");
 var promoter_helper = require("./../../helpers/promoter_helper");
 var inspired_submission_helper = require("./../../helpers/inspired_submission_helper");
-var job_industry_helper = require("./../../helpers/job_industry_helper");
+var job_industry_helper =require("./../../helpers/job_industry_helper");
+var user_helper = require ("./../../helpers/user_helper");
 
 
 
 /**
- * @api {post} /user/promoter Brand - Get all
+ * @api {get} /user/promoter Brand  - Get 
  * @apiName Brand - Get all
- * @apiGroup User
+  * @apiGroup User
  * @apiHeader {String}  x-access-token unique access-key
  *
  * @apiSuccess (Success 200) {Array} brand Array of brand document
@@ -37,7 +37,7 @@ router.post("/", async (req, res) => {
     "page_size": {
       notEmpty: true,
       errorMessage: "page_size is required"
-    }
+    },
 
   };
   req.checkBody(schema);
@@ -48,8 +48,11 @@ router.post("/", async (req, res) => {
   }
 
   if (!errors) {
-    var user_info = await user_helper.get_user_by_id(req.userInfo.id);
-    var resp_data = await promoter_helper.get_all_brand(req.body.filter, req.body.page_no, req.body.page_size);
+    user_id= req.userInfo.id;
+   
+   var users = await user_helper.get_user_by_id(user_id)
+    country_id = users.User.country;
+   var resp_data = await promoter_helper.get_all_brand(req.body.filter, req.body.page_no, req.body.page_size,country_id);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Brand = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);

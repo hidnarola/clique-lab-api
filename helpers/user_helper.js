@@ -1,6 +1,11 @@
 var User = require("./../models/User");
 var user_helper = {};
 var brand =require("./../models/Inspired_Brand_submit");
+var Music_taste =require("./../models/Music_taste");
+var User_interest =require("./../models/User_interest");
+var Job_industry =require("./../models/Job_industry");
+
+
 /*
  * get_login_by_email is used to fetch single user by email address
  * 
@@ -36,7 +41,11 @@ user_helper.get_login_by_email = async (email) => {
  */
 user_helper.get_user_by_id = async (id) => {
     try {
-        var user = await User.findOne({ _id: id }).lean();
+        var user = await User.findOne({ _id: id })
+        .populate('music_taste',['name'])
+        .populate('job_industry',['name'])
+        .populate('user_interest',['name'])
+        .lean();
 
         // Find searchable value
         var field_need_counted = ["name","short_bio","email"];
@@ -86,7 +95,7 @@ user_helper.get_user_by_id = async (id) => {
  */
 user_helper.get_all_user = async () => {
     try {
-        var users = await User.find({ status: true }, { "name": 1, "username": 1, "avatar": 1, "facebook": 1, "instagram": 1, "twitter": 1, "pinterest": 1, "linkedin": 1 });
+        var users = await User.find({ status: true }, { "name": 1, "username": 1, "avatar": 1, "facebook": 1, "instagram": 1, "twitter": 1, "pinterest": 1, "linkedin": 1,country :1 });
         if (users && users.length > 0) {
             return { "status": 1, "message": "Users found", "users": users };
         } else {
