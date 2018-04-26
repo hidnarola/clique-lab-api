@@ -115,7 +115,7 @@ promoter_helper.get_all_brand = async (filter,page_no, page_size) => {
             .populate('industry_category',['name'])
             .skip((page_size * page_no) - page_size)
             .limit(page_size)
-            .lean();  
+            .lean();
 
             var tot_record = count.length;
     
