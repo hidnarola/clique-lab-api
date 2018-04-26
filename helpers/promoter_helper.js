@@ -114,6 +114,7 @@ promoter_helper.get_all_brand = async (filter,page_no, page_size) => {
             var brand  = await Promoter           
             .find({"company":search},{"company":1,"avatar" : 1})
             .populate('industry_category',['name'])
+            .populate('country')
             .skip((page_size * page_no) - page_size)
             .limit(page_size)
             .lean();  

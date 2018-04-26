@@ -678,7 +678,7 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
 
 
 
-campaign_helper.get_purchased_post_by_promoter = async (promoter_id) => {
+campaign_helper.get_purchased_post_by_promoter = async (promoter_id,page_no,page_size) => {
     try {
         var post = await Campaign.aggregate([
             {
@@ -711,54 +711,19 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id) => {
             },
             {
                 "$unwind":"$user"
-            }
+            },
+            {
+                "$skip": page_size * (page_no - 1)
+            },
+            {
+                "$limit": page_size
+            },
         ]);
 
-        // var promoter = await Campaign_User.aggregate([
-        //     {
-        //         $match: { is_purchase: true },
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: "campaign",
-        //             localField: "campaign_id",
-        //             foreignField: "_id",
-        //             as: "campaign"
-        //         }
-        //     },
-        //     {
-        //         $unwind: "$campaign"
-        //     },
-        //     {
-        //         $group: {
-        //             _id: "$_id",
-
-        //             campaign: { $addToSet: "$campaign" },
-        //             is_purchase: { $first: "$is_purchase" },
-        //         }
-        //     },
-
-        //     {
-        //         $match: { "campaign.promoter_id": new ObjectId(id) },
-
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: "user",
-        //             localField: "user_id",
-        //             foreignField: "_id",
-        //             as: "user"
-        //         }
-        //     },
-        //     {
-        //         $unwind: "$user"
-        //     },
-        // ]);
-
         console.log("posts = ", post);
-
-        if (post) {
-            return { "status": 1, "message": "post found", "post": post };
+         count = post.length;
+        if (post && post.length > 0) {
+            return { "status": 1, "message": "post found", "post": post, "count" :count };
         } else {
             return { "status": 2, "message": "No post available" };
         }
@@ -767,4 +732,35 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id) => {
         return { "status": 0, "message": "Error occured while finding purchase post", "error": err }
     }
 }
+
+campaign_helper.get_promoters_by_social_media = async (promoter_id,social_media_platform,date1,date2) => {
+    try {
+      
+        var calendar = await Campaign.aggregate([
+            {
+                "$match": { "promoter_id": new ObjectId(promoter_id) },
+
+            },
+            {
+                "$match": { "social_media_platform": social_media_platform },
+
+            },
+            {
+                "$match":  {"start_date": { $gte: date1,$lte :date2 },}
+            }
+
+            
+            
+        ])
+        if (calendar && calendar.length > 0) {
+            return { "status": 1, "message": "post found", "campaign": calendar};
+        } else {
+            return { "status": 2, "message": "No campaign available" };
+        }
+    } catch (err) {
+        console.log("Error = ",err);
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
+    }
+}
+
 module.exports = campaign_helper;
