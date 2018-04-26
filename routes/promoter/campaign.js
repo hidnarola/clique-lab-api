@@ -721,6 +721,20 @@ router.get('/purchased', async(req,res)=>{
     } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaigns not found" });
     }
-})
+});
+
+/**
+ * Download campaign images
+ * /promoter/campaign/:campaign_id/download
+ */
+router.get('/:campaign_id/download',async(req,res)=>{
+    try {
+        let campaign = await campaign_helper.get_campaign_by_id(req.params.campaign_id);
+        res.send(campaign);
+    } catch (err){
+        console.log("error = ",err);
+        res.send(err);
+    }
+});
 
 module.exports = router;
