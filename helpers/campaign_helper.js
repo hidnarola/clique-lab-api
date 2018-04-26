@@ -727,9 +727,9 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id,page_no,page
             },
         ]);
 
-       
+      
         if (post && post.length > 0) {
-            return { "status": 1, "message": "post found", "post": post };
+            return { "status": 1, "message": "post found", "post": post[0] };
         } else {
             return { "status": 2, "message": "No post available" };
         }
