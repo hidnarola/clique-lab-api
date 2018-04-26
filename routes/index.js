@@ -14,7 +14,7 @@ var job_industry = require("../helpers/job_industry_helper");
 //var profile = require("../helpers/profile_helper");
 var music_taste = require("../helpers/music_taste_helper");
 var user_helper = require('./../helpers/user_helper');
-var country_helper = require("./../../helpers/country_helper");
+var country_helper = require("./../helpers/country_helper");
 
 var logger = config.logger;
 
