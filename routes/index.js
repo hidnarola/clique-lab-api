@@ -140,6 +140,7 @@ router.post('/promoter_login', async (req, res) => {
  * @apiParam {String} email Email address
  * @apiParam {String} company Name of the company
  * @apiParam {String} password Password
+ * @apiParam {String} country Country
  * 
  * @apiSuccess (Success 200) {String} message Success message
  * @apiError (Error 4xx) {String} message Validation or error message.
@@ -169,6 +170,10 @@ router.post('/promoter_signup', async (req, res) => {
     'password': {
       notEmpty: true,
       errorMessage: "Password is required"
+    },
+    'country': {
+      notEmpty: true,
+      errorMessage: "Country is required"
     }
   };
   req.checkBody(schema);
@@ -180,7 +185,8 @@ router.post('/promoter_signup', async (req, res) => {
       "email": req.body.email,
       "username": req.body.username,
       "company": req.body.company,
-      "password": req.body.password
+      "password": req.body.password,
+      "country": req.body.country
     };
 
     // Check email availability
@@ -661,6 +667,12 @@ router.post('/login', async (req, res) => {
   }
 });
 
+/**
+ * Get country list
+ * /country
+ * Developed by "mm",
+ * Changed by "ar"
+ */
 router.get("/country", async (req, res) => {
   logger.trace("Get country  API called");
   var resp_data = await country_helper.get_all_country();
