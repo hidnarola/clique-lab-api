@@ -721,6 +721,6 @@ router.get('/purchased', async(req,res)=>{
     } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaigns not found" });
     }
-    
 })
+
 module.exports = router;

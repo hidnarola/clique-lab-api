@@ -14,6 +14,7 @@ var job_industry = require("../helpers/job_industry_helper");
 //var profile = require("../helpers/profile_helper");
 var music_taste = require("../helpers/music_taste_helper");
 var user_helper = require('./../helpers/user_helper');
+var country_helper = require("./../../helpers/country_helper");
 
 var logger = config.logger;
 
@@ -659,5 +660,18 @@ router.post('/login', async (req, res) => {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
+
+router.get("/country", async (req, res) => {
+  logger.trace("Get country  API called");
+  var resp_data = await country_helper.get_all_country();
+
+  if (resp_data.status === 0 ) {
+      logger.error("Error occured while fetching Countries= ", resp_data);
+      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  } else {
+      logger.trace("got countries successfully");
+      res.status(config.OK_STATUS).json(resp_data);
+  }
+})
 
 module.exports = router;
