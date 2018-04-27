@@ -635,17 +635,17 @@ router.post('/purchased', async (req, res) => {
     };
     req.checkBody(schema);
     const errors = req.validationErrors();
+
     if (!errors) {
         var campaigns = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size);
 
         if (campaigns.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaigns });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaigns.post });
         } else if (campaigns.status === 2) {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
         } else {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaigns.error });
         }
-
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
     }
@@ -784,15 +784,7 @@ router.post('/:campaign_id', async (req, res) => {
     }
 });
 
-router.get('/purchased', async (req, res) => {
-    var campaigns = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id);
 
-    if (campaigns.status === 1) {
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaigns found", "results": campaigns.post });
-    } else {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaigns not found" });
-    }
-});
 
 /**
  * Download campaign images
