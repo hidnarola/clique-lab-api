@@ -371,7 +371,7 @@ router.post("/campaign_applied", async (req, res) => {
 
         thumb({
           source: './uploads/campaign_applied', // could be a filename: dest/path/image.jpg
-          destination: './uploads/campaign',
+          destination: './uploads/170px360px',
           concurrency: 4
         }, function(files, err, stdout, stderr) {
           console.log('All done!');

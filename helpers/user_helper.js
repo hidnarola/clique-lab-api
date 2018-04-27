@@ -1,13 +1,13 @@
 var User = require("./../models/User");
 var user_helper = {};
-var brand =require("./../models/Inspired_Brand_submit");
-var Music_taste =require("./../models/Music_taste");
-var User_interest =require("./../models/User_interest");
-var Job_industry =require("./../models/Job_industry");
-var languages = require("./../models/Language");
+var brand = require("./../models/Inspired_Brand_submit");
+var Music_taste = require("./../models/Music_taste");
+var User_interest = require("./../models/User_interest");
+var Job_industry = require("./../models/Job_industry");
+var language = require("./../models/Language");
 var ethnicity = require("./../models/Ethnicity");
 var job_title = require("./../models/Job_title");
-var Education = require("./../models/Education");
+var education = require("./../models/Education");
 
 
 
@@ -47,17 +47,17 @@ user_helper.get_login_by_email = async (email) => {
 user_helper.get_user_by_id = async (id) => {
     try {
         var user = await User.findOne({ _id: id })
-        // .populate('music_taste',['name'])
-        // .populate('job_industry',['name'])
-        .populate('user_interest')
-        // .populate('languages',['name'])
-        // .populate('ethnicity')
-        // .populate('educations',['name'])
-        // .populate('job_title',['name'])
-        .lean();
+            .populate('music_taste', ['name'])
+            .populate('job_industry', ['name'])
+            .populate('user_interest', ['name'])
+            .populate('language')
+            .populate('ethnicity')
+            .populate('education')
+            .populate('job_title')
+            .lean();
 
         // Find searchable value
-        var field_need_counted = ["name","short_bio","email"];
+        var field_need_counted = ["name", "short_bio", "email"];
 
         var count = 0;
         Object.keys(user).forEach(async (key) => {
@@ -71,19 +71,19 @@ user_helper.get_user_by_id = async (id) => {
         if (user) {
 
             user.power = 0;
-            if(user.facebook){
+            if (user.facebook) {
                 user.power += user.facebook.no_of_friends;
             }
-            if(user.pinterset){
+            if (user.pinterset) {
                 user.power += user.pinterset.no_of_followers;
             }
-            if(user.linkedin){
+            if (user.linkedin) {
                 user.power += user.linkedin.no_of_followers;
             }
-            if(user.twitter){
+            if (user.twitter) {
                 user.power += user.twitter.no_of_followers;
             }
-            if(user.instagram){
+            if (user.instagram) {
                 user.power += user.instagram.no_of_followers;
             }
             return { "status": 1, "message": "User found", "User": user };
@@ -104,7 +104,7 @@ user_helper.get_user_by_id = async (id) => {
  */
 user_helper.get_all_user = async () => {
     try {
-        var users = await User.find({ status: true }, { "name": 1, "username": 1, "avatar": 1, "facebook": 1, "instagram": 1, "twitter": 1, "pinterest": 1, "linkedin": 1,country :1 });
+        var users = await User.find({ status: true }, { "name": 1, "username": 1, "avatar": 1, "facebook": 1, "instagram": 1, "twitter": 1, "pinterest": 1, "linkedin": 1, country: 1 });
         if (users && users.length > 0) {
             return { "status": 1, "message": "Users found", "users": users };
         } else {
@@ -137,24 +137,30 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
             aggregate.push({ "$sort": sort });
         }
 
-        aggregate.push({"$group":{
-            "_id":null,
-            "total":{"$sum":1},
-            'results':{"$push":'$$ROOT'}
-        }});
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$$ROOT' }
+            }
+        });
 
-        if(page_size && page_no){
-            aggregate.push({"$project":{
-                "total":1,
-                'users':{"$slice":["$results",page_size * (page_no - 1),page_size]}
-            }});
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'users': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
         } else {
-            aggregate.push({"$project":{
-                "total":1,
-                'users':"$results"
-            }});
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'users': "$results"
+                }
+            });
         }
-        
+
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
 
@@ -225,11 +231,11 @@ user_helper.update_user_by_id = async (user_id, login_object) => {
  */
 user_helper.get_bank_detail = async (user_id) => {
     try {
-        var user = await User.findOne({_id: user_id},{"bank.bank_name":1,"bank.account_name":1,"bank.account_number":1,"bank.bsb":1});
+        var user = await User.findOne({ _id: user_id }, { "bank.bank_name": 1, "bank.account_name": 1, "bank.account_number": 1, "bank.bsb": 1 });
         if (user) {
             return { "status": 1, "message": "bank detail", "bank": user.bank };
         } else {
-            return { "status": 2, "message": "No bank Detail available" };   
+            return { "status": 2, "message": "No bank Detail available" };
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding bank Detail", "error": err }
@@ -249,18 +255,18 @@ user_helper.get_bank_detail = async (user_id) => {
  * 
  * @developed by "mm"
  */
-user_helper.bank_detail_update = async (user_id,bank_id,bank) => { 
+user_helper.bank_detail_update = async (user_id, bank_id, bank) => {
     try {
         let user = await User.findOneAndUpdate(
-            { "_id": user_id,"bank._id": bank_id },
-             
-            { 
+            { "_id": user_id, "bank._id": bank_id },
+
+            {
                 "$set": {
                     "bank.$.bank_name": bank.bank_name,
                     "bank.$.account_number": bank.account_number,
                     "bank.$.account_name": bank.account_name,
                     "bank.$.bsb": bank.bsb
-                }   
+                }
             },
 
         );
@@ -272,7 +278,7 @@ user_helper.bank_detail_update = async (user_id,bank_id,bank) => {
     } catch (err) {
         console.log(err);
         return { "status": 0, "message": "Error occured while updating user", "error": err }
-        
+
     }
 };
 
@@ -291,7 +297,7 @@ user_helper.bank_detail_update = async (user_id,bank_id,bank) => {
 
 user_helper.add_bank_to_user = async (user_id, bank) => {
     try {
-        let user = await User.findOneAndUpdate({ _id: user_id }, {$push:{"bank":bank}}, { new: true });
+        let user = await User.findOneAndUpdate({ _id: user_id }, { $push: { "bank": bank } }, { new: true });
         if (!user) {
             return { "status": 2, "message": "Record has not updated" };
         } else {
