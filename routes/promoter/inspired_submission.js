@@ -2,6 +2,7 @@ var express = require("express");
 var moment = require("moment");
 var mongoose = require('mongoose');
 var router = express.Router();
+var Jimp = require("jimp");
 
 var config = require('./../../config');
 
@@ -62,9 +63,6 @@ router.post('/',async (req,res) => {
             });
         }
 
-        if(Object.keys(sort).length === 0){
-            sort["_id"] = 1;
-        }
 
         let keys = {
             "fb_friends": "users.facebook.no_of_friends",

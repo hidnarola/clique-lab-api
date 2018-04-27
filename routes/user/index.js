@@ -122,6 +122,9 @@ router.put('/', function (req, res) {
             if (req.body.job_title && req.body.job_title != null) {
                 obj.job_title = req.body.job_title;
             }
+            if (req.body.short_bio && req.body.short_bio != null) {
+                obj.short_bio = req.body.short_bio;
+            }
             if (req.body.education && req.body.education != null) {
                 obj.education = req.body.education;
             }
@@ -146,6 +149,7 @@ router.put('/', function (req, res) {
             if (req.body.date_of_birth && req.body.date_of_birth != null) {
                 obj.date_of_birth = req.body.date_of_birth;
             }
+
             async.waterfall([
                 function (callback) {
                     if (req.files && req.files['avatar']) {
@@ -167,6 +171,13 @@ router.put('/', function (req, res) {
                                     callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading avatar image" } });
                                 } else {
                                     logger.trace("Avatar image has uploaded for user");
+                                    Jimp.read("lenna.png", function (err, lenna) {
+                                        if (err) throw err;
+                                        lenna.resize(256, 256)            // resize 
+                                             .quality(60)                 // set JPEG quality 
+                                             .greyscale()                 // set greyscale 
+                                             .write("lena-small-bw.jpg"); // save 
+                                    });
                                     callback(null, filename);
                                 }
                             });
@@ -177,6 +188,7 @@ router.put('/', function (req, res) {
                         callback(null, null);
                     }
                 }
+                
             ], async (err, filename) => {
                 if (err) {
                     res.status(err.status).json(err.resp);

@@ -4,6 +4,11 @@ var brand =require("./../models/Inspired_Brand_submit");
 var Music_taste =require("./../models/Music_taste");
 var User_interest =require("./../models/User_interest");
 var Job_industry =require("./../models/Job_industry");
+var languages = require("./../models/Language");
+var ethnicity = require("./../models/Ethnicity");
+var job_title = require("./../models/Job_title");
+var Education = require("./../models/Education");
+
 
 
 /*
@@ -42,9 +47,13 @@ user_helper.get_login_by_email = async (email) => {
 user_helper.get_user_by_id = async (id) => {
     try {
         var user = await User.findOne({ _id: id })
-        .populate('music_taste',['name'])
-        .populate('job_industry',['name'])
-        .populate('user_interest',['name'])
+        // .populate('music_taste',['name'])
+        // .populate('job_industry',['name'])
+        .populate('user_interest')
+        // .populate('languages',['name'])
+        // .populate('ethnicity')
+        // .populate('educations',['name'])
+        // .populate('job_title',['name'])
         .lean();
 
         // Find searchable value

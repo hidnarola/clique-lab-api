@@ -97,11 +97,11 @@ var UserModelSchema = new Schema({
     pinterest: PinterestSchema, // 16
     linkedin: LinkedInSchema, // 17
     notification_settings: NotificationSettings,
-    job_title: { type: mongoose.Schema.Types.ObjectId, ref: 'JobTitle' }, // 18
+    job_title: { type: mongoose.Schema.Types.ObjectId, ref: 'job_title' }, // 18
     experience: Number, // In year // 19
     education: { type: mongoose.Schema.Types.ObjectId, ref: 'Education' }, // 20
     language:  { type: mongoose.Schema.Types.ObjectId, ref: 'Language' }, // 21
-    ethnicity: { type: mongoose.Schema.Types.ObjectId, ref: 'Ethnicity' },// 22
+    ethnicity: { type: mongoose.Schema.Types.ObjectId, ref: 'ethnicity' },// 22
     interested_in: { type: String, enum: ["male", "female", "both"] },
      country : { type: mongoose.Schema.Types.ObjectId, ref: 'country' },
     relationship_status: { type: String, enum: ["Married", "Unmarried", "Single"] }, // 24

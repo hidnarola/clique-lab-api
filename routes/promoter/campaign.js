@@ -778,8 +778,17 @@ router.post('/:campaign_id', async (req, res) => {
         sort = await global_helper.rename_keys(sort, keys);
 
         var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, req.body.page_no, req.body.page_size, match_filter, sort);
-
+        logger.trace("Get all Profile API called");
+        var user = await user_helper.get_user_by_id(user_id);
+      
+        var access_token = user.User.facebook.access_token;
+        user_id = req.userInfo.id;
+      FB.setAccessToken(access_token);
+      FB.api('/me/friends', function(response) {
+        return res.status(config.OK_STATUS).json(response);
+      })
         if (campaign_user.status === 1) {
+          
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaign_user.campaign });
         } else if (campaign_user.status === 2) {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });

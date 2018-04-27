@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var EthnicitySchema = new Schema({
-    ethnicity: { type: String, required: true },
+    name: { type: String, required: true },
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 

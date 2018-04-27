@@ -3,6 +3,8 @@ var fs = require("fs");
 var path = require("path");
 var async = require("async");
 var FB = require('fb');
+var Jimp = require("jimp");
+
 
 var router = express.Router();
 
@@ -243,10 +245,22 @@ router.post("/myoffer", async (req, res) => {
  */
 router.get("/:campaign_id", async (req, res) => {
   campaign_id = req.params.campaign_id;
+  user_id = req.userInfo.id;
+  logger.trace("Get all Profile API called");
+  var user = await user_helper.get_user_by_id(user_id);
+
+  var access_token = user.User.facebook.access_token;
+ 
+FB.setAccessToken(access_token);
+
+var like =await FB.api("/105830773604182_136563987197527/likes");
+ 
+likes = like.data.length;
   logger.trace("Get all  Campaign API called");
-  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id);
+  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id,likes);
+  
   if (resp_data.status == 0) {
-    logger.error("Error occured while fetching Public Campaign = ", resp_data);
+    logger.error("Error occured while fetching Public Campaign = ", resp_data,likes);
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
   } else {
     logger.trace(" Campaign got successfully = ", resp_data);
@@ -355,7 +369,16 @@ router.post("/campaign_applied", async (req, res) => {
 
         let campaign_data = await campaign_helper.insert_campaign_applied(campaign_obj);
 
-
+        thumb({
+          source: './uploads/campaign_applied', // could be a filename: dest/path/image.jpg
+          destination: './uploads/campaign',
+          concurrency: 4
+        }, function(files, err, stdout, stderr) {
+          console.log('All done!');
+        });
+      if(Object.keys(sort).length === 0){
+          sort["_id"] = 1;
+      }
         if (campaign_data.status === 0) {
           logger.error("Error while inserting camapign  data = ", campaign_data);
           return res.status(config.BAD_REQUEST).json({ campaign_data });
@@ -457,7 +480,7 @@ router.get('/share/facefook/friends', async (req, res) => {
   var user = await user_helper.get_user_by_id(user_id);
 
   var access_token = user.User.facebook.access_token;
-
+  user_id = req.userInfo.id;
 FB.setAccessToken(access_token);
 FB.api('/me/friends', function(response) {
   return res.status(config.OK_STATUS).json(response);
