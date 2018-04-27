@@ -54,6 +54,17 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
             },
             {
                 "$unwind": "$campaign"
+            },
+            {
+                "$lookup": {
+                    from: "users",
+                    localField: "user_id",
+                    foreignField: "_id",
+                    as: "user"
+                }
+            },
+            {
+                "$unwind": "$user"
             }
         ]);
         if(cart_items && cart_items){
