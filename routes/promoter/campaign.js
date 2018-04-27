@@ -622,7 +622,6 @@ router.delete('/:campaign_id', async (req, res) => {
 });
 
 
-
 router.post('/purchased', async (req, res) => {
     var schema = {
         'page_size': {
