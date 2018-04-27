@@ -55,13 +55,14 @@ router.get("/interest_details", async (req, res) => {
     var job_industry_resp = await job_industry.get_all_job_industry();
     var interest_resp = await interest_helper.get_all_interest();
     var music_taste_resp = await music_taste_helper.get_all_music_taste();
+    var country_resp = await country_helper.get_all_country();
 
-    if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1) {
+    if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1 && country_resp.status === 1) {
         logger.trace("got details successfully");
-        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste });
+        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste, "country": country_resp.countries });
     } else {
-        logger.error("Error occured while fetching Job Industry = ", resp_data);
-        res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+        logger.error("Error occured while fetching details");
+        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Details not found"});
     }
 })
 
