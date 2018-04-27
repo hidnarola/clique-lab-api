@@ -623,7 +623,7 @@ router.delete('/:campaign_id', async (req, res) => {
 
 
 
-router.post('/purchased', async(req,res)=>{
+router.post('/purchased', async (req, res) => {
     var schema = {
         'page_size': {
             notEmpty: true,
@@ -636,34 +636,25 @@ router.post('/purchased', async(req,res)=>{
     };
     req.checkBody(schema);
     const errors = req.validationErrors();
-  if(!errors)
-  {
-    var campaigns = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id,req.body.page_no,req.body.page_size);
-    
-    if (campaigns.status === 1) {
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaigns.post });
-    } else if (campaigns.status === 2) {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
-    } else {
-        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaigns.error });
-    }
+    if (!errors) {
+        var campaigns = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size);
 
-} else {
-    res.status(config.BAD_REQUEST).json({ message: errors });
-}
+        if (campaigns.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaigns.post });
+        } else if (campaigns.status === 2) {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
+        } else {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaigns.error });
+        }
+
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
 })
 
-router.post('/calendar', async(req,res)=>{
-
-    var startdate = moment(req.body.start_date).toDate();
-    var enddate = moment(req.body.end_date).toDate();
-   
-    console.log(startdate,enddate);
+router.post('/calendar', async (req, res) => {
     var schema = {
-        'social_media_platform': {
-            notEmpty: true,
-            errorMessage: "Social Media Platform is required"
-        },
+       
         'start_date': {
             notEmpty: true,
             errorMessage: "start date is required"
@@ -676,22 +667,37 @@ router.post('/calendar', async(req,res)=>{
 
     req.checkBody(schema);
     const errors = req.validationErrors();
-  if(!errors)
-  {
-  
-    var campaigns = await campaign_helper.get_promoters_by_social_media(req.userInfo.id,req.body.social_media_platform,req.body.start_date,req.body.end_date);
-    
-    if (campaigns.status === 1) {
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaigns });
-    } else if (campaigns.status === 2) {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
-    } else {
-        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaigns.error });
-    }
+    if (!errors) {
 
-} else {
-    res.status(config.BAD_REQUEST).json({ message: errors });
-}
+        var startdate = moment(req.body.start_date,"YYYY-MM-DD").toDate();
+        var enddate = moment(req.body.end_date,"YYYY-MM-DD").toDate();
+
+        console.log("start = ",startdate);
+        console.log("end = ",enddate);
+
+        let filter = {
+            "start_date":{
+                "$gte":moment(req.body.start_date,"YYYY-MM-DD").toDate(),
+                "$lte":moment(req.body.end_date,"YYYY-MM-DD").toDate()
+            }
+        }
+
+        if(req.body.social_media_platform){
+            filter["social_media_platform"] = req.body.social_media_platform
+        }
+
+        var campaigns = await campaign_helper.get_promoters_by_social_media(req.userInfo.id, filter);
+        
+        if (campaigns.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaigns });
+        } else if (campaigns.status === 2) {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
+        } else {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaigns.error });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
 })
 
 /**
@@ -801,7 +807,7 @@ router.get('/:campaign_id/download', async (req, res) => {
 
             var filename = new Date().getTime() + (Math.floor(Math.random() * 90000) + 10000) + '.zip';
             // create a file to stream archive data to.
-            var output = fs.createWriteStream(__dirname + '/../../uploads/campaign/zip/'+filename);
+            var output = fs.createWriteStream(__dirname + '/../../uploads/campaign/zip/' + filename);
             var archive = archiver('zip', {
                 zlib: { level: 9 } // Sets the compression level.
             });
@@ -809,18 +815,18 @@ router.get('/:campaign_id/download', async (req, res) => {
             // pipe archive data to the file
             archive.pipe(output);
 
-            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/'+campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
+            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
 
             campaign_resp.Campaign.mood_board_images.forEach(image => {
-                archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/'+image), { name: image });
+                archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + image), { name: image });
             });
 
-            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/'+campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
+            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
             archive.finalize();
 
-            res.status(200).json({"status":1,"message":"file is ready to download","filename":filename});
+            res.status(200).json({ "status": 1, "message": "file is ready to download", "filename": filename });
         } else {
-            res.status(200).json({"status":0,"message":"campaign not found"});
+            res.status(200).json({ "status": 0, "message": "campaign not found" });
         }
     } catch (err) {
         console.log("error = ", err);

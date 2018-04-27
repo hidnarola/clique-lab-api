@@ -113,7 +113,7 @@ router.put('/', function (req, res) {
         if (result.isEmpty()) {
             var obj = {
                 "name": req.body.name,
-                "user_interest": req.body.user_interest,
+                "user_interest": JSON.parse(req.body.user_interest),
                 "job_industry": req.body.job_industry,
                 "music_taste": req.body.music_taste,
                 "country": req.body.country,

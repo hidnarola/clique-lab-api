@@ -7,6 +7,7 @@ var Campaign_User = require("./../models/Campaign_user");
 var Campaign = require("./../models/Campaign");
 var ObjectId = mongoose.Types.ObjectId;
 var FB = require('fb');
+var DateDiff = require('date-diff');
 
 var campaign_helper = {};
 
@@ -678,7 +679,7 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
 
 
 
-campaign_helper.get_purchased_post_by_promoter = async (promoter_id,page_no,page_size) => {
+campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, page_size) => {
     try {
         var post = await Campaign.aggregate([
             {
@@ -697,22 +698,22 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id,page_no,page
                 $unwind: "$campaign_user"
             },
             {
-                "$match":{
-                    "campaign_user.is_purchase":true
+                "$match": {
+                    "campaign_user.is_purchase": true
                 }
             },
             {
-                "$lookup":{
-                    "from":"users",
-                    "localField":"campaign_user.user_id",
-                    "foreignField":"_id",
-                    "as":"user"
+                "$lookup": {
+                    "from": "users",
+                    "localField": "campaign_user.user_id",
+                    "foreignField": "_id",
+                    "as": "user"
                 }
             },
             {
-                "$unwind":"$user"
+                "$unwind": "$user"
             },
-           {
+            {
                 "$group": {
                     "_id": null,
                     "total": { "$sum": 1 },
@@ -727,44 +728,64 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id,page_no,page
             },
         ]);
 
-      
+
         if (post && post.length > 0) {
             return { "status": 1, "message": "post found", "post": post[0] };
         } else {
             return { "status": 2, "message": "No post available" };
         }
     } catch (err) {
-        console.log("Error = ",err);
+        console.log("Error = ", err);
         return { "status": 0, "message": "Error occured while finding purchase post", "error": err }
     }
 }
 
-campaign_helper.get_promoters_by_social_media = async (promoter_id,social_media_platform,date1,date2) => {
+campaign_helper.get_promoters_by_social_media = async (promoter_id, filter) => {
     try {
-      
-        var calendar = await Campaign.aggregate([
-            {
-                "$match": { "promoter_id": new ObjectId(promoter_id) },
 
-            },
-            {
-                "$match": { "social_media_platform": social_media_platform },
+        var aggregate = [{
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        }];
 
-            },
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+
+        aggregate.push({
+            "$project":
             {
-                "$match":  {"start_date": { $gte: date1,$lte :date2 },}
+                "at_tag": 1, "at_tag": 1,
+                "hash_tag": 1,
+                "privacy": 1,
+                "mood_board_images": 1,
+                "status": 1,
+                "name": 1,
+                "start_date": 1,
+                "end_date": 1,
+                "call_to_action": 1,
+                "social_media_platform": 1,
+                "media_format": 1,
+                "location": 1,
+                "price": 1,
+                "currency": 1,
+                "promoter_id": 1,
+                "description": 1,
+                "cover_image": 1,
+                "days": {
+                    "$divide": [{ "$subtract": ['$end_date', '$start_date'] }, 24 * 60 * 60 * 1000]
+                }
             }
+        });
 
-            
-            
-        ])
+        var calendar = await Campaign.aggregate(aggregate);
+
         if (calendar && calendar.length > 0) {
-            return { "status": 1, "message": "post found", "campaign": calendar};
+            return { "status": 1, "message": "post found", "campaign": calendar };
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
     } catch (err) {
-        console.log("Error = ",err);
+        console.log("Error = ", err);
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
