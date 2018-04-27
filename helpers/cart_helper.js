@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Types.ObjectId;
 
 var Cart = require("./../models/Cart");
 var cart_helper = {};
@@ -30,6 +31,32 @@ cart_helper.insert_multiple_cart_item = async (cart_item_array) => {
     try {
         let cart_item_data = await Cart.insertMany(cart_item_array);
         return { "status": 1, "message": "Cart item has been added", "cart_items": cart_item_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting multiple cart item", "error": err };
+    }
+};
+
+cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
+    try {
+        var cart_items = await Cart.aggregate([
+            {
+                "$match": {
+                    "promoter_id":new ObjectId(promoter_id)
+                }
+            },
+            {
+                "$lookup": {
+                    from: "campaign",
+                    localField: "campaign_id",
+                    foreignField: "_id",
+                    as: "campaign"
+                }
+            },
+            {
+                "$unwind": "$campaign"
+            }
+        ]);
+        return {"status": 1,"message":"Cart items found","cart_items":cart_items}
     } catch (err) {
         return { "status": 0, "message": "Error occured while inserting multiple cart item", "error": err };
     }
