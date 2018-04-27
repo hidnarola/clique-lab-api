@@ -152,7 +152,7 @@ router.put('/', function (req, res) {
 
             async.waterfall([
                 function (callback) {
-                    if (req.files && req.files['avatar']) {
+                    if (req.files && req.files['image']) {
                         logger.trace("Uploading avatar image");
                         var file = req.files['avatar'];
                         var dir = "./uploads/users";
