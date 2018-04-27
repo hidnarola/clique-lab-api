@@ -56,8 +56,8 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
                 "$unwind": "$campaign"
             }
         ]);
-        if(cart_items && cart_items[0]){
-            return {"status": 1,"message":"Cart items found","cart_items":cart_items[0]}
+        if(cart_items && cart_items){
+            return {"status": 1,"message":"Cart items found","cart_items":cart_items}
         } else {
             return {"status": 2,"message":"No item available in cart"}
         }
