@@ -7,7 +7,6 @@ var Campaign_User = require("./../models/Campaign_user");
 var Campaign = require("./../models/Campaign");
 var ObjectId = mongoose.Types.ObjectId;
 var FB = require('fb');
-var DateDiff = require('date-diff');
 
 var campaign_helper = {};
 
