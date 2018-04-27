@@ -56,7 +56,11 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
                 "$unwind": "$campaign"
             }
         ]);
-        return {"status": 1,"message":"Cart items found","cart_items":cart_items}
+        if(cart_items && cart_items[0]){
+            return {"status": 1,"message":"Cart items found","cart_items":cart_items[0]}
+        } else {
+            return {"status": 2,"message":"No item available in cart"}
+        }
     } catch (err) {
         return { "status": 0, "message": "Error occured while inserting multiple cart item", "error": err };
     }
