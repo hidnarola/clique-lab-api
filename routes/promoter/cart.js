@@ -20,4 +20,61 @@ router.get('/', async (req, res) => {
     }
 });
 
+/**
+ * Purchase Item available in cart
+ * /promoter/cart/purchase
+ * Developed by "ar"
+ */
+router.post('/purchase',async(req,res)=>{
+    var schema = {
+        'name': {
+            notEmpty: true,
+            errorMessage: "Name is required"
+        },
+        'email': {
+            notEmpty: true,
+            errorMessage: "Email is required"
+        },
+        'abn': {
+            notEmpty: true,
+            errorMessage: "ABN is required"
+        },
+        'country': {
+            notEmpty: true,
+            errorMessage: "Country is required"
+        },
+        'address_line_1': {
+            notEmpty: true,
+            errorMessage: "Address line 1 is required"
+        },
+        'address_line_2': {
+            notEmpty: true,
+            errorMessage: "Address line 2 is required"
+        },
+        'city': {
+            notEmpty: true,
+            errorMessage: "City is required"
+        },
+        'state': {
+            notEmpty: true,
+            errorMessage: "State is required"
+        },
+        'post_code': {
+            notEmpty: true,
+            errorMessage: "Post code is required"
+        },
+        'credit_card':{
+            notEmpty: true,
+            errorMessage: "Credit card is required"
+        }
+    };
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+    if (!errors) {
+        
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+})
+
 module.exports = router;                        

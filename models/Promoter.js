@@ -6,19 +6,19 @@ var SALT_WORK_FACTOR = 10;
 //Define a schema
 var Schema = mongoose.Schema;
 
-var CreditcardSchema = new Schema({
-    name: { type: String, required: true },
-    number: { type: String, required: true },
-    expiry_date: { type: Date, required: true },
-    cvv: { type: Number, required: true }
-});
+// var CreditcardSchema = new Schema({
+//     name: { type: String, required: true },
+//     number: { type: String, required: true },
+//     expiry_date: { type: Date, required: true },
+//     cvv: { type: Number, required: true }
+// });
 
-var BankSchema = new Schema({
-    bank_name: { type: String, required: true },
-    holder_name: { type: String, required: true },
-    account_number: { type: Number, required: true },
-    bsb: { type: Number, required: true }
-});
+// var BankSchema = new Schema({
+//     bank_name: { type: String, required: true },
+//     holder_name: { type: String, required: true },
+//     account_number: { type: Number, required: true },
+//     bsb: { type: Number, required: true }
+// });
 
 var PromoterSchema = new Schema({
     full_name: { type: String, required: true },
@@ -39,8 +39,12 @@ var PromoterSchema = new Schema({
     last_login_date: {type: Date},
     industry_fill : {type: Boolean, default: false},
     password_changed_date: {type: Date},
-    creditcard: CreditcardSchema,
-    bank_details: BankSchema,
+
+    stripe_customer_id: String,
+    // creditcard: CreditcardSchema,
+    creditcard: [String], // Card reference of stripe
+    // bank_details: BankSchema,
+    bank_details: [String], // Bank account id of stripe
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 

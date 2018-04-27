@@ -26,7 +26,6 @@ cart_helper.insert_cart_item = async (cart_object) => {
     }
 };
 
-
 cart_helper.insert_multiple_cart_item = async (cart_item_array) => {
     try {
         let cart_item_data = await Cart.insertMany(cart_item_array);
