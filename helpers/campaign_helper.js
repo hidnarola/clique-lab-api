@@ -179,12 +179,12 @@ campaign_helper.get_all_campaign_of_promoter = async (promoter_id) => {
  *          status 2 - If campaign not found, with appropriate message
  */
 
-campaign_helper.get_campaign_by_id = async (campaign_id,likes) => {
+campaign_helper.get_campaign_by_id = async (campaign_id, likes) => {
 
     try {
         var campaign = await Campaign.findOne({ _id: campaign_id }).lean();
         if (campaign) {
-         return { "status": 1, "message": "campaign found", "Campaign": campaign,"likes" :likes};
+            return { "status": 1, "message": "campaign found", "Campaign": campaign, "likes": likes };
 
         } else {
             return { "status": 2, "message": "No campaign available" };
@@ -679,8 +679,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
     try {
         var post = await Campaign.aggregate([
             {
-                "$match": { "promoter_id": new ObjectId(promoter_id) },
-
+                "$match": { "promoter_id": ObjectId("5ac730d4bd2d072f5072031d") },
             },
             {
                 $lookup: {
@@ -690,6 +689,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                     as: "campaign_user"
                 }
             },
+
             {
                 $unwind: "$campaign_user"
             },
@@ -699,13 +699,6 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                 }
             },
             {
-                "$skip": page_size * (page_no - 1)
-            },
-            {
-                "$limit": page_size
-            },
-          
-            {
                 "$lookup": {
                     "from": "users",
                     "localField": "campaign_user.user_id",
@@ -714,7 +707,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                 }
             },
             {
-                "$unwind": "$user"
+                $unwind: "$user"
             },
             {
                 "$group": {
@@ -723,9 +716,14 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                     'results': { "$push": '$$ROOT' }
                 }
             },
-           
-        ]);
-
+            {
+                "$project": {
+                    "total": 1,
+                    'results': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            }
+        ])
+        
 
         if (post && post.length > 0) {
             return { "status": 1, "message": "post found", "post": post[0] };
@@ -751,28 +749,28 @@ campaign_helper.get_promoters_by_social_media = async (promoter_id, filter) => {
 
         aggregate.push({
             "$project":
-            {
-                "at_tag": 1, "at_tag": 1,
-                "hash_tag": 1,
-                "privacy": 1,
-                "mood_board_images": 1,
-                "status": 1,
-                "name": 1,
-                "start_date": 1,
-                "end_date": 1,
-                "call_to_action": 1,
-                "social_media_platform": 1,
-                "media_format": 1,
-                "location": 1,
-                "price": 1,
-                "currency": 1,
-                "promoter_id": 1,
-                "description": 1,
-                "cover_image": 1,
-                "days": {
-                    "$divide": [{ "$subtract": ['$end_date', '$start_date'] }, 24 * 60 * 60 * 1000]
+                {
+                    "at_tag": 1, "at_tag": 1,
+                    "hash_tag": 1,
+                    "privacy": 1,
+                    "mood_board_images": 1,
+                    "status": 1,
+                    "name": 1,
+                    "start_date": 1,
+                    "end_date": 1,
+                    "call_to_action": 1,
+                    "social_media_platform": 1,
+                    "media_format": 1,
+                    "location": 1,
+                    "price": 1,
+                    "currency": 1,
+                    "promoter_id": 1,
+                    "description": 1,
+                    "cover_image": 1,
+                    "days": {
+                        "$divide": [{ "$subtract": ['$end_date', '$start_date'] }, 24 * 60 * 60 * 1000]
+                    }
                 }
-            }
         });
 
         var calendar = await Campaign.aggregate(aggregate);
