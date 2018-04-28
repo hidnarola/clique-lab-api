@@ -152,7 +152,7 @@ router.put('/', function (req, res) {
 
             async.waterfall([
                 function (callback) {
-                    if (req.files && req.files['image']) {
+                    if (req.files && req.files['avatar']) {
                         logger.trace("Uploading avatar image");
                         var file = req.files['avatar'];
                         var dir = "./uploads/users";
@@ -171,13 +171,7 @@ router.put('/', function (req, res) {
                                     callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading avatar image" } });
                                 } else {
                                     logger.trace("Avatar image has uploaded for user");
-                                    Jimp.read("./uploads/users", function (err, lenna) {
-                                        if (err) throw err;
-                                        lenna.resize(170,360)            // resize 
-                                             .quality(60)                 // set JPEG quality 
-                                             .greyscale()                 // set greyscale 
-                                             .write("./uploads/170px360px"); // save 
-                                    });
+                                  
                                     callback(null, filename);
                                 }
                             });

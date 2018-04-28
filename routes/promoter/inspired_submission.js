@@ -2,7 +2,6 @@ var express = require("express");
 var moment = require("moment");
 var mongoose = require('mongoose');
 var router = express.Router();
-var Jimp = require("jimp");
 
 var config = require('./../../config');
 

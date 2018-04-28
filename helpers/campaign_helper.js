@@ -7,7 +7,7 @@ var Campaign_User = require("./../models/Campaign_user");
 var Campaign = require("./../models/Campaign");
 var ObjectId = mongoose.Types.ObjectId;
 var FB = require('fb');
-var Jimp = require("jimp");
+
 
 
 var campaign_helper = {};
@@ -699,6 +699,13 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                 }
             },
             {
+                "$skip": page_size * (page_no - 1)
+            },
+            {
+                "$limit": page_size
+            },
+          
+            {
                 "$lookup": {
                     "from": "users",
                     "localField": "campaign_user.user_id",
@@ -716,12 +723,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                     'results': { "$push": '$$ROOT' }
                 }
             },
-            {
-                "$skip": page_size * (page_no - 1)
-            },
-            {
-                "$limit": page_size
-            },
+           
         ]);
 
 
