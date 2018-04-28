@@ -22,7 +22,6 @@
     "express-validator": "^5.0.3",
     "fb": "^2.0.0",
     "fs": "0.0.1-security",
-    "jimp": "^0.2.28",
     "jsonwebtoken": "^8.2.0",
     "linkedin-js": "^0.1.4",
     "log4js": "^2.5.3",
@@ -39,9 +38,11 @@
     "request": "^2.85.0",
     "serve-favicon": "~2.4.2",
     "stripe": "^5.8.0",
+    "sharp": "^0.20.1",
     "swagger-ui-express": "^3.0.6",
     "twitter": "^1.7.1",
     "underscore": "^1.9.0",
     "utf8": "^3.0.0"
-  }
+  },
+  "devDependencies": {}
 }

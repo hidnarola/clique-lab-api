@@ -3,8 +3,6 @@ var fs = require("fs");
 var path = require("path");
 var async = require("async");
 var FB = require('fb');
-var Jimp = require("jimp");
-
 
 var router = express.Router();
 
@@ -363,22 +361,24 @@ router.post("/campaign_applied", async (req, res) => {
 
         if (filename) {
           campaign_obj.image = filename;
-        }
-        /*var random = randomstring.generate(6);
-        console.log(random);*/
-
+      
+       
+       sharp(filename)
+  .resize(200, 300, {
+    kernel: sharp.kernel.nearest
+  })
+  .background('white')
+  .embed()
+  .toFile('./uploads/170px360px');
+ 
+    // output.tiff is a 200 pixels wide and 300 pixels high image
+    // containing a nearest-neighbour scaled version, embedded on a white canvas,
+    // of the image data in inputBuffer
+ 
+}
+    
         let campaign_data = await campaign_helper.insert_campaign_applied(campaign_obj);
 
-        thumb({
-          source: './uploads/campaign_applied', // could be a filename: dest/path/image.jpg
-          destination: './uploads/170px360px',
-          concurrency: 4
-        }, function(files, err, stdout, stderr) {
-          console.log('All done!');
-        });
-      if(Object.keys(sort).length === 0){
-          sort["_id"] = 1;
-      }
         if (campaign_data.status === 0) {
           logger.error("Error while inserting camapign  data = ", campaign_data);
           return res.status(config.BAD_REQUEST).json({ campaign_data });
