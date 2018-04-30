@@ -13,6 +13,10 @@ module.exports = {
     // Database config
     "database": process.env.DATABASE,
 
+    // Stripe
+    "STRIPE_KEY":process.env.STRIPE_KEY,
+    "STRIPE_SECRET_KEY":process.env.STRIPE_SECRET_KEY,
+
     // JWT
     "ACCESS_TOKEN_SECRET_KEY": process.env.ACCESS_TOKEN_SECRET_KEY,
     "REFRESH_TOKEN_SECRET_KEY": process.env.REFRESH_TOKEN_SECRET_KEY,

@@ -3,6 +3,10 @@ var router = express.Router();
 
 var config = require('./../../config');
 var cart_helper = require('./../../helpers/cart_helper');
+var transaction_helper = require('./../../helpers/transaction_helper');
+var promoter_helper = require('./../../helpers/promoter_helper');
+
+var stripe = require("stripe")(config.STRIPE_SECRET_KEY);
 
 /**
  * Get cart product
@@ -71,10 +75,64 @@ router.post('/purchase',async(req,res)=>{
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        
+
+        // Fetch currently active cart
+
+        let transaction_obj = {
+            "promoter_id":req.userInfo.id,
+            "name":req.body.name,
+            "email":req.body.email,
+            "abn":req.body.abn,
+            "country":req.body.country,
+            "address_line_1":req.body.address_line_1,
+            "address_line_2":req.body.address_line_2,
+            "city":req.body.city,
+            "state":req.body.state,
+            "post_code":req.body.post_code,
+            "credit_card":req.body.credit_card
+        };
+
+        if(req.body.company){
+            transaction_obj.company = req.body.company;
+        }
+
+        let transaction_resp = transaction_helper.insert_transaction(transaction_obj);
+
+        if(transaction_resp.status === 1){
+            // get user's stripe account
+            let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+            if(promoter_resp.status === 1 && promoter_resp.promoter && promoter_resp.promoter.stripe_customer_id){
+                try{
+                    let charge = await stripe.charges.create({
+                        "amount": 100,
+                        "currency": "usd",
+                        "capture": false,
+                        "customer": promoter_resp.promoter.stripe_customer_id,
+                        "statement_descriptor": "Clique campaign purchase",
+                        "metadata": {
+                            "CHARGETYPE": "Authorization ONLY",
+                            "subtotal": 100,
+                            "GST": 10,
+                            "userID": req.userInfo.id
+                        }
+                    });
+
+                    let updated_transaction = transaction_helper.update_transaction_by_id(transaction_resp.transaction._id,{"status":"paid"});
+                    res.status(config.OK_STATUS).json({"status":1,"message":"Payment has been done successfully"});
+
+                } catch(err){
+                    // Set transaction status to failed
+                    let updated_transaction = transaction_helper.update_transaction_by_id(transaction_resp.transaction._id,{"status":"failed"});
+                    res.status(config.BAD_REQUEST).json({"status":0,"message":"Transaction has been failed"});
+                }
+            }
+        } else {
+            res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while doing transaction"})
+        }
+
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
     }
-})
+});
 
-module.exports = router;                        
+module.exports = router;
