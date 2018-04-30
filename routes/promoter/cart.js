@@ -15,12 +15,12 @@ var stripe = require("stripe")(config.STRIPE_SECRET_KEY);
  */
 router.get('/', async (req, res) => {
     var cart_item_resp = await cart_helper.view_cart_details_by_promoter(req.userInfo.id);
-    if(cart_item_resp.status === 0){
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while finding cart details","error":cart_item_resp.error});
-    } else if(cart_item_resp.status === 2){
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"No cart item available"});
+    if (cart_item_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while finding cart details", "error": cart_item_resp.error });
+    } else if (cart_item_resp.status === 2) {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No cart item available" });
     } else {
-        res.status(config.OK_STATUS).json({"status":1,"message":"Cart items found","cart_items":cart_item_resp.cart_items});
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Cart items found", "cart_items": cart_item_resp.cart_items });
     }
 });
 
@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
  * /promoter/cart/purchase
  * Developed by "ar"
  */
-router.post('/purchase',async(req,res)=>{
+router.post('/purchase', async (req, res) => {
     var schema = {
         'name': {
             notEmpty: true,
@@ -67,7 +67,7 @@ router.post('/purchase',async(req,res)=>{
             notEmpty: true,
             errorMessage: "Post code is required"
         },
-        'credit_card':{
+        'credit_card': {
             notEmpty: true,
             errorMessage: "Credit card is required"
         }
@@ -77,57 +77,66 @@ router.post('/purchase',async(req,res)=>{
     if (!errors) {
 
         // Fetch currently active cart
-
         let transaction_obj = {
-            "promoter_id":req.userInfo.id,
-            "name":req.body.name,
-            "email":req.body.email,
-            "abn":req.body.abn,
-            "country":req.body.country,
-            "address_line_1":req.body.address_line_1,
-            "address_line_2":req.body.address_line_2,
-            "city":req.body.city,
-            "state":req.body.state,
-            "post_code":req.body.post_code,
-            "credit_card":req.body.credit_card
+            "promoter_id": req.userInfo.id,
+            "name": req.body.name,
+            "email": req.body.email,
+            "abn": req.body.abn,
+            "country": req.body.country,
+            "address_line1": req.body.address_line_1,
+            "address_line2": req.body.address_line_2,
+            "city": req.body.city,
+            "state": req.body.state,
+            "post_code": req.body.post_code,
+            "credit_card": req.body.credit_card
         };
 
-        if(req.body.company){
+        if (req.body.company) {
             transaction_obj.company = req.body.company;
         }
 
-        let transaction_resp = transaction_helper.insert_transaction(transaction_obj);
+        let transaction_resp = await transaction_helper.insert_transaction(transaction_obj);
 
-        if(transaction_resp.status === 1){
+        if (transaction_resp.status === 1) {
             // get user's stripe account
             let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
-            if(promoter_resp.status === 1 && promoter_resp.promoter && promoter_resp.promoter.stripe_customer_id){
-                try{
+            if (promoter_resp.status === 1 && promoter_resp.promoter && promoter_resp.promoter.stripe_customer_id) {
+                try {
+
+                    // Fetch user's active cart
+
                     let charge = await stripe.charges.create({
-                        "amount": 100,
+                        "amount": 220,
                         "currency": "usd",
                         "capture": false,
                         "customer": promoter_resp.promoter.stripe_customer_id,
-                        "statement_descriptor": "Clique campaign purchase",
+                        "statement_descriptor": "Clique purchase", // lentgth must be 22 character max.
                         "metadata": {
                             "CHARGETYPE": "Authorization ONLY",
-                            "subtotal": 100,
-                            "GST": 10,
+                            "subtotal": 200,
+                            "GST": 20,
                             "userID": req.userInfo.id
                         }
                     });
 
-                    let updated_transaction = transaction_helper.update_transaction_by_id(transaction_resp.transaction._id,{"status":"paid"});
-                    res.status(config.OK_STATUS).json({"status":1,"message":"Payment has been done successfully"});
+                    let updated_transaction = await transaction_helper.update_transaction_by_id(transaction_resp.transaction._id, { "status": "paid" });
 
-                } catch(err){
+                    // Clear active cart here
+
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Payment has been done successfully" });
+
+                } catch (err) {
+
+                    console.log("transaction error ==> ",err);
+
                     // Set transaction status to failed
-                    let updated_transaction = transaction_helper.update_transaction_by_id(transaction_resp.transaction._id,{"status":"failed"});
-                    res.status(config.BAD_REQUEST).json({"status":0,"message":"Transaction has been failed"});
+                    let updated_transaction = await transaction_helper.update_transaction_by_id(transaction_resp.transaction._id, { "status": "failed" });
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Transaction has been failed" });
                 }
             }
         } else {
-            res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error occured while doing transaction"})
+            console.log("resp = ",transaction_resp);
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while doing transaction" })
         }
 
     } else {
