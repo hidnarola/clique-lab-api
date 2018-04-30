@@ -708,18 +708,8 @@ router.post("/filtered_campaign", async (req, res) => {
     var filter = {};
    
     
-      if (req.body.social_media_platform) {
-        filter["social_media_platform"] = req.body.social_media_platform;
-      }
-  
-      if (typeof req.body.price != "undefined") {
-        sort["price"] = req.body.price;
-      }
-      if (typeof req.body.page_no) {
-        page_no = req.body.page_no;
-      }
-      if (typeof req.body.page_size) {
-        page_size = req.body.page_size;
+      if (req.body.gender) {
+        filter["gender"] = req.body.gender;
       }
   
       var resp_data = await campaign_helper.get_filtered_campaign(user_id,filter);

@@ -786,4 +786,52 @@ campaign_helper.get_promoters_by_social_media = async (promoter_id, filter) => {
     }
 }
 
+campaign_helper.get_filtered_campaign = async (promoter_id, filter) => {
+    
+
+        var campaign  = await Campaign.aggregate([
+                {
+                    "$match": { "promoter_id": ObjectId("5ac730d4bd2d072f5072031d") },
+                },
+                {
+                    $lookup: {
+                        from: "campaign_user",
+                        localField: "_id",
+                        foreignField: "campaign_id",
+                        as: "campaign_user"
+                    }
+                },
+    
+                {
+                    $unwind: "$campaign_user"
+                },
+                {
+                    "$match": {
+                        "campaign_user.is_purchase": true
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": "users",
+                        "localField": "campaign_user.user_id",
+                        "foreignField": "_id",
+                        "as": "user"
+                    }
+                },
+                {
+                    $unwind: "$user"
+                },
+                
+          
+        
+   ]);
+   if (filter) {
+    aggregate.push({ "$match": filter });
+}
+        if (campaign && campaign.length > 0) {
+            return { "status": 1, "message": "purchased campaign found", "campaign": campaign };
+        } else {
+            return { "status": 2, "message": "No campaign available" };
+        }
+    }
 module.exports = campaign_helper;

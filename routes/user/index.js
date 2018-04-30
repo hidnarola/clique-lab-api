@@ -99,43 +99,8 @@ router.get("/interest_details", async (req, res) => {
  */
 router.put('/', function (req, res) {
     user_id = req.userInfo.id;
-    var schema = {
-        "name": {
-            notEmpty: true,
-            errorMessage: "Name is required"
-        },
-
-        "user_interest": {
-            notEmpty: true,
-            errorMessage: "User Interest is required"
-        },
-        "job_industry": {
-            notEmpty: true,
-            errorMessage: "Job Industry is required"
-        },
-        "music_taste": {
-            notEmpty: true,
-            errorMessage: "Music taste is required"
-        },
-        "country": {
-            notEmpty: true,
-            errorMessage: "country is required"
-        },
-        "job_industry": {
-            notEmpty: true,
-            errorMessage: "Job Industry is required"
-        }
-    };
-
-    req.checkBody(schema);
-    req.getValidationResult().then(function (result) {
-        if (result.isEmpty()) {
             var obj = {
-                "name": req.body.name,
-                "user_interest": JSON.parse(req.body.user_interest),
-                "job_industry": req.body.job_industry,
-                "music_taste": req.body.music_taste,
-                "country": req.body.country,
+               
             };
             if (req.body.job_title && req.body.job_title != null) {
                 obj.job_title = req.body.job_title;
@@ -219,14 +184,7 @@ router.put('/', function (req, res) {
                     res.status(config.OK_STATUS).json({ "message": "Profile has been updated successfully" });
                 }
             });
-        } else {
-            var result = {
-                message: "Validation Error",
-                error: result.array()
-            };
-            res.status(config.VALIDATION_FAILURE_STATUS).json(result);
-        }
-    });
+        
 });
 
 module.exports = router;
