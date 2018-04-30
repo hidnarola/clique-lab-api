@@ -60,6 +60,8 @@ router.post('/',async (req,res) => {
             req.body.sort.forEach(sort_criteria => {
                 sort[sort_criteria.field] = sort_criteria.value;
             });
+        } else {
+            sort["_id"] = "1";
         }
 
 
