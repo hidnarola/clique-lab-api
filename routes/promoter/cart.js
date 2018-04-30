@@ -72,11 +72,15 @@ router.post('/purchase', async (req, res) => {
             errorMessage: "Credit card is required"
         }
     };
+
     req.checkBody(schema);
     const errors = req.validationErrors();
-    if (!errors) {
 
+    if (!errors) {
         // Fetch currently active cart
+        var active_cart = await cart_helper.view_cart_details_by_promoter(req.userInfo.id);
+
+        // Add transaction
         let transaction_obj = {
             "promoter_id": req.userInfo.id,
             "name": req.body.name,
@@ -88,7 +92,8 @@ router.post('/purchase', async (req, res) => {
             "city": req.body.city,
             "state": req.body.state,
             "post_code": req.body.post_code,
-            "credit_card": req.body.credit_card
+            "credit_card": req.body.credit_card,
+            "total_amount":active_cart.total
         };
 
         if (req.body.company) {
@@ -102,19 +107,16 @@ router.post('/purchase', async (req, res) => {
             let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
             if (promoter_resp.status === 1 && promoter_resp.promoter && promoter_resp.promoter.stripe_customer_id) {
                 try {
-
-                    // Fetch user's active cart
-
                     let charge = await stripe.charges.create({
-                        "amount": 220,
+                        "amount": active_cart[0].total * 100, // 100 means $1
                         "currency": "usd",
                         "capture": false,
                         "customer": promoter_resp.promoter.stripe_customer_id,
                         "statement_descriptor": "Clique purchase", // lentgth must be 22 character max.
                         "metadata": {
                             "CHARGETYPE": "Authorization ONLY",
-                            "subtotal": 200,
-                            "GST": 20,
+                            "subtotal": active_cart[0].sub_total,
+                            "GST": active_cart[0].gst,
                             "userID": req.userInfo.id
                         }
                     });
@@ -122,6 +124,7 @@ router.post('/purchase', async (req, res) => {
                     let updated_transaction = await transaction_helper.update_transaction_by_id(transaction_resp.transaction._id, { "status": "paid" });
 
                     // Clear active cart here
+                    
 
                     res.status(config.OK_STATUS).json({ "status": 1, "message": "Payment has been done successfully" });
 

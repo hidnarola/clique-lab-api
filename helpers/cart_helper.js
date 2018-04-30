@@ -40,7 +40,7 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
         var cart_items = await Cart.aggregate([
             {
                 "$match": {
-                    "promoter_id":new ObjectId(promoter_id)
+                    "promoter_id": new ObjectId(promoter_id)
                 }
             },
             {
@@ -66,23 +66,30 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
                 "$unwind": "$user"
             },
             {
-                "$group":{
-                    "_id":null,
-                    "sub_total":{$sum: "$campaign.price"},
-                    "cart_items":{"$push":"$$ROOT"}
+                "$group": {
+                    "_id": null,
+                    "sub_total": { $sum: "$campaign.price" },
+                    "cart_items": { "$push": "$$ROOT" }
                 }
             }
         ]);
-        if(cart_items && cart_items[0]){
+        if (cart_items && cart_items[0]) {
             cart_items[0].gst = (cart_items[0].sub_total * 10) / 100;
             cart_items[0].total = cart_items[0].sub_total + cart_items[0].gst;
-            return {"status": 1,"message":"Cart items found","results":cart_items[0]}
+            return { "status": 1, "message": "Cart items found", "results": cart_items[0] }
         } else {
-            return {"status": 2,"message":"No item available in cart"}
+            return { "status": 2, "message": "No item available in cart" }
         }
     } catch (err) {
-        console.log("err => ",err);
         return { "status": 0, "message": "Error occured while inserting multiple cart item", "error": err };
+    }
+};
+
+cart_helper.clear_cart_by_promoter = async (promoter_id) => {
+    try{
+        
+    } catch(err){
+        return { "status": 0, "message": "Error occured while clearing cart", "error": err };
     }
 };
 
