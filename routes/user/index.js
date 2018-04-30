@@ -13,6 +13,11 @@ var country_helper = require("./../../helpers/country_helper");
 var interest_helper = require("./../../helpers/interest_helper");
 var job_industry = require("./../../helpers/job_industry_helper");
 var music_taste_helper = require("./../../helpers/music_taste_helper");
+var language_helper = require("./../../helpers/language_helper");
+var ethnicity_helper = require("./../../helpers/ethnicity_helper");
+var education_helper = require("./../../helpers/education_helper");
+var job_title_helper= require("./../../helpers/job_title_helper");
+
 var FB = require('fb');
 
 /**
@@ -56,10 +61,19 @@ router.get("/interest_details", async (req, res) => {
     var interest_resp = await interest_helper.get_all_interest();
     var music_taste_resp = await music_taste_helper.get_all_music_taste();
     var country_resp = await country_helper.get_all_country();
+    var language_resp = await language_helper.get_all_language();
+    var job_title_resp = await job_title_helper.get_all_job_title();
+    var education_resp = await education_helper.get_all_education();
+    var ethnicity_resp = await ethnicity_helper.get_all_ethnicity();
+    
 
-    if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1 && country_resp.status === 1) {
+    if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1
+         && country_resp.status === 1 && language_resp.status === 1 && job_title_resp.status === 1
+          && education_resp.status === 1 && ethnicity_resp.status === 1) {
         logger.trace("got details successfully");
-        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste, "country": country_resp.countries });
+        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste, 
+        "country": country_resp.countries,"language": language_resp.language, "job_title" : job_title_resp.job_title,
+        "education" : education_resp.education,"ethnicity" : ethnicity_resp.ethnicity});
     } else {
         logger.error("Error occured while fetching details");
         res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Details not found"});
@@ -107,6 +121,10 @@ router.put('/', function (req, res) {
             notEmpty: true,
             errorMessage: "country is required"
         },
+        "job_industry": {
+            notEmpty: true,
+            errorMessage: "Job Industry is required"
+        }
     };
 
     req.checkBody(schema);
@@ -149,7 +167,9 @@ router.put('/', function (req, res) {
             if (req.body.date_of_birth && req.body.date_of_birth != null) {
                 obj.date_of_birth = req.body.date_of_birth;
             }
-
+            if (req.body.sexual_orientation && req.body.sexual_orientation != null) {
+                obj.sexual_orientation = req.body.sexual_orientation;
+            }
             async.waterfall([
                 function (callback) {
                     if (req.files && req.files['avatar']) {

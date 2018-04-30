@@ -20,7 +20,7 @@ var Twitter = require('twitter');
 var parallel = require('async/parallel');
 var randomstring = require("randomstring");
 var request = require("request");
-
+var sharp = require('sharp');
 // var Linkedin = require('node-linked-in');
 // var cfg = {};
 // var linkedin = new Linkedin(cfg);
@@ -61,7 +61,7 @@ router.post("/approved", async (req, res) => {
   var errors = req.validationErrors();
 
   if (!errors) {
-    console.log("2");
+  
     if (req.body.social_media_platform) {
       filter["social_media_platform"] = req.body.social_media_platform;
     }
@@ -77,7 +77,7 @@ router.post("/approved", async (req, res) => {
     }
 
     var resp_data = await campaign_helper.get_campaign_by_user_id(user_id, filter, page_no, page_size);
-    console.log("4");
+
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
@@ -362,21 +362,23 @@ router.post("/campaign_applied", async (req, res) => {
         if (filename) {
           campaign_obj.image = filename;
       
-       
-       sharp(filename)
-  .resize(200, 300, {
-    kernel: sharp.kernel.nearest
-  })
-  .background('white')
-  .embed()
-  .toFile('./uploads/170px360px');
- 
+            
+  
     // output.tiff is a 200 pixels wide and 300 pixels high image
     // containing a nearest-neighbour scaled version, embedded on a white canvas,
     // of the image data in inputBuffer
  
 }
-    
+
+ var thumbnail = await sharp('D:/Clique/clique-lab-api/uploads/campaign_applied/image_1524900021820.jpg')
+.resize(170, 360, {
+
+  kernel: sharp.kernel.nearest
+})
+.background('white')
+.embed()
+.toFile('D:/Clique/clique-lab-api/uploads/Thumnail/thumb1.jpg');
+ 
         let campaign_data = await campaign_helper.insert_campaign_applied(campaign_obj);
 
         if (campaign_data.status === 0) {
@@ -678,6 +680,63 @@ router.post('/share/pinterest/:campaign_id', async (req, res) => {
     });
 
 });
+
+router.post("/", async (req, res) => {
+  var filter = {};
+  var page_no = {};
+  var page_size = {};
+
+  var schema = {
+    "page_no": {
+      notEmpty: true,
+      errorMessage: "page_no is required"
+    },
+    "page_size": {
+      notEmpty: true,
+      errorMessage: "page_size is required"
+    },
+
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+
+  if (typeof req.body.filter != "undefined") {
+    filter["company"] = req.body.filter;
+  }
+
+  if (!errors) {
+    user_id= req.userInfo.id;
+  
+   var resp_data = await promoter_helper.get_filtered_campaign(req.body.filter,user_id);
+    if (resp_data.status == 0) {
+      logger.error("Error occured while fetching Brand = ", resp_data);
+      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+    } else {
+      logger.trace("Brand got successfully = ", resp_data);
+      res.status(config.OK_STATUS).json(resp_data);
+    }
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 var pinIt = new PinIt({
  username: 'blakehrowley',

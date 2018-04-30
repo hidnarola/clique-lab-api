@@ -699,6 +699,41 @@ router.post('/calendar', async (req, res) => {
     }
 })
 
+
+
+
+router.post("/filtered_campaign", async (req, res) => {
+    user_id = req.userInfo.id;
+    logger.trace("Get all campaign API called");
+    var filter = {};
+   
+    
+      if (req.body.social_media_platform) {
+        filter["social_media_platform"] = req.body.social_media_platform;
+      }
+  
+      if (typeof req.body.price != "undefined") {
+        sort["price"] = req.body.price;
+      }
+      if (typeof req.body.page_no) {
+        page_no = req.body.page_no;
+      }
+      if (typeof req.body.page_size) {
+        page_size = req.body.page_size;
+      }
+  
+      var resp_data = await campaign_helper.get_filtered_campaign(user_id,filter);
+  
+      if (resp_data.status == 0) {
+        logger.error("Error occured while fetching campaign = ", resp_data);
+        res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+      }
+      else {
+        logger.trace("Public Campaign got successfully = ", resp_data);
+        res.status(config.OK_STATUS).json(resp_data);
+      }
+    
+  });
 /**
  * Get details of campaign by campaign_id
  * /promoter/campaign/:campaign_id
