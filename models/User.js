@@ -79,7 +79,7 @@ var NotificationSettings = new Schema({
 var UserModelSchema = new Schema({
     name: { type: String, required: true }, // 1
     short_bio: String, // 2
-    // username: { type: String, required: true, unique: true },
+     username: { type: String },
     email: { type: String, required: true, unique: true }, // 3
     image: String, // 4
     user_interest: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user_interest' }], // 5
