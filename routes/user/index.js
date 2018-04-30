@@ -16,7 +16,7 @@ var music_taste_helper = require("./../../helpers/music_taste_helper");
 var language_helper = require("./../../helpers/language_helper");
 var ethnicity_helper = require("./../../helpers/ethnicity_helper");
 var education_helper = require("./../../helpers/education_helper");
-var job_title_helper= require("./../../helpers/job_title_helper");
+var job_title_helper = require("./../../helpers/job_title_helper");
 
 var FB = require('fb');
 
@@ -65,18 +65,20 @@ router.get("/interest_details", async (req, res) => {
     var job_title_resp = await job_title_helper.get_all_job_title();
     var education_resp = await education_helper.get_all_education();
     var ethnicity_resp = await ethnicity_helper.get_all_ethnicity();
-    
+
 
     if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1
-         && country_resp.status === 1 && language_resp.status === 1 && job_title_resp.status === 1
-          && education_resp.status === 1 && ethnicity_resp.status === 1) {
+        && country_resp.status === 1 && language_resp.status === 1 && job_title_resp.status === 1
+        && education_resp.status === 1 && ethnicity_resp.status === 1) {
         logger.trace("got details successfully");
-        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste, 
-        "country": country_resp.countries,"language": language_resp.language, "job_title" : job_title_resp.job_title,
-        "education" : education_resp.education,"ethnicity" : ethnicity_resp.ethnicity});
+        res.status(config.OK_STATUS).json({
+            "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste,
+            "country": country_resp.countries, "language": language_resp.language, "job_title": job_title_resp.job_title,
+            "education": education_resp.education, "ethnicity": ethnicity_resp.ethnicity
+        });
     } else {
         logger.error("Error occured while fetching details");
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Details not found"});
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Details not found" });
     }
 })
 
@@ -99,92 +101,98 @@ router.get("/interest_details", async (req, res) => {
  */
 router.put('/', function (req, res) {
     user_id = req.userInfo.id;
-            var obj = {
-               
-            };
-            if (req.body.job_title && req.body.job_title != null) {
-                obj.job_title = req.body.job_title;
-            }
-            if (req.body.short_bio && req.body.short_bio != null) {
-                obj.short_bio = req.body.short_bio;
-            }
-            if (req.body.education && req.body.education != null) {
-                obj.education = req.body.education;
-            }
-            if (req.body.language && req.body.language != null) {
-                obj.language = req.body.language;
-            }
-            if (req.body.ethnicity && req.body.ethnicity != null) {
-                obj.ethnicity = req.body.ethnicity;
-            }
-            if (req.body.relationship_status && req.body.relationship_status != null) {
-                obj.relationship_status = req.body.relationship_status;
-            }
-            if (req.body.state && req.body.state != null) {
-                obj.state = req.body.state;
-            }
-            if (req.body.suburb && req.body.suburb != null) {
-                obj.suburb = req.body.suburb;
-            }
-            if (req.body.gender && req.body.gender != null) {
-                obj.gender = req.body.gender;
-            }
-            if (req.body.date_of_birth && req.body.date_of_birth != null) {
-                obj.date_of_birth = req.body.date_of_birth;
-            }
-            if (req.body.sexual_orientation && req.body.sexual_orientation != null) {
-                obj.sexual_orientation = req.body.sexual_orientation;
-            }
-            async.waterfall([
-                function (callback) {
-                    if (req.files && req.files['avatar']) {
-                        logger.trace("Uploading avatar image");
-                        var file = req.files['avatar'];
-                        var dir = "./uploads/users";
-                        var mimetype = ['image/png', 'image/jpeg', 'image/jpg'];
+    var obj = {
 
-                        if (mimetype.indexOf(file.mimetype) !== -1) {
-                            if (!fs.existsSync(dir)) {
-                                fs.mkdirSync(dir);
-                            }
-                            //var extention = path.extname(file.name);
-                            var extension = '.jpg';
-                            var filename = "user_" + new Date().getTime() + (Math.floor(Math.random() * 90000) + 10000) + extension;
-                            file.mv(dir + '/' + filename, async (err) => {
-                                if (err) {
-                                    logger.trace("There was an issue in uploading avatar image");
-                                    callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading avatar image" } });
-                                } else {
-                                    logger.trace("Avatar image has uploaded for user");
-                                  
-                                    callback(null, filename);
-                                }
-                            });
+    };
+    if (req.body.name && req.body.name != null) {
+        obj.name = req.body.name;
+    }
+    if (req.body.username && req.body.username != null) {
+        obj.username = req.body.username;
+    }
+    if (req.body.email && req.body.email != null) {
+        obj.email = req.body.email;
+    }
+    if (req.body.short_bio && req.body.short_bio != null) {
+        obj.short_bio = req.body.short_bio;
+    }
+    if (req.body.education && req.body.education != null) {
+        obj.education = req.body.education;
+    }
+    if (req.body.language && req.body.language != null) {
+        obj.language = req.body.language;
+    }
+    if (req.body.ethnicity && req.body.ethnicity != null) {
+        obj.ethnicity = req.body.ethnicity;
+    }
+    if (req.body.relationship_status && req.body.relationship_status != null) {
+        obj.relationship_status = req.body.relationship_status;
+    }
+    if (req.body.state && req.body.state != null) {
+        obj.state = req.body.state;
+    }
+    if (req.body.suburb && req.body.suburb != null) {
+        obj.suburb = req.body.suburb;
+    }
+    if (req.body.gender && req.body.gender != null) {
+        obj.gender = req.body.gender;
+    }
+    if (req.body.date_of_birth && req.body.date_of_birth != null) {
+        obj.date_of_birth = req.body.date_of_birth;
+    }
+    if (req.body.sexual_orientation && req.body.sexual_orientation != null) {
+        obj.sexual_orientation = req.body.sexual_orientation;
+    }
+    async.waterfall([
+        function (callback) {
+            if (req.files && req.files['avatar']) {
+                logger.trace("Uploading avatar image");
+                var file = req.files['avatar'];
+                var dir = "./uploads/users";
+                var mimetype = ['image/png', 'image/jpeg', 'image/jpg'];
+
+                if (mimetype.indexOf(file.mimetype) !== -1) {
+                    if (!fs.existsSync(dir)) {
+                        fs.mkdirSync(dir);
+                    }
+                    //var extention = path.extname(file.name);
+                    var extension = '.jpg';
+                    var filename = "user_" + new Date().getTime() + (Math.floor(Math.random() * 90000) + 10000) + extension;
+                    file.mv(dir + '/' + filename, async (err) => {
+                        if (err) {
+                            logger.trace("There was an issue in uploading avatar image");
+                            callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading avatar image" } });
                         } else {
-                            callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "Invalid image format" } });
+                            logger.trace("Avatar image has uploaded for user");
+
+                            callback(null, filename);
                         }
-                    } else {
-                        callback(null, null);
-                    }
-                }
-                
-            ], async (err, filename) => {
-                if (err) {
-                    res.status(err.status).json(err.resp);
+                    });
                 } else {
-                    if (filename) {
-                        obj.image = await filename;
-                    }
+                    callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "Invalid image format" } });
                 }
-                var user_resp = await user_helper.update_user_by_id(req.userInfo.id, obj);
-                console.log(obj);
-                if (user_resp.status === 0) {
-                    res.status(config.INTERNAL_SERVER_ERROR).json({ "error": user_resp.error });
-                } else {
-                    res.status(config.OK_STATUS).json({ "message": "Profile has been updated successfully" });
-                }
-            });
-        
+            } else {
+                callback(null, null);
+            }
+        }
+
+    ], async (err, filename) => {
+        if (err) {
+            res.status(err.status).json(err.resp);
+        } else {
+            if (filename) {
+                obj.image = await filename;
+            }
+        }
+        var user_resp = await user_helper.update_user_by_id(req.userInfo.id, obj);
+        console.log(obj);
+        if (user_resp.status === 0) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "error": user_resp.error });
+        } else {
+            res.status(config.OK_STATUS).json({ "message": "Profile has been updated successfully" });
+        }
+    });
+
 });
 
 module.exports = router;

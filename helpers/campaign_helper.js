@@ -789,7 +789,7 @@ campaign_helper.get_promoters_by_social_media = async (promoter_id, filter) => {
 campaign_helper.get_filtered_campaign = async (promoter_id, filter) => {
     
 
-        var campaign  = await Campaign.aggregate([
+        var campaigns  = await Campaign.aggregate([
                 {
                     "$match": { "promoter_id": ObjectId("5ac730d4bd2d072f5072031d") },
                 },
@@ -808,6 +808,7 @@ campaign_helper.get_filtered_campaign = async (promoter_id, filter) => {
                 {
                     "$match": {
                         "campaign_user.is_purchase": true
+
                     }
                 },
                 {
@@ -818,18 +819,32 @@ campaign_helper.get_filtered_campaign = async (promoter_id, filter) => {
                         "as": "user"
                     }
                 },
-                {
+                { 
                     $unwind: "$user"
                 },
                 
-          
+                {
+                    "$match": { "user.gender": "male",
+                    "user.age": 21,
+                    "user.location" : "avc"
+                                  
+                },
+                },
+               /* { 
+                    "$group": {
+                         _id: null,
+                         count: {
+                              $sum: 1
+                                }
+                             }
+                },*/
         
    ]);
-   if (filter) {
-    aggregate.push({ "$match": filter });
-}
-        if (campaign && campaign.length > 0) {
-            return { "status": 1, "message": "purchased campaign found", "campaign": campaign };
+   /*if (filter) {
+    campaigns.push({ "$match": filter });   
+}*/
+        if (campaigns && campaigns.length > 0) {
+            return { "status": 1, "message": "purchased campaign found", "campaign": campaigns };
         } else {
             return { "status": 2, "message": "No campaign available" };
         }

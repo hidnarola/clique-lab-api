@@ -103,7 +103,7 @@ var UserModelSchema = new Schema({
     language:  { type: mongoose.Schema.Types.ObjectId, ref: 'languages' }, // 21
     ethnicity: { type: mongoose.Schema.Types.ObjectId, ref: 'ethnicity' },// 22
     interested_in: { type: String, enum: ["male", "female", "both"] },
-     country : { type: mongoose.Schema.Types.ObjectId, ref: 'country' },
+    country : { type: mongoose.Schema.Types.ObjectId, ref: 'country' },
     relationship_status: { type: String, enum: ["Married", "Unmarried", "Single"] }, // 24
     wallet_balance: { type: Number, default: 0 },
     bank: [BankSchema], // 25
