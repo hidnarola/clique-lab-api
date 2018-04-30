@@ -445,10 +445,10 @@ router.post('/:new_group_id/:old_group_id/add_filter_result_to_group', async (re
 
     var members = await group_helper.get_members_of_group(req.params.old_group_id, 0, 0, match_filter, 0);
 
-    if (members.status === 1 && members.results && members.results.members) {
+    if (members.status === 1 && members.results && members.results.users) {
         var user_group = [];
 
-        for (let user of members.results.members) {
+        for (let user of members.results.users) {
             await user_group.push({
                 "group_id": req.params.new_group_id,
                 "user_id": user._id

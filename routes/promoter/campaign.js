@@ -462,10 +462,10 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
 
     var members = await group_helper.get_members_of_group(req.params.group_id, 0, 0, match_filter, 0);
 
-    if (members.status === 1 && members.results && members.results.members) {
+    if (members.status === 1 && members.results && members.results.users) {
         var user_campaign = [];
 
-        for (let user of members.results.members) {
+        for (let user of members.results.users) {
             await user_campaign.push({
                 "campaign_id": req.params.campaign_id,
                 "user_id": user._id
