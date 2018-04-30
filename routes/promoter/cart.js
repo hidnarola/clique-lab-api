@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
     } else if (cart_item_resp.status === 2) {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No cart item available" });
     } else {
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Cart items found", "cart_items": cart_item_resp.cart_items });
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Cart items found", "results": cart_item_resp.results });
     }
 });
 
