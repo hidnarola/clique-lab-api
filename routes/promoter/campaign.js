@@ -711,6 +711,12 @@ router.post("/filtered_campaign", async (req, res) => {
       if (req.body.gender) {
         filter["gender"] = req.body.gender;
       }
+      if (req.body.age) {
+        filter["age"] = req.body.age;
+      }
+      if (req.body.location) {
+        filter["location"] = req.body.location;
+      }
   
       var resp_data = await campaign_helper.get_filtered_campaign(user_id,filter);
   
