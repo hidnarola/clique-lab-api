@@ -653,7 +653,7 @@ router.post('/purchased', async (req, res) => {
 
 router.post('/calendar', async (req, res) => {
     var schema = {
-       
+
         'start_date': {
             notEmpty: true,
             errorMessage: "start date is required"
@@ -668,25 +668,25 @@ router.post('/calendar', async (req, res) => {
     const errors = req.validationErrors();
     if (!errors) {
 
-        var startdate = moment(req.body.start_date,"YYYY-MM-DD").toDate();
-        var enddate = moment(req.body.end_date,"YYYY-MM-DD").toDate();
+        var startdate = moment(req.body.start_date, "YYYY-MM-DD").toDate();
+        var enddate = moment(req.body.end_date, "YYYY-MM-DD").toDate();
 
-        console.log("start = ",startdate);
-        console.log("end = ",enddate);
+        console.log("start = ", startdate);
+        console.log("end = ", enddate);
 
         let filter = {
-            "start_date":{
-                "$gte":moment(req.body.start_date,"YYYY-MM-DD").toDate(),
-                "$lte":moment(req.body.end_date,"YYYY-MM-DD").toDate()
+            "start_date": {
+                "$gte": moment(req.body.start_date, "YYYY-MM-DD").toDate(),
+                "$lte": moment(req.body.end_date, "YYYY-MM-DD").toDate()
             }
         }
 
-        if(req.body.social_media_platform){
+        if (req.body.social_media_platform) {
             filter["social_media_platform"] = req.body.social_media_platform
         }
 
         var campaigns = await campaign_helper.get_promoters_by_social_media(req.userInfo.id, filter);
-        
+
         if (campaigns.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaigns });
         } else if (campaigns.status === 2) {
@@ -706,25 +706,26 @@ router.post("/filtered_campaign", async (req, res) => {
     user_id = req.userInfo.id;
     logger.trace("Get all campaign API called");
     var filter = {};
-      if (req.body.gender) {
+    if (req.body.gender) {
         filter["user.gender"] = req.body.gender;
-      }
-      
-      if (req.body.location) {
+    }
+
+    if (req.body.location) {
         filter["user.location"] = req.body.location;
-      }
-      var resp_data = await campaign_helper.get_filtered_campaign_by_promoter(user_id,filter);
-  
-      if (resp_data.status == 0) {
+    }
+    var resp_data = await campaign_helper.get_filtered_campaign_by_promoter(user_id, filter);
+
+    if (resp_data.status == 0) {
         logger.error("Error occured while fetching campaign = ", resp_data);
         res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-      }
-      else {
+    }
+    else {
         logger.trace("Public Campaign got successfully = ", resp_data);
         res.status(config.OK_STATUS).json(resp_data);
-      }
-    
-  });
+    }
+
+});
+
 /**
  * Get details of campaign by campaign_id
  * /promoter/campaign/:campaign_id
@@ -744,7 +745,69 @@ router.post('/:campaign_id', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-              var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, req.body.page_no, req.body.page_size, match_filter, sort);
+
+        var match_filter = {};
+        var sort = {};
+        if (req.body.filter) {
+            req.body.filter.forEach(filter_criteria => {
+                if (filter_criteria.type === "exact") {
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                } else if (filter_criteria.type === "between") {
+                    if (filter_criteria.field === "age") {
+                        // Age is derived attribute and need to calculate based on date of birth
+                        match_filter[filter_criteria.field] = {
+                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                            "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                        };
+                    } else {
+                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                    }
+                } else if (filter_criteria.type === "like") {
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                } else if (filter_criteria.type === "id") {
+                    match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+                }
+            });
+        }
+
+        if (req.body.sort) {
+            req.body.sort.forEach(sort_criteria => {
+                sort[sort_criteria.field] = sort_criteria.value;
+            });
+        }
+
+        if (Object.keys(sort).length === 0) {
+            sort["_id"] = 1;
+        }
+
+        let keys = {
+            "fb_friends": "campaign_user.facebook.no_of_friends",
+            "insta_followers": "campaign_user.instagram.no_of_followers",
+            "twitter_followers": "campaign_user.twitter.no_of_followers",
+            "pinterest_followers": "campaign_user.pinterest.no_of_followers",
+            "linkedin_connection": "campaign_user.linkedin.no_of_connections",
+            "year_in_industry": "campaign_user.experience",
+            "age": "campaign_user.date_of_birth",
+
+            "name": "campaign_user.name",
+            "gender": "campaign_user.gender",
+            "location": "campaign_user.location",
+            "job_industry": "campaign_user.job_industry",
+            "education": "campaign_user.education",
+            "language": "campaign_user.language",
+            "ethnicity": "campaign_user.ethnicity",
+            "interested_in": "campaign_user.interested_in",
+            "relationship_status": "campaign_user.relationship_status",
+            "music_taste": "campaign_user.music_taste"
+        };
+
+        match_filter = await global_helper.rename_keys(match_filter, keys);
+        sort = await global_helper.rename_keys(sort, keys);
+
+        var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, req.body.page_no, req.body.page_size, match_filter, sort);
+
+        var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, req.body.page_no, req.body.page_size, match_filter, sort);
         logger.trace("Get all Profile API called");
 
         if (campaign_user.status === 1) {
