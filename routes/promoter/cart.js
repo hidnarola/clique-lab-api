@@ -93,7 +93,7 @@ router.post('/purchase', async (req, res) => {
             "state": req.body.state,
             "post_code": req.body.post_code,
             "credit_card": req.body.credit_card,
-            "total_amount":active_cart.total
+            "total_amount":active_cart.results.total
         };
 
         if (req.body.company) {
@@ -108,15 +108,15 @@ router.post('/purchase', async (req, res) => {
             if (promoter_resp.status === 1 && promoter_resp.promoter && promoter_resp.promoter.stripe_customer_id) {
                 try {
                     let charge = await stripe.charges.create({
-                        "amount": active_cart[0].total * 100, // 100 means $1
+                        "amount": active_cart.results.total * 100, // 100 means $1
                         "currency": "usd",
                         "capture": false,
                         "customer": promoter_resp.promoter.stripe_customer_id,
                         "statement_descriptor": "Clique purchase", // lentgth must be 22 character max.
                         "metadata": {
                             "CHARGETYPE": "Authorization ONLY",
-                            "subtotal": active_cart[0].sub_total,
-                            "GST": active_cart[0].gst,
+                            "subtotal": active_cart.results.sub_total,
+                            "GST": active_cart.results.gst,
                             "userID": req.userInfo.id
                         }
                     });

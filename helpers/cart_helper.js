@@ -74,8 +74,8 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
             }
         ]);
         if (cart_items && cart_items[0]) {
-            cart_items[0].gst = (cart_items[0].sub_total * 10) / 100;
-            cart_items[0].total = cart_items[0].sub_total + cart_items[0].gst;
+            cart_items[0].gst = await (cart_items[0].sub_total * 10) / 100;
+            cart_items[0].total = await cart_items[0].sub_total + cart_items[0].gst;
             return { "status": 1, "message": "Cart items found", "results": cart_items[0] }
         } else {
             return { "status": 2, "message": "No item available in cart" }
