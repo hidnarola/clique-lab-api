@@ -4,7 +4,12 @@ var _ = require('underscore');
 
 var Campaign_Applied = require("./../models/Campaign_applied");
 var Campaign_User = require("./../models/Campaign_user");
+var transaction = require("./../models/Transaction");
+var Promoter = require("./../models/Promoter");
+var campaign_user = require("./../models/Promoter");
 var Campaign = require("./../models/Campaign");
+var Campaign_user = require("./../models/Campaign_user");
+
 var ObjectId = mongoose.Types.ObjectId;
 var FB = require('fb');
 
@@ -723,7 +728,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                 }
             }
         ])
-        
+
 
         if (post && post.length > 0) {
             return { "status": 1, "message": "post found", "post": post[0] };
@@ -786,67 +791,159 @@ campaign_helper.get_promoters_by_social_media = async (promoter_id, filter) => {
     }
 }
 
-campaign_helper.get_filtered_campaign = async (promoter_id, filter) => {
-    
+campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) => {
 
-        var campaigns  = await Campaign.aggregate([
-                {
-                    "$match": { "promoter_id": ObjectId("5ac730d4bd2d072f5072031d") },
-                },
-                {
-                    $lookup: {
-                        from: "campaign_user",
-                        localField: "_id",
-                        foreignField: "campaign_id",
-                        as: "campaign_user"
-                    }
-                },
-    
-                {
-                    $unwind: "$campaign_user"
-                },
-                {
-                    "$match": {
-                        "campaign_user.is_purchase": true
+    var purchase_post = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            $lookup: {
+                from: "campaign_user",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
 
-                    }
-                },
-                {
-                    "$lookup": {
-                        "from": "users",
-                        "localField": "campaign_user.user_id",
-                        "foreignField": "_id",
-                        "as": "user"
-                    }
-                },
-                { 
-                    $unwind: "$user"
-                },
-                
-                {
-                    "$match": { "user.gender": "male",
-                    "user.age": 21,
-                    "user.location" : "avc"
-                                  
-                },
-                },
-               /* { 
-                    "$group": {
-                         _id: null,
-                         count: {
-                              $sum: 1
-                                }
-                             }
-                },*/
-        
-   ]);
-   /*if (filter) {
-    campaigns.push({ "$match": filter });   
-}*/
-        if (campaigns && campaigns.length > 0) {
-            return { "status": 1, "message": "purchased campaign found", "campaign": campaigns };
-        } else {
-            return { "status": 2, "message": "No campaign available" };
+        {
+            $unwind: "$campaign_user"
+        },
+        {
+            "$match": {
+                "campaign_user.is_purchase": true
+
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "campaign_user.user_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+
+
+    ];
+
+
+    var purchase = await purchase_post.push({
+        "$group": {
+            "_id": null,
+            "purchase post ": { "$sum": 1 },
+
         }
+    });
+
+    var total_spent = [
+        {
+            "$match": {
+                "promoter_id": new ObjectId(promoter_id),
+                "status": "paid"
+            }
+        },
+
+    ]
+    var spent = await total_spent.push({
+        $group: {
+            "_id": null,
+            "total": { $sum: "$total_amount" }
+        }
+    });
+
+    var applicants = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            $lookup: {
+                from: "campaign_user",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
+
+        {
+            $unwind: "$campaign_user"
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "campaign_user.user_id",
+                foreignField: "_id",
+                as: "users"
+            }
+        },
+        {
+            $unwind: "$users"
+        },
+
+    ]
+    applicants.push({
+        $group: {
+            "_id": null,
+            "applicant": { $sum: 1 }
+        }
+    });
+
+    var reach = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            $lookup: {
+                from: "campaign_user",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
+    
+        {
+            $unwind: "$campaign_user"
+        },
+        
+        {
+            $lookup: {
+                from: "users",
+                localField: "campaign_user.user_id",
+                foreignField: "_id",
+                as: "users"
+            }
+        },
+        {
+            $unwind: "$users"
+        },
+    ];
+    reach.push({
+        $group: {
+            "_id": null,
+            "total_social_power": { $sum: { $add: ["$users.facebook.no_of_friends", "$users.pinterest.no_of_followers", "$users.instagram.no_of_followers", "$users.twitter.no_of_followers", "$users.linkedin.no_of_connections"] } }
+        }
+    });
+
+    var engagement =  [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        }, 
+    ];
+    var cost = await purchase / spent;
+    var camp = await Campaign.aggregate(purchase_post);
+    var spent = await transaction.aggregate(total_spent);
+    var applicant = await Campaign.aggregate(applicants);
+    var reach_total = await Campaign.aggregate(reach);
+    var engage = await Campaign.aggregate(engagement);
+
+
+    if (camp && spent && applicant && reach_total && engage) {
+        return { "status": 1, "message": "purchased campaign found", "campaign": camp, "spent": spent, "Average Cost:": cost, "number of Appplicants": applicant, "Reach": reach_total, "Engagement": engage };
+    } else {
+        return { "status": 2, "message": "No campaign available" };
     }
+}
 module.exports = campaign_helper;

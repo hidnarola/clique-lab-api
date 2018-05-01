@@ -54,6 +54,7 @@ user_helper.get_user_by_id = async (id) => {
             .populate('ethnicity')
             .populate('education')
             .populate('job_title')
+            .populate('country')
             .lean();
 
         // Find searchable value
