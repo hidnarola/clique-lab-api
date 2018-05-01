@@ -9,6 +9,7 @@ var Promoter = require("./../models/Promoter");
 var campaign_user = require("./../models/Promoter");
 var Campaign = require("./../models/Campaign");
 var Campaign_user = require("./../models/Campaign_user");
+var campaign_post = require("./../models/Campaign_post");
 
 var ObjectId = mongoose.Types.ObjectId;
 var FB = require('fb');
@@ -825,19 +826,22 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
         },
         {
             $unwind: "$user"
-        },
-
-
+        }
     ];
 
+    if (filter) {
+        purchase_post.push({ "$match": filter });
+    }
 
-    var purchase = await purchase_post.push({
+    var purchased = {
         "$group": {
             "_id": null,
-            "purchase post ": { "$sum": 1 },
+            "purchase_post ": { "$sum": 1 },
 
         }
-    });
+    };
+    purchase_post.push(purchased);
+
 
     var total_spent = [
         {
@@ -848,13 +852,17 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
         },
 
     ]
-    var spent = await total_spent.push({
-        $group: {
-            "_id": null,
-            "total": { $sum: "$total_amount" }
+    var spend = 
+        {
+            $group: {
+                "_id": null,
+                "total": { $sum: "$total_amount" }
+            }
         }
-    });
 
+      
+     total_spent.push(spend);
+   
     var applicants = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
@@ -876,20 +884,24 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
                 from: "users",
                 localField: "campaign_user.user_id",
                 foreignField: "_id",
-                as: "users"
+                as: "user"
             }
         },
         {
-            $unwind: "$users"
+            $unwind: "$user"
         },
 
-    ]
+    ];
+    if (filter) {
+        applicants.push({ "$match": filter });
+    }
     applicants.push({
         $group: {
             "_id": null,
             "applicant": { $sum: 1 }
         }
     });
+ 
 
     var reach = [
         {
@@ -903,36 +915,59 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
                 as: "campaign_user"
             }
         },
-    
+
         {
             $unwind: "$campaign_user"
         },
-        
+
         {
             $lookup: {
                 from: "users",
                 localField: "campaign_user.user_id",
                 foreignField: "_id",
-                as: "users"
+                as: "user"
             }
         },
         {
-            $unwind: "$users"
+            $unwind: "$user"
         },
     ];
+    if (filter) {
+        reach.push({ "$match": filter });
+    }
     reach.push({
         $group: {
             "_id": null,
-            "total_social_power": { $sum: { $add: ["$users.facebook.no_of_friends", "$users.pinterest.no_of_followers", "$users.instagram.no_of_followers", "$users.twitter.no_of_followers", "$users.linkedin.no_of_connections"] } }
+            "total_social_power": { $sum: { $add: ["$user.facebook.no_of_friends", "$user.pinterest.no_of_followers", "$user.instagram.no_of_followers", "$user.twitter.no_of_followers", "$user.linkedin.no_of_connections"] } }
         }
     });
 
-    var engagement =  [
+   
+    var engagement = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
-        }, 
+        },
+        {
+            $lookup: {
+                from: "campaign_post",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
+
+        {
+            $unwind: "$campaign_user"
+        },
     ];
-    var cost = await purchase / spent;
+    engagement.push({
+        $group: {
+            "_id": null,
+            "total": { $sum: { $add: ["$campaign_user.no_of_shares", "$campaign_user.no_of_likes", "$campaign_user.no_of_comments"] } }
+        }
+    });
+    
+  
     var camp = await Campaign.aggregate(purchase_post);
     var spent = await transaction.aggregate(total_spent);
     var applicant = await Campaign.aggregate(applicants);
@@ -941,7 +976,7 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
 
 
     if (camp && spent && applicant && reach_total && engage) {
-        return { "status": 1, "message": "purchased campaign found", "campaign": camp, "spent": spent, "Average Cost:": cost, "number of Appplicants": applicant, "Reach": reach_total, "Engagement": engage };
+        return { "status": 1, "message": "purchased campaign found", "campaign": camp, "spent": spent, "number of Appplicants": applicant, "Reach": reach_total, "Engagement": engage };
     } else {
         return { "status": 2, "message": "No campaign available" };
     }

@@ -107,6 +107,21 @@ router.put('/', function (req, res) {
     if (req.body.name && req.body.name != null) {
         obj.name = req.body.name;
     }
+    if (req.body.job_industry && req.body.job_industry != null) {
+        obj.job_industry = req.body.job_industry;
+    }
+    if (req.body.job_title && req.body.job_title != null) {
+        obj.job_title = req.body.job_title;
+    }
+    if (req.body.music_taste && req.body.music_taste != null) {
+        obj.music_taste = req.body.music_taste;
+    }
+    if (req.body.user_interest && req.body.user_interest != null) {
+        obj.user_interest = req.body.user_interest;
+    }
+    if (req.body.job_title && req.body.job_title != null) {
+        obj.job_title = req.body.job_title;
+    }
     if (req.body.username && req.body.username != null) {
         obj.username = req.body.username;
     }
