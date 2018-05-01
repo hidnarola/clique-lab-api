@@ -1,6 +1,4 @@
 var mongoose = require('mongoose');
-var ObjectId = mongoose.Types.ObjectId;
-
 var Cart = require("./../models/Cart");
 var cart_helper = {};
 
@@ -87,7 +85,8 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
 
 cart_helper.clear_cart_by_promoter = async (promoter_id) => {
     try{
-        
+        let del_resp = await Cart.deleteMany({"promoter_id":new ObjectId(promoter_id)});
+        return {"status":1,"message":"Cart has been clear"}
     } catch(err){
         return { "status": 0, "message": "Error occured while clearing cart", "error": err };
     }

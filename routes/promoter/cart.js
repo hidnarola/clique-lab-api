@@ -124,7 +124,7 @@ router.post('/purchase', async (req, res) => {
                     let updated_transaction = await transaction_helper.update_transaction_by_id(transaction_resp.transaction._id, { "status": "paid" });
 
                     // Clear active cart here
-                    
+                    await cart_helper.clear_cart_by_promoter(req.userInfo.id);
 
                     res.status(config.OK_STATUS).json({ "status": 1, "message": "Payment has been done successfully" });
 
