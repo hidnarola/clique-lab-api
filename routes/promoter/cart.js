@@ -93,7 +93,7 @@ router.post('/purchase', async (req, res) => {
             "state": req.body.state,
             "post_code": req.body.post_code,
             "credit_card": req.body.credit_card,
-            "total_amount":active_cart.results.total
+            "total_amount": active_cart.results.total
         };
 
         if (req.body.company) {
@@ -130,7 +130,7 @@ router.post('/purchase', async (req, res) => {
 
                 } catch (err) {
 
-                    console.log("transaction error ==> ",err);
+                    console.log("transaction error ==> ", err);
 
                     // Set transaction status to failed
                     let updated_transaction = await transaction_helper.update_transaction_by_id(transaction_resp.transaction._id, { "status": "failed" });
@@ -138,12 +138,28 @@ router.post('/purchase', async (req, res) => {
                 }
             }
         } else {
-            console.log("resp = ",transaction_resp);
+            console.log("resp = ", transaction_resp);
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while doing transaction" })
         }
 
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/**
+ * Delete cart item
+ * /promoter/cart/:cart_item_id
+ */
+router.delete('/:cart_item_id', async (req, res) => {
+    var del_resp = await cart_helper.remove_cart_item(req.params.cart_item_id);
+    if (del_resp.status === 0) {
+        console.log("error => ",del_resp);
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while deleting cart item", "error": del_resp.error });
+    } else if (del_resp.status === 2) {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't remove cart item" });
+    } else {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Cart item has been removed" });
     }
 });
 

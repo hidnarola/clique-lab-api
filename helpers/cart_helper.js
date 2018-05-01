@@ -84,11 +84,24 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
 };
 
 cart_helper.clear_cart_by_promoter = async (promoter_id) => {
-    try{
-        let del_resp = await Cart.deleteMany({"promoter_id":new ObjectId(promoter_id)});
-        return {"status":1,"message":"Cart has been clear"}
-    } catch(err){
+    try {
+        let del_resp = await Cart.deleteMany({ "promoter_id": new ObjectId(promoter_id) });
+        return { "status": 1, "message": "Cart has been clear" }
+    } catch (err) {
         return { "status": 0, "message": "Error occured while clearing cart", "error": err };
+    }
+};
+
+cart_helper.remove_cart_item = async (cart_item_id) => {
+    try {
+        let resp = await Cart.findOneAndRemove({ _id: cart_item_id });
+        if (!resp) {
+            return { "status": 2, "message": "Cart item not found" };
+        } else {
+            return { "status": 1, "message": "Cart item deleted", "resp": resp };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while deleting cart item", "error": err };
     }
 };
 
