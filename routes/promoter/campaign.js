@@ -706,14 +706,42 @@ router.post("/filtered_campaign", async (req, res) => {
     user_id = req.userInfo.id;
     logger.trace("Get all campaign API called");
     var filter = {};
-    if (req.body.gender) {
-        filter["user.gender"] = req.body.gender;
-    }
+    var match_filter = {};
+        var sort = {};
+        if (req.body.filter) {
+            req.body.filter.forEach(filter_criteria => {
+                if (filter_criteria.type === "exact") {
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                } else if (filter_criteria.type === "between") {
+                    if (filter_criteria.field === "age") {
+                        // Age is derived attribute and need to calculate based on date of birth
+                        match_filter[filter_criteria.field] = {
+                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                            "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                        };
+                    } else {
+                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                    }
+                } else if (filter_criteria.type === "like") {
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                } else if (filter_criteria.type === "id") {
+                    match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+                }
+            });
+        }
 
-    if (req.body.location) {
-        filter["user.location"] = req.body.location;
-    }
-    var resp_data = await campaign_helper.get_filtered_campaign_by_promoter(user_id, filter);
+
+        let keys = {
+            "fb_friends": "facebook.no_of_friends",
+            "insta_followers": "instagram.no_of_followers",
+            "twitter_followers": "twitter.no_of_followers",
+            "pinterest_followers": "pinterest.no_of_followers",
+            "linkedin_connection": "linkedin.no_of_connections",
+            "age": "dob"
+        };
+        match_filter = await global_helper.rename_keys(match_filter, keys);
+    var resp_data = await campaign_helper.get_filtered_campaign_by_promoter(user_id, match_filter);
 
     if (resp_data.status == 0) {
         logger.error("Error occured while fetching campaign = ", resp_data);

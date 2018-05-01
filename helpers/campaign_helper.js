@@ -851,7 +851,11 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
             }
         },
 
-    ]
+    ];
+    if (filter) {
+        total_spent.push({ "$match": filter });
+    }
+
     var spend = 
         {
             $group: {
@@ -891,7 +895,7 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
             $unwind: "$user"
         },
 
-    ];
+    ]
     if (filter) {
         applicants.push({ "$match": filter });
     }
@@ -901,7 +905,7 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
             "applicant": { $sum: 1 }
         }
     });
- 
+   
 
     var reach = [
         {
@@ -959,14 +963,27 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
         {
             $unwind: "$campaign_user"
         },
+     /*   {
+            $lookup: {
+                from: "users",
+                localField: "campaign_post.user_id",
+                foreignField: "_id",
+                as: "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },*/
+
     ];
+   
     engagement.push({
         $group: {
             "_id": null,
             "total": { $sum: { $add: ["$campaign_user.no_of_shares", "$campaign_user.no_of_likes", "$campaign_user.no_of_comments"] } }
         }
     });
-    
+   
   
     var camp = await Campaign.aggregate(purchase_post);
     var spent = await transaction.aggregate(total_spent);
