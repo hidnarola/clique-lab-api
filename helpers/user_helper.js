@@ -9,8 +9,6 @@ var ethnicity = require("./../models/Ethnicity");
 var job_title = require("./../models/Job_title");
 var education = require("./../models/Education");
 
-
-
 /*
  * get_login_by_email is used to fetch single user by email address
  * 
