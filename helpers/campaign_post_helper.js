@@ -15,9 +15,9 @@ var campaign_post_helper = {};
  * 
  * @developed by "mm"
  */
-campaign_post_helper.insert_campaign_post = async (campaign_object) => {
+campaign_post_helper.insert_campaign_post = async (obj) => {
    
-    let campaign = new Campaign(campaign_object);
+    let campaign = new Campaign(obj);
     try {
         let campaign_data = await campaign.save();
         return { "status": 1, "message": "Campaign post inserted", "campaign": campaign_data };

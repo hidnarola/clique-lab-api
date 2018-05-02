@@ -402,6 +402,26 @@ router.post("/campaign_applied", async (req, res) => {
 
 // /user/campaign/share/:campaign_id
 
+router.post("/social_post", async (req, res) => {
+
+ 
+  var obj ={
+    "user_id" : req.userInfo.id,
+    "campaign_id" : req.body.campaign_id,
+    "post_id" : req.body.postid,
+    "social_media_platform" : req.body.social_media_platform
+  }
+ let resp_data = await campaign_post_helper.insert_campaign_post(obj);
+ if (resp_data.status == 0) {
+   logger.error("Error occured while inserting posted Campaign = ", resp_data);
+   res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+ } else {
+   logger.trace(" Inserted successfully = ", resp_data);
+   res.status(config.OK_STATUS).json(resp_data);
+ }
+ });
+
+
 router.post('/share/:campaign_id', async (req, res) => {
 
   // access token get
@@ -720,6 +740,8 @@ router.post("/", async (req, res) => {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
+
+
 
 
 

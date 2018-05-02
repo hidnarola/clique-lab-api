@@ -739,7 +739,7 @@ router.post("/filtered_campaign", async (req, res) => {
             "pinterest_followers": "user.pinterest.no_of_followers",
             "linkedin_connection": "user.linkedin.no_of_connections",
             "year_in_industry": "user.experience",
-            "age": "user.date_of_birth",
+            "age": "user.dob",
 
             "name": "user.name",
             "gender": "user.gender",
