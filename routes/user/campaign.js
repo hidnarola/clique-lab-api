@@ -409,7 +409,7 @@ router.post("/social_post", async (req, res) => {
     "user_id" : req.userInfo.id,
     "campaign_id" : req.body.campaign_id,
     "post_id" : req.body.postid,
-    "social_media_platform" : req.body.social_media_platform
+    "social_media_platform" : req.body.social_media_platform    
   }
  let resp_data = await campaign_post_helper.insert_campaign_post(obj);
  if (resp_data.status == 0) {
