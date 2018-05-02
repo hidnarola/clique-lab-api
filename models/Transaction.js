@@ -8,7 +8,12 @@ var TransactionSchema = new Schema({
     company: { type: String },
     email: { type: String, required: true },
     abn: { type: String, required: true },
-    total_amount: {type: Number},
+    total_amount: { type: Number },
+    cart_items: [{
+        campaign_id: { type: mongoose.Schema.Types.ObjectId, ref: 'campaign' },
+        inspired_post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'inspired_brands' },
+        user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
+    }],
     country: { type: mongoose.Schema.Types.ObjectId, ref: 'country', required: true },
     address_line1: { type: String, required: true },
     address_line2: { type: String },
@@ -16,7 +21,7 @@ var TransactionSchema = new Schema({
     state: { type: String, required: true },
     post_code: { type: String, required: true },
     credit_card: { type: String, required: true },
-    stripe_charge_id: {type: String},
+    stripe_charge_id: { type: String },
     status: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
     created_at: { type: Date, default: Date.now },
 }, { versionKey: false });

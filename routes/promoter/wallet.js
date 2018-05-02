@@ -23,4 +23,27 @@ router.get('/cards',async(req,res) => {
     }
 });
 
+/**
+ * Withdraw given amount from wallet
+ * /promoter/wallet/withdraw
+ * Developed by "ar"
+ */
+router.post('/withdraw',async(req,res) => {
+    var schema = {
+        'amount': {
+            notEmpty: true,
+            errorMessage: "Withdrawal amount is required"
+        }
+    };
+
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+
+    if (!errors) {
+        
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
 module.exports = router;
