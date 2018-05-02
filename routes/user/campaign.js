@@ -403,8 +403,26 @@ router.post("/campaign_applied", async (req, res) => {
 // /user/campaign/share/:campaign_id
 
 router.post("/social_post", async (req, res) => {
+  var schema = {
+    
+    "campaign_id": {
+      notEmpty: true,
+      errorMessage: "campaign id is required"
+    },
+    "post_id": {
+      notEmpty: true,
+      errorMessage: "Post id is required"
+    },
+    "social_media_platform": {
+      notEmpty: true,
+      errorMessage: "social media platform is required"
+    },
 
- 
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+
+  if (!errors) {
   var obj ={
     "user_id" : req.userInfo.id,
     "campaign_id" : req.body.campaign_id,
@@ -412,14 +430,18 @@ router.post("/social_post", async (req, res) => {
     "social_media_platform" : req.body.social_media_platform    
   }
  let resp_data = await campaign_post_helper.insert_campaign_post(obj);
- if (resp_data.status == 0) {
-   logger.error("Error occured while inserting posted Campaign = ", resp_data);
-   res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
- } else {
-   logger.trace(" Inserted successfully = ", resp_data);
-   res.status(config.OK_STATUS).json(resp_data);
- }
- });
+ if (resp_data.status === 0) {
+  logger.error("Error while posting camapign  data = ", resp_data);
+  return res.status(config.BAD_REQUEST).json({ resp_data });
+} else {
+  return res.status(config.OK_STATUS).json(resp_data);
+}
+
+} else {
+logger.error("Validation Error = ", errors);
+res.status(config.BAD_REQUEST).json({ message: errors });
+}
+});
 
 
 router.post('/share/:campaign_id', async (req, res) => {
