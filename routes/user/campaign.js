@@ -145,11 +145,9 @@ router.post("/public_campaign", async (req, res) => {
     } else {
       sort["_id"] = 1;
     }
-
-
-
-    var resp_data = await campaign_helper.get_all_campaign(filter, redact, sort, req.body.page_no, req.body.page_size);
-    if (resp_data.status == 0) {``
+    var resp_data = await campaign_helper.get_public_campaign(filter, redact, sort, req.body.page_no, req.body.page_size);
+    if (resp_data.status == 0) {
+      ``
       logger.error("Error occured while fetching Public Campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
     } else {
@@ -173,6 +171,8 @@ router.post("/public_campaign", async (req, res) => {
  *
  * @apiSuccess (Success 200) {Array} Array of Offered Campaign document
  * @apiError (Error 4xx) {String} message Validation or error message.
+ * 
+ * changed by "ar"
  */
 router.post("/myoffer", async (req, res) => {
   var schema = {
@@ -271,21 +271,18 @@ router.get("/:campaign_id", async (req, res) => {
 
  * @apiHeader {String}  Content-Type application/json
  * @apiHeader {String}  x-access-token  unique access-key
+ * 
  * @apiParam {number} user_id User id of campaign
  * @apiParam {number} campaign_id Campaign id of campaign
- *  @apiParam {String} description  description of campaign
- *  @apiParam {String} [image] Image of campaign
-
- * @apiSuccess (Success 200) {JSON}Campaign details
+ * @apiParam {String} description  description of campaign
+ * @apiParam {String} [image] Image of campaign
+ *
+ * @apiSuccess (Success 200) {JSON} Campaign details
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 
 router.post("/campaign_applied", async (req, res) => {
   var schema = {
-    "user_id": {
-      notEmpty: true,
-      errorMessage: "user_id is required"
-    },
     "campaign_id": {
       notEmpty: true,
       errorMessage: "campaign_id is required"
@@ -293,23 +290,18 @@ router.post("/campaign_applied", async (req, res) => {
     "desription": {
       notEmpty: true,
       errorMessage: "Description is required"
-    },
-
+    }
   };
   req.checkBody(schema);
   var errors = req.validationErrors();
 
   if (!errors) {
-
     var campaign_obj = {
-      "user_id": req.body.user_id,
+      "user_id": req.userInfo.id,
       "campaign_id": req.body.campaign_id,
-      "desription": req.body.desription,
-
+      "desription": req.body.desription
     };
 
-    var campaign_id = campaign_obj.campaign_id;
-    var user_id = campaign_obj.user_id;
     async.waterfall(
       [
         function (callback) {
@@ -331,12 +323,17 @@ router.post("/campaign_applied", async (req, res) => {
 
               extension = ".jpg";
               filename = "image_" + new Date().getTime() + extension;
-              file.mv(dir + '/' + filename, function (err) {
+              file.mv(dir + '/' + filename, async (err) => {
                 if (err) {
                   logger.trace("Problem in uploading image");
                   callback({ "status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image" });
                 } else {
                   logger.trace("Image uploaded");
+
+                  // var thumbnail = await sharp(dir+'/'+filename)
+                  //   .resize(170, 360, { kernel: sharp.kernel.nearest })
+                  //   .toFile(dir+'/170X360/'+filename);
+
                   callback(null, filename);
                 }
               });
@@ -344,38 +341,17 @@ router.post("/campaign_applied", async (req, res) => {
               logger.trace("Invalid image format");
               callback({ "status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid" });
             }
-
-          }
-          else {
+          } else {
             logger.trace(" image required");
             callback({ "err": "Image required" });
-
           }
         }
-
       ],
       async (err, filename) => {
         //End image upload
-
         if (filename) {
           campaign_obj.image = filename;
-
-
-
-          // output.tiff is a 200 pixels wide and 300 pixels high image
-          // containing a nearest-neighbour scaled version, embedded on a white canvas,
-          // of the image data in inputBuffer
-
         }
-
-        var thumbnail = await sharp('D:/Clique/clique-lab-api/uploads/campaign_applied/image_1524900021820.jpg')
-          .resize(170, 360, {
-
-            kernel: sharp.kernel.nearest
-          })
-          .background('white')
-          .embed()
-          .toFile('D:/Clique/clique-lab-api/uploads/Thumnail/thumb1.jpg');
 
         let campaign_data = await campaign_helper.insert_campaign_applied(campaign_obj);
 
@@ -384,9 +360,7 @@ router.post("/campaign_applied", async (req, res) => {
           return res.status(config.BAD_REQUEST).json({ campaign_data });
         } else {
           var obj = { "is_apply": true };
-
-          let campaign_apply_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
-
+          let campaign_apply_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
           return res.status(config.OK_STATUS).json(campaign_data);
         }
 
@@ -505,7 +479,7 @@ router.post('/share/:campaign_id', async (req, res) => {
           campaign_id = campaign_obj.post_id;
           var obj = { "is_posted": true };
 
-          let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
+          let campaign_post_update = await campaign_helper.update_campaign_user(user_id, campaign_id, obj);
           return res.status(config.OK_STATUS).json(campaign_data);
         }
       });
@@ -619,7 +593,7 @@ router.post('/share/twitter/:campaign_id', async (req, res) => {
 
         var obj = { "is_posted": true };
 
-        let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
+        let campaign_post_update = await campaign_helper.update_campaign_user(user_id, campaign_id, obj);
         return res.status(config.OK_STATUS).json(campaign_data);
       })
     });
@@ -714,11 +688,10 @@ router.post('/share/pinterest/:campaign_id', async (req, res) => {
 
         var obj = { "is_posted": true };
 
-        let campaign_post_update = await campaign_helper.update_campaign_by_user(user_id, campaign_id, obj);
+        let campaign_post_update = await campaign_helper.update_campaign_user(user_id, campaign_id, obj);
         return res.status(config.OK_STATUS).json(campaign_data);
       })
     });
-
 });
 
 router.post("/", async (req, res) => {

@@ -103,7 +103,7 @@ campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size)
  *          status 1 - If campaign data found, with campaign object
  *          status 2 - If campaign not found, with appropriate message
  */
-campaign_helper.get_all_campaign = async (filter, redact, sort, page_no, page_size) => {
+campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page_size) => {
     try {
         var aggregate = [];
         if (filter) {
@@ -228,8 +228,7 @@ campaign_helper.insert_campaign_applied = async (campaign_object) => {
     }
 };
 
-
-campaign_helper.update_campaign_by_user = async (user_id, campaign_id, obj) => {
+campaign_helper.update_campaign_user = async (user_id, campaign_id, obj) => {
     try {
         let user = await Campaign_User.findOneAndUpdate({ "user_id": new ObjectId(user_id), "campaign_id": new ObjectId(campaign_id) }, obj);
 
