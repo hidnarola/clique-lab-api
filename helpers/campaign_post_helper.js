@@ -1,8 +1,9 @@
 var mongoose = require('mongoose');
 
-var Campaign = require("./../models/Campaign_post");
+var Campaign_post = require("./../models/Campaign_post");
+var Campaign = require("./../models/Campaign");
+
 var ObjectId = mongoose.Types.ObjectId;
-var Campaign_User = require("./../models/Campaign_user");
 var campaign_post_helper = {};
 
 /*
@@ -17,7 +18,7 @@ var campaign_post_helper = {};
  */
 campaign_post_helper.insert_campaign_post = async (obj) => {
    
-    let campaign = new Campaign(obj);
+    let campaign = new Campaign_post(obj);
     try {
         let campaign_data = await campaign.save();
         return { "status": 1, "message": "Campaign post inserted", "campaign": campaign_data };
@@ -27,5 +28,60 @@ campaign_post_helper.insert_campaign_post = async (obj) => {
 };
 
 
+/**
+ * return count of total purchased post by promoter
+ * 
+ * @param {*} promoter_id 
+ * @param {*} filter 
+ * 
+ * Developed by "ar"
+ */
+campaign_post_helper.count_purchase_post_by_promoter = async(promoter_id, filter) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            $lookup: {
+                from: "campaign_user",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
+        {
+            $unwind: "$campaign_user"
+        },
+        {
+            "$match": {
+                "campaign_user.is_purchase": true
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "campaign_user.user_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        }
+    ];
+
+    if (filter) {
+        aggregate.push({ "$match": filter });
+    }
+
+    aggregate.push({
+        "$group": {
+            "_id": null,
+            "purchase_post": { "$sum": 1 },
+        }
+    });
+
+    let result = await Campaign.aggregate(purchase_post);
+}
 
 module.exports = campaign_post_helper;

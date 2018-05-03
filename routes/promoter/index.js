@@ -166,11 +166,76 @@ router.get('/filter_preference', async (req, res) => {
 
     if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1) {
         logger.trace("got details successfully");
-        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste, "language":language_resp.language, "education":education_resp.education, "job_title":job_title_resp.job_title, "ethnicity":ethnicity_resp.ethnicity });
+        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste, "language": language_resp.language, "education": education_resp.education, "job_title": job_title_resp.job_title, "ethnicity": ethnicity_resp.ethnicity });
     } else {
         logger.error("Error occured while fetching Job Industry = ", resp_data);
         res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
     }
-})
+});
+
+/**
+ * Get analytics statistics
+ * /promoter/get_analytics
+ * Changed by "ar"
+ */
+router.post("/get_analytics", async (req, res) => {
+    let match_filter = {};
+
+    if (req.body.filter) {
+        req.body.filter.forEach(filter_criteria => {
+            if (filter_criteria.type === "exact") {
+                match_filter[filter_criteria.field] = filter_criteria.value;
+            } else if (filter_criteria.type === "between") {
+                if (filter_criteria.field === "age") {
+                    // Age is derived attribute and need to calculate based on date of birth
+                    match_filter[filter_criteria.field] = {
+                        "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                        "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                    };
+                } else {
+                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.max_value , "$gte": filter_criteria.min_value};
+                }
+            } else if (filter_criteria.type === "like") {
+                let regex = new RegExp(filter_criteria.value);
+                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+            } else if (filter_criteria.type === "id") {
+                match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+            }
+        });
+    }
+
+    let keys = {
+        "fb_friends": "user.facebook.no_of_friends",
+        "insta_followers": "user.instagram.no_of_followers",
+        "twitter_followers": "user.twitter.no_of_followers",
+        "pinterest_followers": "user.pinterest.no_of_followers",
+        "linkedin_connection": "user.linkedin.no_of_connections",
+        "year_in_industry": "user.experience",
+        "age": "user.dob",
+
+        "name": "user.name",
+        "gender": "user.gender",
+        "location": "user.location",
+        "job_industry": "user.job_industry",
+        "education": "user.education",
+        "language": "user.language",
+        "ethnicity": "user.ethnicity",
+        "interested_in": "user.interested_in",
+        "relationship_status": "user.relationship_status",
+        "music_taste": "user.music_taste"
+    };
+
+    match_filter = await global_helper.rename_keys(match_filter, keys);
+    var resp_data = await campaign_helper.get_filtered_campaign_by_promoter(req.userInfo.id, match_filter);
+
+    if (resp_data.status == 0) {
+        logger.error("Error occured while fetching campaign = ", resp_data);
+        res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+    } else {
+        logger.trace("Public Campaign got successfully = ", resp_data);
+        res.status(config.OK_STATUS).json(resp_data);
+    }
+
+});
 
 module.exports = router;
