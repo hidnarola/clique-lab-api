@@ -29,66 +29,70 @@ var campaign_helper = {};
  *          status 1 - If campaign data found, with campaign object
  *          status 2 - If campaign not found, with appropriate message
  */
-campaign_helper.get_campaign_by_user_id = async (id, filter, page_no, page_size) => {
+campaign_helper.get_users_approved_campaign = async (user_id, filter,redact, sort, page_no, page_size) => {
     try {
-
-        var campaigns = await Campaign.aggregate([
+        let aggregate = [
             {
-                $lookup: {
-                    from: "campaign_user",
-                    localField: "_id",
-                    foreignField: "campaign_id",
-                    as: "approved_campaign"
+                "$match": {
+                    "user_id": new ObjectId(user_id),
+                    "is_purchase": true
                 }
             },
             {
-                $unwind: "$approved_campaign"
-            },
-            {
-                $match: {
-                    "approved_campaign.user_id": { "$eq": new ObjectId(id) },
-                    "status": true,
-                    //"social_media_platform": filter
+                "$lookup": {
+                    "from": "campaign",
+                    "localField": "campaign_id",
+                    "foreignField": "_id",
+                    "as": "campaign"
                 }
             },
             {
-                $project:
-                    {
-                        social_media_platform: 1,
-                        hash_tag: 1, at_tag: 1,
-                        privacy: 1, media_format: 1,
-                        mood_board_images: 1,
-                        name: 1,
-                        start_date: 1,
-                        end_date: 1,
-                        call_to_action: 1,
-                        location: 1,
-                        price: 1,
-                        currency: 1,
-                        promoter_id: 1,
-                        description: 1,
-                        cover_image: 1
-                    }
-            },
-            {
-                $skip: page_no > 0 ? ((page_no - 1) * page_size) : 0
-            },
-            {
-                $limit: page_size
-
+                "$unwind":"$campaign"
             }
-            /*{
-                $sort: {price : sort} 
-            },*/
+        ];
 
-        ]
-        )
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
 
-        console.log("campaign = ", campaigns);
-        if (campaigns && campaigns.length > 0) {
-            return { "status": 1, "message": "campaign found", "campaign": campaigns };
+        if (redact) {
+            aggregate.push({ "$redact": { "$cond": { "if": redact, "then": "$$KEEP", "else": "$$PRUNE" } } });
+        }
+
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": "$campaign" }
+            }
+        });
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'campaign': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
         } else {
-            return { "status": 2, "message": "No campaign available" };
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'campaign': "$results"
+                }
+            });
+        }
+
+        var approved_campaign = await Campaign_User.aggregate(aggregate);
+
+        if (approved_campaign && approved_campaign.length > 0) {
+            return { "status": 1, "message": "User's approved campaign found", "results": approved_campaign };
+        } else {
+            return { "status": 2, "message": "No approve campaign available" };
         }
     } catch (err) {
 
@@ -371,10 +375,7 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
             });
         }
 
-        console.log("Aggregate => ",JSON.stringify(aggregate));
-
         var user_offers = await Campaign_User.aggregate(aggregate);
-        console.log("offers => ",user_offers);
 
         if (user_offers && user_offers.length > 0) {
             return { "status": 1, "message": "User's offer found", "results": user_offers };

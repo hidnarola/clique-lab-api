@@ -39,13 +39,6 @@ var sharp = require('sharp');
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post("/approved", async (req, res) => {
-  user_id = req.userInfo.id;
-  logger.trace("Get all campaign API called");
-  var filter = {};
-  var sort = {};
-  var page_no = {};
-  var page_size = {};
-
   var schema = {
     "page_no": {
       notEmpty: true,
@@ -62,27 +55,38 @@ router.post("/approved", async (req, res) => {
 
   if (!errors) {
 
+    let filter = {};
+    let sort = {};
+    var redact = {};
+
     if (req.body.social_media_platform) {
-      filter["social_media_platform"] = req.body.social_media_platform;
+      filter["campaign.social_media_platform"] = { "$in": req.body.social_media_platform };
+    }
+
+    if (req.body.search) {
+      var r = new RegExp(req.body.search);
+      var regex = { "$regex": r, "$options": "i" };
+      redact = {
+        "$or": [
+          { "$setIsSubset": [[req.body.search], "$campaign.at_tag"] },
+          { "$setIsSubset": [[req.body.search], "$campaign.hash_tag"] },
+          { "$eq": [{ "$substr": ["$campaign.name", 0, -1] }, req.body.search] }
+        ]
+      }
     }
 
     if (typeof req.body.price != "undefined") {
-      sort["price"] = req.body.price;
-    }
-    if (typeof req.body.page_no) {
-      page_no = req.body.page_no;
-    }
-    if (typeof req.body.page_size) {
-      page_size = req.body.page_size;
+      sort["campaign.price"] = req.body.price;
+    } else {
+      sort["campaign._id"] = 1;
     }
 
-    var resp_data = await campaign_helper.get_campaign_by_user_id(user_id, filter, page_no, page_size);
+    var resp_data = await campaign_helper.get_users_approved_campaign(req.userInfo.id, filter, redact, sort, req.body.page_no, req.body.page_size);
 
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-    }
-    else {
+    } else {
       logger.trace("Public Campaign got successfully = ", resp_data);
       res.status(config.OK_STATUS).json(resp_data);
     }
@@ -189,7 +193,6 @@ router.post("/myoffer", async (req, res) => {
   var errors = req.validationErrors();
 
   if (!errors) {
-    user_id = req.userInfo.id;
     let filter = {};
     let sort = {};
     var redact = {};
@@ -302,52 +305,49 @@ router.post("/campaign_applied", async (req, res) => {
       "desription": req.body.desription
     };
 
-    async.waterfall(
-      [
-        function (callback) {
-          //image upload
-          if (req.files && req.files["image"]) {
-            var file_path_array = [];
-            // var files = req.files['images'];
-            var file = req.files.image;
-            var dir = "./uploads/campaign_applied";
-            var mimetype = ["image/png", "image/jpeg", "image/jpg"];
+    async.waterfall([
+      function (callback) {
+        //image upload
+        if (req.files && req.files["image"]) {
+          var file_path_array = [];
+          // var files = req.files['images'];
+          var file = req.files.image;
+          var dir = "./uploads/campaign_applied";
+          var mimetype = ["image/png", "image/jpeg", "image/jpg"];
 
-            // assuming openFiles is an array of file names
+          // assuming openFiles is an array of file names
 
-            if (mimetype.indexOf(file.mimetype) != -1) {
-              logger.trace("Uploading image");
-              if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir);
-              }
-
-              extension = ".jpg";
-              filename = "image_" + new Date().getTime() + extension;
-              file.mv(dir + '/' + filename, async (err) => {
-                if (err) {
-                  logger.trace("Problem in uploading image");
-                  callback({ "status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image" });
-                } else {
-                  logger.trace("Image uploaded");
-
-                  // var thumbnail = await sharp(dir+'/'+filename)
-                  //   .resize(170, 360, { kernel: sharp.kernel.nearest })
-                  //   .toFile(dir+'/170X360/'+filename);
-
-                  callback(null, filename);
-                }
-              });
-            } else {
-              logger.trace("Invalid image format");
-              callback({ "status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid" });
+          if (mimetype.indexOf(file.mimetype) != -1) {
+            logger.trace("Uploading image");
+            if (!fs.existsSync(dir)) {
+              fs.mkdirSync(dir);
             }
+
+            extension = ".jpg";
+            filename = "image_" + new Date().getTime() + extension;
+            file.mv(dir + '/' + filename, async (err) => {
+              if (err) {
+                logger.trace("Problem in uploading image");
+                callback({ "status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image" });
+              } else {
+                logger.trace("Image uploaded");
+
+                // var thumbnail = await sharp(dir+'/'+filename)
+                //   .resize(170, 360, { kernel: sharp.kernel.nearest })
+                //   .toFile(dir+'/170X360/'+filename);
+
+                callback(null, filename);
+              }
+            });
           } else {
-            logger.trace(" image required");
-            callback({ "err": "Image required" });
+            logger.trace("Invalid image format");
+            callback({ "status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid" });
           }
+        } else {
+          logger.trace(" image required");
+          callback({ "err": "Image required" });
         }
-      ],
-      async (err, filename) => {
+      }], async (err, filename) => {
         //End image upload
         if (filename) {
           campaign_obj.image = filename;
@@ -363,9 +363,7 @@ router.post("/campaign_applied", async (req, res) => {
           let campaign_apply_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
           return res.status(config.OK_STATUS).json(campaign_data);
         }
-
-      }
-    );
+      });
   } else {
     logger.error("Validation Error = ", errors);
     res.status(config.BAD_REQUEST).json({ message: errors });
