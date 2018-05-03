@@ -314,13 +314,12 @@ campaign_helper.insert_campaign = async (campaign_object) => {
  *          status 1 - If campaign data found, with campaign object
  *          status 2 - If campaign not found, with appropriate message
  */
-campaign_helper.get_all_offered_campaign = async (id, filter, sort, page_no, page_size) => {
+campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, page_size) => {
     try {
-
-        var user_offers = await Campaign_User.aggregate([
+        let aggregate = [
             {
                 "$match": {
-                    "user_id": new ObjectId(id),
+                    "user_id": new ObjectId(user_id),
                     "is_apply": false
                 }
             },
@@ -329,38 +328,57 @@ campaign_helper.get_all_offered_campaign = async (id, filter, sort, page_no, pag
                     "from": "campaign",
                     "localField": "campaign_id",
                     "foreignField": "_id",
-                    "as": "campaign_user"
+                    "as": "campaign"
                 }
             },
-            // {
-            //     $project: {
-            //         social_media_platform: "$cam",
-            //         hash_tag: 1, at_tag: 1,
-            //         privacy: 1, media_format: 1,
-            //         mood_board_images: 1,
-            //         name: 1,
-            //         start_date: 1,
-            //         end_date: 1,
-            //         call_to_action: 1,
-            //         location: 1,
-            //         price: 1,
-            //         currency: 1,
-            //         promoter_id: 1,
-            //         description: 1,
-            //         cover_image: 1
-            //     }
-            // },
             {
-                $skip: page_no > 0 ? ((page_no - 1) * page_size) : 0
-            },
-            {
-                $limit: page_size
+                "$unwind":"$campaign"
             }
-        ]);
+        ];
 
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+
+        if (redact) {
+            aggregate.push({ "$redact": { "$cond": { "if": redact, "then": "$$KEEP", "else": "$$PRUNE" } } });
+        }
+
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": "$campaign" }
+            }
+        });
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'campaign': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'campaign': "$results"
+                }
+            });
+        }
+
+        console.log("Aggregate => ",JSON.stringify(aggregate));
+
+        var user_offers = await Campaign_User.aggregate(aggregate);
+        console.log("offers => ",user_offers);
 
         if (user_offers && user_offers.length > 0) {
-            return { "status": 1, "message": "User's offer found", "campaign": user_offers };
+            return { "status": 1, "message": "User's offer found", "results": user_offers };
         } else {
             return { "status": 2, "message": "No offer available" };
         }

@@ -61,7 +61,7 @@ router.post("/approved", async (req, res) => {
   var errors = req.validationErrors();
 
   if (!errors) {
-  
+
     if (req.body.social_media_platform) {
       filter["social_media_platform"] = req.body.social_media_platform;
     }
@@ -149,7 +149,7 @@ router.post("/public_campaign", async (req, res) => {
 
 
     var resp_data = await campaign_helper.get_all_campaign(filter, redact, sort, req.body.page_no, req.body.page_size);
-    if (resp_data.status == 0) {
+    if (resp_data.status == 0) {``
       logger.error("Error occured while fetching Public Campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
     } else {
@@ -175,15 +175,6 @@ router.post("/public_campaign", async (req, res) => {
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post("/myoffer", async (req, res) => {
-
-  user_id = req.userInfo.id;
-  console.log(user_id);
-  logger.trace("Get all campaign API called");
-  var filter = {};
-  var sort = {};
-  var page_no = {};
-  var page_size = {};
-
   var schema = {
     "page_no": {
       notEmpty: true,
@@ -192,38 +183,45 @@ router.post("/myoffer", async (req, res) => {
     "page_size": {
       notEmpty: true,
       errorMessage: "page_size is required"
-    },
-
+    }
   };
   req.checkBody(schema);
   var errors = req.validationErrors();
 
   if (!errors) {
-    console.log("2");
+    user_id = req.userInfo.id;
+    let filter = {};
+    let sort = {};
+    var redact = {};
+
     if (req.body.social_media_platform) {
-      filter["social_media_platform"] = req.body.social_media_platform;
+      filter["campaign.social_media_platform"] = { "$in": req.body.social_media_platform };
+    }
+
+    if (req.body.search) {
+      var r = new RegExp(req.body.search);
+      var regex = { "$regex": r, "$options": "i" };
+      redact = {
+        "$or": [
+          { "$setIsSubset": [[req.body.search], "$campaign.at_tag"] },
+          { "$setIsSubset": [[req.body.search], "$campaign.hash_tag"] },
+          { "$eq": [{ "$substr": ["$campaign.name", 0, -1] }, req.body.search] }
+        ]
+      }
     }
 
     if (typeof req.body.price != "undefined") {
-      sort["price"] = req.body.price;
+      sort["campaign.price"] = req.body.price;
+    } else {
+      sort["campaign._id"] = 1;
     }
-    if (typeof req.body.search != "undefined") {
-      filter["search"] = req.body.search;
-    }
-    if (typeof req.body.page_no) {
-      page_no = req.body.page_no;
-    }
-    if (typeof req.body.page_size) {
-      page_size = req.body.page_size;
-    }
-    console.log("3");
 
-    var resp_data = await campaign_helper.get_all_offered_campaign(user_id, filter, sort, page_no, page_size);
+    var resp_data = await campaign_helper.get_user_offer(req.userInfo.id, filter, redact, sort, req.userInfo.page_no, req.userInfo.page_size);
     if (resp_data.status == 0) {
-      logger.error("Error occured while fetching campaign = ", resp_data);
+      logger.error("Error occured while fetching offer = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
     } else {
-      logger.trace("Public Campaign got successfully = ", resp_data);
+      logger.trace("User's offer got successfully = ", resp_data);
       res.status(config.OK_STATUS).json(resp_data);
     }
   } else {
@@ -248,17 +246,17 @@ router.get("/:campaign_id", async (req, res) => {
   var user = await user_helper.get_user_by_id(user_id);
 
   var access_token = user.User.facebook.access_token;
- 
-FB.setAccessToken(access_token);
 
-var like =await FB.api("/105830773604182_136563987197527/likes");
- 
-likes = like.data.length;
+  FB.setAccessToken(access_token);
+
+  var like = await FB.api("/105830773604182_136563987197527/likes");
+
+  likes = like.data.length;
   logger.trace("Get all  Campaign API called");
-  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id,likes);
-  
+  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id, likes);
+
   if (resp_data.status == 0) {
-    logger.error("Error occured while fetching Public Campaign = ", resp_data,likes);
+    logger.error("Error occured while fetching Public Campaign = ", resp_data, likes);
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
   } else {
     logger.trace(" Campaign got successfully = ", resp_data);
@@ -361,24 +359,24 @@ router.post("/campaign_applied", async (req, res) => {
 
         if (filename) {
           campaign_obj.image = filename;
-      
-            
-  
-    // output.tiff is a 200 pixels wide and 300 pixels high image
-    // containing a nearest-neighbour scaled version, embedded on a white canvas,
-    // of the image data in inputBuffer
- 
-}
 
- var thumbnail = await sharp('D:/Clique/clique-lab-api/uploads/campaign_applied/image_1524900021820.jpg')
-.resize(170, 360, {
 
-  kernel: sharp.kernel.nearest
-})
-.background('white')
-.embed()
-.toFile('D:/Clique/clique-lab-api/uploads/Thumnail/thumb1.jpg');
- 
+
+          // output.tiff is a 200 pixels wide and 300 pixels high image
+          // containing a nearest-neighbour scaled version, embedded on a white canvas,
+          // of the image data in inputBuffer
+
+        }
+
+        var thumbnail = await sharp('D:/Clique/clique-lab-api/uploads/campaign_applied/image_1524900021820.jpg')
+          .resize(170, 360, {
+
+            kernel: sharp.kernel.nearest
+          })
+          .background('white')
+          .embed()
+          .toFile('D:/Clique/clique-lab-api/uploads/Thumnail/thumb1.jpg');
+
         let campaign_data = await campaign_helper.insert_campaign_applied(campaign_obj);
 
         if (campaign_data.status === 0) {
@@ -404,7 +402,7 @@ router.post("/campaign_applied", async (req, res) => {
 
 router.post("/social_post", async (req, res) => {
   var schema = {
-    
+
     "campaign_id": {
       notEmpty: true,
       errorMessage: "campaign id is required"
@@ -423,24 +421,24 @@ router.post("/social_post", async (req, res) => {
   var errors = req.validationErrors();
 
   if (!errors) {
-  var obj ={
-    "user_id" : req.userInfo.id,
-    "campaign_id" : req.body.campaign_id,
-    "post_id" : req.body.postid,
-    "social_media_platform" : req.body.social_media_platform    
-  }
- let resp_data = await campaign_post_helper.insert_campaign_post(obj);
- if (resp_data.status === 0) {
-  logger.error("Error while posting camapign  data = ", resp_data);
-  return res.status(config.BAD_REQUEST).json({ resp_data });
-} else {
-  return res.status(config.OK_STATUS).json(resp_data);
-}
+    var obj = {
+      "user_id": req.userInfo.id,
+      "campaign_id": req.body.campaign_id,
+      "post_id": req.body.postid,
+      "social_media_platform": req.body.social_media_platform
+    }
+    let resp_data = await campaign_post_helper.insert_campaign_post(obj);
+    if (resp_data.status === 0) {
+      logger.error("Error while posting camapign  data = ", resp_data);
+      return res.status(config.BAD_REQUEST).json({ resp_data });
+    } else {
+      return res.status(config.OK_STATUS).json(resp_data);
+    }
 
-} else {
-logger.error("Validation Error = ", errors);
-res.status(config.BAD_REQUEST).json({ message: errors });
-}
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
 });
 
 
@@ -525,10 +523,10 @@ router.get('/share/facefook/friends', async (req, res) => {
 
   var access_token = user.User.facebook.access_token;
   user_id = req.userInfo.id;
-FB.setAccessToken(access_token);
-FB.api('/me/friends', function(response) {
-  return res.status(config.OK_STATUS).json(response);
-})
+  FB.setAccessToken(access_token);
+  FB.api('/me/friends', function (response) {
+    return res.status(config.OK_STATUS).json(response);
+  })
 });
 
 
@@ -747,9 +745,9 @@ router.post("/", async (req, res) => {
   }
 
   if (!errors) {
-    user_id= req.userInfo.id;
-  
-   var resp_data = await promoter_helper.get_filtered_campaign(req.body.filter,user_id);
+    user_id = req.userInfo.id;
+
+    var resp_data = await promoter_helper.get_filtered_campaign(req.body.filter, user_id);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Brand = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
