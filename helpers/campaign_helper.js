@@ -325,6 +325,14 @@ campaign_helper.get_all_offered_campaign = async (id, filter, sort, page_no, pag
                 }
             },
             {
+                "$lookup": {
+                    "from": "campaign",
+                    "localField": "campaign_id",
+                    "foreignField": "_id",
+                    "as": "campaign"
+                }
+            },
+            {
                 $project: {
                         social_media_platform: 1,
                         hash_tag: 1, at_tag: 1,
