@@ -319,9 +319,9 @@ campaign_helper.get_all_offered_campaign = async (id, filter, sort, page_no, pag
 
         var user_offers = await Campaign_User.aggregate([
             {
-                "$match":{
-                    "user_id":new ObjectId(id),
-                    "is_apply":false
+                "$match": {
+                    "user_id": new ObjectId(id),
+                    "is_apply": false
                 }
             },
             {
@@ -329,27 +329,27 @@ campaign_helper.get_all_offered_campaign = async (id, filter, sort, page_no, pag
                     "from": "campaign",
                     "localField": "campaign_id",
                     "foreignField": "_id",
-                    "as": "campaign"
+                    "as": "campaign_user"
                 }
             },
-            {
-                $project: {
-                        social_media_platform: 1,
-                        hash_tag: 1, at_tag: 1,
-                        privacy: 1, media_format: 1,
-                        mood_board_images: 1,
-                        name: 1,
-                        start_date: 1,
-                        end_date: 1,
-                        call_to_action: 1,
-                        location: 1,
-                        price: 1,
-                        currency: 1,
-                        promoter_id: 1,
-                        description: 1,
-                        cover_image: 1
-                }
-            },
+            // {
+            //     $project: {
+            //         social_media_platform: "$cam",
+            //         hash_tag: 1, at_tag: 1,
+            //         privacy: 1, media_format: 1,
+            //         mood_board_images: 1,
+            //         name: 1,
+            //         start_date: 1,
+            //         end_date: 1,
+            //         call_to_action: 1,
+            //         location: 1,
+            //         price: 1,
+            //         currency: 1,
+            //         promoter_id: 1,
+            //         description: 1,
+            //         cover_image: 1
+            //     }
+            // },
             {
                 $skip: page_no > 0 ? ((page_no - 1) * page_size) : 0
             },
