@@ -216,7 +216,7 @@ router.post("/myoffer", async (req, res) => {
       sort["campaign._id"] = 1;
     }
 
-    var resp_data = await campaign_helper.get_user_offer(req.userInfo.id, filter, redact, sort, req.userInfo.page_no, req.userInfo.page_size);
+    var resp_data = await campaign_helper.get_user_offer(req.userInfo.id, filter, redact, sort, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching offer = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
