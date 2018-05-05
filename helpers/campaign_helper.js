@@ -29,7 +29,7 @@ var campaign_helper = {};
  *          status 1 - If campaign data found, with campaign object
  *          status 2 - If campaign not found, with appropriate message
  */
-campaign_helper.get_users_approved_campaign = async (user_id, filter,redact, sort, page_no, page_size) => {
+campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, sort, page_no, page_size) => {
     try {
         let aggregate = [
             {
@@ -47,7 +47,7 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter,redact, sor
                 }
             },
             {
-                "$unwind":"$campaign"
+                "$unwind": "$campaign"
             }
         ];
 
@@ -335,7 +335,7 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
                 }
             },
             {
-                "$unwind":"$campaign"
+                "$unwind": "$campaign"
             }
         ];
 
@@ -806,47 +806,24 @@ campaign_helper.get_promoters_by_social_media = async (promoter_id, filter) => {
     }
 }
 
-campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) => {
+campaign_helper.get_campaign_analysis_by_promoter = async (promoter_id, filter) => {
+    let purchased_post_cnt = campaign_post_helper.count_purchase_post_by_promoter(promoter_id, filter);
+    let spent = campaign_post_helper.total_spent_by_promoter(promoter_id, filter);
+    let applicant_cnt = campaign_helper.get_campaign_total_applicant_by_promoter(promoter_id, filter);
+    let reach_total = campaign_helper.get_campaign_total_reach_by_promoter(promoter_id, filter);
+    let engage_cnt = campaign_helper.get_total_engaged_person_by_promoter(promoter_id, filter);
 
+    return {
+        "purchased_campaign": await purchased_post_cnt,
+        "total_spent": await spent,
+        "number_of_appplicants": await applicant_cnt,
+        "no_of_reach_total": await reach_total,
+        "total_no_of_engagement": await engage_cnt
+    };
+}
 
-    var total_spent = [
-        {
-            "$match": {
-                "promoter_id": new ObjectId(promoter_id),
-                "status": "paid"
-            }
-        },
-        {
-            $lookup: {
-                from: "users",
-                localField: "cart_items.user_id",
-                foreignField: "_id",
-                as: "user"
-            }
-        },
-
-        {
-            $unwind: "$user"
-
-        },
-
-    ];
-    if (filter) {
-        total_spent.push({ "$match": filter });
-    }
-
-    var spend =
-        {
-            $group: {
-                "_id": null,
-                "total": { $sum: "$total_amount" }
-            }
-        }
-
-
-    total_spent.push(spend);
-
-    var applicants = [
+campaign_helper.get_campaign_total_applicant_by_promoter = async(promoter_id, filter) => {
+    let aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
         },
@@ -858,7 +835,6 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
                 as: "campaign_user"
             }
         },
-
         {
             $unwind: "$campaign_user"
         },
@@ -873,20 +849,23 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
         {
             $unwind: "$user"
         },
-
     ]
     if (filter) {
-        applicants.push({ "$match": filter });
+        aggregate.push({ "$match": filter });
     }
-    applicants.push({
+    aggregate.push({
         $group: {
             "_id": null,
             "applicant": { $sum: 1 }
         }
     });
 
+    var total_applicant = await Campaign.aggregate(aggregate);
+    return (total_applicant && total_applicant[0] && total_applicant[0].applicant)?total_applicant[0].applicant:0;
+};
 
-    var reach = [
+campaign_helper.get_campaign_total_reach_by_promoter = async(promoter_id, filter) => {
+    let aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
         },
@@ -898,11 +877,9 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
                 as: "campaign_user"
             }
         },
-
         {
             $unwind: "$campaign_user"
         },
-
         {
             $lookup: {
                 from: "users",
@@ -916,17 +893,21 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
         },
     ];
     if (filter) {
-        reach.push({ "$match": filter });
+        aggregate.push({ "$match": filter });
     }
-    reach.push({
+    aggregate.push({
         $group: {
             "_id": null,
             "total_social_power": { $sum: { $add: ["$user.facebook.no_of_friends", "$user.pinterest.no_of_followers", "$user.instagram.no_of_followers", "$user.twitter.no_of_followers", "$user.linkedin.no_of_connections"] } }
         }
     });
 
+    let reach_total = await Campaign.aggregate(aggregate);
+    return (reach_total && reach_total[0] && reach_total[0].total_social_power)?reach_total[0].total_social_power:0;
+};
 
-    var engagement = [
+campaign_helper.get_total_engaged_person_by_promoter = async(promoter_id, filter) => {
+    let aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
         },
@@ -954,33 +935,18 @@ campaign_helper.get_filtered_campaign_by_promoter = async (promoter_id, filter) 
         }
     ];
     if (filter) {
-        engagement.push({ "$match": filter });
+        aggregate.push({ "$match": filter });
     }
 
-    engagement.push({
+    aggregate.push({
         $group: {
             "_id": null,
             "total": { $sum: { $add: ["$campaign_user.no_of_shares", "$campaign_user.no_of_likes", "$campaign_user.no_of_comments"] } }
         }
     });
 
-    let purchased_post_cnt = await campaign_post_helper.count_purchase_post_by_promoter(promoter_id, filter);
+    var engaged_persons = await Campaign.aggregate(aggregate);
+    return (engaged_persons && engaged_persons[0] && engaged_persons[0].total)?engaged_persons[0].total:0;
+};
 
-    var camp = await Campaign.aggregate(purchase_post);
-    var spent = await transaction.aggregate(total_spent);
-    var applicant = await Campaign.aggregate(applicants);
-    var reach_total = await Campaign.aggregate(reach);
-    var engage = await Campaign.aggregate(engagement);
-
-    if (camp && spent && applicant && reach_total && engage) {
-        return {
-            "status": 1, "message": "purchased campaign found", "purchased_campaign": (camp && camp[0] && camp[0].purchase_post) ? camp[0].purchase_post : 0,
-            "total_spent": (spent && spent[0] && spent[0].total) ? spent[0].total : 0, "number_of_appplicants": (applicant && applicant[0] && applicant[0].applicant) ? applicant[0].applicant : 0,
-            "no_of_reach_total": (reach && reach[0] && reach[0].total_social_power) ? reach[0].total_social_power : 0,
-            "total_no_of_engagement": (engage && engage[0] && engage[0].total) ? engage[0].total : 0
-        };
-    } else {
-        return { "status": 2, "message": "No campaign available" };
-    }
-}
 module.exports = campaign_helper;

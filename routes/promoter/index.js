@@ -2,6 +2,7 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var async = require("async");
+var moment = require('moment');
 var router = express.Router();
 
 var config = require('./../../config');
@@ -14,6 +15,8 @@ var language_helper = require('./../../helpers/language_helper');
 var education_helper = require('./../../helpers/education_helper');
 var job_title_helper = require('./../../helpers/job_title_helper');
 var ethnicity_helper = require('./../../helpers/ethnicity_helper');
+var campaign_helper = require('./../../helpers/campaign_helper');
+var global_helper = require('./../../helpers/global_helper');
 
 var logger = config.logger;
 
@@ -179,31 +182,10 @@ router.get('/filter_preference', async (req, res) => {
  * Changed by "ar"
  */
 router.post("/get_analytics", async (req, res) => {
-    let match_filter = {};
-
-    if (req.body.filter) {
-        req.body.filter.forEach(filter_criteria => {
-            if (filter_criteria.type === "exact") {
-                match_filter[filter_criteria.field] = filter_criteria.value;
-            } else if (filter_criteria.type === "between") {
-                if (filter_criteria.field === "age") {
-                    // Age is derived attribute and need to calculate based on date of birth
-                    match_filter[filter_criteria.field] = {
-                        "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
-                        "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
-                    };
-                } else {
-                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.max_value , "$gte": filter_criteria.min_value};
-                }
-            } else if (filter_criteria.type === "like") {
-                let regex = new RegExp(filter_criteria.value);
-                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
-            } else if (filter_criteria.type === "id") {
-                match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
-            }
-        });
+    if (!req.body.filter) {
+        req.body.filter = [];
     }
-
+    let resp = [];
     let keys = {
         "fb_friends": "user.facebook.no_of_friends",
         "insta_followers": "user.instagram.no_of_followers",
@@ -225,17 +207,54 @@ router.post("/get_analytics", async (req, res) => {
         "music_taste": "user.music_taste"
     };
 
-    match_filter = await global_helper.rename_keys(match_filter, keys);
-    var resp_data = await campaign_helper.get_filtered_campaign_by_promoter(req.userInfo.id, match_filter);
+    async.each(req.body.filter, function (filter, loop_callback) {
 
-    if (resp_data.status == 0) {
-        logger.error("Error occured while fetching campaign = ", resp_data);
-        res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-    } else {
-        logger.trace("Public Campaign got successfully = ", resp_data);
-        res.status(config.OK_STATUS).json(resp_data);
-    }
-
+        async.waterfall([
+            function (callback) {
+                let match_filter = {};
+                if (filter) {
+                    filter.forEach(filter_criteria => {
+                        if (filter_criteria.type === "exact") {
+                            match_filter[filter_criteria.field] = filter_criteria.value;
+                        } else if (filter_criteria.type === "between") {
+                            if (filter_criteria.field === "age") {
+                                // Age is derived attribute and need to calculate based on date of birth
+                                match_filter[filter_criteria.field] = {
+                                    "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                                    "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                                };
+                            } else {
+                                match_filter[filter_criteria.field] = { "$lte": filter_criteria.max_value, "$gte": filter_criteria.min_value };
+                            }
+                        } else if (filter_criteria.type === "like") {
+                            let regex = new RegExp(filter_criteria.value);
+                            match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                        } else if (filter_criteria.type === "id") {
+                            match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+                        }
+                    });
+                    callback(null,match_filter);
+                } else {
+                    callback(null,{});
+                }
+            },
+            async (match_filter, callback) => {
+                match_filter = await global_helper.rename_keys(match_filter, keys);
+                let resp_data = await campaign_helper.get_campaign_analysis_by_promoter(req.userInfo.id, match_filter);
+                resp.push(resp_data);
+                callback(null);
+            }
+        ], async (err, resp) => {
+            loop_callback();
+        });
+    }, async (err) => {
+        if (err) {
+            console.log("err = ", err);
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please provide filter agrgument" });
+        } else {
+            res.status(config.OK_STATUS).json({ "status": 0, "message": "Analytics calculated", "result": resp });
+        }
+    });
 });
 
 module.exports = router;

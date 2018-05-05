@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 
 var Campaign_post = require("./../models/Campaign_post");
 var Campaign = require("./../models/Campaign");
+var Transaction = require("./../models/Transaction");
 
 var ObjectId = mongoose.Types.ObjectId;
 var campaign_post_helper = {};
@@ -17,7 +18,7 @@ var campaign_post_helper = {};
  * @developed by "mm"
  */
 campaign_post_helper.insert_campaign_post = async (obj) => {
-   
+
     let campaign = new Campaign_post(obj);
     try {
         let campaign_data = await campaign.save();
@@ -36,7 +37,7 @@ campaign_post_helper.insert_campaign_post = async (obj) => {
  * 
  * Developed by "ar"
  */
-campaign_post_helper.count_purchase_post_by_promoter = async(promoter_id, filter) => {
+campaign_post_helper.count_purchase_post_by_promoter = async (promoter_id, filter) => {
     var aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
@@ -81,7 +82,52 @@ campaign_post_helper.count_purchase_post_by_promoter = async(promoter_id, filter
         }
     });
 
-    let result = await Campaign.aggregate(purchase_post);
-}
+    let result = await Campaign.aggregate(aggregate);
+    if (result && result[0] && result[0].purchase_post) {
+        return result[0].purchase_post;
+    } else {
+        return 0;
+    }
+};
+
+campaign_post_helper.total_spent_by_promoter = async (promoter_id, filter) => {
+
+    var total_spent = [
+        {
+           "$match": {
+                "promoter_id": new ObjectId(promoter_id),
+                "status": "paid"
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "cart_items.user_id",
+                foreignField: "_id",
+                as: "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        
+    ];
+    if (filter) {
+        total_spent.push({ "$match": filter });
+    }
+    total_spent.push({
+        $group: {
+            "_id": null,
+            "total": { $sum: "$total_amount" }
+        }
+    });
+
+    var result = await Transaction.aggregate(total_spent);
+    if (result && result[0] && result[0].total) {
+        return result[0].total;
+    } else {
+        return 0;
+    }
+};
 
 module.exports = campaign_post_helper;
