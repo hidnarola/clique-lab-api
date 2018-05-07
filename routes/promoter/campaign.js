@@ -699,6 +699,34 @@ router.post('/calendar', async (req, res) => {
     }
 });
 
+router.post('/get_demographics', async (req, res) => {
+ 
+        var country = await campaign_helper.count_country_of_user(req.userInfo.id);
+        var state = await campaign_helper.count_state_of_user(req.userInfo.id);
+        var suburb = await campaign_helper.count_suburb_of_user(req.userInfo.id);
+        var gender = await campaign_helper.count_gender_of_user(req.userInfo.id);
+        var job_industry = await campaign_helper.count_job_industry_of_user(req.userInfo.id);
+        var education = await campaign_helper.count_education_of_user(req.userInfo.id);
+        var language = await campaign_helper.count_language_of_user(req.userInfo.id);
+        var ethnicity = await campaign_helper.count_ethnicity_of_user(req.userInfo.id);
+        var music_taste = await campaign_helper.count_music_taste_of_user(req.userInfo.id);
+        var relationship_status = await campaign_helper.count_relationship_status_of_user(req.userInfo.id);
+        var sexual_orientation = await campaign_helper.count_sexual_orientation_of_user(req.userInfo.id);
+
+
+
+        if (country.status === 1 && state.status === 1 && suburb.status === 1  && job_industry.status === 1 && education.status === 1  && language.status === 1  && ethnicity.status === 1  && music_taste.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "country": country.country, "state" : state.state , "suburb" :suburb.suburb, "gender" :gender.gender , "job_industry" :job_industry.job_industry, "education" : education.education, "language" :language.language, "ethnicity" : ethnicity.ethnicity,"music_taste" :music_taste.music_taste, "relationship_status" : relationship_status.relationship_status,"sexual_orientation" :sexual_orientation.sexual_orientation});
+        } else if (campaigns.status === 2) {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
+        } else {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaigns.error });
+        }
+
+    
+});
+
+
 /**
  * Get details of campaign by campaign_id
  * /promoter/campaign/:campaign_id
@@ -836,5 +864,9 @@ router.get('/:campaign_id/download', async (req, res) => {
         res.send(err);
     }
 });
+
+
+
+
 
 module.exports = router;

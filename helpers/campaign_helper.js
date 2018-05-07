@@ -822,7 +822,7 @@ campaign_helper.get_campaign_analysis_by_promoter = async (promoter_id, filter) 
     };
 }
 
-campaign_helper.get_campaign_total_applicant_by_promoter = async(promoter_id, filter) => {
+campaign_helper.get_campaign_total_applicant_by_promoter = async (promoter_id, filter) => {
     let aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
@@ -861,10 +861,10 @@ campaign_helper.get_campaign_total_applicant_by_promoter = async(promoter_id, fi
     });
 
     var total_applicant = await Campaign.aggregate(aggregate);
-    return (total_applicant && total_applicant[0] && total_applicant[0].applicant)?total_applicant[0].applicant:0;
+    return (total_applicant && total_applicant[0] && total_applicant[0].applicant) ? total_applicant[0].applicant : 0;
 };
 
-campaign_helper.get_campaign_total_reach_by_promoter = async(promoter_id, filter) => {
+campaign_helper.get_campaign_total_reach_by_promoter = async (promoter_id, filter) => {
     let aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
@@ -903,10 +903,10 @@ campaign_helper.get_campaign_total_reach_by_promoter = async(promoter_id, filter
     });
 
     let reach_total = await Campaign.aggregate(aggregate);
-    return (reach_total && reach_total[0] && reach_total[0].total_social_power)?reach_total[0].total_social_power:0;
+    return (reach_total && reach_total[0] && reach_total[0].total_social_power) ? reach_total[0].total_social_power : 0;
 };
 
-campaign_helper.get_total_engaged_person_by_promoter = async(promoter_id, filter) => {
+campaign_helper.get_total_engaged_person_by_promoter = async (promoter_id, filter) => {
     let aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
@@ -946,7 +946,929 @@ campaign_helper.get_total_engaged_person_by_promoter = async(promoter_id, filter
     });
 
     var engaged_persons = await Campaign.aggregate(aggregate);
-    return (engaged_persons && engaged_persons[0] && engaged_persons[0].total)?engaged_persons[0].total:0;
+    return (engaged_persons && engaged_persons[0] && engaged_persons[0].total) ? engaged_persons[0].total : 0;
 };
 
+campaign_helper.count_country_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            "$lookup": {
+              "from": "campaign_user",
+              "localField": "_id",
+              "foreignField": "campaign_id",
+              "as": "campaign_user"
+            }
+          },
+          {
+            "$unwind": "$campaign_user"
+          },
+          {
+            "$match": {
+              "campaign_user.is_purchase": true
+            }
+          },
+          {
+            "$lookup": {
+              "from": "users",
+              "localField": "campaign_user.user_id",
+              "foreignField": "_id",
+              "as": "user"
+            }
+          },
+          {
+            "$unwind": "$user"
+          },
+          {
+            "$lookup": {
+              "from": "country",
+              "localField": "user.country",
+              "foreignField": "_id",
+              "as": "country"
+            }
+          },
+          {
+            "$unwind": "$country"
+          },
+          {
+            "$group": {
+              "_id": "$country._id",
+              "name": {
+                "$first": "$country.name"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },
+          {
+            "$group": {
+              "_id": null,
+              "country": {
+                "$push": "$$ROOT"
+              },
+              "total": {
+                "$sum": "$count"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },
+          {
+              "$unwind":"$country"
+          },
+           {
+               $addFields: {
+                  "country.percentage_value": {"$multiply":[{"$divide":["$country.count","$total"]},100]}
+               }
+            },
+            {
+                "$group":{
+                        "_id":null,
+                    "country":{$push:"$country"},
+                    "total":{$first:"$total"}
+                }
+            }
+    ];
+    
+
+   
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "country": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+
+campaign_helper.count_state_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            $lookup: {
+                from: "campaign_user",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
+        {
+            $unwind: "$campaign_user"
+        },
+        {
+            "$match": {
+                "campaign_user.is_purchase": true
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "campaign_user.user_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            "$group":
+                { _id: "$user.state", count: { $sum: 1 } }
+        },
+        {
+            "$group":{
+                    "_id":null,
+                    "state":{$push:"$$ROOT"},
+                    "total":{$sum:"$count"},
+                   
+            }
+        },
+        {
+            "$unwind":"$state"
+        },
+         {
+             $addFields: {
+                "state.percentage_value": {"$multiply":[{"$divide":["$state.count","$total"]},100]}
+             }
+          },
+          {
+              "$group":{
+                      "_id":null,
+                  "state":{$push:"$state"},
+                  "total":{$first:"$total"}
+              }
+          }
+    ];
+
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "state": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+campaign_helper.count_suburb_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            $lookup: {
+                from: "campaign_user",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
+        {
+            $unwind: "$campaign_user"
+        },
+        {
+            "$match": {
+                "campaign_user.is_purchase": true
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "campaign_user.user_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            "$group":
+                { _id: "$user.suburb", count: { $sum: 1 } }
+        },
+        {
+            "$group":{
+                    "_id":null,
+                    "suburb":{$push:"$$ROOT"},
+                    "total":{$sum:"$count"},
+                   
+            }
+        },
+        {
+            "$unwind":"$suburb"
+        },
+         {
+             $addFields: {
+                "suburb.percentage_value": {"$multiply":[{"$divide":["$suburb.count","$total"]},100]}
+             }
+          },
+          {
+              "$group":{
+                      "_id":null,
+                  "suburb":{$push:"$suburb"},
+                  "total":{$first:"$total"}
+              }
+          }
+
+    ];
+
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "suburb": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+campaign_helper.count_gender_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            $lookup: {
+                from: "campaign_user",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
+        {
+            $unwind: "$campaign_user"
+        },
+        {
+            "$match": {
+                "campaign_user.is_purchase": true
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "campaign_user.user_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            "$group":
+                { _id: "$user.gender", count: { $sum: 1 } }
+        },
+        {
+            "$group":{
+                    "_id":null,
+                    "gender":{$push:"$$ROOT"},
+                    "total":{$sum:"$count"},
+                   
+            }
+        },
+        {
+            "$unwind":"$gender"
+        },
+         {
+             $addFields: {
+                "gender.percentage_value": {"$multiply":[{"$divide":["$gender.count","$total"]},100]}
+             }
+          },
+          {
+              "$group":{
+                      "_id":null,
+                  "gender":{$push:"$gender"},
+                  "total":{$first:"$total"}
+              }
+          }
+
+    ];
+
+    let gender = await Campaign.aggregate(aggregate);
+
+    if (gender) {
+        return { "status": 1, "message": "found", "gender": gender };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+
+campaign_helper.count_job_industry_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            "$lookup": {
+              "from": "campaign_user",
+              "localField": "_id",
+              "foreignField": "campaign_id",
+              "as": "campaign_user"
+            }
+          },
+          {
+            "$unwind": "$campaign_user"
+          },
+          {
+            "$match": {
+              "campaign_user.is_purchase": true
+            }
+          },
+          {
+            "$lookup": {
+              "from": "users",
+              "localField": "campaign_user.user_id",
+              "foreignField": "_id",
+              "as": "user"
+            }
+          },
+          {
+            "$unwind": "$user"
+          },
+       {
+            "$lookup": {
+              "from": "job_industry",
+              "localField": "user.job_industry",
+              "foreignField": "_id",
+              "as": "job_industry"
+            }
+          },
+          {
+            "$unwind": "$job_industry"
+          },
+          {
+            "$group": {
+              "_id": "$job_industry._id",
+              "name": {
+                "$first": "$job_industry.name"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },
+        {
+            "$group": {
+              "_id": null,
+              "job_industry": {
+                "$push": "$$ROOT"
+              },
+              "total": {
+                "$sum": "$count"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },  
+          {
+              "$unwind":"$job_industry"
+          },
+           {
+               $addFields: {
+                  "job_industry.percentage_value": {"$multiply":[{"$divide":["$job_industry.count","$total"]},100]}
+               }
+            },
+            {
+                "$group":{
+                        "_id":null,
+                    "job_industry":{$push:"$job_industry"},
+                    "total":{$first:"$total"}
+                }
+            }
+    ];
+    
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "job_industry": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+campaign_helper.count_education_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            "$lookup": {
+              "from": "campaign_user",
+              "localField": "_id",
+              "foreignField": "campaign_id",
+              "as": "campaign_user"
+            }
+          },
+          {
+            "$unwind": "$campaign_user"
+          },
+          {
+            "$match": {
+              "campaign_user.is_purchase": true
+            }
+          },
+          {
+            "$lookup": {
+              "from": "users",
+              "localField": "campaign_user.user_id",
+              "foreignField": "_id",
+              "as": "user"
+            }
+          },
+          {
+            "$unwind": "$user"
+          },
+       {
+            "$lookup": {
+              "from": "educations",
+              "localField": "user.education",
+              "foreignField": "_id",
+              "as": "education"
+            }
+          },
+          {
+            "$unwind": "$education"
+          },
+          {
+            "$group": {
+              "_id": "$education._id",
+              "name": {
+                "$first": "$education.name"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },
+        {
+            "$group": {
+              "_id": null,
+              "education": {
+                "$push": "$$ROOT"
+              },
+              "total": {
+                "$sum": "$count"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },  
+          {
+              "$unwind":"$education"
+          },
+           {
+               $addFields: {
+                  "education.percentage_value": {"$multiply":[{"$divide":["$education.count","$total"]},100]}
+               }
+            },
+            {
+                "$group":{
+                        "_id":null,
+                    "education":{$push:"$education"},
+                    "total":{$first:"$total"}
+                }
+            }
+    ];
+    
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "education": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+campaign_helper.count_language_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            "$lookup": {
+              "from": "campaign_user",
+              "localField": "_id",
+              "foreignField": "campaign_id",
+              "as": "campaign_user"
+            }
+          },
+          {
+            "$unwind": "$campaign_user"
+          },
+          {
+            "$match": {
+              "campaign_user.is_purchase": true
+            }
+          },
+          {
+            "$lookup": {
+              "from": "users",
+              "localField": "campaign_user.user_id",
+              "foreignField": "_id",
+              "as": "user"
+            }
+          },
+          {
+            "$unwind": "$user"
+          },
+       {
+            "$lookup": {
+              "from": "languages",
+              "localField": "user.language",
+              "foreignField": "_id",
+              "as": "language"
+            }
+          },
+          {
+            "$unwind": "$language"
+          },
+          {
+            "$group": {
+              "_id": "$language._id",
+              "name": {
+                "$first": "$language.name"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },
+        {
+            "$group": {
+              "_id": null,
+              "language": {
+                "$push": "$$ROOT"
+              },
+              "total": {
+                "$sum": "$count"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },  
+          {
+              "$unwind":"$language"
+          },
+           {
+               $addFields: {
+                  "language.percentage_value": {"$multiply":[{"$divide":["$language.count","$total"]},100]}
+               }
+            },
+            {
+                "$group":{
+                        "_id":null,
+                    "education":{$push:"$language"},
+                    "total":{$first:"$total"}
+                }
+            }
+    ];
+    
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "language": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+
+campaign_helper.count_ethnicity_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            "$lookup": {
+              "from": "campaign_user",
+              "localField": "_id",
+              "foreignField": "campaign_id",
+              "as": "campaign_user"
+            }
+          },
+          {
+            "$unwind": "$campaign_user"
+          },
+          {
+            "$match": {
+              "campaign_user.is_purchase": true
+            }
+          },
+          {
+            "$lookup": {
+              "from": "users",
+              "localField": "campaign_user.user_id",
+              "foreignField": "_id",
+              "as": "user"
+            }
+          },
+          {
+            "$unwind": "$user"
+          },
+       {
+            "$lookup": {
+              "from": "ethnicity",
+              "localField": "user.ethnicity",
+              "foreignField": "_id",
+              "as": "ethnicity"
+            }
+          },
+          {
+            "$unwind": "$ethnicity"
+          },
+          {
+            "$group": {
+              "_id": "$ethnicity._id",
+              "name": {
+                "$first": "$ethnicity.name"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },
+        {
+            "$group": {
+              "_id": null,
+              "ethnicity": {
+                "$push": "$$ROOT"
+              },
+              "total": {
+                "$sum": "$count"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },  
+          {
+              "$unwind":"$ethnicity"
+          },
+           {
+               $addFields: {
+                  "ethnicity.percentage_value": {"$multiply":[{"$divide":["$ethnicity.count","$total"]},100]}
+               }
+            },
+            {
+                "$group":{
+                        "_id":null,
+                    "ethnicity":{$push:"$ethnicity"},
+                    "total":{$first:"$total"}
+                }
+            }
+    ];
+    
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "ethnicity": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+campaign_helper.count_music_taste_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            "$lookup": {
+              "from": "campaign_user",
+              "localField": "_id",
+              "foreignField": "campaign_id",
+              "as": "campaign_user"
+            }
+          },
+          {
+            "$unwind": "$campaign_user"
+          },
+          {
+            "$match": {
+              "campaign_user.is_purchase": true
+            }
+          },
+          {
+            "$lookup": {
+              "from": "users",
+              "localField": "campaign_user.user_id",
+              "foreignField": "_id",
+              "as": "user"
+            }
+          },
+          {
+            "$unwind": "$user"
+          },
+       {
+            "$lookup": {
+              "from": "music_taste",
+              "localField": "user.music_taste",
+              "foreignField": "_id",
+              "as": "music_taste"
+            }
+          },
+          {
+            "$unwind": "$music_taste"
+          },
+          {
+            "$group": {
+              "_id": "$music_taste._id",
+              "name": {
+                "$first": "$music_taste.name"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },
+        {
+            "$group": {
+              "_id": null,
+              "music_taste": {
+                "$push": "$$ROOT"
+              },
+              "total": {
+                "$sum": "$count"
+              },
+              "count": {
+                "$sum": 1
+              }
+            }
+          },  
+          {
+              "$unwind":"$music_taste"
+          },
+           {
+               $addFields: {
+                  "music_taste.percentage_value": {"$multiply":[{"$divide":["$music_taste.count","$total"]},100]}
+               }
+            },
+            {
+                "$group":{
+                        "_id":null,
+                    "music_taste":{$push:"$music_taste"},
+                    "total":{$first:"$total"}
+                }
+            }
+    ];
+    
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "music_taste": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+campaign_helper.count_relationship_status_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            $lookup: {
+                from: "campaign_user",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
+        {
+            $unwind: "$campaign_user"
+        },
+        {
+            "$match": {
+                "campaign_user.is_purchase": true
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "campaign_user.user_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            "$group":
+                { _id: "$user.relationship_status", count: { $sum: 1 } }
+        },
+        {
+            "$group":{
+                    "_id":null,
+                    "relationship_status":{$push:"$$ROOT"},
+                    "total":{$sum:"$count"},
+                   
+            }
+        },
+        {
+            "$unwind":"$relationship_status"
+        },
+         {
+             $addFields: {
+                "relationship_status.percentage_value": {"$multiply":[{"$divide":["$relationship_status.count","$total"]},100]}
+             }
+          },
+          {
+              "$group":{
+                      "_id":null,
+                  "relationship_status":{$push:"$relationship_status"},
+                  "total":{$first:"$total"}
+              }
+          }
+
+    ];
+
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "relationship_status": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
+
+campaign_helper.count_sexual_orientation_of_user = async (promoter_id) => {
+    var aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            $lookup: {
+                from: "campaign_user",
+                localField: "_id",
+                foreignField: "campaign_id",
+                as: "campaign_user"
+            }
+        },
+        {
+            $unwind: "$campaign_user"
+        },
+        {
+            "$match": {
+                "campaign_user.is_purchase": true
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "campaign_user.user_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            "$group":
+                { _id: "$user.sexual_orientation", count: { $sum: 1 } }
+        },
+        {
+            "$group":{
+                    "_id":null,
+                    "sexual_orientation":{$push:"$$ROOT"},
+                    "total":{$sum:"$count"},
+                   
+            }
+        },
+        {
+            "$unwind":"$sexual_orientation"
+        },
+         {
+             $addFields: {
+                "sexual_orientation.percentage_value": {"$multiply":[{"$divide":["$sexual_orientation.count","$total"]},100]}
+             }
+          },
+          {
+              "$group":{
+                      "_id":null,
+                  "sexual_orientation":{$push:"$sexual_orientation"},
+                  "total":{$first:"$total"}
+              }
+          }
+
+    ];
+
+    let result = await Campaign.aggregate(aggregate);
+
+    if (result) {
+        return { "status": 1, "message": "found", "sexual_orientation": result };
+    } else {
+        return { "status": 0, "message": "Error occured while finding", "error": err };
+    }
+};
 module.exports = campaign_helper;
