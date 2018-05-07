@@ -722,7 +722,6 @@ router.post('/get_demographics', async (req, res) => {
         } else {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaigns.error });
         }
-
     
 });
 
