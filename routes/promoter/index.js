@@ -4,6 +4,7 @@ var path = require("path");
 var async = require("async");
 var moment = require('moment');
 var router = express.Router();
+var bcrypt = require('bcrypt');
 
 var config = require('./../../config');
 var promoter_helper = require('./../../helpers/promoter_helper');
@@ -19,6 +20,7 @@ var campaign_helper = require('./../../helpers/campaign_helper');
 var global_helper = require('./../../helpers/global_helper');
 
 var logger = config.logger;
+const saltRounds = 10;
 
 /** 
  * @api {post} /promoter/update_profile Update promoter profile
@@ -273,7 +275,7 @@ router.post("/get_social_analytics", async (req, res) => {
             errorMessage: "End date is required"
         }
     };
-    
+
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
@@ -304,7 +306,7 @@ router.post("/get_social_analytics", async (req, res) => {
             "linkedin_connection": "user.linkedin.no_of_connections",
             "year_in_industry": "user.experience",
             "age": "user.dob",
-    
+
             "name": "user.name",
             "gender": "user.gender",
             "location": "user.location",
@@ -316,9 +318,9 @@ router.post("/get_social_analytics", async (req, res) => {
             "relationship_status": "user.relationship_status",
             "music_taste": "user.music_taste"
         };
-    
+
         async.each(req.body.filter, function (filter, loop_callback) {
-    
+
             async.waterfall([
                 function (callback) {
                     let match_filter = {};
@@ -350,7 +352,7 @@ router.post("/get_social_analytics", async (req, res) => {
                 },
                 async (match_filter, callback) => {
                     match_filter = await global_helper.rename_keys(match_filter, keys);
-                    let resp_data = await campaign_helper.get_campaign_social_analysis_by_promoter(req.userInfo.id, match_filter,custom_filter);
+                    let resp_data = await campaign_helper.get_campaign_social_analysis_by_promoter(req.userInfo.id, match_filter, custom_filter);
                     resp.push(resp_data);
                     callback(null);
                 }
@@ -362,11 +364,66 @@ router.post("/get_social_analytics", async (req, res) => {
                 console.log("err = ", err);
                 res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please provide filter agrgument" });
             } else {
-                res.status(config.OK_STATUS).json({ "status": 0, "message": "Analytics calculated", "result": resp });
+                res.status(config.OK_STATUS).json({ "status": 0, "message": "Social analytics calculated", "result": resp });
             }
         });
 
     } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/**
+ * @api {post} /promoter/change_password Change password
+ * @apiName Change password
+ * @apiGroup Promoter
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} old_password Old password of user
+ * @apiParam {String} new_password New password of user
+ * 
+ * @apiSuccess (Success 200) {String} message Success message (Password changed)
+ * @apiError (Error 4xx) {String} message Validation or error message. (Any error or user not available)
+ */
+router.post('/change_password', async (req, res) => {
+    logger.trace("API - Change password called");
+    logger.debug("req.body = ", req.body);
+    var schema = {
+        'old_password': {
+            notEmpty: true,
+            errorMessage: "Old password is required"
+        },
+        'new_password': {
+            notEmpty: true,
+            errorMessage: "New password is required"
+        }
+    };
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+    if (!errors) {
+        let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+        if (promoter_resp.status === 0) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": promoter_resp.error });
+        } else if (promoter_resp.status === 1) {
+            if (bcrypt.compareSync(req.body.old_password, promoter_resp.promoter.password)) {
+                let update_resp = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "password": bcrypt.hashSync(req.body.new_password, saltRounds) });
+                if (update_resp.status === 0) {
+                    res.status(config.BAD_REQUEST).json({ "message": "Something went wrong while updating password.", "error": update_resp });
+                } else if (update_resp.status === 2) {
+                    res.status(config.BAD_REQUEST).json({ "message": "Old password and new password can't be same" });
+                } else {
+                    // Valid request. Password updated
+                    res.status(config.OK_STATUS).json({ "message": "Password has been changed" });
+                }
+            } else {
+                res.status(config.BAD_REQUEST).json({ "message": "Old password is incorrect" });
+            }
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter not exist" });
+        }
+    } else {
+        // logger.error("Validation error ",errors);
         res.status(config.BAD_REQUEST).json({ message: errors });
     }
 });

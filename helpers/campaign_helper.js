@@ -977,9 +977,45 @@ campaign_helper.get_campaign_social_analysis_by_promoter = async (promoter_id, f
     if (filter) {
         aggregate.push({ "$match": filter });
     }
+    if (custom_filter) {
+        aggregate.push({ "$match": custom_filter });
+    }
 
-    let resp = await Campaign.aggregate(aggregate);
-    return resp;
+    aggregate.push({
+        "$lookup": {
+            "from": "campaign_post",
+            "localField": "_id",
+            "foreignField": "campaign_id",
+            "as": "campaign_post"
+        }
+    });
+
+    aggregate.push({
+        "$unwind": "$campaign_post"
+    });
+
+    aggregate.push({
+        "$project": {
+            "_id": 1,
+            "campaign_post": 1,
+            "start_date": 1,
+            "month": { $month: "$start_date" }
+        }
+    });
+
+    aggregate.push({
+        "$group": {
+            "_id": "$month",
+            "like_cnt": { "$sum": "$campaign_post.no_of_likes" },
+            "comment_cnt": { "$sum": "$campaign_post.no_of_comments" },
+            "share_cnt": { "$sum": "$campaign_post.no_of_shares" }
+        }
+    });
+
+    console.log("Aggregate = ", JSON.stringify(aggregate));
+
+    let result = await Campaign.aggregate(aggregate);
+    return result;
 }
 
 campaign_helper.count_country_of_user = async (promoter_id) => {

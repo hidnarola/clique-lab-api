@@ -1,5 +1,5 @@
 var Promoter = require("./../models/Promoter");
-var Job_industry =require("./../models/Job_industry");
+var Job_industry = require("./../models/Job_industry");
 var promoter_helper = {};
 
 /*
@@ -37,7 +37,7 @@ promoter_helper.get_promoter_by_id = async (promoter_id) => {
  */
 promoter_helper.get_promoter_by_email_or_username = async (email_or_username) => {
     try {
-        var promoter = await Promoter.findOne({ "$or" : [{"email": email_or_username} , {"username":email_or_username}] }).lean();
+        var promoter = await Promoter.findOne({ "$or": [{ "email": email_or_username }, { "username": email_or_username }] }).lean();
         if (promoter) {
             return { "status": 1, "message": "Promoter details found", "promoter": promoter };
         } else {
@@ -60,11 +60,11 @@ promoter_helper.get_promoter_by_email_or_username = async (email_or_username) =>
  */
 promoter_helper.insert_promoter = async (promoter_object) => {
     let promoter = new Promoter(promoter_object)
-    try{
+    try {
         let promoter_data = await promoter.save();
         return { "status": 1, "message": "Promoter inserted", "promoter": promoter_data };
-    } catch(err){
-        return { "status": 0, "message":"Error occured while inserting promoter","error": err };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting promoter", "error": err };
     }
 };
 
@@ -102,28 +102,28 @@ promoter_helper.update_promoter_by_id = async (promoter_id, promoter_object) => 
  *          status 1 - If promoter data found, with promoter object
  *          status 2 - If promoter not found, with appropriate message
  */
-promoter_helper.get_all_brand = async (filter,page_no, page_size,country_id) => {
+promoter_helper.get_all_brand = async (filter, page_no, page_size, country_id) => {
     try {
-       
-        var r = new RegExp(filter);
-        var search = {"$regex":r,"$options":"i"};
-        var count  = await Promoter
-        .find({"company":search,"country" :country_id },{"company":1,"avatar" : 1})
-        .lean();
 
-            var brand  = await Promoter           
-            .find({"company":search,"country" :country_id },{"company":1,"avatar" : 1})
-            .populate('industry_category',['name'])
+        var r = new RegExp(filter);
+        var search = { "$regex": r, "$options": "i" };
+        var count = await Promoter
+            .find({ "company": search, "country": country_id }, { "company": 1, "avatar": 1 })
+            .lean();
+
+        var brand = await Promoter
+            .find({ "company": search, "country": country_id }, { "company": 1, "avatar": 1 })
+            .populate('industry_category', ['name'])
             .skip((page_size * page_no) - page_size)
             .limit(page_size)
-            .lean();  
-         
+            .lean();
 
-            var tot_record = count.length;
-            console.log("Number of Records: ",count.length);
-    
+
+        var tot_record = count.length;
+        console.log("Number of Records: ", count.length);
+
         if (brand && brand.length > 0) {
-            return { "status": 1, "message": "Brand details found", "brand": brand,"Total": tot_record };
+            return { "status": 1, "message": "Brand details found", "brand": brand, "Total": tot_record };
         } else {
             return { "status": 2, "message": "Brand not found" };
         }
