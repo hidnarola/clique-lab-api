@@ -16,8 +16,6 @@ var campaign_post_helper = require('./campaign_post_helper');
 var ObjectId = mongoose.Types.ObjectId;
 var FB = require('fb');
 
-
-
 var campaign_helper = {};
 
 /*
@@ -206,7 +204,6 @@ campaign_helper.get_campaign_by_id = async (campaign_id, likes) => {
     }
 }
 
-
 /*
  * insert_campaign_applied is used to insert into User collection
  * 
@@ -308,7 +305,6 @@ campaign_helper.insert_campaign = async (campaign_object) => {
         return { "status": 0, "message": "Error occured while inserting campaign", "error": err };
     }
 };
-
 
 /*
  * get_all_offered_campaign is used to fetch all campaign data
@@ -693,8 +689,6 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
     }
 }
 
-
-
 campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, page_size) => {
     try {
         var post = await Campaign.aggregate([
@@ -822,7 +816,7 @@ campaign_helper.get_campaign_analysis_by_promoter = async (promoter_id, filter) 
     };
 }
 
-campaign_helper.get_campaign_total_applicant_by_promoter = async(promoter_id, filter) => {
+campaign_helper.get_campaign_total_applicant_by_promoter = async (promoter_id, filter) => {
     let aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
@@ -861,10 +855,10 @@ campaign_helper.get_campaign_total_applicant_by_promoter = async(promoter_id, fi
     });
 
     var total_applicant = await Campaign.aggregate(aggregate);
-    return (total_applicant && total_applicant[0] && total_applicant[0].applicant)?total_applicant[0].applicant:0;
+    return (total_applicant && total_applicant[0] && total_applicant[0].applicant) ? total_applicant[0].applicant : 0;
 };
 
-campaign_helper.get_campaign_total_reach_by_promoter = async(promoter_id, filter) => {
+campaign_helper.get_campaign_total_reach_by_promoter = async (promoter_id, filter) => {
     let aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
@@ -903,10 +897,10 @@ campaign_helper.get_campaign_total_reach_by_promoter = async(promoter_id, filter
     });
 
     let reach_total = await Campaign.aggregate(aggregate);
-    return (reach_total && reach_total[0] && reach_total[0].total_social_power)?reach_total[0].total_social_power:0;
+    return (reach_total && reach_total[0] && reach_total[0].total_social_power) ? reach_total[0].total_social_power : 0;
 };
 
-campaign_helper.get_total_engaged_person_by_promoter = async(promoter_id, filter) => {
+campaign_helper.get_total_engaged_person_by_promoter = async (promoter_id, filter) => {
     let aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
@@ -946,7 +940,46 @@ campaign_helper.get_total_engaged_person_by_promoter = async(promoter_id, filter
     });
 
     var engaged_persons = await Campaign.aggregate(aggregate);
-    return (engaged_persons && engaged_persons[0] && engaged_persons[0].total)?engaged_persons[0].total:0;
+    return (engaged_persons && engaged_persons[0] && engaged_persons[0].total) ? engaged_persons[0].total : 0;
 };
+
+campaign_helper.get_campaign_social_analysis_by_promoter = async (promoter_id, filter, custom_filter) => {
+    let aggregate = [
+        {
+            "$match": { "promoter_id": new ObjectId(promoter_id) }
+        },
+        {
+            "$lookup": {
+                "from": "campaign_user",
+                "localField": "_id",
+                "foreignField": "campaign_id",
+                "as": "campaign_user"
+            }
+        },
+        {
+            "$unwind": "$campaign_user"
+        },
+        {
+            "$match": { "campaign_user.is_purchase": true }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "campaign_user.user_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            "$unwind": "$user"
+        }
+    ];
+    if (filter) {
+        aggregate.push({ "$match": filter });
+    }
+    
+    let resp = await Campaign.aggregate(aggregate);
+    return resp;
+}
 
 module.exports = campaign_helper;

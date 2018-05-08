@@ -233,9 +233,9 @@ router.post("/get_analytics", async (req, res) => {
                             match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
                         }
                     });
-                    callback(null,match_filter);
+                    callback(null, match_filter);
                 } else {
-                    callback(null,{});
+                    callback(null, {});
                 }
             },
             async (match_filter, callback) => {
@@ -255,6 +255,120 @@ router.post("/get_analytics", async (req, res) => {
             res.status(config.OK_STATUS).json({ "status": 0, "message": "Analytics calculated", "result": resp });
         }
     });
+});
+
+/**
+ * Get social analytics
+ * /promoter/get_social_analytics
+ * Developed by "ar"
+ */
+router.post("/get_social_analytics", async (req, res) => {
+    var schema = {
+        'start_date': {
+            notEmpty: true,
+            errorMessage: "start date is required"
+        },
+        'end_date': {
+            notEmpty: true,
+            errorMessage: "End date is required"
+        }
+    };
+    
+    req.checkBody(schema);
+    const errors = req.validationErrors();
+    if (!errors) {
+
+        var startdate = moment(req.body.start_date, "YYYY-MM-DD").toDate();
+        var enddate = moment(req.body.end_date, "YYYY-MM-DD").toDate();
+
+        console.log("start = ", startdate);
+        console.log("end = ", enddate);
+
+        let custom_filter = {
+            "start_date": {
+                "$gte": moment(req.body.start_date, "YYYY-MM-DD").toDate(),
+                "$lte": moment(req.body.end_date, "YYYY-MM-DD").toDate()
+            }
+        }
+
+        if (req.body.social_media_platform) {
+            custom_filter["social_media_platform"] = req.body.social_media_platform
+        }
+
+        let resp = [];
+        let keys = {
+            "fb_friends": "user.facebook.no_of_friends",
+            "insta_followers": "user.instagram.no_of_followers",
+            "twitter_followers": "user.twitter.no_of_followers",
+            "pinterest_followers": "user.pinterest.no_of_followers",
+            "linkedin_connection": "user.linkedin.no_of_connections",
+            "year_in_industry": "user.experience",
+            "age": "user.dob",
+    
+            "name": "user.name",
+            "gender": "user.gender",
+            "location": "user.location",
+            "job_industry": "user.job_industry",
+            "education": "user.education",
+            "language": "user.language",
+            "ethnicity": "user.ethnicity",
+            "interested_in": "user.interested_in",
+            "relationship_status": "user.relationship_status",
+            "music_taste": "user.music_taste"
+        };
+    
+        async.each(req.body.filter, function (filter, loop_callback) {
+    
+            async.waterfall([
+                function (callback) {
+                    let match_filter = {};
+                    if (filter) {
+                        filter.forEach(filter_criteria => {
+                            if (filter_criteria.type === "exact") {
+                                match_filter[filter_criteria.field] = filter_criteria.value;
+                            } else if (filter_criteria.type === "between") {
+                                if (filter_criteria.field === "age") {
+                                    // Age is derived attribute and need to calculate based on date of birth
+                                    match_filter[filter_criteria.field] = {
+                                        "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                                        "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                                    };
+                                } else {
+                                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.max_value, "$gte": filter_criteria.min_value };
+                                }
+                            } else if (filter_criteria.type === "like") {
+                                let regex = new RegExp(filter_criteria.value);
+                                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                            } else if (filter_criteria.type === "id") {
+                                match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+                            }
+                        });
+                        callback(null, match_filter);
+                    } else {
+                        callback(null, {});
+                    }
+                },
+                async (match_filter, callback) => {
+                    match_filter = await global_helper.rename_keys(match_filter, keys);
+                    let resp_data = await campaign_helper.get_campaign_social_analysis_by_promoter(req.userInfo.id, match_filter,custom_filter);
+                    resp.push(resp_data);
+                    callback(null);
+                }
+            ], async (err, resp) => {
+                loop_callback();
+            });
+        }, async (err) => {
+            if (err) {
+                console.log("err = ", err);
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please provide filter agrgument" });
+            } else {
+                res.status(config.OK_STATUS).json({ "status": 0, "message": "Analytics calculated", "result": resp });
+            }
+        });
+
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
 });
 
 module.exports = router;

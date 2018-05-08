@@ -653,7 +653,6 @@ router.post('/purchased', async (req, res) => {
 
 router.post('/calendar', async (req, res) => {
     var schema = {
-
         'start_date': {
             notEmpty: true,
             errorMessage: "start date is required"
