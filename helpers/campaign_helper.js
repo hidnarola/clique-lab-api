@@ -752,7 +752,6 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
 
 campaign_helper.get_promoters_by_social_media = async (promoter_id, filter) => {
     try {
-
         var aggregate = [{
             "$match": { "promoter_id": new ObjectId(promoter_id) }
         }];

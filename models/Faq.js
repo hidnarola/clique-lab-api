@@ -5,13 +5,12 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Faq_Schema = new Schema({
-    name :String,
-    short_name :String,
-    country_code :String,
+    question :String,
+    answer :String,
     status : Boolean,
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
-var Country = mongoose.model('country', Country_Schema, 'country');
+var FAQ = mongoose.model('faq', Faq_Schema, 'faq');
 
-module.exports = Country;
+module.exports = FAQ;
