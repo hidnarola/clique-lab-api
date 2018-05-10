@@ -22,6 +22,9 @@ module.exports = {
     "REFRESH_TOKEN_SECRET_KEY": process.env.REFRESH_TOKEN_SECRET_KEY,
     "ACCESS_TOKEN_EXPIRE_TIME" : 60 * 60 * 24 * 7, // 7 days
 
+    // some other constant
+    "REFERRAL_REWARD":50, // In dollars
+
     // HTTP Status
     "OK_STATUS": 200,
     "BAD_REQUEST": 400,

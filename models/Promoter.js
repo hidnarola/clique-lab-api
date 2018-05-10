@@ -6,7 +6,6 @@ var SALT_WORK_FACTOR = 10;
 //Define a schema
 var Schema = mongoose.Schema;
 
-
 var PromoterSchema = new Schema({
     full_name: { type: String, required: true },
     username: { type: String, required: true, unique: true },
@@ -28,9 +27,8 @@ var PromoterSchema = new Schema({
     password_changed_date: {type: Date},
 
     stripe_customer_id: String,
-    
-    creditcard: [String], // Card reference of stripe
-    // bank_details: BankSchema,
+    referral_id:{type: mongoose.Schema.Types.ObjectId, ref: 'promoters'},
+
     bank_details: [String], // Bank account id of stripe
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });

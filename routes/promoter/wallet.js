@@ -48,30 +48,26 @@ router.post('/withdraw', async (req, res) => {
                 // Verify user's wallet balance and proceed further
                 if (promoter_resp.promoter.wallet_balance >= req.body.amount) {
 
-                    // Generating token for clique's bank account
-                    let token = await stripe.tokens.create({
-                        bank_account: {
-                            country: 'US',
-                            currency: 'usd',
-                            account_holder_name: 'DM',
-                            account_holder_type: 'individual',
-                            routing_number: '110000000',
-                            account_number: '000123456789'
-                        }
-                    });
-
                     let charge = await stripe.charges.create({
                         amount: req.body.amount * 100,
                         currency: "usd",
-                        // source: token,
-                        customer: promoter_resp.promoter.stripe_customer_id,
-                        destination: promoter_resp.promoter.stripe_customer_id,
+                        customer: "cus_Cpn2hYxHQACXYq", // Stripe customer id of clique
+                        destination: {
+                            account: "acct_1AL7EZB6ThHUGP1p" // bank account id of promoter
+                        },
                         description: "Charge for " + promoter_resp.promoter.name
                     });
 
-                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Card available", "cards": cards.data });
+                    if (charge) {
+                        // Deduct wallet balance of promoter by withdrawal amount
+                        let updated_promoter = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "wallet_balance": promoter_resp.promoter.wallet_balance - req.body.amount });
+
+                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Chard has been created", "charge": charge });
+                    } else {
+                        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in creating charge" });
+                    }
                 } else {
-                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please enter amount equal or less then your wallet balance" });
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Insufficient wallet balance" });
                 }
             } catch (err) {
                 console.log("err => ", err);

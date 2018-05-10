@@ -197,6 +197,11 @@ router.post('/promoter_signup', async (req, res) => {
       promoter = await promoter_helper.get_promoter_by_email_or_username(req.body.username)
       if (promoter.status === 2) {
 
+        // Check for referral
+        if(req.body.referral_id){
+          promoter_obj.referral_id = req.body.referral_id;
+        }
+
         // Insert promoter
         var promoter_data = await promoter_helper.insert_promoter(promoter_obj);
 
@@ -275,6 +280,17 @@ router.get('/promoter_email_verify/:promoter_id', async (req, res) => {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while verifying user's email" });
       } else {
         // Email verified!
+
+        // Check for referral
+        if(promoter_resp.promoter.referral_id){
+          // Find referral promoter
+          let referral_promoter = await promoter_helper.get_promoter_by_id(promoter_resp.promoter.referral_id);
+          if(referral_promoter.status == 1){
+            // Update some referral reward to promoter's account
+            let updated_promoter = await promoter_helper.update_promoter_by_id(promoter_resp.promoter.referral_id,{"wallet_balance":referral_promoter.promoter.wallet_balance + config.REFERRAL_REWARD});
+          }
+        }
+
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Email has been verified" });
       }
     }
