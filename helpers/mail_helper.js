@@ -1,18 +1,16 @@
 var nodemailer = require('nodemailer');
 var EmailTemplate = require('email-templates').EmailTemplate;
+
+var config = require("./../config");
 var mail_helper = {};
+
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     tls: { rejectUnauthorized: false },
-    // auth: {
-    //     user: 'demo.narolainfotech@gmail.com',
-    //     pass: 'Password123#'
-    // }
-
     auth: {
-        user: 'blake.h.rowley@gmail.com',
-        pass: 'tECHWITTY123'
+        user: config.SMTP_EMAIL,
+        pass: config.SMTP_PASSWORD
     }
 });
 
