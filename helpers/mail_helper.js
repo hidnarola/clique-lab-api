@@ -5,15 +5,15 @@ var mail_helper = {};
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     tls: { rejectUnauthorized: false },
-    auth: {
-        user: 'demo.narolainfotech@gmail.com',
-        pass: 'Password123#'
-    }
-
     // auth: {
-    //     user: 'blake.h.rowley@gmail.com',
-    //     pass: 'tECHWITTY123'
+    //     user: 'demo.narolainfotech@gmail.com',
+    //     pass: 'Password123#'
     // }
+
+    auth: {
+        user: 'blake.h.rowley@gmail.com',
+        pass: 'tECHWITTY123'
+    }
 });
 
 mail_helper.send = async(template_name, options, data) => {

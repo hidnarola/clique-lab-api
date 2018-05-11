@@ -198,7 +198,7 @@ router.post('/promoter_signup', async (req, res) => {
       if (promoter.status === 2) {
 
         // Check for referral
-        if(req.body.referral_id){
+        if (req.body.referral_id) {
           promoter_obj.referral_id = req.body.referral_id;
         }
 
@@ -282,12 +282,12 @@ router.get('/promoter_email_verify/:promoter_id', async (req, res) => {
         // Email verified!
 
         // Check for referral
-        if(promoter_resp.promoter.referral_id){
+        if (promoter_resp.promoter.referral_id) {
           // Find referral promoter
           let referral_promoter = await promoter_helper.get_promoter_by_id(promoter_resp.promoter.referral_id);
-          if(referral_promoter.status == 1){
+          if (referral_promoter.status == 1) {
             // Update some referral reward to promoter's account
-            let updated_promoter = await promoter_helper.update_promoter_by_id(promoter_resp.promoter.referral_id,{"wallet_balance":referral_promoter.promoter.wallet_balance + config.REFERRAL_REWARD});
+            let updated_promoter = await promoter_helper.update_promoter_by_id(promoter_resp.promoter.referral_id, { "wallet_balance": referral_promoter.promoter.wallet_balance + config.REFERRAL_REWARD });
           }
         }
 
@@ -661,7 +661,7 @@ router.post('/login', async (req, res) => {
           expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
         });
 
-        
+
         delete login_resp.user.status;
         delete login_resp.user.password;
         delete login_resp.user.refresh_token;
@@ -669,7 +669,7 @@ router.post('/login', async (req, res) => {
         delete login_resp.user.created_at;
 
         logger.info("Token generated");
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "user":login_resp.user , "token": token, "refresh_token": refreshToken});
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "user": login_resp.user, "token": token, "refresh_token": refreshToken });
       } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or token" });
       }
@@ -693,12 +693,12 @@ router.get("/country", async (req, res) => {
   logger.trace("Get country  API called");
   var resp_data = await country_helper.get_all_country();
 
-  if (resp_data.status === 0 ) {
-      logger.error("Error occured while fetching Countries= ", resp_data);
-      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  if (resp_data.status === 0) {
+    logger.error("Error occured while fetching Countries= ", resp_data);
+    res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
   } else {
-      logger.trace("got countries successfully");
-      res.status(config.OK_STATUS).json(resp_data);
+    logger.trace("got countries successfully");
+    res.status(config.OK_STATUS).json(resp_data);
   }
 })
 
