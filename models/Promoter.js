@@ -27,7 +27,6 @@ var PromoterSchema = new Schema({
     password_changed_date: {type: Date},
 
     stripe_customer_id: String,
-    referral_id:{type: mongoose.Schema.Types.ObjectId, ref: 'promoters'},
 
     bank_details: [String], // Bank account id of stripe
     created_at: { type: Date, default: Date.now }

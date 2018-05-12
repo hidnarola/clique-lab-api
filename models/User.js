@@ -108,6 +108,7 @@ var UserModelSchema = new Schema({
     wallet_balance: { type: Number, default: 0 },
     bank: [BankSchema], // 25
     sexual_orientation :String,
+    referral_id:{type: mongoose.Schema.Types.ObjectId, ref: 'promoters'},
     status :{ type:Boolean, default:true},
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });

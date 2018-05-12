@@ -13,6 +13,7 @@ var purchase_post = require("./promoter/purchase_post");
 var cart = require("./promoter/cart");
 var wallet = require("./promoter/wallet");
 var faq = require("./promoter/faq");
+var referral = require("./promoter/referral");
 
 router.use("/",auth, authorization, index);
 router.use("/campaign", campaign);
@@ -22,7 +23,7 @@ router.use("/group", group);
 router.use("/purchase_post", purchase_post);
 router.use("/cart", cart);
 router.use("/wallet", wallet);
-
 router.use("/faq", faq);
+router.use("/referral", referral);
 
 module.exports = router;

@@ -15,6 +15,7 @@ var job_industry = require("../helpers/job_industry_helper");
 var music_taste = require("../helpers/music_taste_helper");
 var user_helper = require('./../helpers/user_helper');
 var country_helper = require("./../helpers/country_helper");
+var referral_helper = require("./../helpers/referral_helper");
 
 var logger = config.logger;
 
@@ -197,11 +198,6 @@ router.post('/promoter_signup', async (req, res) => {
       promoter = await promoter_helper.get_promoter_by_email_or_username(req.body.username)
       if (promoter.status === 2) {
 
-        // Check for referral
-        if (req.body.referral_id) {
-          promoter_obj.referral_id = req.body.referral_id;
-        }
-
         // Insert promoter
         var promoter_data = await promoter_helper.insert_promoter(promoter_obj);
 
@@ -281,15 +277,8 @@ router.get('/promoter_email_verify/:promoter_id', async (req, res) => {
       } else {
         // Email verified!
 
-        // Check for referral
-        if (promoter_resp.promoter.referral_id) {
-          // Find referral promoter
-          let referral_promoter = await promoter_helper.get_promoter_by_id(promoter_resp.promoter.referral_id);
-          if (referral_promoter.status == 1) {
-            // Update some referral reward to promoter's account
-            let updated_promoter = await promoter_helper.update_promoter_by_id(promoter_resp.promoter.referral_id, { "wallet_balance": referral_promoter.promoter.wallet_balance + config.REFERRAL_REWARD });
-          }
-        }
+        // Create stripe account of customer
+
 
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Email has been verified" });
       }
@@ -502,6 +491,7 @@ router.get("/music_taste", async (req, res) => {
  * @apiParam {String} gender Gender of User
  * @apiParam {String} social_type Social Type of User
  * @apiParam {String} social_id Social Id of User
+ * @apiParam {String} [referral_id] Referral id of invited promoter
  * @apiParam {String} [username] Username of social platform
  * @apiParam {String} access_token Access token of social platform
  * 
@@ -587,11 +577,44 @@ router.post('/social_registration', async (req, res) => {
       }
     }
 
+    // Check for referral
+    if (req.body.referral_id) {
+      reg_obj.referral_id = req.body.referral_id;
+    }
+
     let reg_data = await user_helper.insert_user(reg_obj);
     if (reg_data.status === 0) {
       return res.status(config.BAD_REQUEST).json({ reg_data });
     } else {
-      return res.status(config.OK_STATUS).json(reg_data);
+      console.log("1");
+      if (req.body.referral_id) {
+
+        console.log("2");
+        // Find referral promoter
+        // Check for referral
+        let referral_promoter = await promoter_helper.get_promoter_by_id(req.body.referral_id);
+        if (referral_promoter.status == 1) {
+          console.log("3");
+          // Update some referral reward to promoter's account
+          let updated_promoter = await promoter_helper.update_promoter_by_id(req.body.referral_id, { "wallet_balance": referral_promoter.promoter.wallet_balance + config.REFERRAL_REWARD });
+          console.log("Updated promoter = ",updated_promoter);
+          let referral_obj = {
+            "promoter_id": req.body.referral_id,
+            "user_id": reg_data.user._id,
+            "reward_amount": config.REFERRAL_REWARD
+          };
+          let referral_resp = await referral_helper.insert_referral(referral_obj);
+          console.log("Referral resp = ",referral_resp);
+          console.log("4");
+          res.status(config.OK_STATUS).json(reg_data);
+        } else {
+          console.log("5");
+          res.status(config.OK_STATUS).json(reg_data);
+        }
+      } else {
+        console.log("6");
+        res.status(config.OK_STATUS).json(reg_data);
+      }
     }
   } else {
     logger.error("Validation Error = ", errors);
