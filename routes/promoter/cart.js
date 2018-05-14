@@ -136,6 +136,8 @@ router.post('/purchase', async (req, res) => {
                     let updated_transaction = await transaction_helper.update_transaction_by_id(transaction_resp.transaction._id, { "status": "failed" });
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Transaction has been failed" });
                 }
+            } else {
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User is not had any stripe account" });
             }
         } else {
             console.log("resp = ", transaction_resp);
