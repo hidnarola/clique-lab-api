@@ -3,6 +3,7 @@ var router = express.Router();
 
 var config = require('./../../config');
 var cart_helper = require('./../../helpers/cart_helper');
+var campaign_helper = require('./../../helpers/campaign_helper');
 var transaction_helper = require('./../../helpers/transaction_helper');
 var promoter_helper = require('./../../helpers/promoter_helper');
 
@@ -123,6 +124,13 @@ router.post('/purchase', async (req, res) => {
 
                     let updated_transaction = await transaction_helper.update_transaction_by_id(transaction_resp.transaction._id, { "status": "paid" });
 
+                    // mark status as purchased for campaign_user
+                    active_cart.forEach(async(cart_item) => {
+                        if(cart_item.campaign_id){
+                            await campaign_helper.update_campaign_user(cart_item.user_id,cart_item.campaign_id,{"is_purchase":true});
+                        }
+                    });
+
                     // Clear active cart here
                     await cart_helper.clear_cart_by_promoter(req.userInfo.id);
 
@@ -137,7 +145,7 @@ router.post('/purchase', async (req, res) => {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Transaction has been failed" });
                 }
             } else {
-                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User is not had any stripe account" });
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User is not having any stripe account" });
             }
         } else {
             console.log("resp = ", transaction_resp);

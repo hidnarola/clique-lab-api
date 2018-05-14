@@ -18,6 +18,7 @@ var country_helper = require("./../helpers/country_helper");
 var referral_helper = require("./../helpers/referral_helper");
 
 var logger = config.logger;
+var stripe = require("stripe")(config.STRIPE_SECRET_KEY);
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -276,11 +277,21 @@ router.get('/promoter_email_verify/:promoter_id', async (req, res) => {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while verifying user's email" });
       } else {
         // Email verified!
+        try {
+          // Create stripe account of customer
+          let customer = await stripe.customers.create(
+            {
+              email: promoter_resp.promoter.email,
+              description: promoter_resp.promoter.email
+            });
 
-        // Create stripe account of customer
+          var update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id, { "stripe_customer_id": customer.id });
+          res.status(config.OK_STATUS).json({ "status": 1, "message": "Email has been verified" });
 
-
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Email has been verified" });
+        } catch (err) {
+          console.log("Error => ", err);
+          res.status(config.BAD_REQUEST).json({ "status": 1, "message": "Email has been verified" });
+        }
       }
     }
   }
@@ -597,14 +608,14 @@ router.post('/social_registration', async (req, res) => {
           console.log("3");
           // Update some referral reward to promoter's account
           let updated_promoter = await promoter_helper.update_promoter_by_id(req.body.referral_id, { "wallet_balance": referral_promoter.promoter.wallet_balance + config.REFERRAL_REWARD });
-          console.log("Updated promoter = ",updated_promoter);
+          console.log("Updated promoter = ", updated_promoter);
           let referral_obj = {
             "promoter_id": req.body.referral_id,
             "user_id": reg_data.user._id,
             "reward_amount": config.REFERRAL_REWARD
           };
           let referral_resp = await referral_helper.insert_referral(referral_obj);
-          console.log("Referral resp = ",referral_resp);
+          console.log("Referral resp = ", referral_resp);
           console.log("4");
           res.status(config.OK_STATUS).json(reg_data);
         } else {
