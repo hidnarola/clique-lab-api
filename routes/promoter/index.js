@@ -428,4 +428,26 @@ router.post('/change_password', async (req, res) => {
     }
 });
 
+/**
+ * get wallet balance
+ * /promoter/wallet_balance
+ * Developed by "ar"
+ */
+router.get('/wallet_balance', async(req,res) => {
+    try{
+        let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+        if(promoter_resp.status === 1){
+            if(promoter_resp.promoter.wallet_balance){
+                res.status(config.OK_STATUS).json({"status":1,"message":"Wallet balance found","balance":promoter_resp.promoter.wallet_balance});
+            } else {
+                res.status(config.OK_STATUS).json({"status":1,"message":"Wallet balance found","balance":0});
+            }
+        } else {
+            res.status(config.BAD_REQUEST).json({"status":0,"message":"Error in finding promoter"});
+        }
+    } catch(err){
+        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error in fetching wallet balance"});
+    }
+});
+
 module.exports = router;

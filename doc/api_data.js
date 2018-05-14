@@ -1,5 +1,74 @@
 define({ "api": [
   {
+    "type": "post",
+    "url": "/promoter/change_password",
+    "title": "Change password",
+    "name": "Change_password",
+    "group": "Promoter",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "old_password",
+            "description": "<p>Old password of user</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "new_password",
+            "description": "<p>New password of user</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Success message (Password changed)</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message. (Any error or user not available)</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/index.js",
+    "groupTitle": "Promoter"
+  },
+  {
     "type": "get",
     "url": "/promoter/filter_preference",
     "title": "Get preference value",
@@ -184,6 +253,13 @@ define({ "api": [
             "optional": true,
             "field": "company",
             "description": "<p>Company name of the company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "country",
+            "description": "<p>Country of the brand</p>"
           },
           {
             "group": "Parameter",
@@ -415,6 +491,63 @@ define({ "api": [
     "groupTitle": "Promoter_Campaign"
   },
   {
+    "type": "get",
+    "url": "/promoter/faq",
+    "title": "Get all faq",
+    "name": "Get_all_faq",
+    "group": "Promoter_FAQ",
+    "description": "<p>Get all faq</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>promoter's unique access-key</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "results",
+            "description": "<p>Faqs details</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/faq.js",
+    "groupTitle": "Promoter_FAQ"
+  },
+  {
     "type": "post",
     "url": "/promoter/group",
     "title": "Add group",
@@ -560,6 +693,63 @@ define({ "api": [
             "optional": false,
             "field": "results",
             "description": "<p>Groups details with total group count</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Validation or error message.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/promoter/group.js",
+    "groupTitle": "Promoter_Group"
+  },
+  {
+    "type": "get",
+    "url": "/promoter/group",
+    "title": "Get all group",
+    "name": "Get_all_group",
+    "group": "Promoter_Group",
+    "description": "<p>Get all group</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>promoter's unique access-key</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>application/json</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "JSON",
+            "optional": false,
+            "field": "results",
+            "description": "<p>Groups details</p>"
           }
         ]
       }
@@ -982,6 +1172,13 @@ define({ "api": [
             "optional": false,
             "field": "password",
             "description": "<p>Password</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "country",
+            "description": "<p>Country</p>"
           }
         ]
       }
@@ -1242,6 +1439,13 @@ define({ "api": [
             "optional": false,
             "field": "social_id",
             "description": "<p>Social Id of User</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "referral_id",
+            "description": "<p>Referral id of invited promoter</p>"
           },
           {
             "group": "Parameter",
@@ -1709,7 +1913,7 @@ define({ "api": [
     "groupTitle": "User"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/user/campaign/myoffer",
     "title": "My offer Campaign  - Get all",
     "name": "approved_campaign___Get_all",
@@ -1748,7 +1952,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "message",
-            "description": "<p>Validation or error message.</p>"
+            "description": "<p>Validation or error message.</p> <p>changed by &quot;ar&quot;</p>"
           }
         ]
       }
@@ -1810,8 +2014,8 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "String",
-            "optional": false,
-            "field": "imaged",
+            "optional": true,
+            "field": "image",
             "description": "<p>Image of campaign</p>"
           }
         ]
@@ -1848,7 +2052,7 @@ define({ "api": [
     "groupTitle": "User"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/user/campaign/approved",
     "title": "campaigns - Get by ID",
     "name": "campaigns___Get_campaigns_by_ID",
