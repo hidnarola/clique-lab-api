@@ -48,13 +48,11 @@ router.post("/approved", async (req, res) => {
       notEmpty: true,
       errorMessage: "page_size is required"
     },
-
   };
   req.checkBody(schema);
   var errors = req.validationErrors();
 
   if (!errors) {
-
     let filter = {};
     let sort = {};
     var redact = {};

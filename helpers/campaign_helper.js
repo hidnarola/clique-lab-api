@@ -87,13 +87,20 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
 
         var approved_campaign = await Campaign_User.aggregate(aggregate);
 
-        if (approved_campaign && approved_campaign.length > 0) {
-            return { "status": 1, "message": "User's approved campaign found", "results": approved_campaign };
+        if (approved_campaign && approved_campaign[0].campaign.length > 0) {
+            approved_campaign[0].campaign.map(function(campaign){
+                if(campaign.price){
+                    campaign.price = (campaign.price * 70 / 100).toFixed(2);
+                } else {
+                    campaign.price = 0;
+                }
+                return campaign;
+            });
+            return { "status": 1, "message": "User's approved campaign found", "results": approved_campaign[0] };
         } else {
             return { "status": 2, "message": "No approve campaign available" };
         }
     } catch (err) {
-
         return { "status": 0, "message": "Error occured while finding campaign", "error": err }
     }
 }
