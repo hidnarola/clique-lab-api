@@ -105,7 +105,7 @@ router.post("/approved", async (req, res) => {
  */
 router.post("/public_campaign", async (req, res) => {
   logger.trace("Get all Public Campaign API called");
-  var filter = {"privacy":"public"};
+  var filter = { "privacy": "public" };
   var redact = {};
   var sort = {};
 
@@ -239,23 +239,25 @@ router.post("/myoffer", async (req, res) => {
 router.get("/:campaign_id", async (req, res) => {
   campaign_id = req.params.campaign_id;
   user_id = req.userInfo.id;
-  logger.trace("Get all Profile API called");
+
   var user = await user_helper.get_user_by_id(user_id);
 
-  var access_token = user.User.facebook.access_token;
+  // var access_token = user.User.facebook.access_token;
+  // FB.setAccessToken(access_token);
+  // var like = await FB.api("/105830773604182_136563987197527/likes");
+  // likes = like.data.length;
+  
+  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id);
 
-  FB.setAccessToken(access_token);
 
-  var like = await FB.api("/105830773604182_136563987197527/likes");
-
-  likes = like.data.length;
-  logger.trace("Get all  Campaign API called");
-  var resp_data = await campaign_helper.get_campaign_by_id(campaign_id, likes);
 
   if (resp_data.status == 0) {
-    logger.error("Error occured while fetching Public Campaign = ", resp_data, likes);
+    logger.error("Error occured while fetching Public Campaign = ", resp_data);
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
   } else {
+
+    resp_data.Campaign.price = ((resp_data.Campaign.price * 70)/100).toFixed(2);
+
     logger.trace(" Campaign got successfully = ", resp_data);
     res.status(config.OK_STATUS).json(resp_data);
   }
@@ -422,7 +424,6 @@ router.post('/share/:campaign_id', async (req, res) => {
   logger.trace("Get all  Campaign API called");
   var campaign_data = await campaign_helper.get_campaign_by_id(campaign_id);
   var caption = campaign_data.Campaign.name + ' - ' + campaign_data.Campaign.description;
-
 
   try {
 

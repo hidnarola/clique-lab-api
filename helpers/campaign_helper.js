@@ -18,15 +18,6 @@ var FB = require('fb');
 
 var campaign_helper = {};
 
-/*
- * get_campaign_by_id is used to fetch all campaign data
- * 
- * @params id string user_id
- * 
- * @return  status 0 - If any internal error occured while fetching campaign data, with error
- *          status 1 - If campaign data found, with campaign object
- *          status 2 - If campaign not found, with appropriate message
- */
 campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, sort, page_no, page_size) => {
     try {
         let aggregate = [
@@ -105,13 +96,6 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
     }
 }
 
-/*
- * campaign_helper is used to fetch all capaign data
- * 
- * @return  status 0 - If any internal error occured while fetching campaign data, with error
- *          status 1 - If campaign data found, with campaign object
- *          status 2 - If campaign not found, with appropriate message
- */
 campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page_size) => {
     try {
         var aggregate = [];
@@ -196,21 +180,11 @@ campaign_helper.get_all_campaign_of_promoter = async (promoter_id) => {
     }
 }
 
-/*
- * campaign_helper is used to fetch  capaign data by id
- * 
- * @return  status 0 - If any internal error occured while fetching campaign data, with error
- *          status 1 - If campaign data found, with campaign object
- *          status 2 - If campaign not found, with appropriate message
- */
-
-campaign_helper.get_campaign_by_id = async (campaign_id, likes) => {
-
+campaign_helper.get_campaign_by_id = async (campaign_id) => {
     try {
         var campaign = await Campaign.findOne({ _id: campaign_id }).lean();
         if (campaign) {
-            return { "status": 1, "message": "campaign found", "Campaign": campaign, "likes": likes };
-
+            return { "status": 1, "message": "campaign found", "Campaign": campaign};
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
