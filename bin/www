@@ -7,8 +7,9 @@
 
 var app = require('../app');
 var debug = require('debug')('myapp:server');
-var http = require('http');
+var https = require('https');
 var config = require('./../config');
+var fs = require('fs');
 
 /**
  * Get port from environment and store in Express.
@@ -17,11 +18,19 @@ var config = require('./../config');
 var port = normalizePort(config.node_port || process.env.PORT || '3000');
 app.set('port', port);
 
+var key = fs.readFileSync('/home/ec2-user/ssl/dev.cliquelabs.key');
+var cert = fs.readFileSync('/home/ec2-user/ssl/dev.cliquelabs.crt');
+
+var options = {
+  key: key,
+  cert: cert
+};
+
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = https.createServer(options,app);
 
 /**
  * Listen on provided port, on all network interfaces.
