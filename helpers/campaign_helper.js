@@ -388,8 +388,16 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
 
         var user_offers = await Campaign_User.aggregate(aggregate);
 
-        if (user_offers && user_offers.length > 0) {
-            return { "status": 1, "message": "User's offer found", "results": user_offers };
+        if (user_offers && user_offers[0] && user_offers.campaign.length > 0) {
+            user_offers[0].campaign.map(function(campaign){
+                if(campaign.price){
+                    campaign.price = (campaign.price * 70 / 100).toFixed(2);
+                } else {
+                    campaign.price = 0;
+                }
+                return campaign;
+            });
+            return { "status": 1, "message": "User's offer found", "results": user_offers[0] };
         } else {
             return { "status": 2, "message": "No offer available" };
         }
