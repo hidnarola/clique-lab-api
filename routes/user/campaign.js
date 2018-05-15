@@ -94,8 +94,6 @@ router.post("/approved", async (req, res) => {
   }
 });
 
-
-
 /**
  * @api {post} /user/campaign/public_campaign Campaign  - Get all
  * @apiName public campaign - Get all
@@ -107,7 +105,7 @@ router.post("/approved", async (req, res) => {
  */
 router.post("/public_campaign", async (req, res) => {
   logger.trace("Get all Public Campaign API called");
-  var filter = {};
+  var filter = {"privacy":"public"};
   var redact = {};
   var sort = {};
 
@@ -130,7 +128,6 @@ router.post("/public_campaign", async (req, res) => {
     }
 
     if (req.body.search) {
-      console.log("search = ", req.body.search);
       var r = new RegExp(req.body.search);
       var regex = { "$regex": r, "$options": "i" };
       redact = {
@@ -149,7 +146,6 @@ router.post("/public_campaign", async (req, res) => {
     }
     var resp_data = await campaign_helper.get_public_campaign(filter, redact, sort, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
-      ``
       logger.error("Error occured while fetching Public Campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
     } else {

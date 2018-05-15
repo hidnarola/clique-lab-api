@@ -154,7 +154,15 @@ campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page
         var campaign = await Campaign.aggregate(aggregate);
 
         if (campaign && campaign[0] && campaign[0].campaign.length > 0) {
-            return { "status": 1, "message": "campaign found", "Campaigns": campaign };
+            campaign[0].campaign.map(function(campaign){
+                if(campaign.price){
+                    campaign.price = (campaign.price * 70 / 100).toFixed(2);
+                } else {
+                    campaign.price = 0;
+                }
+                return campaign;
+            });
+            return { "status": 1, "message": "campaign found", "results": campaign[0] };
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
