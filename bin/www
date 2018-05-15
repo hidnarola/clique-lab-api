@@ -7,6 +7,7 @@
 
 var app = require('../app');
 var debug = require('debug')('myapp:server');
+var http = require('http');
 var https = require('https');
 var config = require('./../config');
 var fs = require('fs');
@@ -18,19 +19,24 @@ var fs = require('fs');
 var port = normalizePort(config.node_port || process.env.PORT || '3000');
 app.set('port', port);
 
-var key = fs.readFileSync('/home/ec2-user/ssl/dev.cliquelabs.key');
-var cert = fs.readFileSync('/home/ec2-user/ssl/dev.cliquelabs.crt');
+var server = {};
 
-var options = {
-  key: key,
-  cert: cert
-};
+if (config.IS_HTTPS == "true") {
+  var key = fs.readFileSync('/home/ec2-user/ssl/dev.cliquelabs.key');
+  var cert = fs.readFileSync('/home/ec2-user/ssl/dev.cliquelabs.crt');
 
-/**
- * Create HTTP server.
- */
+  var options = {
+    key: key,
+    cert: cert
+  };
+  server = https.createServer(options, app);
+} else {
+  /**
+    * Create HTTP server.
+    */
+  server = http.createServer(app);
+}
 
-var server = https.createServer(options,app);
 
 /**
  * Listen on provided port, on all network interfaces.
