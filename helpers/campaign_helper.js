@@ -384,7 +384,10 @@ campaign_helper.user_not_exist_campaign_for_promoter = async (user_id, promoter_
     try {
         var campaigns = await Campaign.aggregate([
             {
-                "$match": { "promoter_id": new ObjectId(promoter_id) }
+                "$match": { 
+                    "promoter_id": new ObjectId(promoter_id),
+                    "end_date": { "$gt": new Date() }
+                }
             },
             {
                 "$lookup": {

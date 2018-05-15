@@ -249,14 +249,12 @@ router.get("/:campaign_id", async (req, res) => {
   
   var resp_data = await campaign_helper.get_campaign_by_id(campaign_id);
 
-
-
   if (resp_data.status == 0) {
-    logger.error("Error occured while fetching Public Campaign = ", resp_data);
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
   } else {
-
     resp_data.Campaign.price = ((resp_data.Campaign.price * 70)/100).toFixed(2);
+
+    
 
     logger.trace(" Campaign got successfully = ", resp_data);
     res.status(config.OK_STATUS).json(resp_data);
@@ -409,7 +407,6 @@ router.post("/social_post", async (req, res) => {
   }
 });
 
-
 router.post('/share/:campaign_id', async (req, res) => {
 
   // access token get
@@ -421,7 +418,7 @@ router.post('/share/:campaign_id', async (req, res) => {
 
   // Get campaign details by campaign id
   campaign_id = req.params.campaign_id;
-  logger.trace("Get all  Campaign API called");
+  logger.trace("Get all Campaign API called");
   var campaign_data = await campaign_helper.get_campaign_by_id(campaign_id);
   var caption = campaign_data.Campaign.name + ' - ' + campaign_data.Campaign.description;
 
@@ -495,7 +492,6 @@ router.get('/share/facefook/friends', async (req, res) => {
     return res.status(config.OK_STATUS).json(response);
   })
 });
-
 
 router.post('/share/twitter/:campaign_id', async (req, res) => {
   // Get campaign details by campaign id
