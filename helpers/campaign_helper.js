@@ -268,10 +268,15 @@ campaign_helper.insert_campaign_user = async (campaign_user_object) => {
 
 campaign_helper.insert_multiple_campaign_user = async (campaign_user_array) => {
     try {
-        let campaign_user_data = await Campaign_User.insertMany(campaign_user_array);
+        let campaign_user_data = await Campaign_User.insertMany(campaign_user_array,{ordered:false});
         return { "status": 1, "message": "User added in campaign", "campaign_user": campaign_user_data };
     } catch (err) {
-        return { "status": 0, "message": "Error occured while inserting into campaign_user", "error": err };
+        if(err.name == "BulkWriteError"){
+            return { "status": 1, "message": "User added in campaign" };
+        } else {
+            return { "status": 0, "message": "Error occured while inserting into campaign_user", "error": err };
+        }
+        console.log("error ==> ",err);   
     }
 };
 

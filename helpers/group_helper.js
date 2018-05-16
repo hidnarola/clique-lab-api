@@ -72,7 +72,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             aggregate.push({ "$sort": sort });
         }
 
-        if(page_size && page_no){
+        if (page_size && page_no) {
             aggregate.push({
                 "$group": {
                     "_id": null,
@@ -80,10 +80,12 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                     'results': { "$push": '$$ROOT' }
                 }
             });
-            aggregate.push({"$project":{
-                "total":1,
-                'groups': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
-            }});
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'groups': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
         }
 
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
@@ -91,7 +93,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
         var groups = await Group.aggregate(aggregate);
         if (groups && groups[0]) {
-            if(page_no && page_size){
+            if (page_no && page_size) {
                 return { "status": 1, "message": "Groups found", "results": groups[0] };
             } else {
                 return { "status": 1, "message": "Groups found", "results": groups };
@@ -194,10 +196,12 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
                 }
             });
         } else {
-            aggregate.push({"$project":{
-                "total":1,
-                'users':"$results"
-            }});
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'users': "$results"
+                }
+            });
         }
 
         var members = await Group_User.aggregate(aggregate);
@@ -214,10 +218,14 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
 
 group_helper.insert_multiple_group_user = async (group_user_array) => {
     try {
-        let group_user_data = await Group_User.insertMany(group_user_array);
+        let group_user_data = await Group_User.insertMany(group_user_array, { ordered: false });
         return { "status": 1, "message": "User added in group", "group_user": group_user_data };
     } catch (err) {
-        return { "status": 0, "message": "Error occured while inserting into group_user", "error": err };
+        if (err.name == "BulkWriteError") {
+            return { "status": 1, "message": "User added in group" };
+        } else {
+            return { "status": 0, "message": "Error occured while inserting into group_user", "error": err };
+        }
     }
 };
 

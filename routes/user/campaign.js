@@ -254,7 +254,7 @@ router.get("/:campaign_id", async (req, res) => {
   } else if(resp_data.status == 2) {
     res.status(config.BAD_REQUEST).json({"status":0,"message":"No campaign found"});
   } else {
-    if(resp_data.Campaign.price){
+    if(resp_data.Campaign.price) {
       resp_data.Campaign.price = ((resp_data.Campaign.price * 70)/100).toFixed(2);
     }
 
