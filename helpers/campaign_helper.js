@@ -1967,4 +1967,97 @@ campaign_helper.get_total_people_applied_for_campaign = async(campaign_id) => {
     }
 };
 
+/**
+ * Get applied post of particular campaign
+ * Developed by "ar"
+ */
+campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page_size, filter, sort) => {
+    try {
+        var aggregate = [
+            {
+                "$match": { 
+                    "campaign_id": new ObjectId(campaign_id),
+                    "is_apply":true,
+                    "is_purchase":false
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "user_id",
+                    "foreignField": "_id",
+                    "as": "user"
+                }
+            },
+            {
+                "$unwind": "$user"
+            }
+        ];
+
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate = aggregate.concat([
+            {
+                "$lookup":{
+                    "from":"campaign_applied",
+                    "localField":"user._id",
+                    "foreignField":"user_id",
+                    "as":"applied_post"
+                 }
+            },
+            {
+                "$unwind":"$applied_post"
+            },
+            {
+                "$match":{
+                    "applied_post.campaign_id":new ObjectId(campaign_id)
+                }
+            }
+        ]);
+
+        // aggregate.push(
+        //     {
+        //         "$group": {
+        //             "_id": "$_id",
+        //             "user": { $push: "$user" }
+        //         }
+        //     });
+
+        // if (page_size && page_no) {
+        //     aggregate.push({
+        //         "$project": {
+        //             "_id": "$_id",
+        //             "total": { "$size": "$campaign_user" },
+        //             "users": { "$slice": ["$campaign_user", page_size * (page_no - 1), page_size] }
+        //         }
+        //     });
+        // } else {
+        //     aggregate.push({
+        //         "$project": {
+        //             "_id": "$_id",
+        //             "total": { "$size": "$campaign_user" },
+        //             "users": "$campaign_user"
+        //         }
+        //     });
+        // }
+
+        console.log("aggregate : ", JSON.stringify(aggregate));
+
+        var campaign = await Campaign_User.aggregate(aggregate);
+
+        if (campaign && campaign[0]) {
+            return { "status": 1, "message": "Campaign found", "campaign": campaign[0] };
+        } else {
+            return { "status": 2, "message": "No campaign found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign's applied post", "error": err }
+    }
+}
+
 module.exports = campaign_helper;
