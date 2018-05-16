@@ -251,10 +251,20 @@ router.get("/:campaign_id", async (req, res) => {
 
   if (resp_data.status == 0) {
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+  } else if(resp_data.status == 2) {
+    res.status(config.BAD_REQUEST).json({"status":0,"message":"No campaign found"});
   } else {
-    resp_data.Campaign.price = ((resp_data.Campaign.price * 70)/100).toFixed(2);
+    if(resp_data.Campaign.price){
+      resp_data.Campaign.price = ((resp_data.Campaign.price * 70)/100).toFixed(2);
+    }
 
-    
+    // Count response of that campaign
+    let response = await campaign_helper.get_total_people_applied_for_campaign(campaign_id);
+    if(response.status === 1){
+      resp_data.Campaign.response = response.count;
+    } else {
+      resp_data.Campaign.response = 0;
+    }
 
     logger.trace(" Campaign got successfully = ", resp_data);
     res.status(config.OK_STATUS).json(resp_data);
