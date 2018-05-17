@@ -862,11 +862,11 @@ router.post('/:campaign_id',async(req,res) => {
         let campaign_post = await campaign_helper.get_applied_post_of_campaign(req.params.campaign_id,req.body.page_no,req.body.page_size,match_filter,sort);
 
         if (campaign_post.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaign_post.campaign });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Applied post found", "results": campaign_post.campaign });
         } else if (campaign_post.status === 2) {
-            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Applied post not found" });
         } else {
-            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaign_post.error });
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching applied post details", error: campaign_post.error });
         }
 
     } else {

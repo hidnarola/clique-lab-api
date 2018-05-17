@@ -759,16 +759,38 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             aggregate.push({ "$sort": sort });
         }
 
-        aggregate = aggregate.concat([
-            
-        ]);
+        aggregate.push(
+            {
+                "$group": {
+                    "_id": null,
+                    "applied_post": { $push: "$$ROOT" }
+                }
+            });
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "_id": "$_id",
+                    "total": { "$size": "$applied_post" },
+                    "applied_post": { "$slice": ["$applied_post", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({
+                "$project": {
+                    "_id": "$_id",
+                    "total": { "$size": "$applied_post" },
+                    "applied_post": "$applied_post"
+                }
+            });
+        }
 
         console.log("aggregate ==> ", JSON.stringify(aggregate));
 
         var post = await Campaign.aggregate(aggregate);
 
         if (post && post.length > 0) {
-            return { "status": 1, "message": "post found", "post": post };
+            return { "status": 1, "message": "post found", "post": post[0] };
         } else {
             return { "status": 2, "message": "No post available" };
         }
@@ -2117,9 +2139,9 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
         var campaign = await Campaign_User.aggregate(aggregate);
 
         if (campaign && campaign[0]) {
-            return { "status": 1, "message": "Campaign found", "campaign": campaign[0] };
+            return { "status": 1, "message": "Applied post found", "campaign": campaign[0] };
         } else {
-            return { "status": 2, "message": "No campaign found" };
+            return { "status": 2, "message": "No applied post found" };
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding campaign's applied post", "error": err }
