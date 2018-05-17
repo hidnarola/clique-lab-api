@@ -635,16 +635,74 @@ router.post('/purchased', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var campaigns = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size);
-
-        if (campaigns.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": campaigns.post });
-        } else if (campaigns.status === 2) {
-            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
-        } else {
-            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaigns.error });
+        var match_filter = {};
+        var sort = {};
+        if (req.body.filter) {
+            req.body.filter.forEach(filter_criteria => {
+                if (filter_criteria.type === "exact") {
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                } else if (filter_criteria.type === "between") {
+                    if (filter_criteria.field === "age") {
+                        // Age is derived attribute and need to calculate based on date of birth
+                        match_filter[filter_criteria.field] = {
+                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
+                            "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
+                        };
+                    } else {
+                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                    }
+                } else if (filter_criteria.type === "like") {
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                } else if (filter_criteria.type === "id") {
+                    match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
+                }
+            });
         }
 
+        if (req.body.sort) {
+            req.body.sort.forEach(sort_criteria => {
+                sort[sort_criteria.field] = sort_criteria.value;
+            });
+        }
+
+        if (Object.keys(sort).length === 0) {
+            sort["_id"] = 1;
+        }
+
+        let keys = {
+            "fb_friends": "user.facebook.no_of_friends",
+            "insta_followers": "user.instagram.no_of_followers",
+            "twitter_followers": "user.twitter.no_of_followers",
+            "pinterest_followers": "user.pinterest.no_of_followers",
+            "linkedin_connection": "user.linkedin.no_of_connections",
+            "year_in_industry": "user.experience",
+            "age": "user.date_of_birth",
+
+            "name": "user.name",
+            "gender": "user.gender",
+            "location": "user.location",
+            "job_industry": "user.job_industry",
+            "education": "user.education",
+            "language": "user.language",
+            "ethnicity": "user.ethnicity",
+            "interested_in": "user.interested_in",
+            "relationship_status": "user.relationship_status",
+            "music_taste": "user.music_taste"
+        };
+
+        match_filter = await global_helper.rename_keys(match_filter, keys);
+        sort = await global_helper.rename_keys(sort, keys);
+
+        let purchased_post = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id,req.body.page_no,req.body.page_size,match_filter,sort);
+
+        if (purchased_post.status === 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": purchased_post.post });
+        } else if (purchased_post.status === 2) {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
+        } else {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: purchased_post.error });
+        }
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
     }

@@ -705,23 +705,23 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
     }
 }
 
-campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, page_size) => {
+campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, page_size, filter, sort) => {
     try {
-        var post = await Campaign.aggregate([
+
+        var aggregate = [
             {
-                "$match": { "promoter_id": ObjectId("5ac730d4bd2d072f5072031d") },
+                "$match": { "promoter_id": new ObjectId(promoter_id) },
             },
             {
-                $lookup: {
-                    from: "campaign_user",
-                    localField: "_id",
-                    foreignField: "campaign_id",
-                    as: "campaign_user"
+                "$lookup": {
+                    "from": "campaign_user",
+                    "localField": "_id",
+                    "foreignField": "campaign_id",
+                    "as": "campaign_user"
                 }
             },
-
             {
-                $unwind: "$campaign_user"
+                "$unwind": "$campaign_user"
             },
             {
                 "$match": {
@@ -730,33 +730,45 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             },
             {
                 "$lookup": {
+                    "from": "campaign_applied",
+                    "localField": "_id",
+                    "foreignField": "campaign_id",
+                    "as": "applied_campaign"
+                }
+            },
+            {
+                "$unwind": "$applied_campaign"
+            },
+            {
+                "$lookup": {
                     "from": "users",
-                    "localField": "campaign_user.user_id",
+                    "localField": "applied_campaign.user_id",
                     "foreignField": "_id",
-                    "as": "user"
+                    "as": "users"
                 }
             },
             {
-                $unwind: "$user"
-            },
-            {
-                "$group": {
-                    "_id": null,
-                    "total": { "$sum": 1 },
-                    'results': { "$push": '$$ROOT' }
-                }
-            },
-            {
-                "$project": {
-                    "total": 1,
-                    'results': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
-                }
+                "$unwind": "$users"
             }
-        ])
+        ];
 
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate = aggregate.concat([
+            
+        ]);
+
+        console.log("aggregate ==> ", JSON.stringify(aggregate));
+
+        var post = await Campaign.aggregate(aggregate);
 
         if (post && post.length > 0) {
-            return { "status": 1, "message": "post found", "post": post[0] };
+            return { "status": 1, "message": "post found", "post": post };
         } else {
             return { "status": 2, "message": "No post available" };
         }
@@ -1991,6 +2003,17 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
             },
             {
                 "$unwind": "$user"
+            },
+            {
+                "$lookup":{
+                    "from":"country",
+                    "localField":"user.country",
+                    "foreignField":"_id",
+                    "as":"user.country"
+                }
+            },
+            {
+                "$unwind":"$user.country"
             }
         ];
 
@@ -2078,7 +2101,7 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
                 "$project": {
                     "_id": "$_id",
                     "total": { "$size": "$applied_post" },
-                    "applied_post": { "$slice": ["$applied_post", page_size * (page_no - 1), page_size] }
+                    "users": { "$slice": ["$applied_post", page_size * (page_no - 1), page_size] }
                 }
             });
         } else {
@@ -2086,7 +2109,7 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
                 "$project": {
                     "_id": "$_id",
                     "total": { "$size": "$applied_post" },
-                    "applied_post": "$applied_post"
+                    "users": "$applied_post"
                 }
             });
         }
