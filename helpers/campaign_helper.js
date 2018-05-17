@@ -79,8 +79,8 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
         var approved_campaign = await Campaign_User.aggregate(aggregate);
 
         if (approved_campaign && approved_campaign[0].campaign.length > 0) {
-            approved_campaign[0].campaign.map(function(campaign){
-                if(campaign.price){
+            approved_campaign[0].campaign.map(function (campaign) {
+                if (campaign.price) {
                     campaign.price = (campaign.price * 70 / 100).toFixed(2);
                 } else {
                     campaign.price = 0;
@@ -138,8 +138,8 @@ campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page
         var campaign = await Campaign.aggregate(aggregate);
 
         if (campaign && campaign[0] && campaign[0].campaign.length > 0) {
-            campaign[0].campaign.map(function(campaign){
-                if(campaign.price){
+            campaign[0].campaign.map(function (campaign) {
+                if (campaign.price) {
                     campaign.price = (campaign.price * 70 / 100).toFixed(2);
                 } else {
                     campaign.price = 0;
@@ -184,7 +184,7 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
     try {
         var campaign = await Campaign.findOne({ _id: campaign_id }).lean();
         if (campaign) {
-            return { "status": 1, "message": "campaign found", "Campaign": campaign};
+            return { "status": 1, "message": "campaign found", "Campaign": campaign };
         } else {
             return { "status": 2, "message": "No campaign available" };
         }
@@ -268,15 +268,15 @@ campaign_helper.insert_campaign_user = async (campaign_user_object) => {
 
 campaign_helper.insert_multiple_campaign_user = async (campaign_user_array) => {
     try {
-        let campaign_user_data = await Campaign_User.insertMany(campaign_user_array,{ordered:false});
+        let campaign_user_data = await Campaign_User.insertMany(campaign_user_array, { ordered: false });
         return { "status": 1, "message": "User added in campaign", "campaign_user": campaign_user_data };
     } catch (err) {
-        if(err.name == "BulkWriteError"){
+        if (err.name == "BulkWriteError") {
             return { "status": 1, "message": "User added in campaign" };
         } else {
             return { "status": 0, "message": "Error occured while inserting into campaign_user", "error": err };
         }
-        console.log("error ==> ",err);   
+        console.log("error ==> ", err);
     }
 };
 
@@ -368,8 +368,8 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
         var user_offers = await Campaign_User.aggregate(aggregate);
 
         if (user_offers && user_offers[0] && user_offers[0].campaign.length > 0) {
-            user_offers[0].campaign.map(function(campaign){
-                if(campaign.price){
+            user_offers[0].campaign.map(function (campaign) {
+                if (campaign.price) {
                     campaign.price = (campaign.price * 70 / 100).toFixed(2);
                 } else {
                     campaign.price = 0;
@@ -389,7 +389,7 @@ campaign_helper.user_not_exist_campaign_for_promoter = async (user_id, promoter_
     try {
         var campaigns = await Campaign.aggregate([
             {
-                "$match": { 
+                "$match": {
                     "promoter_id": new ObjectId(promoter_id),
                     "end_date": { "$gt": new Date() }
                 }
@@ -436,7 +436,7 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
                 }
             },
             {
-                "$unwind":"$campaigns"
+                "$unwind": "$campaigns"
             },
             {
                 "$skip": page_size * (page_no - 1)
@@ -454,7 +454,7 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
             },
             {
                 "$project": {
-                    "total":1,
+                    "total": 1,
                     "campaigns._id": 1,
                     "campaigns.name": 1,
                     "campaigns.start_date": 1,
@@ -471,10 +471,10 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
                 }
             },
             {
-                "$group":{
-                    "_id":null,
-                    "total":{"$first":"$total"},
-                    "campaigns":{"$push":"$campaigns"}
+                "$group": {
+                    "_id": null,
+                    "total": { "$first": "$total" },
+                    "campaigns": { "$push": "$campaigns" }
                 }
             }
         ]);
@@ -1956,14 +1956,14 @@ campaign_helper.count_sexual_orientation_of_user = async (promoter_id) => {
 /**
  * Developed by "ar"
  */
-campaign_helper.get_total_people_applied_for_campaign = async(campaign_id) => {
-    try{
-        let count = await Campaign_User.find({"campaign_id":campaign_id, "is_apply":true}).count();
-        console.log("count ==> ",count);
-        return {"status":1,"message":"Applied count found for campaign","count":count}
-    } catch(err){
-        console.log("Error ==> ",err);
-        return {"status":0,"message":"Applied count not found for campaign"}
+campaign_helper.get_total_people_applied_for_campaign = async (campaign_id) => {
+    try {
+        let count = await Campaign_User.find({ "campaign_id": campaign_id, "is_apply": true }).count();
+        console.log("count ==> ", count);
+        return { "status": 1, "message": "Applied count found for campaign", "count": count }
+    } catch (err) {
+        console.log("Error ==> ", err);
+        return { "status": 0, "message": "Applied count not found for campaign" }
     }
 };
 
@@ -1975,10 +1975,10 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
     try {
         var aggregate = [
             {
-                "$match": { 
+                "$match": {
                     "campaign_id": new ObjectId(campaign_id),
-                    "is_apply":true,
-                    "is_purchase":false
+                    "is_apply": true,
+                    "is_purchase": false
                 }
             },
             {
@@ -2003,50 +2003,93 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
 
         aggregate = aggregate.concat([
             {
-                "$lookup":{
-                    "from":"campaign_applied",
-                    "localField":"user._id",
-                    "foreignField":"user_id",
-                    "as":"applied_post"
-                 }
+                "$lookup": {
+                    "from": "campaign_applied",
+                    "localField": "user._id",
+                    "foreignField": "user_id",
+                    "as": "applied_post"
+                }
             },
             {
-                "$unwind":"$applied_post"
+                "$unwind": "$applied_post"
             },
             {
-                "$match":{
-                    "applied_post.campaign_id":new ObjectId(campaign_id)
+                "$match": {
+                    "applied_post.campaign_id": new ObjectId(campaign_id)
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "campaign",
+                    "localField": "campaign_id",
+                    "foreignField": "_id",
+                    "as": "campaign"
+                }
+            },
+            {
+                "$unwind": "$campaign"
+            },
+            {
+                "$project": {
+                    "campaign_id": 1,
+                    "user_id": 1,
+                    "applied_at": "$created_at",
+                    "user_name": "$user.name",
+                    "email": "$user.email",
+                    "facebook": "$user.facebook",
+                    "instagram": "$user.instagram",
+                    "twitter": "$user.twitter",
+                    "pinterest": "$user.pinterest",
+                    "linkedin": "$user.linkedin",
+                    "user_avatar": "$user.image",
+                    "country": "$user.country",
+                    "suburb": "$user.suburb",
+                    "username": "$user.username",
+                    "applied_post_id": "$applied_post._id",
+                    "applied_post_description": "$applied_post.desription",
+                    "applied_post_image": "$applied_post.image",
+                    "campaign_name": "$campaign.name",
+                    "hash_tag": "$campaign.hash_tag",
+                    "at_tag": "$campaign.at_tag",
+                    "privacy": "$campaign.privacy",
+                    "start_date": "$campaign.start_date",
+                    "end_date": "$campaign.end_date",
+                    "social_media_platform": "$campaign.social_media_platform",
+                    "media_format": "$campaign.media_format",
+                    "location": "$campaign.location",
+                    "price": "$campaign.price",
+                    "campaign_description": "$campaign.description",
+                    "cover_image": "$campaign.cover_image",
+                    "mood_board_image": "$campaign.mood_board_images"
                 }
             }
         ]);
 
-        // aggregate.push(
-        //     {
-        //         "$group": {
-        //             "_id": "$_id",
-        //             "user": { $push: "$user" }
-        //         }
-        //     });
+        aggregate.push(
+            {
+                "$group": {
+                    "_id": null,
+                    "applied_post": { $push: "$$ROOT" }
+                }
+            });
 
-        // if (page_size && page_no) {
-        //     aggregate.push({
-        //         "$project": {
-        //             "_id": "$_id",
-        //             "total": { "$size": "$campaign_user" },
-        //             "users": { "$slice": ["$campaign_user", page_size * (page_no - 1), page_size] }
-        //         }
-        //     });
-        // } else {
-        //     aggregate.push({
-        //         "$project": {
-        //             "_id": "$_id",
-        //             "total": { "$size": "$campaign_user" },
-        //             "users": "$campaign_user"
-        //         }
-        //     });
-        // }
-
-        console.log("aggregate : ", JSON.stringify(aggregate));
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "_id": "$_id",
+                    "total": { "$size": "$applied_post" },
+                    "applied_post": { "$slice": ["$applied_post", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({
+                "$project": {
+                    "_id": "$_id",
+                    "total": { "$size": "$applied_post" },
+                    "applied_post": "$applied_post"
+                }
+            });
+        }
 
         var campaign = await Campaign_User.aggregate(aggregate);
 
