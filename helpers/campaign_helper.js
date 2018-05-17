@@ -749,6 +749,17 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             },
             {
                 "$unwind": "$users"
+            },
+            {
+                "$lookup":{
+                    "from":"country",
+                    "localField":"user.country",
+                    "foreignField":"_id",
+                    "as":"user.country"
+                }
+            },
+            {
+                "$unwind":{"path":"$user.country", "preserveNullAndEmptyArrays":true}
             }
         ];
 
