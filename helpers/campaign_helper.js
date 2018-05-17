@@ -2013,7 +2013,7 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
                 }
             },
             {
-                "$unwind":"$user.country"
+                "$unwind":{"path":"$user.country", "preserveNullAndEmptyArrays":true}
             }
         ];
 
