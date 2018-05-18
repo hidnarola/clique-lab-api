@@ -74,16 +74,16 @@ user_helper.get_user_by_id = async (id) => {
                 user.power += user.facebook.no_of_friends;
             }
             if (user.pinterset) {
-                user.power += user.pinterset.no_of_followers;
+                user.power += user.pinterset.no_of_friends;
             }
             if (user.linkedin) {
-                user.power += user.linkedin.no_of_followers;
+                user.power += user.linkedin.no_of_friends;
             }
             if (user.twitter) {
-                user.power += user.twitter.no_of_followers;
+                user.power += user.twitter.no_of_friends;
             }
             if (user.instagram) {
-                user.power += user.instagram.no_of_followers;
+                user.power += user.instagram.no_of_friends;
             }
             return { "status": 1, "message": "User found", "User": user };
         } else {

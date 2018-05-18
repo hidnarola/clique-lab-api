@@ -190,10 +190,10 @@ router.post("/get_analytics", async (req, res) => {
     let resp = [];
     let keys = {
         "fb_friends": "user.facebook.no_of_friends",
-        "insta_followers": "user.instagram.no_of_followers",
-        "twitter_followers": "user.twitter.no_of_followers",
-        "pinterest_followers": "user.pinterest.no_of_followers",
-        "linkedin_connection": "user.linkedin.no_of_connections",
+        "insta_followers": "user.instagram.no_of_friends",
+        "twitter_followers": "user.twitter.no_of_friends",
+        "pinterest_followers": "user.pinterest.no_of_friends",
+        "linkedin_connection": "user.linkedin.no_of_friends",
         "year_in_industry": "user.experience",
         "age": "user.dob",
 
@@ -300,10 +300,10 @@ router.post("/get_social_analytics", async (req, res) => {
         let resp = [];
         let keys = {
             "fb_friends": "user.facebook.no_of_friends",
-            "insta_followers": "user.instagram.no_of_followers",
-            "twitter_followers": "user.twitter.no_of_followers",
-            "pinterest_followers": "user.pinterest.no_of_followers",
-            "linkedin_connection": "user.linkedin.no_of_connections",
+            "insta_followers": "user.instagram.no_of_friends",
+            "twitter_followers": "user.twitter.no_of_friends",
+            "pinterest_followers": "user.pinterest.no_of_friends",
+            "linkedin_connection": "user.linkedin.no_of_friends",
             "year_in_industry": "user.experience",
             "age": "user.dob",
 

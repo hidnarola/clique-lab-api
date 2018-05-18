@@ -952,7 +952,7 @@ campaign_helper.get_campaign_total_reach_by_promoter = async (promoter_id, filte
     aggregate.push({
         $group: {
             "_id": null,
-            "total_social_power": { $sum: { $add: ["$user.facebook.no_of_friends", "$user.pinterest.no_of_followers", "$user.instagram.no_of_followers", "$user.twitter.no_of_followers", "$user.linkedin.no_of_connections"] } }
+            "total_social_power": { $sum: { $add: ["$user.facebook.no_of_friends", "$user.pinterest.no_of_friends", "$user.instagram.no_of_friends", "$user.twitter.no_of_friends", "$user.linkedin.no_of_friends"] } }
         }
     });
 

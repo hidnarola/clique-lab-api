@@ -377,10 +377,10 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
 
     let keys = {
         "fb_friends": "facebook.no_of_friends",
-        "insta_followers": "instagram.no_of_followers",
-        "twitter_followers": "twitter.no_of_followers",
-        "pinterest_followers": "pinterest.no_of_followers",
-        "linkedin_connection": "linkedin.no_of_connections",
+        "insta_followers": "instagram.no_of_friends",
+        "twitter_followers": "twitter.no_of_friends",
+        "pinterest_followers": "pinterest.no_of_friends",
+        "linkedin_connection": "linkedin.no_of_friends",
         "year_in_industry": "experience",
         "age": "date_of_birth"
     };
@@ -441,10 +441,10 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
 
     let keys = {
         "fb_friends": "members.facebook.no_of_friends",
-        "insta_followers": "members.instagram.no_of_followers",
-        "twitter_followers": "members.twitter.no_of_followers",
-        "pinterest_followers": "members.pinterest.no_of_followers",
-        "linkedin_connection": "members.linkedin.no_of_connections",
+        "insta_followers": "members.instagram.no_of_friends",
+        "twitter_followers": "members.twitter.no_of_friends",
+        "pinterest_followers": "members.pinterest.no_of_friends",
+        "linkedin_connection": "members.linkedin.no_of_friends",
         "year_in_industry": "members.experience",
         "age": "members.date_of_birth",
 
@@ -555,10 +555,10 @@ router.post('/:campaign_id/add_filtered_user_to_cart', async (req, res) => {
 
     let keys = {
         "fb_friends": "campaign_user.facebook.no_of_friends",
-        "insta_followers": "campaign_user.instagram.no_of_followers",
-        "twitter_followers": "campaign_user.twitter.no_of_followers",
-        "pinterest_followers": "campaign_user.pinterest.no_of_followers",
-        "linkedin_connection": "campaign_user.linkedin.no_of_connections",
+        "insta_followers": "campaign_user.instagram.no_of_friends",
+        "twitter_followers": "campaign_user.twitter.no_of_friends",
+        "pinterest_followers": "campaign_user.pinterest.no_of_friends",
+        "linkedin_connection": "campaign_user.linkedin.no_of_friends",
         "year_in_industry": "campaign_user.experience",
         "age": "campaign_user.date_of_birth",
 
@@ -672,10 +672,10 @@ router.post('/purchased', async (req, res) => {
 
         let keys = {
             "fb_friends": "user.facebook.no_of_friends",
-            "insta_followers": "user.instagram.no_of_followers",
-            "twitter_followers": "user.twitter.no_of_followers",
-            "pinterest_followers": "user.pinterest.no_of_followers",
-            "linkedin_connection": "user.linkedin.no_of_connections",
+            "insta_followers": "user.instagram.no_of_friends",
+            "twitter_followers": "user.twitter.no_of_friends",
+            "pinterest_followers": "user.pinterest.no_of_friends",
+            "linkedin_connection": "user.linkedin.no_of_friends",
             "year_in_industry": "user.experience",
             "age": "user.date_of_birth",
 
@@ -837,10 +837,10 @@ router.post('/:campaign_id',async(req,res) => {
 
         let keys = {
             "fb_friends": "user.facebook.no_of_friends",
-            "insta_followers": "user.instagram.no_of_followers",
-            "twitter_followers": "user.twitter.no_of_followers",
-            "pinterest_followers": "user.pinterest.no_of_followers",
-            "linkedin_connection": "user.linkedin.no_of_connections",
+            "insta_followers": "user.instagram.no_of_friends",
+            "twitter_followers": "user.twitter.no_of_friends",
+            "pinterest_followers": "user.pinterest.no_of_friends",
+            "linkedin_connection": "user.linkedin.no_of_friends",
             "year_in_industry": "user.experience",
             "age": "user.date_of_birth",
 
@@ -932,10 +932,10 @@ router.post('/:campaign_id/campaign_users', async (req, res) => {
 
         let keys = {
             "fb_friends": "campaign_user.facebook.no_of_friends",
-            "insta_followers": "campaign_user.instagram.no_of_followers",
-            "twitter_followers": "campaign_user.twitter.no_of_followers",
-            "pinterest_followers": "campaign_user.pinterest.no_of_followers",
-            "linkedin_connection": "campaign_user.linkedin.no_of_connections",
+            "insta_followers": "campaign_user.instagram.no_of_friends",
+            "twitter_followers": "campaign_user.twitter.no_of_friends",
+            "pinterest_followers": "campaign_user.pinterest.no_of_friends",
+            "linkedin_connection": "campaign_user.linkedin.no_of_friends",
             "year_in_industry": "campaign_user.experience",
             "age": "campaign_user.date_of_birth",
 

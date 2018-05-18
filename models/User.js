@@ -21,7 +21,7 @@ var InstagramSchema = new Schema({
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,
-    no_of_followers: Number
+    no_of_friends: Number
     
 });
 
@@ -32,7 +32,7 @@ var TwitterSchema = new Schema({
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,
-    no_of_followers: Number
+    no_of_friends: Number
     
 });
 
@@ -43,7 +43,7 @@ var PinterestSchema = new Schema({
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,
-    no_of_followers: Number
+    no_of_friends: Number
     
 });
 
@@ -54,8 +54,7 @@ var LinkedInSchema = new Schema({
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,
-    no_of_connections: Number
-    
+    no_of_friends: Number
 });
 
 var BankSchema = new Schema({

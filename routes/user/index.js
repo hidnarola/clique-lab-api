@@ -102,8 +102,8 @@ router.get("/interest_details", async (req, res) => {
 router.put('/', function (req, res) {
     user_id = req.userInfo.id;
     var obj = {
-
     };
+
     if (req.body.name && req.body.name != null) {
         obj.name = req.body.name;
     }
@@ -208,6 +208,29 @@ router.put('/', function (req, res) {
         }
     });
 
+});
+
+/**
+ * Add/edit social media account of particular user
+ * /user/social_media
+ * Developed by "ar"
+ */
+router.post('/social_media', async (req, res) => {
+    var schema = {
+        "social_media_platform": {
+            notEmpty: true,
+            errorMessage: "social_media_platform is required"
+        }
+    };
+
+    req.checkBody(schema);
+    var errors = req.validationErrors();
+
+    if (!errors) {
+        
+    } else {
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
 });
 
 module.exports = router;

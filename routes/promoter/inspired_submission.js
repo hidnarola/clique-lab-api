@@ -67,10 +67,10 @@ router.post('/',async (req,res) => {
 
         let keys = {
             "fb_friends": "users.facebook.no_of_friends",
-            "insta_followers": "users.instagram.no_of_followers",
-            "twitter_followers": "users.twitter.no_of_followers",
-            "pinterest_followers": "users.pinterest.no_of_followers",
-            "linkedin_connection": "users.linkedin.no_of_connections",
+            "insta_followers": "users.instagram.no_of_friends",
+            "twitter_followers": "users.twitter.no_of_friends",
+            "pinterest_followers": "users.pinterest.no_of_friends",
+            "linkedin_connection": "users.linkedin.no_of_friends",
             "year_in_industry": "users.experience",
             "age": "users.date_of_birth",
     

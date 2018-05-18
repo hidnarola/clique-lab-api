@@ -295,10 +295,10 @@ router.post('/:group_id/members', async (req, res) => {
 
         let keys = {
             "fb_friends": "members.facebook.no_of_friends",
-            "insta_followers": "members.instagram.no_of_followers",
-            "twitter_followers": "members.twitter.no_of_followers",
-            "pinterest_followers": "members.pinterest.no_of_followers",
-            "linkedin_connection": "members.linkedin.no_of_connections",
+            "insta_followers": "members.instagram.no_of_friends",
+            "twitter_followers": "members.twitter.no_of_friends",
+            "pinterest_followers": "members.pinterest.no_of_friends",
+            "linkedin_connection": "members.linkedin.no_of_friends",
             "year_in_industry": "members.experience",
             "age": "members.date_of_birth",
 
@@ -360,10 +360,10 @@ router.post('/:group_id/add_filter_result_to_group', async (req, res) => {
 
     let keys = {
         "fb_friends": "facebook.no_of_friends",
-        "insta_followers": "instagram.no_of_followers",
-        "twitter_followers": "twitter.no_of_followers",
-        "pinterest_followers": "pinterest.no_of_followers",
-        "linkedin_connection": "linkedin.no_of_connections",
+        "insta_followers": "instagram.no_of_friends",
+        "twitter_followers": "twitter.no_of_friends",
+        "pinterest_followers": "pinterest.no_of_friends",
+        "linkedin_connection": "linkedin.no_of_friends",
         "year_in_industry": "experience",
         "age": "date_of_birth"
     };
@@ -424,10 +424,10 @@ router.post('/:new_group_id/:old_group_id/add_filter_result_to_group', async (re
 
     let keys = {
         "fb_friends": "members.facebook.no_of_friends",
-        "insta_followers": "members.instagram.no_of_followers",
-        "twitter_followers": "members.twitter.no_of_followers",
-        "pinterest_followers": "members.pinterest.no_of_followers",
-        "linkedin_connection": "members.linkedin.no_of_connections",
+        "insta_followers": "members.instagram.no_of_friends",
+        "twitter_followers": "members.twitter.no_of_friends",
+        "pinterest_followers": "members.pinterest.no_of_friends",
+        "linkedin_connection": "members.linkedin.no_of_friends",
         "year_in_industry": "members.experience",
         "age": "members.date_of_birth",
 
