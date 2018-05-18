@@ -256,15 +256,12 @@ router.post('/social_media', async (req, res) => {
             user[req.body.social_media_platform]['enable'] = req.body.enable;
         }
 
-        console.log("User obj ==> ",user);
         var user_resp = await user_helper.update_user_by_id(req.userInfo.id, user);
-        console.log("User_resp ==> ",user_resp);
         if (user_resp.status === 0) {
             res.status(config.INTERNAL_SERVER_ERROR).json({"status":0, "message":"Error has occured while updating user information", "error": user_resp.error });
         } else {
             res.status(config.OK_STATUS).json({"status":1, "message": "Profile has been updated successfully" });
         }
-
     } else {
         res.status(config.BAD_REQUEST).json({"status":0, "message": errors });
     }

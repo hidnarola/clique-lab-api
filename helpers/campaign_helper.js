@@ -478,7 +478,6 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
                 }
             }
         ]);
-
         if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
             _.map(campaigns[0].campaigns, function (campaign) {
                 campaign.remaining_days = moment(campaign.end_date).diff(moment(), 'days');
@@ -559,6 +558,16 @@ campaign_helper.get_past_campaign_by_promoter = async (promoter_id, page_no, pag
             },
             { "$sort": { "created_at": -1 } },
             {
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'campaigns': { "$push": '$$ROOT' }
+                }
+            },
+            {
+                "$unwind": "$campaigns"
+            },
+            {
                 "$skip": page_size * (page_no - 1)
             },
             {
@@ -574,28 +583,29 @@ campaign_helper.get_past_campaign_by_promoter = async (promoter_id, page_no, pag
             },
             {
                 "$project": {
-                    "_id": 1,
-                    "name": 1,
-                    "start_date": 1,
-                    "end_date": 1,
-                    "social_media_platform": 1,
-                    "media_format": 1,
-                    "location": 1,
-                    "price": 1,
-                    "currency": 1,
-                    "description": 1,
-                    "cover_image": 1,
-                    "submissions": { "$size": "$campaign_user" },
+                    "total": 1,
+                    "campaigns._id": 1,
+                    "campaigns.name": 1,
+                    "campaigns.start_date": 1,
+                    "campaigns.end_date": 1,
+                    "campaigns.social_media_platform": 1,
+                    "campaigns.media_format": 1,
+                    "campaigns.location": 1,
+                    "campaigns.price": 1,
+                    "campaigns.currency": 1,
+                    "campaigns.description": 1,
+                    "campaigns.cover_image": 1,
+                    "campaigns.submissions": { "$size": "$campaign_user" },
                     // "remianing_days": { $subtract: ["$end_date",new Date()] }
                 }
             },
             {
                 "$group": {
                     "_id": null,
-                    "total": { "$sum": 1 },
-                    'campaigns': { "$push": '$$ROOT' }
+                    "total": { "$first": "$total" },
+                    "campaigns": { "$push": "$campaigns" }
                 }
-            },
+            }
         ]);
 
         if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
