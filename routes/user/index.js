@@ -229,7 +229,7 @@ router.post('/social_media', async (req, res) => {
     if (!errors) {
         var user_resp = await user_helper.get_user_by_id(req.userInfo.id);
         let user = user_resp.User;
-        
+
         if(!user[req.body.social_media_platform]){
             user[req.body.social_media_platform] = {};
         }
@@ -260,13 +260,13 @@ router.post('/social_media', async (req, res) => {
         var user_resp = await user_helper.update_user_by_id(req.userInfo.id, user);
         console.log("User_resp ==> ",user_resp);
         if (user_resp.status === 0) {
-            res.status(config.INTERNAL_SERVER_ERROR).json({ "error": user_resp.error });
+            res.status(config.INTERNAL_SERVER_ERROR).json({"status":0, "message":"Error has occured while updating user information", "error": user_resp.error });
         } else {
-            res.status(config.OK_STATUS).json({ "message": "Profile has been updated successfully" });
+            res.status(config.OK_STATUS).json({"status":1, "message": "Profile has been updated successfully" });
         }
 
     } else {
-        res.status(config.BAD_REQUEST).json({ message: errors });
+        res.status(config.BAD_REQUEST).json({"status":0, "message": errors });
     }
 });
 
