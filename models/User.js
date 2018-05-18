@@ -11,7 +11,8 @@ var FacebookSchema = new Schema({
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,
-    no_of_friends: Number
+    no_of_friends: Number,
+    enable: Boolean
 });
 
 var InstagramSchema = new Schema({
@@ -21,8 +22,8 @@ var InstagramSchema = new Schema({
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,
-    no_of_friends: Number
-    
+    no_of_friends: Number,
+    enable: Boolean
 });
 
 var TwitterSchema = new Schema({
@@ -32,8 +33,8 @@ var TwitterSchema = new Schema({
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,
-    no_of_friends: Number
-    
+    no_of_friends: Number,
+    enable: Boolean
 });
 
 var PinterestSchema = new Schema({
@@ -43,8 +44,8 @@ var PinterestSchema = new Schema({
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,
-    no_of_friends: Number
-    
+    no_of_friends: Number,
+    enable: Boolean
 });
 
 var LinkedInSchema = new Schema({
@@ -54,7 +55,8 @@ var LinkedInSchema = new Schema({
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,
-    no_of_friends: Number
+    no_of_friends: Number,
+    enable: Boolean
 });
 
 var BankSchema = new Schema({

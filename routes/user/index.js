@@ -227,7 +227,44 @@ router.post('/social_media', async (req, res) => {
     var errors = req.validationErrors();
 
     if (!errors) {
+        var user_resp = await user_helper.get_user_by_id(req.userInfo.id);
+        let user = user_resp.User;
         
+        if(!user[req.body.social_media_platform]){
+            user[req.body.social_media_platform] = {};
+        }
+
+        if(req.body.id){
+            user[req.body.social_media_platform]['id'] = req.body.id;
+        }
+        if(req.body.username){
+            user[req.body.social_media_platform]['username'] = req.body.username;
+        }
+        if(req.body.access_token){
+            user[req.body.social_media_platform]['access_token'] = req.body.access_token;
+        }
+        if(req.body.refresh_token){
+            user[req.body.social_media_platform]['refresh_token'] = req.body.refresh_token;
+        }
+        if(req.body.profile_url){
+            user[req.body.social_media_platform]['profile_url'] = req.body.profile_url;
+        }
+        if(req.body.no_of_friends){
+            user[req.body.social_media_platform]['no_of_friends'] = req.body.no_of_friends;
+        }
+        if(req.body.enable){
+            user[req.body.social_media_platform]['enable'] = req.body.enable;
+        }
+
+        console.log("User obj ==> ",user);
+        var user_resp = await user_helper.update_user_by_id(req.userInfo.id, user);
+        console.log("User_resp ==> ",user_resp);
+        if (user_resp.status === 0) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "error": user_resp.error });
+        } else {
+            res.status(config.OK_STATUS).json({ "message": "Profile has been updated successfully" });
+        }
+
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
     }
