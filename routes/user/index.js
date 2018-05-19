@@ -155,6 +155,10 @@ router.put('/', function (req, res) {
     if (req.body.sexual_orientation && req.body.sexual_orientation != null) {
         obj.sexual_orientation = req.body.sexual_orientation;
     }
+
+    if (req.body.country && req.body.country != null) {
+        obj.country = req.body.country;
+    }
     async.waterfall([
         function (callback) {
             if (req.files && req.files['avatar']) {
@@ -197,7 +201,6 @@ router.put('/', function (req, res) {
             }
         }
         var user_resp = await user_helper.update_user_by_id(req.userInfo.id, obj);
-        console.log(obj);
         if (user_resp.status === 0) {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "error": user_resp.error });
         } else {
