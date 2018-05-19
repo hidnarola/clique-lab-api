@@ -54,14 +54,14 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
             },
             {
                 "$lookup": {
-                    from: "users",
-                    localField: "user_id",
+                    from: "campaign_applied",
+                    localField: "applied_post_id",
                     foreignField: "_id",
-                    as: "user"
+                    as: "applied_post"
                 }
             },
             {
-                "$unwind": "$user"
+                "$unwind": "$applied_post"
             },
             {
                 "$group": {

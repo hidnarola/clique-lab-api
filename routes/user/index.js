@@ -101,8 +101,7 @@ router.get("/interest_details", async (req, res) => {
  */
 router.put('/', function (req, res) {
     user_id = req.userInfo.id;
-    var obj = {
-    };
+    var obj = {};
 
     if (req.body.name && req.body.name != null) {
         obj.name = req.body.name;
@@ -230,40 +229,40 @@ router.post('/social_media', async (req, res) => {
         var user_resp = await user_helper.get_user_by_id(req.userInfo.id);
         let user = user_resp.User;
 
-        if(!user[req.body.social_media_platform]){
+        if (!user[req.body.social_media_platform]) {
             user[req.body.social_media_platform] = {};
         }
 
-        if(req.body.id){
+        if (req.body.id) {
             user[req.body.social_media_platform]['id'] = req.body.id;
         }
-        if(req.body.username){
+        if (req.body.username) {
             user[req.body.social_media_platform]['username'] = req.body.username;
         }
-        if(req.body.access_token){
+        if (req.body.access_token) {
             user[req.body.social_media_platform]['access_token'] = req.body.access_token;
         }
-        if(req.body.refresh_token){
+        if (req.body.refresh_token) {
             user[req.body.social_media_platform]['refresh_token'] = req.body.refresh_token;
         }
-        if(req.body.profile_url){
+        if (req.body.profile_url) {
             user[req.body.social_media_platform]['profile_url'] = req.body.profile_url;
         }
-        if(req.body.no_of_friends){
+        if (req.body.no_of_friends) {
             user[req.body.social_media_platform]['no_of_friends'] = req.body.no_of_friends;
         }
-        if(req.body.enable){
+        if (req.body.enable != undefined) {
             user[req.body.social_media_platform]['enable'] = req.body.enable;
         }
 
         var user_resp = await user_helper.update_user_by_id(req.userInfo.id, user);
         if (user_resp.status === 0) {
-            res.status(config.INTERNAL_SERVER_ERROR).json({"status":0, "message":"Error has occured while updating user information", "error": user_resp.error });
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error has occured while updating user information", "error": user_resp.error });
         } else {
-            res.status(config.OK_STATUS).json({"status":1, "message": "Profile has been updated successfully" });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Profile has been updated successfully" });
         }
     } else {
-        res.status(config.BAD_REQUEST).json({"status":0, "message": errors });
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": errors });
     }
 });
 
