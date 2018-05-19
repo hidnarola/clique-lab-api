@@ -163,7 +163,8 @@ campaign_helper.get_all_campaign_of_promoter = async (promoter_id) => {
     try {
         var aggregate = [{
             "$match": {
-                "promoter_id": new ObjectId(promoter_id)
+                "promoter_id": new ObjectId(promoter_id),
+                "end_date": { "$gt": new Date() }
             }
         }];
 
