@@ -508,11 +508,11 @@ router.post('/stop/:campaign_id', async (req, res) => {
  * /promoter/campaign/add_to_cart/:campaign_id/:user_id
  * Developed by "ar"
  */
-router.post('/add_to_cart/:campaign_id/:user_id', async (req, res) => {
+router.post('/add_to_cart/:campaign_id/:applied_post_id', async (req, res) => {
     var cart = {
         "promoter_id": req.userInfo.id,
         "campaign_id": req.params.campaign_id,
-        "user_id": req.params.user_id
+        "applied_post_id": req.params.applied_post_id
     };
     let cart_resp = await cart_helper.insert_cart_item(cart);
 
@@ -524,11 +524,11 @@ router.post('/add_to_cart/:campaign_id/:user_id', async (req, res) => {
 });
 
 /**
- * Purchase filter campaign
- * /promoter/campaign/:campaign_id/add_filtered_user_to_cart
+ * Purchase filter campaigns
+ * /promoter/campaign/:campaign_id/add_filtered_applied_post_to_cart
  * Developed by "ar"
  */
-router.post('/:campaign_id/add_filtered_user_to_cart', async (req, res) => {
+router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) => {
     var match_filter = {};
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {
