@@ -1,5 +1,7 @@
-var User = require("./../models/User");
+var moment = require("moment");
 var user_helper = {};
+
+var User = require("./../models/User");
 var brand = require("./../models/Inspired_Brand_submit");
 var Music_taste = require("./../models/Music_taste");
 var User_interest = require("./../models/User_interest");
@@ -85,6 +87,11 @@ user_helper.get_user_by_id = async (id) => {
             if (user.instagram) {
                 user.power += user.instagram.no_of_friends;
             }
+
+            if (user.date_of_birth) {
+                user.date_of_birth = moment(user.date_of_birth).format("D MMMM YYYY");
+            }
+
             return { "status": 1, "message": "User found", "User": user };
         } else {
             return { "status": 2, "message": "User available" };
@@ -160,7 +167,7 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
             });
         }
 
-        console.log("aggregate => ",JSON.stringify(aggregate));
+        console.log("aggregate => ", JSON.stringify(aggregate));
 
         // aggregate.push({ "$skip": page_size * (page_no - 1) });
         // aggregate.push({ "$limit": page_size });
@@ -211,7 +218,7 @@ user_helper.insert_user = async (user_object) => {
  */
 user_helper.update_user_by_id = async (user_id, login_object) => {
     try {
-      
+
         let user = await User.findOneAndUpdate({ _id: user_id }, login_object);
         if (!user) {
             return { "status": 2, "message": "Record has not updated" };

@@ -32,10 +32,8 @@ var FB = require('fb');
  */
 router.get("/", async (req, res) => {
     user_id = req.userInfo.id;
-    console.log(user_id);
     logger.trace("Get all Profile API called");
     var resp_data = await user_helper.get_user_by_id(user_id);
-    console.log(resp_data);
     if (resp_data.status == 0) {
         logger.error("Error occured while fetching Profile = ", resp_data);
         res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
