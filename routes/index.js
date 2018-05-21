@@ -725,6 +725,14 @@ router.get("/country", async (req, res) => {
     logger.trace("got countries successfully");
     res.status(config.OK_STATUS).json(resp_data);
   }
-})
+});
+
+router.post("/chk_image_availablity", async(req,res) => {
+  if (fs.existsSync('.'+req.body.image_name)) {
+    res.status(config.OK_STATUS).json({"status":1,"message":"Image is available"});
+  } else {
+    res.status(config.NOT_FOUND).json({"status":404,"message":"Image is not available"});
+  }
+});
 
 module.exports = router;

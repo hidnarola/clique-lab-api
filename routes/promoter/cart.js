@@ -108,26 +108,26 @@ router.post('/purchase', async (req, res) => {
             let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
             if (promoter_resp.status === 1 && promoter_resp.promoter && promoter_resp.promoter.stripe_customer_id) {
                 try {
-                    let charge = await stripe.charges.create({
-                        "amount": active_cart.results.total * 100, // 100 means $1
-                        "currency": "usd",
-                        "capture": false,
-                        "customer": promoter_resp.promoter.stripe_customer_id,
-                        "statement_descriptor": "Clique purchase", // lentgth must be 22 character max.
-                        "metadata": {
-                            "CHARGETYPE": "Authorization ONLY",
-                            "subtotal": active_cart.results.sub_total,
-                            "GST": active_cart.results.gst,
-                            "userID": req.userInfo.id
-                        }
-                    });
+                    // let charge = await stripe.charges.create({
+                    //     "amount": active_cart.results.total * 100, // 100 means $1
+                    //     "currency": "usd",
+                    //     "capture": false,
+                    //     "customer": promoter_resp.promoter.stripe_customer_id,
+                    //     "statement_descriptor": "Clique purchase", // lentgth must be 22 character max.
+                    //     "metadata": {
+                    //         "CHARGETYPE": "Authorization ONLY",
+                    //         "subtotal": active_cart.results.sub_total,
+                    //         "GST": active_cart.results.gst,
+                    //         "userID": req.userInfo.id
+                    //     }
+                    // });
 
                     let updated_transaction = await transaction_helper.update_transaction_by_id(transaction_resp.transaction._id, { "status": "paid" });
 
                     // mark status as purchased for campaign_user
-                    active_cart.forEach(async(cart_item) => {
+                    active_cart.results.cart_items.forEach(async(cart_item) => {
                         if(cart_item.campaign_id){
-                            await campaign_helper.update_campaign_user(cart_item.user_id,cart_item.campaign_id,{"is_purchase":true});
+                            await campaign_helper.update_campaign_user(cart_item.user._id,cart_item.campaign_id,{"is_purchase":true});
                         }
                     });
 

@@ -112,7 +112,7 @@ router.post('/', async (req, res) => {
             });
         }
 
-        if(Object.keys(sort).length === 0){
+        if (Object.keys(sort).length === 0) {
             sort["_id"] = 1;
         }
 
@@ -128,10 +128,20 @@ router.post('/', async (req, res) => {
         match_filter = await global_helper.rename_keys(match_filter, keys);
 
         sort = await global_helper.rename_keys(sort, keys);
-        var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter,sort);
+        var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter, sort);
 
-        console.log("users = ",users);
+        console.log("users = ", users);
         if (users.status === 1) {
+            users.results.users = users.results.users.map((user) => {
+                if (fs.existsSync('./uploads/users/' + user.image)) {
+                    user.is_image = 1;
+                    return user;
+                } else {
+                    user.is_image = 0;
+                    user.image = "http://placehold.it/465x300/ececec/525f7f?text=No Image Found";
+                    return user;
+                }
+            });
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "results": users.results });
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Users not found" });
