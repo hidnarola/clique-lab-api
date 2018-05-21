@@ -200,7 +200,11 @@ user_helper.insert_user = async (user_object) => {
         let user_data = await user.save();
         return { "status": 1, "message": "Record inserted", "user": user_data };
     } catch (err) {
-        return { "status": 0, "message": "Error occured while inserting user", "error": err };
+        if(err.code === 11000){
+            return { "status": 0, "message": "This account is already exist"};
+        } else {
+            return { "status": 0, "message": "Error occured while inserting user", "error": err };
+        }
     }
 };
 

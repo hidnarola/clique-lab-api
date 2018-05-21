@@ -209,7 +209,7 @@ router.post("/get_analytics", async (req, res) => {
         "music_taste": "user.music_taste"
     };
 
-    async.each(req.body.filter, function (filter, loop_callback) {
+    async.eachSeries(req.body.filter, function (filter, loop_callback) {
 
         async.waterfall([
             function (callback) {

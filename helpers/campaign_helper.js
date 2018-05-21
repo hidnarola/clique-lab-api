@@ -872,15 +872,17 @@ campaign_helper.get_promoters_by_social_media = async (promoter_id, filter) => {
 }
 
 campaign_helper.get_campaign_analysis_by_promoter = async (promoter_id, filter) => {
-    let purchased_post_cnt = campaign_post_helper.count_purchase_post_by_promoter(promoter_id, filter);
-    let spent = campaign_post_helper.total_spent_by_promoter(promoter_id, filter);
     let applicant_cnt = campaign_helper.get_campaign_total_applicant_by_promoter(promoter_id, filter);
     let reach_total = campaign_helper.get_campaign_total_reach_by_promoter(promoter_id, filter);
     let engage_cnt = campaign_helper.get_total_engaged_person_by_promoter(promoter_id, filter);
+    let purchased_post_cnt = await campaign_post_helper.count_purchase_post_by_promoter(promoter_id, filter);
+    let spent = await campaign_post_helper.total_spent_by_promoter(promoter_id, filter);
+    let average_cost_per_purchase = (purchased_post_cnt && purchased_post_cnt > 0) ? (spent/purchased_post_cnt) :0
 
     return {
-        "purchased_campaign": await purchased_post_cnt,
-        "total_spent": await spent,
+        "average_cost_per_purchase": average_cost_per_purchase,
+        "purchased_campaign": purchased_post_cnt,
+        "total_spent": spent,
         "number_of_appplicants": await applicant_cnt,
         "no_of_reach_total": await reach_total,
         "total_no_of_engagement": await engage_cnt

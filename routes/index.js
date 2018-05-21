@@ -595,35 +595,27 @@ router.post('/social_registration', async (req, res) => {
 
     let reg_data = await user_helper.insert_user(reg_obj);
     if (reg_data.status === 0) {
-      return res.status(config.BAD_REQUEST).json({ reg_data });
+      return res.status(config.BAD_REQUEST).json(reg_data);
     } else {
-      console.log("1");
       if (req.body.referral_id) {
 
-        console.log("2");
         // Find referral promoter
         // Check for referral
         let referral_promoter = await promoter_helper.get_promoter_by_id(req.body.referral_id);
         if (referral_promoter.status == 1) {
-          console.log("3");
           // Update some referral reward to promoter's account
           let updated_promoter = await promoter_helper.update_promoter_by_id(req.body.referral_id, { "wallet_balance": referral_promoter.promoter.wallet_balance + config.REFERRAL_REWARD });
-          console.log("Updated promoter = ", updated_promoter);
           let referral_obj = {
             "promoter_id": req.body.referral_id,
             "user_id": reg_data.user._id,
             "reward_amount": config.REFERRAL_REWARD
           };
           let referral_resp = await referral_helper.insert_referral(referral_obj);
-          console.log("Referral resp = ", referral_resp);
-          console.log("4");
           res.status(config.OK_STATUS).json(reg_data);
         } else {
-          console.log("5");
           res.status(config.OK_STATUS).json(reg_data);
         }
       } else {
-        console.log("6");
         res.status(config.OK_STATUS).json(reg_data);
       }
     }
