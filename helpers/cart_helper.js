@@ -43,17 +43,6 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
             },
             {
                 "$lookup": {
-                    from: "campaign",
-                    localField: "campaign_id",
-                    foreignField: "_id",
-                    as: "campaign"
-                }
-            },
-            {
-                "$unwind": "$campaign"
-            },
-            {
-                "$lookup": {
                     from: "campaign_applied",
                     localField: "applied_post_id",
                     foreignField: "_id",
@@ -64,6 +53,28 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
                 "$unwind": "$applied_post"
             },
             {
+                "$lookup": {
+                    from: "users",
+                    localField: "applied_post.user_id",
+                    foreignField: "_id",
+                    as: "user"
+                }
+            },
+            {
+                "$unwind": "$user"
+            },
+            {
+                "$lookup": {
+                    from: "campaign",
+                    localField: "applied_post.campaign_id",
+                    foreignField: "_id",
+                    as: "campaign"
+                }
+            },
+            {
+                "$unwind": "$campaign"
+            },
+            {
                 "$group": {
                     "_id": null,
                     "sub_total": { $sum: "$campaign.price" },
@@ -71,6 +82,9 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
                 }
             }
         ]);
+
+        console.log("Cart item ==> ",cart_items);
+
         if (cart_items && cart_items[0]) {
             cart_items[0].gst = await (cart_items[0].sub_total * 10) / 100;
             cart_items[0].total = await cart_items[0].sub_total + cart_items[0].gst;

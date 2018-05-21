@@ -598,7 +598,6 @@ router.post('/social_registration', async (req, res) => {
       return res.status(config.BAD_REQUEST).json(reg_data);
     } else {
       if (req.body.referral_id) {
-
         // Find referral promoter
         // Check for referral
         let referral_promoter = await promoter_helper.get_promoter_by_id(req.body.referral_id);
