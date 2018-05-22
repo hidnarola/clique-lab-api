@@ -575,7 +575,7 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
 
     match_filter = await global_helper.rename_keys(match_filter, keys);
 
-    var campaign_user = await campaign_helper.get_campaign_users_by_campaignid(req.params.campaign_id, 0, 0, match_filter, 0);
+    var campaign_user = await campaign_helper.get_applied_post_by_campaign(req.params.campaign_id, 0, 0, match_filter, 0);
 
     console.log("user = ", campaign_user);
 

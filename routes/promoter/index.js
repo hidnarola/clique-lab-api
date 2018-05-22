@@ -169,13 +169,16 @@ router.get('/filter_preference', async (req, res) => {
     var job_title_resp = await job_title_helper.get_all_job_title();
     var ethnicity_resp = await ethnicity_helper.get_all_ethnicity();
 
-    if (job_industry_resp.status === 1 && interest_resp.status === 1 && music_taste_resp.status === 1) {
-        logger.trace("got details successfully");
-        res.status(config.OK_STATUS).json({ "status": 1, "job_industry": job_industry_resp.job_industry, "interest": interest_resp.interest, "music_taste": music_taste_resp.music_taste, "language": language_resp.language, "education": education_resp.education, "job_title": job_title_resp.job_title, "ethnicity": ethnicity_resp.ethnicity });
-    } else {
-        logger.error("Error occured while fetching Job Industry = ", resp_data);
-        res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-    }
+    res.status(config.OK_STATUS).json({
+        "status": 1,
+        "job_industry": (job_industry_resp.job_industry)?job_industry_resp.job_industry:{},
+        "interest": (interest_resp.interest)?interest_resp.interest:{},
+        "music_taste": (music_taste_resp.music_taste)?music_taste_resp.music_taste:{},
+        "language": (language_resp.language)?language_resp.language:{},
+        "education": (education_resp.education)?education_resp.education:{},
+        "job_title": (job_title_resp.job_title)?job_title_resp.job_title:{},
+        "ethnicity": (ethnicity_resp.ethnicity)?ethnicity_resp.ethnicity:{}
+    });
 });
 
 /**
