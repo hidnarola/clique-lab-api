@@ -718,7 +718,6 @@ campaign_helper.get_campaign_users_by_campaignid = async (campaign_id, page_no, 
 
 campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, page_size, filter, sort) => {
     try {
-
         var aggregate = [
             {
                 "$match": { "promoter_id": new ObjectId(promoter_id) },
@@ -806,8 +805,6 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                 }
             });
         }
-
-        console.log("aggregate ==> ", JSON.stringify(aggregate));
 
         var post = await Campaign.aggregate(aggregate);
 

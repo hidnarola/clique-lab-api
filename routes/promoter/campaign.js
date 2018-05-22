@@ -575,33 +575,32 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
 
     match_filter = await global_helper.rename_keys(match_filter, keys);
 
-    var campaign_user = await campaign_helper.get_applied_post_by_campaign(req.params.campaign_id, 0, 0, match_filter, 0);
+    var campaign_post = await campaign_helper.get_applied_post_of_campaign(req.params.campaign_id, 0, 0, match_filter, 0);
 
-    console.log("user = ", campaign_user);
+    console.log("post = ", campaign_post);
 
-    if (campaign_user.status === 1) {
+    if (campaign_post.status === 1) {
 
-        var user_campaign = [];
+        var applied_post = [];
 
-        for (let user of campaign_user.campaign.users) {
-            await user_campaign.push({
+        for (let post of campaign_post.campaign) {
+            await post.push({
                 "promoter_id": req.userInfo.id,
                 "campaign_id": req.params.campaign_id,
-                "user_id": user.user_id
+                "applied_post_id": post.applied_post_id
             });
         }
 
-        let cart_users_resp = await cart_helper.insert_multiple_cart_item(user_campaign);
-        if (cart_users_resp.status == 0) {
-            console.log("resp = ", cart_users_resp);
-            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "No user available to add" });
+        let cart_resp = await cart_helper.insert_multiple_cart_item(user_campaign);
+        if (cart_resp.status == 0) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "No post available to add" });
         } else {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added to cart" });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Post has been added to cart" });
         }
-    } else if (campaign_user.status === 2) {
+    } else if (campaign_post.status === 2) {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
     } else {
-        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaign_user.error });
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: campaign_post.error });
     }
 });
 
@@ -697,9 +696,9 @@ router.post('/purchased', async (req, res) => {
         let purchased_post = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id,req.body.page_no,req.body.page_size,match_filter,sort);
 
         if (purchased_post.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": purchased_post.post });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Post found", "results": purchased_post.post });
         } else if (purchased_post.status === 2) {
-            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No purchase post available" });
         } else {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured during fetching campaign details", error: purchased_post.error });
         }
