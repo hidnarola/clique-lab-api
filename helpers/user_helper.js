@@ -94,7 +94,7 @@ user_helper.get_user_by_id = async (id) => {
 
             return { "status": 1, "message": "User found", "User": user };
         } else {
-            return { "status": 2, "message": "User available" };
+            return { "status": 2, "message": "User not available" };
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding User", "error": err }

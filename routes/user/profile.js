@@ -74,10 +74,7 @@ router.post("/bank_detail", async (req, res) => {
 
 });
 
-
-
 /*update */
-
 router.put("/:id", async (req, res) => {
     user_id = req.userInfo.id;
     logger.trace("Get all Offered Campaign API called");
@@ -91,7 +88,8 @@ router.put("/:id", async (req, res) => {
     }
   });
 
-/**
+
+  /**
  * @api {get} /user/profile/bank_detail Bank detail - Get 
  * @apiName get_profile_by_id - Get
  * @apiGroup User
