@@ -727,11 +727,11 @@ router.get("/country", async (req, res) => {
   }
 });
 
-router.post("/chk_image_availablity", async(req,res) => {
-  if (fs.existsSync('.'+req.body.image_name)) {
-    res.status(config.OK_STATUS).json({"status":1,"message":"Image is available"});
+router.post("/chk_image_availablity", async (req, res) => {
+  if (fs.existsSync('.' + req.body.image_name)) {
+    res.status(config.OK_STATUS).json({ "status": 1, "message": "Image is available" });
   } else {
-    res.status(config.NOT_FOUND).json({"status":404,"message":"Image is not available"});
+    res.status(config.NOT_FOUND).json({ "status": 404, "message": "Image is not available" });
   }
 });
 

@@ -73,7 +73,6 @@ router.post('/withdraw', async (req, res) => {
                 console.log("err => ", err);
                 res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in withrawal" });
             }
-
         } else {
             console.log("resp => ", promoter_resp);
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Stripe account not connected" });

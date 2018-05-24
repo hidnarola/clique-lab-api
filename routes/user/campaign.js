@@ -306,7 +306,7 @@ router.post("/campaign_applied", async (req, res) => {
     var campaign_obj = {
       "user_id": req.userInfo.id,
       "campaign_id": req.body.campaign_id,
-      "desription": req.body.desription
+      "desription": (req.body.desription + " #ad")
     };
 
     async.waterfall([

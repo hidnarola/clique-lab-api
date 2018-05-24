@@ -171,7 +171,7 @@ campaign_helper.get_all_campaign_of_promoter = async (promoter_id) => {
         var campaign = await Campaign.aggregate(aggregate);
         console.log("Campaign = ", campaign);
 
-        if (campaign) {
+        if (campaign && campaign.length > 0) {
             return { "status": 1, "message": "campaign found", "campaigns": campaign };
         } else {
             return { "status": 2, "message": "No campaign available" };

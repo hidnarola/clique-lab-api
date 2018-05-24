@@ -222,7 +222,6 @@ user_helper.insert_user = async (user_object) => {
  */
 user_helper.update_user_by_id = async (user_id, login_object) => {
     try {
-
         let user = await User.findOneAndUpdate({ _id: user_id }, login_object);
         if (!user) {
             return { "status": 2, "message": "Record has not updated" };
