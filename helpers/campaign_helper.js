@@ -488,8 +488,6 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
             }
         ]);
 
-        console.log("Campaign ==> ",campaigns);
-
         if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
             _.map(campaigns[0].campaigns, function (campaign) {
                 campaign.remaining_days = moment(campaign.end_date).diff(moment(), 'days');
@@ -587,10 +585,10 @@ campaign_helper.get_past_campaign_by_promoter = async (promoter_id, page_no, pag
             },
             {
                 "$lookup": {
-                    "from": "campaign_user",
-                    "localField": "_id",
+                    "from": "campaign_applied",
+                    "localField": "campaigns._id",
                     "foreignField": "campaign_id",
-                    "as": "campaign_user"
+                    "as": "campaigns.campaign_submission"
                 }
             },
             {
@@ -607,7 +605,7 @@ campaign_helper.get_past_campaign_by_promoter = async (promoter_id, page_no, pag
                     "campaigns.currency": 1,
                     "campaigns.description": 1,
                     "campaigns.cover_image": 1,
-                    "campaigns.submissions": { "$size": "$campaign_user" },
+                    "campaigns.submissions": { "$size": "$campaigns.campaign_submission" },
                     // "remianing_days": { $subtract: ["$end_date",new Date()] }
                 }
             },
