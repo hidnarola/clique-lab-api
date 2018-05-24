@@ -37,6 +37,11 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
             },
             {
                 "$unwind": "$campaign"
+            },
+            {
+                "$match":{
+                    "campaign.end_date": { "$gt": new Date() }
+                }
             }
         ];
 
@@ -98,7 +103,9 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
 
 campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page_size) => {
     try {
-        var aggregate = [];
+        var aggregate = [{
+            "end_date": { "$gt": new Date() }
+        }];
         if (filter) {
             aggregate.push({ "$match": filter });
         }
@@ -206,7 +213,6 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
  */
 campaign_helper.insert_campaign_applied = async (campaign_object) => {
     let campaign = new Campaign_Applied(campaign_object)
-
     try {
 
         let campaign_data = await campaign.save();
