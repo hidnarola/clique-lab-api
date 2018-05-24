@@ -104,7 +104,7 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
 campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page_size) => {
     try {
         var aggregate = [{
-            "$match":{ 
+            "$match":{
                 "end_date": { "$gt": new Date() }
             }
         }];
@@ -455,10 +455,10 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
             },
             {
                 "$lookup": {
-                    "from": "campaign_user",
-                    "localField": "_id",
+                    "from": "campaign_applied",
                     "foreignField": "campaign_id",
-                    "as": "campaign_user"
+                    "localField": "campaigns.campaign_id",
+                    "as": "campaigns.campaign_submission"
                 }
             },
             {
@@ -475,7 +475,7 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
                     "campaigns.currency": 1,
                     "campaigns.description": 1,
                     "campaigns.cover_image": 1,
-                    "campaigns.submissions": { "$size": "$campaign_user" },
+                    "campaigns.submissions": { "$size": "$campaigns.campaign_submission" },
                     // "remianing_days": { $subtract: ["$end_date",new Date()] }
                 }
             },
@@ -487,6 +487,9 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
                 }
             }
         ]);
+
+        console.log("Campaign ==> ",campaigns);
+
         if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
             _.map(campaigns[0].campaigns, function (campaign) {
                 campaign.remaining_days = moment(campaign.end_date).diff(moment(), 'days');
