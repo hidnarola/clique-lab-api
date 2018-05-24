@@ -88,9 +88,6 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             });
         }
 
-        // aggregate.push({ "$skip": page_size * (page_no - 1) });
-        // aggregate.push({ "$limit": page_size });
-
         var groups = await Group.aggregate(aggregate);
         if (groups && groups[0]) {
             if (page_no && page_size) {

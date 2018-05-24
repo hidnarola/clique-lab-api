@@ -335,6 +335,11 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
             },
             {
                 "$unwind": "$campaign"
+            },
+            {
+                "$match":{
+                    "campaign.end_date": { "$gt": new Date() }
+                }
             }
         ];
 
