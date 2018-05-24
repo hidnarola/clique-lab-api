@@ -104,7 +104,9 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
 campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page_size) => {
     try {
         var aggregate = [{
-            "end_date": { "$gt": new Date() }
+            "$match":{ 
+                "end_date": { "$gt": new Date() }
+            }
         }];
         if (filter) {
             aggregate.push({ "$match": filter });
