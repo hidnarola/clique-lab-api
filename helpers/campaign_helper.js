@@ -456,8 +456,8 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
             {
                 "$lookup": {
                     "from": "campaign_applied",
+                    "localField": "campaigns._id",
                     "foreignField": "campaign_id",
-                    "localField": "campaigns.campaign_id",
                     "as": "campaigns.campaign_submission"
                 }
             },
