@@ -246,21 +246,21 @@ router.get("/:campaign_id", async (req, res) => {
   // FB.setAccessToken(access_token);
   // var like = await FB.api("/105830773604182_136563987197527/likes");
   // likes = like.data.length;
-  
+
   var resp_data = await campaign_helper.get_campaign_by_id(campaign_id);
 
   if (resp_data.status == 0) {
     res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
-  } else if(resp_data.status == 2) {
-    res.status(config.BAD_REQUEST).json({"status":0,"message":"No campaign found"});
+  } else if (resp_data.status == 2) {
+    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No campaign found" });
   } else {
-    if(resp_data.Campaign.price) {
-      resp_data.Campaign.price = ((resp_data.Campaign.price * 70)/100).toFixed(2);
+    if (resp_data.Campaign.price) {
+      resp_data.Campaign.price = ((resp_data.Campaign.price * 70) / 100).toFixed(2);
     }
 
     // Count response of that campaign
     let response = await campaign_helper.get_total_people_applied_for_campaign(campaign_id);
-    if(response.status === 1){
+    if (response.status === 1) {
       resp_data.Campaign.response = response.count;
     } else {
       resp_data.Campaign.response = 0;
@@ -309,65 +309,72 @@ router.post("/campaign_applied", async (req, res) => {
       "desription": (req.body.desription + " #ad")
     };
 
-    async.waterfall([
-      function (callback) {
-        //image upload
-        if (req.files && req.files["image"]) {
-          var file_path_array = [];
-          // var files = req.files['images'];
-          var file = req.files.image;
-          var dir = "./uploads/campaign_applied";
-          var mimetype = ["image/png", "image/jpeg", "image/jpg"];
+    let campaign = await campaign_helper.get_campaign_by_id(req.body.campaign_id);
 
-          // assuming openFiles is an array of file names
+    if (campaign.status === 1) {
+      async.waterfall([
+        function (callback) {
+          //image upload
+          if (req.files && req.files["image"]) {
+            var file_path_array = [];
+            // var files = req.files['images'];
+            var file = req.files.image;
+            var dir = "./uploads/campaign_applied";
+            var mimetype = ["image/png", "image/jpeg", "image/jpg"];
 
-          if (mimetype.indexOf(file.mimetype) != -1) {
-            logger.trace("Uploading image");
-            if (!fs.existsSync(dir)) {
-              fs.mkdirSync(dir);
-            }
+            // assuming openFiles is an array of file names
 
-            extension = ".jpg";
-            filename = "image_" + new Date().getTime() + extension;
-            file.mv(dir + '/' + filename, async (err) => {
-              if (err) {
-                logger.trace("Problem in uploading image");
-                callback({ "status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image" });
-              } else {
-                logger.trace("Image uploaded");
-
-                // var thumbnail = await sharp(dir+'/'+filename)
-                //   .resize(170, 360, { kernel: sharp.kernel.nearest })
-                //   .toFile(dir+'/170X360/'+filename);
-
-                callback(null, filename);
+            if (mimetype.indexOf(file.mimetype) != -1) {
+              logger.trace("Uploading image");
+              if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir);
               }
-            });
+
+              extension = ".jpg";
+              filename = "image_" + new Date().getTime() + extension;
+              file.mv(dir + '/' + filename, async (err) => {
+                if (err) {
+                  logger.trace("Problem in uploading image");
+                  callback({ "status": config.MEDIA_ERROR_STATUS, "err": "There was an issue in uploading image" });
+                } else {
+                  logger.trace("Image uploaded");
+
+                  // var thumbnail = await sharp(dir+'/'+filename)
+                  //   .resize(170, 360, { kernel: sharp.kernel.nearest })
+                  //   .toFile(dir+'/170X360/'+filename);
+
+                  callback(null, filename);
+                }
+              });
+            } else {
+              logger.trace("Invalid image format");
+              callback({ "status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid" });
+            }
           } else {
-            logger.trace("Invalid image format");
-            callback({ "status": config.VALIDATION_FAILURE_STATUS, "err": "Image format is invalid" });
+            logger.trace(" image required");
+            callback({ "err": "Image required" });
           }
-        } else {
-          logger.trace(" image required");
-          callback({ "err": "Image required" });
         }
-      }], async (err, filename) => {
-        //End image upload
-        if (filename) {
-          campaign_obj.image = filename;
-        }
+      ], async (err, filename) => {
+          //End image upload
+          if (filename) {
+            campaign_obj.image = filename;
+          }
 
-        let campaign_data = await campaign_helper.insert_campaign_applied(campaign_obj);
+          let campaign_data = await campaign_helper.insert_campaign_applied(campaign_obj);
 
-        if (campaign_data.status === 0) {
-          logger.error("Error while inserting camapign  data = ", campaign_data);
-          return res.status(config.BAD_REQUEST).json({ campaign_data });
-        } else {
-          var obj = { "is_apply": true };
-          let campaign_apply_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
-          return res.status(config.OK_STATUS).json(campaign_data);
-        }
-      });
+          if (campaign_data.status === 0) {
+            logger.error("Error while inserting camapign  data = ", campaign_data);
+            return res.status(config.BAD_REQUEST).json({ campaign_data });
+          } else {
+            var obj = { "is_apply": true };
+            let campaign_apply_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
+            return res.status(config.OK_STATUS).json({"status":1,"message":"Campaign applied successfully","campaign":campaign.Campaign});
+          }
+        });
+    } else {
+      res.status(config.BAD_REQUEST).json({"status":0,"message":"Invalid campaign"});
+    }
   } else {
     logger.error("Validation Error = ", errors);
     res.status(config.BAD_REQUEST).json({ message: errors });

@@ -57,39 +57,43 @@ router.post('/add_bank_account', async (req, res) => {
         let user_resp = user_helper.get_user_by_id(req.userInfo.id);
         if (user_resp.status === 1) {
 
-            try{
+            try {
                 let bank_account_token = await stripe.tokens.create({
                     bank_account: {
                         account_number: req.body.account_number,
-                        country:'AU',
+                        country: 'AU',
                         currency: 'aud',
-                      account_holder_name: req.body.account_name,
-                      account_holder_type: 'individual',
+                        account_holder_name: req.body.account_name,
+                        account_holder_type: 'individual',
+                        routing_number: req.body.bsb
                     }
                 });
-            } catch(err){
-                res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error while creating bank account","error":err});
+
+                console.log("Bank account ===> ", bank_account_token);
+
+                if (!user_resp.User.stripe_customer_id) {
+                    // create new stripe account
+                    // Create stripe account of customer
+
+                    let account = await stripe.accounts.create({
+                        type: 'custom',
+                        country: 'AU',
+                        email: user_resp.User.email
+                    });
+
+                    console.log("created account ==> ",account);
+
+                    let update_resp = await user_helper.update_user_by_id(user_resp.User._id, { "stripe_customer_id": customer.id });
+
+                    stripe_id = customer.id;
+
+                } else {
+                    stripe_id = user_resp.User.stripe_customer_id;
+                }
+
+            } catch (err) {
+                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error while creating bank account", "error": err });
             }
-            
-
-            let stripe_id = "";
-            if (!user_resp.User.stripe_customer_id) {
-                // create new stripe account
-                // Create stripe account of customer
-                let customer = await stripe.customers.create({
-                    email: promoter_resp.promoter.email,
-                    description: promoter_resp.promoter.email
-                });
-
-                let update_resp = await user_helper.update_user_by_id(user_resp.User._id, { "stripe_customer_id": customer.id });
-
-                stripe_id = customer.id;
-
-            } else {
-                stripe_id = user_resp.User.stripe_customer_id;
-            }
-
-            
 
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't find given user" });

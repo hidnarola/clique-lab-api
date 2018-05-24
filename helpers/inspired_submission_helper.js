@@ -60,16 +60,10 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
             });
         }
 
-        
-
-        console.log("aggregate = ", JSON.stringify(aggregate));
-
         var submissions = await Inspire_submission.aggregate(aggregate);
 
-        console.log("submission = ", submissions);
-
-        if (submissions) {
-            return { "status": 1, "message": "Post found", "submissions": submissions };
+        if (submissions && submissions[0].posts && submissions[0].posts.length > 0) {
+            return { "status": 1, "message": "Post found", "submissions": submissions[0] };
         } else {
             return { "status": 2, "message": "No post available" };
         }
