@@ -121,7 +121,7 @@ router.post('/withdraw', async (req, res) => {
     const errors = req.validationErrors();
 
     if (!errors) {
-        // Get promoter info
+        // Get user info
         let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
         if (user_resp.status === 1 && user_resp.User.stripe_customer_id) {
             try {
@@ -139,7 +139,7 @@ router.post('/withdraw', async (req, res) => {
                     });
 
                     if (charge) {
-                        // Deduct wallet balance of promoter by withdrawal amount
+                        // Deduct wallet balance of user by withdrawal amount
                         let updated_user = await user_helper.update_user_by_id(req.userInfo.id, { "wallet_balance": user_resp.user.wallet_balance - req.body.amount });
 
                         res.status(config.OK_STATUS).json({ "status": 1, "message": "Charge has been created", "charge": charge });
@@ -154,7 +154,7 @@ router.post('/withdraw', async (req, res) => {
                 res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in withrawal" });
             }
         } else {
-            console.log("resp => ", promoter_resp);
+            console.log("resp => ", user_resp);
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Stripe account not connected" });
         }
     } else {

@@ -72,6 +72,12 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             aggregate.push({ "$sort": sort });
         }
 
+        // aggregate.push({
+        //     "$lookup":{
+        //         "from":""
+        //     }
+        // });
+
         if (page_size && page_no) {
             aggregate.push({
                 "$group": {
@@ -88,9 +94,57 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             });
         }
 
+        aggregate = aggregate.concat([
+            {
+                "$unwind": "$groups"
+            },
+            {
+                "$lookup": {
+                    "from": "group_user",
+                    "foreignField": "group_id",
+                    "localField": "groups._id",
+                    "as": "groups.user"
+                }
+            },
+            {
+                "$group": {
+                    "_id": null,
+                    "total": { "$first": "$total" },
+                    "groups": { "$push": "$groups" }
+                }
+            }
+        ])
+
+        console.log("aggregate ===> ", JSON.stringify(aggregate));
+
         var groups = await Group.aggregate(aggregate);
+
+        groups = await Group.populate(groups, { "path": "groups.user.user_id", "model": "users" });
+
         if (groups && groups[0]) {
             if (page_no && page_size) {
+                // console.log("------------> Type ====>   ",typeof groups[0]);
+                // console.log(groups[0]);
+                groups[0].groups = groups[0].groups.map((group) => {
+
+                    group.total_member = 0;
+                    group.social_power = 0;
+
+                    // Count total memeber
+                    if (group.user) {
+                        group.total_member = group.user.length;
+                        group.user.forEach(u => {
+                            group.social_power += (u.user_id.facebook && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
+                            group.social_power += (u.user_id.instagram && u.user_id.instagram.no_of_friends) ? u.user_id.instagram.no_of_friends : 0;
+                            group.social_power += (u.user_id.twitter && u.user_id.twitter.no_of_friends) ? u.user_id.twitter.no_of_friends : 0;
+                            group.social_power += (u.user_id.pinterest && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
+                            group.social_power += (u.user_id.linkedin && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
+                        });
+                    }
+
+                    delete group.user;
+                    return group;
+                });
                 return { "status": 1, "message": "Groups found", "results": groups[0] };
             } else {
                 return { "status": 1, "message": "Groups found", "results": groups };
