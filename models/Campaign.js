@@ -11,7 +11,7 @@ var CampaignModelSchema = new Schema({
     end_date: { type: Date, required: true },
     is_stop_by_promoter: Boolean,
     call_to_action: String,
-    discount_code: { type: mongoose.Schema.Types.ObjectId, ref: "discount" },
+    discount_code: { type: String },
     description: String,
     social_media_platform: { type: String, enum: ["facebook", "instagram", "twitter", "pinterest", "linkedin"] },
     hash_tag: [String],
