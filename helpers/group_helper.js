@@ -115,10 +115,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             }
         ])
 
-        console.log("aggregate ===> ", JSON.stringify(aggregate));
-
         var groups = await Group.aggregate(aggregate);
-
         groups = await Group.populate(groups, { "path": "groups.user.user_id", "model": "users" });
 
         if (groups && groups[0]) {

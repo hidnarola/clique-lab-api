@@ -30,6 +30,11 @@ router.get('/balance', async (req, res) => {
     }
 });
 
+/**
+ * Add user's bank account using stripe connect
+ * /user/wallet/add_bank_account
+ * Developed by "ar"
+ */
 router.post('/add_bank_account', async (req, res) => {
     var schema = {
         "bank_name": {
@@ -54,9 +59,8 @@ router.post('/add_bank_account', async (req, res) => {
     var errors = req.validationErrors();
 
     if (!errors) {
-        let user_resp = user_helper.get_user_by_id(req.userInfo.id);
+        let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
         if (user_resp.status === 1) {
-
             try {
                 let bank_account_token = await stripe.tokens.create({
                     bank_account: {
@@ -81,18 +85,20 @@ router.post('/add_bank_account', async (req, res) => {
                         email: user_resp.User.email
                     });
 
-                    console.log("created account ==> ",account);
+                    console.log("created account ==> ", account);
 
                     let update_resp = await user_helper.update_user_by_id(user_resp.User._id, { "stripe_customer_id": customer.id });
 
-                    stripe_id = customer.id;
+                    stripe_id = account.id;
 
                 } else {
                     stripe_id = user_resp.User.stripe_customer_id;
                 }
 
+                res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been added" });
+
             } catch (err) {
-                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error while creating bank account", "error": err });
+                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err.message });
             }
 
         } else {
