@@ -176,9 +176,29 @@ router.get('/bank_account', async (req, res) => {
         if(user_resp.User.stripe_customer_id){
             try {
                 // let accounts = await stripe.customers.listSources( user_resp.User.stripe_customer_id, { limit: 100, object: "bank_account" });
-
                 let accounts = await stripe.accounts.retrieve(user_resp.User.stripe_customer_id);
-                res.status(config.OK_STATUS).json({"status":1,"message":"Bank account found","bank_account":accounts});
+
+                let bank_account = [];
+                if(accounts.external_accounts.total_count > 0){
+                    accounts.external_accounts.data.forEach((obj) => {
+                        if(obj.object === "bank_account"){
+                            bank_account.push({
+                                "id":obj.id,
+                                "account_holder_name":obj.account_holder_name,
+                                "bank_name":obj.bank_name,
+                                "bank_Account_last4":obj.last4,
+                                "bsb":obj.routing_number
+                            });
+                        }
+                    });
+                }
+
+                if(bank_account.length > 0){
+                    res.status(config.OK_STATUS).json({"status":1,"message":"Bank account found","bank_account":bank_account});
+                } else {
+                    res.status(config.BAD_REQUEST).json({"status":0,"message":"No bank account found"});
+                }
+
             } catch (err) {
                 res.status(config.BAD_REQUEST).json({"status":0,"message":"Error occured while finding bank account","error":err});
             }
