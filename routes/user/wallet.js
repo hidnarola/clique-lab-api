@@ -1,4 +1,5 @@
 var express = require("express");
+var moment = require("moment");
 var router = express.Router();
 
 var config = require("./../../config");
@@ -83,6 +84,16 @@ router.post('/add_bank_account', async (req, res) => {
                         type: 'custom',
                         country: 'AU',
                         email: user_resp.User.email,
+                        legal_entity: {
+                            dob: {
+                                day: moment(user_resp.User.date_of_birth).date(),
+                                month: moment(user_resp.User.date_of_birth).month(),
+                                year: moment(user_resp.User.date_of_birth).year()
+                            },
+                            first_name: user_resp.User.name,
+                            last_name: user_resp.User.name,
+                            type: "individual"
+                        },
                         external_account: bank_account_token.id
                     });
 
@@ -90,7 +101,7 @@ router.post('/add_bank_account', async (req, res) => {
                 } else {
                     await stripe.accounts.createExternalAccount(
                         user_resp.User.stripe_customer_id,
-                        {external_account: bank_account_token.id}
+                        { external_account: bank_account_token.id }
                     );
                 }
                 res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been added" });
@@ -133,10 +144,10 @@ router.post('/withdraw', async (req, res) => {
 
                     let charge = await stripe.charges.create({
                         amount: req.body.amount * 100,
-                        currency: "usd",
+                        currency: "aud",
                         customer: "cus_Cpn2hYxHQACXYq", // Stripe customer id of clique
                         destination: {
-                            account: "acct_1AL7EZB6ThHUGP1p" // bank account id of user
+                            account: user_resp.User.stripe_customer_id // bank account id of user
                         },
                         description: "Charge for " + user_resp.User.name
                     });
@@ -173,40 +184,37 @@ router.post('/withdraw', async (req, res) => {
 router.get('/bank_account', async (req, res) => {
     let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
     if (user_resp.status === 1) {
-        if(user_resp.User.stripe_customer_id){
+        if (user_resp.User.stripe_customer_id) {
             try {
                 // let accounts = await stripe.customers.listSources( user_resp.User.stripe_customer_id, { limit: 100, object: "bank_account" });
-                let accounts = await stripe.accounts.retrieve(user_resp.User.stripe_customer_id);
+                let accounts = await stripe.accounts.listExternalAccounts(user_resp.User.stripe_customer_id,{object: "bank_account"});
 
                 let bank_account = [];
-                if(accounts.external_accounts.total_count > 0){
-                    accounts.external_accounts.data.forEach((obj) => {
-                        if(obj.object === "bank_account"){
-                            bank_account.push({
-                                "id":obj.id,
-                                "account_holder_name":obj.account_holder_name,
-                                "bank_name":obj.bank_name,
-                                "bank_Account_last4":obj.last4,
-                                "bsb":obj.routing_number
-                            });
-                        }
+                if (accounts.data.length > 0) {
+                    accounts.data.forEach((obj) => {
+                        bank_account.push({
+                            "id": obj.id,
+                            "account_holder_name": obj.account_holder_name,
+                            "bank_name": obj.bank_name,
+                            "bank_Account_last4": obj.last4,
+                            "bsb": obj.routing_number
+                        });
                     });
                 }
 
-                if(bank_account.length > 0){
-                    res.status(config.OK_STATUS).json({"status":1,"message":"Bank account found","bank_account":bank_account});
+                if (bank_account.length > 0) {
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account });
                 } else {
-                    res.status(config.BAD_REQUEST).json({"status":0,"message":"No bank account found"});
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
                 }
-
             } catch (err) {
-                res.status(config.BAD_REQUEST).json({"status":0,"message":"Error occured while finding bank account","error":err});
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });
             }
         } else {
-            res.status(config.BAD_REQUEST).json({"status":0,"message":"No bank account found"});
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
         }
     } else {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"User details not found"});
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User details not found" });
     }
 
 })
