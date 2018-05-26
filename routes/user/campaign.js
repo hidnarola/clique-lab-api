@@ -382,7 +382,6 @@ router.post("/campaign_applied", async (req, res) => {
 });
 
 // /user/campaign/share/:campaign_id
-
 router.post("/social_post", async (req, res) => {
   var schema = {
 
@@ -497,7 +496,7 @@ router.post('/share/:campaign_id', async (req, res) => {
   }
 });
 
-router.get('/share/facefook/friends', async (req, res) => {
+router.get('/share/facebook/friends', async (req, res) => {
   user_id = req.userInfo.id;
   logger.trace("Get all Profile API called");
   var user = await user_helper.get_user_by_id(user_id);

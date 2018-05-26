@@ -87,7 +87,7 @@ router.post('/add_bank_account', async (req, res) => {
 
                     console.log("created account ==> ", account);
 
-                    let update_resp = await user_helper.update_user_by_id(user_resp.User._id, { "stripe_customer_id": customer.id });
+                    let update_resp = await user_helper.update_user_by_id(user_resp.User._id, { "stripe_customer_id": account.id });
 
                     stripe_id = account.id;
 
@@ -168,5 +168,30 @@ router.post('/withdraw', async (req, res) => {
     }
 });
 
+/**
+ * Get connected bank accounts
+ * /user/wallet/bank_account
+ * Developed by "ar"
+ */
+router.get('/bank_account', async (req, res) => {
+    let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
+    if (user_resp.status === 1) {
+        if(user_resp.User.stripe_customer_id){
+            try {
+                // let accounts = await stripe.customers.listSources( user_resp.User.stripe_customer_id, { limit: 100, object: "bank_account" });
+
+                let accounts = await stripe.accounts.retrieve(user_resp.User.stripe_customer_id);
+                res.status(config.OK_STATUS).json({"status":1,"message":"Bank account found","bank_account":accounts});
+            } catch (err) {
+                res.status(config.BAD_REQUEST).json({"status":0,"message":"Error occured while finding bank account","error":err});
+            }
+        } else {
+            res.status(config.BAD_REQUEST).json({"status":0,"message":"No bank account found"});
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({"status":0,"message":"User details not found"});
+    }
+
+})
 
 module.exports = router;

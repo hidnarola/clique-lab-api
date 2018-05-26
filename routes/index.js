@@ -115,11 +115,11 @@ router.post('/promoter_login', async (req, res) => {
           }
         }
       } else {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or password" });
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid login id or password" });
       }
     } else {
       logger.info("Account doesn't exist.");
-      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or password" });
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid login id or password" });
     }
   } else {
     logger.error("Validation Error = ", errors);
