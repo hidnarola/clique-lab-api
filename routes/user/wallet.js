@@ -82,21 +82,18 @@ router.post('/add_bank_account', async (req, res) => {
                     let account = await stripe.accounts.create({
                         type: 'custom',
                         country: 'AU',
-                        email: user_resp.User.email
+                        email: user_resp.User.email,
+                        external_account: bank_account_token.id
                     });
 
-                    console.log("created account ==> ", account);
-
                     let update_resp = await user_helper.update_user_by_id(user_resp.User._id, { "stripe_customer_id": account.id });
-
-                    stripe_id = account.id;
-
                 } else {
-                    stripe_id = user_resp.User.stripe_customer_id;
+                    await stripe.accounts.createExternalAccount(
+                        user_resp.User.stripe_customer_id,
+                        {external_account: bank_account_token.id}
+                    );
                 }
-
                 res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been added" });
-
             } catch (err) {
                 res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err.message });
             }

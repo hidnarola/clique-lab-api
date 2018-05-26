@@ -131,11 +131,11 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                     if (group.user) {
                         group.total_member = group.user.length;
                         group.user.forEach(u => {
-                            group.social_power += (u.user_id.facebook && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
-                            group.social_power += (u.user_id.instagram && u.user_id.instagram.no_of_friends) ? u.user_id.instagram.no_of_friends : 0;
-                            group.social_power += (u.user_id.twitter && u.user_id.twitter.no_of_friends) ? u.user_id.twitter.no_of_friends : 0;
-                            group.social_power += (u.user_id.pinterest && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
-                            group.social_power += (u.user_id.linkedin && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
+                            group.social_power += ( u.user_id && u.user_id.facebook && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
+                            group.social_power += ( u.user_id && u.user_id.instagram && u.user_id.instagram.no_of_friends) ? u.user_id.instagram.no_of_friends : 0;
+                            group.social_power += ( u.user_id && u.user_id.twitter && u.user_id.twitter.no_of_friends) ? u.user_id.twitter.no_of_friends : 0;
+                            group.social_power += ( u.user_id && u.user_id.pinterest && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
+                            group.social_power += ( u.user_id && u.user_id.linkedin && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
                         });
                     }
 
