@@ -61,6 +61,7 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
         }
 
         var submissions = await Inspire_submission.aggregate(aggregate);
+        submissions = await Inspire_submission.populate(submissions,{"path":"posts.users.country","model":"country"});
 
         if (submissions && submissions[0].posts && submissions[0].posts.length > 0) {
             return { "status": 1, "message": "Post found", "submissions": submissions[0] };
