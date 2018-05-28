@@ -319,6 +319,22 @@ user_helper.add_bank_to_user = async (user_id, bank) => {
     }
 };
 
-// user_helper.
+user_helper.update_social_connection = async(user_id) => {
+    let user_resp = await user_helper.get_user_by_id(user_id);
+    let user_friends = {
+        "facebook_friends":0,
+        "instagram_friends":0,
+        "twitter_friends":0,
+        "pinterest_friends":0,
+        "linkedin_friends":0
+    };
+    if(user_resp.status === 1 && user_resp.User){
+        if(user_resp.User.facebook && user_resp.User.facebook.access_token){
+            user_friends.facebook_friends = await social_helper.get_facebook_friends_by_token(user_resp.User.facebook.access_token);
+        }
+    } else {
+        return {"status":2,"message":"User not found"};
+    }
+};
 
 module.exports = user_helper;
