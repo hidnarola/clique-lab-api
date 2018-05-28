@@ -2027,7 +2027,7 @@ campaign_helper.count_sexual_orientation_of_user = async (promoter_id) => {
  */
 campaign_helper.get_total_people_applied_for_campaign = async (campaign_id) => {
     try {
-        let count = await Campaign_User.find({ "campaign_id": campaign_id, "is_apply": true }).count();
+        let count = await Campaign_Applied.find({ "campaign_id": campaign_id }).count();
         console.log("count ==> ", count);
         return { "status": 1, "message": "Applied count found for campaign", "count": count }
     } catch (err) {

@@ -11,6 +11,8 @@ var ethnicity = require("./../models/Ethnicity");
 var job_title = require("./../models/Job_title");
 var education = require("./../models/Education");
 
+var social_helper = require("./social_helper");
+
 /*
  * get_login_by_email is used to fetch single user by email address
  * 
@@ -58,7 +60,7 @@ user_helper.get_user_by_id = async (id) => {
             .lean();
 
         // Find searchable value
-        var field_need_counted = ["name", "short_bio", "email"];
+        var field_need_counted = ["user_interest", "name", "email", "short_bio","gender","facebook","job_industry","music_taste","instagram","pinterest","twitter","linkedin","username","education","date_of_birth","ethnicity","job_title","language","relationship_status","suburb","country"];
 
         var count = 0;
         Object.keys(user).forEach(async (key) => {
@@ -66,6 +68,7 @@ user_helper.get_user_by_id = async (id) => {
                 count++;
             }
         });
+
         user.searchable = Math.ceil(100 * count / field_need_counted.length);
 
         // Find social power
@@ -200,8 +203,8 @@ user_helper.insert_user = async (user_object) => {
         let user_data = await user.save();
         return { "status": 1, "message": "Record inserted", "user": user_data };
     } catch (err) {
-        if(err.code === 11000){
-            return { "status": 0, "message": "This account is already exist"};
+        if (err.code === 11000) {
+            return { "status": 0, "message": "This account is already exist" };
         } else {
             return { "status": 0, "message": "Error occured while inserting user", "error": err };
         }
@@ -233,7 +236,6 @@ user_helper.update_user_by_id = async (user_id, login_object) => {
     }
 };
 
-
 /*
  * user_helper is used to fetch all bank detail
  * 
@@ -253,7 +255,6 @@ user_helper.get_bank_detail = async (user_id) => {
         return { "status": 0, "message": "Error occured while finding bank Detail", "error": err }
     }
 }
-
 
 /*
  * update_by_id is used to update User data based on user_id
@@ -294,8 +295,6 @@ user_helper.bank_detail_update = async (user_id, bank_id, bank) => {
     }
 };
 
-
-
 /*
  * add_bank_to_user is used to insert into User collection
  * 
@@ -320,7 +319,6 @@ user_helper.add_bank_to_user = async (user_id, bank) => {
     }
 };
 
-
-
+// user_helper.
 
 module.exports = user_helper;

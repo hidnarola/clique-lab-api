@@ -406,7 +406,7 @@ router.post("/social_post", async (req, res) => {
     var obj = {
       "user_id": req.userInfo.id,
       "campaign_id": req.body.campaign_id,
-      "post_id": req.body.postid,
+      "post_id": req.body.post_id,
       "social_media_platform": req.body.social_media_platform
     }
     let resp_data = await campaign_post_helper.insert_campaign_post(obj);
