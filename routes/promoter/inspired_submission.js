@@ -1,6 +1,7 @@
 var express = require("express");
 var moment = require("moment");
 var mongoose = require('mongoose');
+var fs = require("fs");
 var router = express.Router();
 
 var config = require('./../../config');
@@ -90,6 +91,18 @@ router.post('/',async (req,res) => {
         var posts = await inspired_submission_helper.get_filtered_submission_for_promoter(req.userInfo.id, req.body.page_no, req.body.page_size, match_filter,sort);
 
         if (posts.status === 1) {
+
+            posts.submissions.posts = posts.submissions.posts.map((post) => {
+                if (fs.existsSync('./uploads/inspired_submission/' + post.image)) {
+                    post.is_image = 1;
+                    return post;
+                } else {
+                    post.is_image = 0;
+                    post.image = "http://placehold.it/450x215/ececec/525f7f?text=No Image Found";
+                    return post;
+                }
+            });
+
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Post found", "results": posts.submissions });
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post not found" });

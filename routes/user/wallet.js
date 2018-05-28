@@ -217,6 +217,6 @@ router.get('/bank_account', async (req, res) => {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User details not found" });
     }
 
-})
+});
 
 module.exports = router;

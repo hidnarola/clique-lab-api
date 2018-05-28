@@ -36,4 +36,25 @@ referral_helper.get_joined_referral_by_promoter = async(promoter_id,filter) => {
     }
 }
 
+referral_helper.get_referral_revenue_by_promoter = async(promoter_id,filter) => {
+    try{
+        let referral = await Referral.aggregate([
+            {
+                "$match":{
+                    "promoter_id":new ObjectId(promoter_id)
+                }
+            },
+            {
+                "$match":filter
+            },
+            { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$created_at" } }, revenue: { $sum: "$reward_amount" } } },
+        ]);
+
+        return {"status":1,"message":"Referral data found","revenue":referral};
+
+    } catch(err){
+        return {"status":0,"message":"Error has occured while finding joined referral","error":err};
+    }
+}
+
 module.exports = referral_helper;
