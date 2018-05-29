@@ -98,8 +98,10 @@ router.post('/', async (req, res) => {
                         match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
-                    var regex = new RegExp(filter_criteria.value);
-                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                        var regex = new RegExp(filter_criteria.value);
+                        match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                    }
                 } else if (filter_criteria.type === "id") {
                     match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
                 }
