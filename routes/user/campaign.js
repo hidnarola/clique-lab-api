@@ -2,7 +2,6 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var async = require("async");
-var FB = require('fb');
 
 var router = express.Router();
 
@@ -13,6 +12,7 @@ var PinIt = require('pin-it-node');
 var campaign_helper = require("./../../helpers/campaign_helper");
 var user_helper = require("./../../helpers/user_helper");
 var campaign_post_helper = require("./../../helpers/campaign_post_helper");
+
 var PDK = require('node-pinterest');
 var pinterest = PDK.init('AYSihE_YGAfDVXbYU3P7e85xncTzFSaDpm_8EORE2WRMweA4YAAAAAA');
 var PinIt = require('pin-it-node');
@@ -21,6 +21,7 @@ var parallel = require('async/parallel');
 var randomstring = require("randomstring");
 var request = require("request");
 var sharp = require('sharp');
+
 // var Linkedin = require('node-linked-in');
 // var cfg = {};
 // var linkedin = new Linkedin(cfg);
@@ -423,91 +424,84 @@ router.post("/social_post", async (req, res) => {
   }
 });
 
-router.post('/share/:campaign_id', async (req, res) => {
+/**
+ * Not in used
+ * Marked by "ar"
+ */
 
-  // access token get
-  user_id = req.userInfo.id;
-  logger.trace("Get all Profile API called");
-  var user = await user_helper.get_user_by_id(user_id);
+// router.post('/share/:campaign_id', async (req, res) => {
 
-  var access_token = user.User.facebook.access_token;
+//   // access token get
+//   user_id = req.userInfo.id;
+//   logger.trace("Get all Profile API called");
+//   var user = await user_helper.get_user_by_id(user_id);
 
-  // Get campaign details by campaign id
-  campaign_id = req.params.campaign_id;
-  logger.trace("Get all Campaign API called");
-  var campaign_data = await campaign_helper.get_campaign_by_id(campaign_id);
-  var caption = campaign_data.Campaign.name + ' - ' + campaign_data.Campaign.description;
+//   var access_token = user.User.facebook.access_token;
 
-  try {
+//   // Get campaign details by campaign id
+//   campaign_id = req.params.campaign_id;
+//   logger.trace("Get all Campaign API called");
+//   var campaign_data = await campaign_helper.get_campaign_by_id(campaign_id);
+//   var caption = campaign_data.Campaign.name + ' - ' + campaign_data.Campaign.description;
 
-    FB.setAccessToken(access_token);
-    var images = [];
+//   try {
 
-    console.log("image = ", config.base_url + '/uploads/campaign/' + campaign_data.Campaign.cover_image);
+//     FB.setAccessToken(access_token);
+//     var images = [];
 
-    // Add cover images
-    var cover_image_id = await FB.api('me/photos', 'post', { url: config.base_url + '/uploads/campaign/' + campaign_data.Campaign.cover_image, caption: caption, published: false });
-    images.push({ "media_fbid": cover_image_id.id });
+//     console.log("image = ", config.base_url + '/uploads/campaign/' + campaign_data.Campaign.cover_image);
 
-    if (campaign_data.Campaign.mood_board_images && campaign_data.Campaign.mood_board_images.length > 0) {
-      async.waterfall([
-        function (callback) {
-          async.eachSeries(campaign_data.Campaign.mood_board_images, function (image, loop_callback) {
+//     // Add cover images
+//     var cover_image_id = await FB.api('me/photos', 'post', { url: config.base_url + '/uploads/campaign/' + campaign_data.Campaign.cover_image, caption: caption, published: false });
+//     images.push({ "media_fbid": cover_image_id.id });
 
-            FB.api('me/photos', 'post', { url: config.base_url + '/uploads/campaign/' + image, caption: caption, published: false }, function (resp) {
-              console.log("media_fbid = ", resp.id);
-              images.push({ "media_fbid": resp.id });
-              loop_callback();
-            });
-          }, async (err) => {
-            if (err) {
-              callback(err);
-            } else {
-              callback(null);
-            }
-          });
-        }
-      ], async (err, resp) => {
-        if (err) {
-          console.log("error = ", err);
-          res.status(500).send("error in uploading images");
-        } else {
-          var post_id = await FB.api('me/feed', 'post', { attached_media: images, message: caption });
-          console.log("post resp = ", post_id);
-          var campaign_obj = {
-            "user_id": user_id,
-            "campaign_id": campaign_id,
-            "post_id": post_id
-          };
-          let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
+//     if (campaign_data.Campaign.mood_board_images && campaign_data.Campaign.mood_board_images.length > 0) {
+//       async.waterfall([
+//         function (callback) {
+//           async.eachSeries(campaign_data.Campaign.mood_board_images, function (image, loop_callback) {
 
-          user_id = campaign_obj.user_id;
-          campaign_id = campaign_obj.post_id;
-          var obj = { "is_posted": true };
+//             FB.api('me/photos', 'post', { url: config.base_url + '/uploads/campaign/' + image, caption: caption, published: false }, function (resp) {
+//               console.log("media_fbid = ", resp.id);
+//               images.push({ "media_fbid": resp.id });
+//               loop_callback();
+//             });
+//           }, async (err) => {
+//             if (err) {
+//               callback(err);
+//             } else {
+//               callback(null);
+//             }
+//           });
+//         }
+//       ], async (err, resp) => {
+//         if (err) {
+//           console.log("error = ", err);
+//           res.status(500).send("error in uploading images");
+//         } else {
+//           var post_id = await FB.api('me/feed', 'post', { attached_media: images, message: caption });
+//           console.log("post resp = ", post_id);
+//           var campaign_obj = {
+//             "user_id": user_id,
+//             "campaign_id": campaign_id,
+//             "post_id": post_id
+//           };
+//           let campaign_data = await campaign_post_helper.insert_campaign_post(campaign_obj);
 
-          let campaign_post_update = await campaign_helper.update_campaign_user(user_id, campaign_id, obj);
-          return res.status(config.OK_STATUS).json(campaign_data);
-        }
-      });
+//           user_id = campaign_obj.user_id;
+//           campaign_id = campaign_obj.post_id;
+//           var obj = { "is_posted": true };
 
-    }
-  } catch (error) {
-    res.status(500).send({ "Error": error });
-  }
-});
+//           let campaign_post_update = await campaign_helper.update_campaign_user(user_id, campaign_id, obj);
+//           return res.status(config.OK_STATUS).json(campaign_data);
+//         }
+//       });
 
-router.get('/share/facebook/friends', async (req, res) => {
-  user_id = req.userInfo.id;
-  logger.trace("Get all Profile API called");
-  var user = await user_helper.get_user_by_id(user_id);
+//     }
+//   } catch (error) {
+//     res.status(500).send({ "Error": error });
+//   }
+// });
 
-  var access_token = user.User.facebook.access_token;
-  user_id = req.userInfo.id;
-  FB.setAccessToken(access_token);
-  FB.api('/me/friends', function (response) {
-    return res.status(config.OK_STATUS).json(response);
-  })
-});
 
 router.post('/share/twitter/:campaign_id', async (req, res) => {
   // Get campaign details by campaign id

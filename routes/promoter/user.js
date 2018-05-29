@@ -123,14 +123,14 @@ router.post('/', async (req, res) => {
             "pinterest_followers": "pinterest.no_of_friends",
             "linkedin_connection": "linkedin.no_of_friends",
             "year_in_industry": "experience",
-            "age": "date_of_birth"
+            "age": "date_of_birth",
+            "location":"subrub"
         };
         match_filter = await global_helper.rename_keys(match_filter, keys);
 
         sort = await global_helper.rename_keys(sort, keys);
         var users = await user_helper.get_filtered_user(req.body.page_no, req.body.page_size, match_filter, sort);
 
-        console.log("users = ", users);
         if (users.status === 1) {
             users.results.users = users.results.users.map((user) => {
                 if (fs.existsSync('./uploads/users/' + user.image)) {

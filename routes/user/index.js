@@ -18,8 +18,6 @@ var ethnicity_helper = require("./../../helpers/ethnicity_helper");
 var education_helper = require("./../../helpers/education_helper");
 var job_title_helper = require("./../../helpers/job_title_helper");
 
-var FB = require('fb');
-
 /**
  * @api {get} /user Profile - Get 
  * @apiName get_profile_by_id - Get
@@ -78,7 +76,7 @@ router.get("/interest_details", async (req, res) => {
         logger.error("Error occured while fetching details");
         res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Details not found" });
     }
-})
+});
 
 /**
  * @api {put} /user Update user profile
@@ -266,7 +264,6 @@ router.post('/social_media', async (req, res) => {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": errors });
     }
 });
-
 
 router.get("/update_friend_list", async (req, res) => {
     let resp = await user_helper.update_social_connection(req.userInfo.id);

@@ -60,7 +60,7 @@ user_helper.get_user_by_id = async (id) => {
             .lean();
 
         // Find searchable value
-        var field_need_counted = ["user_interest", "name", "email", "short_bio","gender","facebook","job_industry","music_taste","instagram","pinterest","twitter","linkedin","username","education","date_of_birth","ethnicity","job_title","language","relationship_status","suburb","country"];
+        var field_need_counted = ["user_interest", "name", "email", "short_bio", "gender", "facebook", "job_industry", "music_taste", "instagram", "pinterest", "twitter", "linkedin", "username", "education", "date_of_birth", "ethnicity", "job_title", "language", "relationship_status", "suburb", "country"];
 
         var count = 0;
         Object.keys(user).forEach(async (key) => {
@@ -169,11 +169,6 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
                 }
             });
         }
-
-        console.log("aggregate => ", JSON.stringify(aggregate));
-
-        // aggregate.push({ "$skip": page_size * (page_no - 1) });
-        // aggregate.push({ "$limit": page_size });
 
         var users = await User.aggregate(aggregate);
 
@@ -319,21 +314,116 @@ user_helper.add_bank_to_user = async (user_id, bank) => {
     }
 };
 
-user_helper.update_social_connection = async(user_id) => {
+user_helper.update_social_connection = async (user_id) => {
     let user_resp = await user_helper.get_user_by_id(user_id);
-    let user_friends = {
-        "facebook_friends":0,
-        "instagram_friends":0,
-        "twitter_friends":0,
-        "pinterest_friends":0,
-        "linkedin_friends":0
-    };
-    if(user_resp.status === 1 && user_resp.User){
-        if(user_resp.User.facebook && user_resp.User.facebook.access_token){
-            user_friends.facebook_friends = await social_helper.get_facebook_friends_by_token(user_resp.User.facebook.access_token);
+    if (user_resp.status === 1 && user_resp.User) {
+
+        let user_friends = {};
+
+        // Update facebook friends
+        if (user_resp.User.facebook) {
+
+            user_friends.facebook = user_resp.User.facebook;
+            if (user_friends.facebook.no_of_friends) {
+                user_friends.facebook.no_of_friends = 0;
+            }
+
+            if (user_resp.User.facebook.access_token) {
+                user_friends.facebook.no_of_friends = await social_helper.get_facebook_friends_by_token(user_resp.User.facebook.access_token);
+            }
+            
+        } else {
+            user_friends.facebook = {
+                "no_of_friends": 0
+            };
         }
+
+        // Update instagram friends
+        if (user_resp.User.instagram) {
+
+            user_friends.instagram = user_resp.User.instagram;
+            if (user_friends.instagram.no_of_friends) {
+                user_friends.instagram.no_of_friends = 0;
+            }
+
+            if (user_resp.User.instagram.access_token) {
+                // user_friends.instagram.no_of_friends = await social_helper.get_instagram_friends_by_token(user_resp.User.instagram.access_token);
+                user_friends.instagram.no_of_friends = 0;
+            }
+
+        } else {
+            user_friends.instagram = {
+                "no_of_friends": 0
+            };
+        }
+
+        // Update twitter friends
+        if (user_resp.User.twitter) {
+
+            user_friends.twitter = user_resp.User.twitter;
+            if (user_friends.twitter.no_of_friends) {
+                user_friends.twitter.no_of_friends = 0;
+            }
+
+            if (user_resp.User.twitter.access_token) {
+                // user_friends.twitter.no_of_friends = await social_helper.get_twitter_friends_by_token(user_resp.User.twitter.access_token);
+                user_friends.twitter.no_of_friends = 0;
+            }
+            
+        } else {
+            user_friends.twitter = {
+                "no_of_friends": 0
+            };
+        }
+
+        // Update pinterest friends
+        if (user_resp.User.pinterest) {
+
+            user_friends.pinterest = user_resp.User.pinterest;
+            if (user_friends.pinterest.no_of_friends) {
+                user_friends.pinterest.no_of_friends = 0;
+            }
+
+            if (user_resp.User.pinterest.access_token) {
+                // user_friends.pinterest.no_of_friends = await social_helper.get_pinterest_friends_by_token(user_resp.User.pinterest.access_token);
+                user_friends.pinterest.no_of_friends = 0;
+            }
+            
+        } else {
+            user_friends.pinterest = {
+                "no_of_friends": 0
+            };
+        }
+
+        // Update linkedin friends
+        if (user_resp.User.linkedin) {
+
+            user_friends.linkedin = user_resp.User.linkedin;
+            if (user_friends.linkedin.no_of_friends) {
+                user_friends.linkedin.no_of_friends = 0;
+            }
+
+            if (user_resp.User.linkedin.access_token) {
+                // user_friends.linkedin.no_of_friends = await social_helper.get_linkedin_friends_by_token(user_resp.User.linkedin.access_token);
+                user_friends.linkedin.no_of_friends = 0;
+            }
+            
+        } else {
+            user_friends.linkedin = {
+                "no_of_friends": 0
+            };
+        }
+
+        // Update value in DB
+        let update_resp = await user_helper.update_user_by_id(user_id, user_friends);
+        if (update_resp.status === 1) {
+            return { "status": 1, "message": "Social connection data updated" }
+        } else {
+            return { "status": 0, "message": "Error while updating social connection data" }
+        }
+
     } else {
-        return {"status":2,"message":"User not found"};
+        return { "status": 2, "message": "User not found" };
     }
 };
 

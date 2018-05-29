@@ -14,7 +14,6 @@ var campaign_post = require("./../models/Campaign_post");
 var campaign_post_helper = require('./campaign_post_helper');
 
 var ObjectId = mongoose.Types.ObjectId;
-var FB = require('fb');
 
 var campaign_helper = {};
 
