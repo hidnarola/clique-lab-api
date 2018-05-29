@@ -82,7 +82,7 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
 
         var approved_campaign = await Campaign_User.aggregate(aggregate);
 
-        if (approved_campaign && approved_campaign[0].campaign.length > 0) {
+        if (approved_campaign && approved_campaign[0] && approved_campaign[0].campaign.length > 0) {
             approved_campaign[0].campaign.map(function (campaign) {
                 if (campaign.price) {
                     campaign.price = (campaign.price * 70 / 100).toFixed(2);
