@@ -323,6 +323,16 @@ router.post('/:group_id/members', async (req, res) => {
         var members = await group_helper.get_members_of_group(req.params.group_id, req.body.page_no, req.body.page_size, match_filter, sort);
 
         if (members.status === 1) {
+            members.results.users = members.results.users.map((user) => {
+                if (fs.existsSync('./uploads/users/' + user.image)) {
+                    user.is_image = 1;
+                    return user;
+                } else {
+                    user.is_image = 0;
+                    user.image = "http://placehold.it/465x300/ececec/525f7f?text=No Image Found";
+                    return user;
+                }
+            });
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Members found", "results": members.results });
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Members not found" });
