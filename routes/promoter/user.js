@@ -86,7 +86,9 @@ router.post('/', async (req, res) => {
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
-                    match_filter[filter_criteria.field] = filter_criteria.value;
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                        match_filter[filter_criteria.field] = filter_criteria.value;
+                    }
                 } else if (filter_criteria.type === "between") {
                     if (filter_criteria.field === "age") {
                         // Age is derived attribute and need to calculate based on date of birth

@@ -263,7 +263,9 @@ router.post('/:group_id/members', async (req, res) => {
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
-                    match_filter[filter_criteria.field] = filter_criteria.value;
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                        match_filter[filter_criteria.field] = filter_criteria.value;
+                    }
                 } else if (filter_criteria.type === "between") {
                     if (filter_criteria.field === "age") {
                         // Age is derived attribute and need to calculate based on date of birth
@@ -275,8 +277,10 @@ router.post('/:group_id/members', async (req, res) => {
                         match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
-                    var regex = new RegExp(filter_criteria.value);
-                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                        var regex = new RegExp(filter_criteria.value);
+                        match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                    }
                 } else if (filter_criteria.type === "id") {
                     match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
                 }
@@ -304,7 +308,7 @@ router.post('/:group_id/members', async (req, res) => {
 
             "name": "members.name",
             "gender": "members.gender",
-            "location": "members.location",
+            "location": "members.suburb",
             "job_industry": "members.job_industry",
             "education": "members.education",
             "language": "members.language",
