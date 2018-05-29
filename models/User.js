@@ -91,7 +91,7 @@ var UserModelSchema = new Schema({
     date_of_birth: Date, // 10
     location: String, // 11
     state: String,
-    subrub: String, // 12
+    suburb: String, // 12
     facebook: FacebookSchema, // 13
     instagram: InstagramSchema, // 14
     twitter: TwitterSchema, // 15

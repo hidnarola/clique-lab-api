@@ -141,8 +141,8 @@ router.put('/', function (req, res) {
     if (req.body.state && req.body.state != null) {
         obj.state = req.body.state;
     }
-    if (req.body.subrub && req.body.subrub != null) {
-        obj.subrub = req.body.subrub;
+    if (req.body.suburb && req.body.suburb != null) {
+        obj.suburb = req.body.suburb;
     }
     if (req.body.gender && req.body.gender != null) {
         obj.gender = req.body.gender;

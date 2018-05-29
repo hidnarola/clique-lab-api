@@ -1267,7 +1267,7 @@ campaign_helper.count_state_of_user = async (promoter_id) => {
     }
 };
 
-campaign_helper.count_subrub_of_user = async (promoter_id) => {
+campaign_helper.count_suburb_of_user = async (promoter_id) => {
     var aggregate = [
         {
             "$match": { "promoter_id": new ObjectId(promoter_id) }
@@ -1301,28 +1301,28 @@ campaign_helper.count_subrub_of_user = async (promoter_id) => {
         },
         {
             "$group":
-                { _id: "$user.subrub", count: { $sum: 1 } }
+                { _id: "$user.suburb", count: { $sum: 1 } }
         },
         {
             "$group": {
                 "_id": null,
-                "subrub": { $push: "$$ROOT" },
+                "suburb": { $push: "$$ROOT" },
                 "total": { $sum: "$count" },
 
             }
         },
         {
-            "$unwind": "$subrub"
+            "$unwind": "$suburb"
         },
         {
             $addFields: {
-                "subrub.percentage_value": { "$multiply": [{ "$divide": ["$subrub.count", "$total"] }, 100] }
+                "suburb.percentage_value": { "$multiply": [{ "$divide": ["$suburb.count", "$total"] }, 100] }
             }
         },
         {
             "$group": {
                 "_id": null,
-                "subrub": { $push: "$subrub" },
+                "suburb": { $push: "$suburb" },
                 "total": { $first: "$total" }
             }
         }
@@ -1332,7 +1332,7 @@ campaign_helper.count_subrub_of_user = async (promoter_id) => {
     let result = await Campaign.aggregate(aggregate);
 
     if (result) {
-        return { "status": 1, "message": "found", "subrub": result };
+        return { "status": 1, "message": "found", "suburb": result };
     } else {
         return { "status": 0, "message": "Error occured while finding", "error": err };
     }
@@ -2122,7 +2122,7 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
                     "linkedin": "$user.linkedin",
                     "user_avatar": "$user.image",
                     "country": "$user.country",
-                    "subrub": "$user.subrub",
+                    "suburb": "$user.suburb",
                     "username": "$user.username",
                     "applied_post_id": "$applied_post._id",
                     "applied_post_description": "$applied_post.desription",
