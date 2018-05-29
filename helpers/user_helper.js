@@ -321,6 +321,7 @@ user_helper.update_social_connection = async (user_id) => {
         let user_friends = {};
 
         // Update facebook friends
+        /*
         if (user_resp.User.facebook) {
 
             user_friends.facebook = user_resp.User.facebook;
@@ -337,8 +338,10 @@ user_helper.update_social_connection = async (user_id) => {
                 "no_of_friends": 0
             };
         }
+        */
 
         // Update instagram friends
+        /*
         if (user_resp.User.instagram) {
 
             user_friends.instagram = user_resp.User.instagram;
@@ -347,15 +350,14 @@ user_helper.update_social_connection = async (user_id) => {
             }
 
             if (user_resp.User.instagram.access_token) {
-                // user_friends.instagram.no_of_friends = await social_helper.get_instagram_friends_by_token(user_resp.User.instagram.access_token);
-                user_friends.instagram.no_of_friends = 0;
+                user_friends.instagram.no_of_friends = await social_helper.get_instagram_friends_by_token(user_resp.User.instagram.access_token);
             }
 
         } else {
             user_friends.instagram = {
                 "no_of_friends": 0
             };
-        }
+        }*/
 
         // Update twitter friends
         if (user_resp.User.twitter) {
@@ -366,8 +368,7 @@ user_helper.update_social_connection = async (user_id) => {
             }
 
             if (user_resp.User.twitter.access_token) {
-                // user_friends.twitter.no_of_friends = await social_helper.get_twitter_friends_by_token(user_resp.User.twitter.access_token);
-                user_friends.twitter.no_of_friends = 0;
+                user_friends.twitter.no_of_friends = await social_helper.get_twitter_friends_by_token(user_resp.User.twitter.access_token,user_resp.User.twitter.access_token_secret);
             }
             
         } else {
@@ -377,6 +378,7 @@ user_helper.update_social_connection = async (user_id) => {
         }
 
         // Update pinterest friends
+        /*
         if (user_resp.User.pinterest) {
 
             user_friends.pinterest = user_resp.User.pinterest;
@@ -385,8 +387,7 @@ user_helper.update_social_connection = async (user_id) => {
             }
 
             if (user_resp.User.pinterest.access_token) {
-                // user_friends.pinterest.no_of_friends = await social_helper.get_pinterest_friends_by_token(user_resp.User.pinterest.access_token);
-                user_friends.pinterest.no_of_friends = 0;
+                user_friends.pinterest.no_of_friends = await social_helper.get_pinterest_friends_by_token(user_resp.User.pinterest.access_token);
             }
             
         } else {
@@ -394,8 +395,10 @@ user_helper.update_social_connection = async (user_id) => {
                 "no_of_friends": 0
             };
         }
+        */
 
         // Update linkedin friends
+        /*
         if (user_resp.User.linkedin) {
 
             user_friends.linkedin = user_resp.User.linkedin;
@@ -404,8 +407,7 @@ user_helper.update_social_connection = async (user_id) => {
             }
 
             if (user_resp.User.linkedin.access_token) {
-                // user_friends.linkedin.no_of_friends = await social_helper.get_linkedin_friends_by_token(user_resp.User.linkedin.access_token);
-                user_friends.linkedin.no_of_friends = 0;
+                user_friends.linkedin.no_of_friends = await social_helper.get_linkedin_friends_by_token(user_resp.User.linkedin.access_token);
             }
             
         } else {
@@ -413,6 +415,7 @@ user_helper.update_social_connection = async (user_id) => {
                 "no_of_friends": 0
             };
         }
+        */
 
         // Update value in DB
         let update_resp = await user_helper.update_user_by_id(user_id, user_friends);

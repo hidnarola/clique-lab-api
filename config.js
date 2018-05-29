@@ -42,5 +42,8 @@ module.exports = {
     // "base_url": "http://13.55.64.183:3200"
 
     "SMTP_MAIL": process.env.SMTP_MAIL,
-    "SMTP_PASSWORD":process.env.SMTP_PASSWORD
+    "SMTP_PASSWORD":process.env.SMTP_PASSWORD,
+
+    "TWITTER_APP_ID": process.env.TWITTER_APP_ID,
+    "TWITTER_APP_SECRET":process.env.TWITTER_APP_SECRET
 };

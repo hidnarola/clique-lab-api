@@ -505,6 +505,7 @@ router.get("/music_taste", async (req, res) => {
  * @apiParam {String} [referral_id] Referral id of invited promoter
  * @apiParam {String} [username] Username of social platform
  * @apiParam {String} access_token Access token of social platform
+ * @apiParam {String} access_token_secret Access token of social platform
  * 
  * @apiSuccess (Success 200) {JSON} User details
  * @apiError (Error 4xx) {String} message Validation or error message

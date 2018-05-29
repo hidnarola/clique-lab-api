@@ -583,15 +583,15 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
 
         var applied_post = [];
 
-        for (let post of campaign_post.campaign) {
-            await post.push({
+        for (let post of campaign_post.campaign.users) {
+            applied_post.push({
                 "promoter_id": req.userInfo.id,
                 "campaign_id": req.params.campaign_id,
                 "applied_post_id": post.applied_post_id
             });
         }
 
-        let cart_resp = await cart_helper.insert_multiple_cart_item(user_campaign);
+        let cart_resp = await cart_helper.insert_multiple_cart_item(applied_post);
         if (cart_resp.status == 0) {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "No post available to add" });
         } else {
