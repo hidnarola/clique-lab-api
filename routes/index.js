@@ -505,7 +505,7 @@ router.get("/music_taste", async (req, res) => {
  * @apiParam {String} [referral_id] Referral id of invited promoter
  * @apiParam {String} [username] Username of social platform
  * @apiParam {String} access_token Access token of social platform
- * @apiParam {String} access_token_secret Access token of social platform
+ * @apiParam {String} access_token_secret Access token secret of social platform (Twitter)
  * 
  * @apiSuccess (Success 200) {JSON} User details
  * @apiError (Error 4xx) {String} message Validation or error message
@@ -574,7 +574,8 @@ router.post('/social_registration', async (req, res) => {
     } else if (req.body.social_type == "twitter") {
       reg_obj.twitter = {
         "id": req.body.social_id,
-        "access_token": req.body.social_id
+        "access_token": req.body.access_token,
+        "access_token_secret": req.body.access_token_secret
       };
       if (req.body.username) {
         reg_obj.twitter['username'] = req.body.username;

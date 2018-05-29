@@ -121,11 +121,10 @@ router.post('/',async (req,res) => {
  * /promoter/inspired_submission/add_to_cart/:post_id/:user_id
  * Developed by "ar"
  */
-router.post('/add_to_cart/:post_id/:user_id', async (req, res) => {
+router.post('/add_to_cart/:post_id', async (req, res) => {
     var cart = {
         "promoter_id": req.userInfo.id,
-        "inspired_post_id": req.params.post_id,
-        "user_id": req.params.user_id
+        "inspired_post_id": req.params.post_id
     };
     let cart_resp = await cart_helper.insert_cart_item(cart);
 

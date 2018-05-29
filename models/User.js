@@ -30,6 +30,7 @@ var TwitterSchema = new Schema({
     id : String,
     username: String,
     access_token : String,
+    access_token_secret: String,
     expiry_time:Date,
     refresh_token:String,
     profile_url : String,

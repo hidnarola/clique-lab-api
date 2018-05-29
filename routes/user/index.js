@@ -241,6 +241,9 @@ router.post('/social_media', async (req, res) => {
         if (req.body.access_token) {
             user[req.body.social_media_platform]['access_token'] = req.body.access_token;
         }
+        if (req.body.access_token_secret) {
+            user[req.body.social_media_platform]['access_token_secret'] = req.body.access_token_secret;
+        }
         if (req.body.refresh_token) {
             user[req.body.social_media_platform]['refresh_token'] = req.body.refresh_token;
         }
