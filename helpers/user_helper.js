@@ -60,7 +60,7 @@ user_helper.get_user_by_id = async (id) => {
             .lean();
 
         // Find searchable value
-        var field_need_counted = ["user_interest", "name", "email", "short_bio", "gender", "facebook", "job_industry", "music_taste", "instagram", "pinterest", "twitter", "linkedin", "username", "education", "date_of_birth", "ethnicity", "job_title", "language", "relationship_status", "suburb", "country"];
+        var field_need_counted = ["user_interest", "name", "email", "short_bio", "gender", "facebook", "job_industry", "music_taste", "instagram", "pinterest", "twitter", "linkedin", "username", "education", "date_of_birth", "ethnicity", "job_title", "language", "relationship_status", "subrub", "country"];
 
         var count = 0;
         Object.keys(user).forEach(async (key) => {
