@@ -187,7 +187,7 @@ router.get('/bank_account', async (req, res) => {
         if (user_resp.User.stripe_customer_id) {
             try {
                 // let accounts = await stripe.customers.listSources( user_resp.User.stripe_customer_id, { limit: 100, object: "bank_account" });
-                let accounts = await stripe.accounts.listExternalAccounts(user_resp.User.stripe_customer_id,{object: "bank_account"});
+                let accounts = await stripe.accounts.listExternalAccounts(user_resp.User.stripe_customer_id, { object: "bank_account" });
 
                 let bank_account = [];
                 if (accounts.data.length > 0) {
@@ -206,9 +206,37 @@ router.get('/bank_account', async (req, res) => {
                     if (user_resp.User.wallet_balance === undefined) {
                         user_resp.User.wallet_balance = 0;
                     }
-                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account, "wallet_balance": user_resp.User.wallet_balance});
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account, "wallet_balance": user_resp.User.wallet_balance });
                 } else {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
+                }
+            } catch (err) {
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });
+            }
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User details not found" });
+    }
+
+});
+
+/**
+ * Delete connected bank accounts
+ * /user/wallet/bank_account/:bank_account_id
+ * Developed by "ar"
+ */
+router.delete('/bank_account/:bank_account_id', async (req, res) => {
+    let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
+    if (user_resp.status === 1) {
+        if (user_resp.User.stripe_customer_id) {
+            try {
+                let resp = await stripe.accounts.deleteExternalAccount(user_resp.User.stripe_customer_id,req.params.bank_account_id);
+                if(resp.deleted === true){
+                    res.status(config.OK_STATUS).json({"status":1,"message":"Bank account has been removed"});
+                } else {
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
                 }
             } catch (err) {
                 res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });

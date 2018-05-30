@@ -345,7 +345,9 @@ router.post('/:group_id/add_filter_result_to_group', async (req, res) => {
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {
             if (filter_criteria.type === "exact") {
-                match_filter[filter_criteria.field] = filter_criteria.value;
+                if(filter_criteria.value != null && filter_criteria.value != ""){
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                }
             } else if (filter_criteria.type === "between") {
                 if (filter_criteria.field === "age") {
                     // Age is derived attribute and need to calculate based on date of birth
@@ -357,8 +359,10 @@ router.post('/:group_id/add_filter_result_to_group', async (req, res) => {
                     match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
                 }
             } else if (filter_criteria.type === "like") {
-                var regex = new RegExp(filter_criteria.value);
-                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                if(filter_criteria.value != null && filter_criteria.value != ""){
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                }
             } else if (filter_criteria.type === "id") {
                 match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
             }
@@ -372,7 +376,8 @@ router.post('/:group_id/add_filter_result_to_group', async (req, res) => {
         "pinterest_followers": "pinterest.no_of_friends",
         "linkedin_connection": "linkedin.no_of_friends",
         "year_in_industry": "experience",
-        "age": "date_of_birth"
+        "age": "date_of_birth",
+        "location":"suburb"
     };
     match_filter = await global_helper.rename_keys(match_filter, keys);
 
