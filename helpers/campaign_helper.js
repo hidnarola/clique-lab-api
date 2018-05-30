@@ -56,7 +56,7 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
             },
             {
                 "$match":{
-                    "applied_campaign.user_id":ObjectId("5b0ce53f1c4eb47ea4f7d05a")
+                    "applied_campaign.user_id":new ObjectId(user_id),
                 }
             },
             {
