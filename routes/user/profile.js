@@ -112,4 +112,8 @@ router.get("/bank_detail", async (req, res) => {
     }
 });
 
+router.delete("/bank_detail/:accout_id", async (req, res) => {
+    
+});
+
 module.exports = router;

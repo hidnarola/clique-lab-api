@@ -129,6 +129,7 @@ router.post('/add_to_cart/:post_id', async (req, res) => {
     let cart_resp = await cart_helper.insert_cart_item(cart);
 
     if (cart_resp.status === 0) {
+        console.log("resp ==> ",cart_resp);
         res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while adding post into cart" });
     } else {
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Post has been added in cart" });
