@@ -785,6 +785,15 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             {
                 "$unwind": "$applied_campaign"
             },
+            { 
+                "$redact": { 
+                    "$cond": [
+                        { "$eq": [ "$applied_campaign.user_id", "$campaign_user.user_id" ] }, 
+                        "$$KEEP", 
+                        "$$PRUNE"
+                    ]
+                }
+            },
             {
                 "$lookup": {
                     "from": "users",
@@ -796,6 +805,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             {
                 "$unwind": "$users"
             },
+
             {
                 "$lookup":{
                     "from":"country",
@@ -842,7 +852,11 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             });
         }
 
+        console.log("aggregate ==> ",JSON.stringify(aggregate));
+
         var post = await Campaign.aggregate(aggregate);
+
+        console.log("Post ==> ",post);
 
         if (post && post.length > 0) {
             return { "status": 1, "message": "post found", "post": post[0] };
