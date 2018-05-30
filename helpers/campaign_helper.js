@@ -777,7 +777,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             {
                 "$lookup": {
                     "from": "campaign_applied",
-                    "localField": "_id",
+                    "localField": "campaign_user.campaign_id",
                     "foreignField": "campaign_id",
                     "as": "applied_campaign"
                 }
