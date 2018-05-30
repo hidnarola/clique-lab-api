@@ -20,16 +20,24 @@ cart_helper.insert_cart_item = async (cart_object) => {
         let cart_data = await cart.save();
         return { "status": 1, "message": "Cart item has been added", "cart": cart_data };
     } catch (err) {
-        return { "status": 0, "message": "Error occured while adding cart item", "error": err };
+        if (err.code === 11000) {
+            return { "status": 0, "message": "Post is already available in cart" };
+        } else {
+            return { "status": 0, "message": "Error occured while adding cart item", "error": err };
+        }
     }
 };
 
 cart_helper.insert_multiple_cart_item = async (cart_item_array) => {
     try {
-        let cart_item_data = await Cart.insertMany(cart_item_array);
+        let cart_item_data = await Cart.insertMany(cart_item_array, { ordered: false });
         return { "status": 1, "message": "Cart item has been added", "cart_items": cart_item_data };
     } catch (err) {
-        return { "status": 0, "message": "Error occured while inserting multiple cart item", "error": err };
+        if (err.name == "BulkWriteError") {
+            return { "status": 1, "message": "Cart item has been added" };
+        } else {
+            return { "status": 0, "message": "Error occured while inserting multiple cart item", "error": err };
+        }
     }
 };
 

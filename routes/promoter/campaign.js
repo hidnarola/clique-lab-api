@@ -517,7 +517,7 @@ router.post('/add_to_cart/:campaign_id/:applied_post_id', async (req, res) => {
     let cart_resp = await cart_helper.insert_cart_item(cart);
 
     if (cart_resp.status === 0) {
-        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while adding campaign into cart" });
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": cart_resp.message });
     } else {
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added in cart" });
     }
@@ -576,8 +576,6 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
     match_filter = await global_helper.rename_keys(match_filter, keys);
 
     var campaign_post = await campaign_helper.get_applied_post_of_campaign(req.params.campaign_id, 0, 0, match_filter, 0);
-
-    console.log("post = ", campaign_post);
 
     if (campaign_post.status === 1) {
 
