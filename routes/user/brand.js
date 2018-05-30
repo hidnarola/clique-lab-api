@@ -106,7 +106,6 @@ router.post("/inspired_submission", async (req, res) => {
   var errors = req.validationErrors();
 
   if (!errors) {
-
     var inspire_obj = {
       brand_id: req.body.company,
       text: req.body.text,
