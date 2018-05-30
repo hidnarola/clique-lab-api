@@ -91,7 +91,7 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
             }
         ]);
 
-        console.log("Cart item ==> ",cart_items);
+        console.log("Cart item ==> ", cart_items);
 
         if (cart_items && cart_items[0]) {
             cart_items[0].gst = await (cart_items[0].sub_total * 10) / 100;

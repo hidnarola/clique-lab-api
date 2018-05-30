@@ -23,7 +23,8 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
             {
                 "$match": {
                     "user_id": new ObjectId(user_id),
-                    "is_purchase": true
+                    "is_purchase": true,
+                    "is_posted":false
                 }
             },
             {
@@ -41,6 +42,28 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
                 "$match":{
                     "campaign.end_date": { "$gt": new Date() }
                 }
+            },
+            {
+                "$lookup":{
+                  "from":"campaign_applied",
+                  "localField":"campaign._id",
+                  "foreignField":"campaign_id",
+                  "as":"applied_campaign"
+               }
+            },
+            {
+                "$unwind":"$applied_campaign"
+            },
+            {
+                "$match":{
+                    "applied_campaign.user_id":ObjectId("5b0ce53f1c4eb47ea4f7d05a")
+                }
+            },
+            {
+                 "$project": {
+                      "_id": 1,
+                      "campaign": { $mergeObjects: ["$campaign", "$applied_campaign"] }
+                  }
             }
         ];
 
