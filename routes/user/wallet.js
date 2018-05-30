@@ -203,7 +203,10 @@ router.get('/bank_account', async (req, res) => {
                 }
 
                 if (bank_account.length > 0) {
-                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account });
+                    if (user_resp.User.wallet_balance === undefined) {
+                        user_resp.User.wallet_balance = 0;
+                    }
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account, "wallet_balance": user_resp.User.wallet_balance});
                 } else {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
                 }
