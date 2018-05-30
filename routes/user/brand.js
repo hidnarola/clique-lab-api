@@ -69,7 +69,7 @@ router.post("/", async (req, res) => {
  * @api {post} /user/promoter/inspired_submission Brand Add
  * @apiName Brand - Add
 /**
-  * @apiGroup User
+ * @apiGroup User
  * @apiHeader {String}  x-access-token unique access-key 
  * @apiHeader {String}  Content-Type application/json
  * @apiHeader {String}  x-access-token  unique access-key
@@ -110,7 +110,7 @@ router.post("/inspired_submission", async (req, res) => {
     var inspire_obj = {
       brand_id: req.body.company,
       text: req.body.text,
-      price: req.body.price,
+      price: (req.body.price * 100) / 70, // Converting price into 100%
       social_media_platform: req.body.social_media_platform,
       user_id: req.userInfo.id
     };
