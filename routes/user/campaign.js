@@ -368,8 +368,20 @@ router.post("/campaign_applied", async (req, res) => {
             logger.error("Error while inserting camapign  data = ", campaign_data);
             return res.status(config.BAD_REQUEST).json({ campaign_data });
           } else {
-            var obj = { "is_apply": true };
-            let campaign_apply_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
+
+            // Check for already existing entry
+            let campaign_user_resp = await campaign_helper.get_campaign_user(req.body.campaign_id,req.userInfo.id);
+            if(campaign_user_resp.status === 1){
+              let obj = { "is_apply": true };
+              let campaign_apply_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
+            } else {
+              let obj = {
+                "campaign_id":req.body.campaign_id,
+                "user_id":req.userInfo.id,
+                "is_apply":true
+              }
+              let camapign_user_insert = await campaign_helper.insert_campaign_user(obj);
+            }
             return res.status(config.OK_STATUS).json({"status":1,"message":"Campaign applied successfully","campaign":campaign.Campaign});
           }
         });

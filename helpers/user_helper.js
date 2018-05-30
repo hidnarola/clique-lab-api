@@ -321,7 +321,6 @@ user_helper.update_social_connection = async (user_id) => {
         let user_friends = {};
 
         // Update facebook friends
-        /*
         if (user_resp.User.facebook) {
 
             user_friends.facebook = user_resp.User.facebook;
@@ -338,7 +337,6 @@ user_helper.update_social_connection = async (user_id) => {
                 "no_of_friends": 0
             };
         }
-        */
 
         // Update instagram friends
         /*
@@ -398,7 +396,6 @@ user_helper.update_social_connection = async (user_id) => {
         */
 
         // Update linkedin friends
-        /*
         if (user_resp.User.linkedin) {
 
             user_friends.linkedin = user_resp.User.linkedin;
@@ -415,7 +412,6 @@ user_helper.update_social_connection = async (user_id) => {
                 "no_of_friends": 0
             };
         }
-        */
 
         // Update value in DB
         let update_resp = await user_helper.update_user_by_id(user_id, user_friends);

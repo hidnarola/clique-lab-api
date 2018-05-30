@@ -2,6 +2,9 @@ var FB = require('fb');
 var Twitter = require('twitter');
 
 var config = require("./../config");
+
+var Linkedin = require('node-linkedin')(config.LINKEDIN_APP_ID, config.LINKEDIN_APP_SECRET);
+
 var social_helper = {};
 
 
@@ -36,12 +39,6 @@ social_helper.get_twitter_friends_by_token = (access_token,access_token_secret) 
             access_token_secret: access_token_secret
         });
 
-        // var client = new Twitter({
-        //     consumer_key: 'HMZWrgFh4A9hhoWhZdkPS1IyO',
-        //     consumer_secret: '10kLAI5ybuC1AxY7WmdHDba2r9uCN4k6LYbvGhSNHr9Igq7uZy',
-        //     access_token_key: '981822054855933952-pyB8kqCK5pDIZl7tBWcaavfvNWY7JnM',
-        //     access_token_secret: 'frUH9G8PVgQIQ3AYdRF223SDAFDOpEFFOEv8TZBfhT7Ba'
-        // });
         var promise = new Promise(function(resolve, reject) {
             client.get('account/verify_credentials',function(err,data){
                 resolve(data.followers_count);
@@ -64,7 +61,17 @@ social_helper.get_pinterest_friends_by_token = async (access_token) => {
 
 social_helper.get_linkedin_friends_by_token = async (access_token) => {
     try {
-        return 0;
+        var linkedin = Linkedin.init(access_token);
+        var promise = new Promise(function(resolve, reject) {
+            linkedin.people.me(function(err, $in) {
+                if(err){
+                    resolve(0);
+                } else {
+                    resolve($in.numConnections);
+                }
+            });
+        });
+        return promise;
     } catch (err) {
         return 0;
     }

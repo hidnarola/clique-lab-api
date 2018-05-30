@@ -45,5 +45,7 @@ module.exports = {
     "SMTP_PASSWORD":process.env.SMTP_PASSWORD,
 
     "TWITTER_APP_ID": process.env.TWITTER_APP_ID,
-    "TWITTER_APP_SECRET":process.env.TWITTER_APP_SECRET
+    "TWITTER_APP_SECRET":process.env.TWITTER_APP_SECRET,
+    "LINKEDIN_APP_ID": process.env.LINKEDIN_APP_ID,
+    "LINKEDIN_APP_SECRET":process.env.LINKEDIN_APP_SECRET
 };

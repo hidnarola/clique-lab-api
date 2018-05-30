@@ -78,14 +78,15 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
         //     }
         // });
 
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$$ROOT' }
+            }
+        });
+
         if (page_size && page_no) {
-            aggregate.push({
-                "$group": {
-                    "_id": null,
-                    "total": { "$sum": 1 },
-                    'results': { "$push": '$$ROOT' }
-                }
-            });
             aggregate.push({
                 "$project": {
                     "total": 1,

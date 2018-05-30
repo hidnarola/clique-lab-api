@@ -268,9 +268,4 @@ router.post('/social_media', async (req, res) => {
     }
 });
 
-router.get("/update_friend_list", async (req, res) => {
-    let resp = await user_helper.update_social_connection(req.userInfo.id);
-    res.status(config.OK_STATUS).json(resp);
-});
-
 module.exports = router;

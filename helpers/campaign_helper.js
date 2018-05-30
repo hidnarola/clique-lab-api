@@ -2182,4 +2182,20 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
     }
 }
 
+/**
+ * 
+ */
+campaign_helper.get_campaign_user = async(campaign_id,user_id) => {
+    try {
+        var campaign = await Campaign_user.findOne({ campaign_id: campaign_id, user_id: user_id }).lean();
+        if (campaign) {
+            return { "status": 1, "message": "campaign_user found", "campaign_user": campaign };
+        } else {
+            return { "status": 2, "message": "No record found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign_user", "error": err }
+    }
+}
+
 module.exports = campaign_helper;
