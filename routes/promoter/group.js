@@ -117,14 +117,7 @@ router.post("/", async (req, res) => {
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.get('/', async (req, res) => {
-    var match_filter = { "promoter_id": { "$eq": new ObjectId(req.userInfo.id) } };
-    var sort = {};
-
-    if (Object.keys(sort).length === 0) {
-        sort["_id"] = 1;
-    }
-
-    var groups = await group_helper.get_filtered_group(0, 0, match_filter, sort);
+    var groups = await group_helper.get_all_group_of_promoter(req.userInfo.id);
     if (groups.status === 1) {
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Groups found", "results": groups.results });
     } else {

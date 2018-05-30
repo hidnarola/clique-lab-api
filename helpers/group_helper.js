@@ -50,6 +50,19 @@ group_helper.insert_group = async (group_object) => {
     }
 };
 
+group_helper.get_all_group_of_promoter = async(promoter_id) => {
+    try{
+        var group = await Group.find({ "promoter_id": { "$eq": promoter_id } });
+        if (group) {
+            return { "status": 1, "message": "Group details found", "results": group };
+        } else {
+            return { "status": 2, "message": "Group not found" };
+        }
+    } catch(err){
+        return { "status": 0, "message": "Error occured while finding group", "error": err };
+    }
+}
+
 /*
  * get_filtered_group is used to get group based on given filter
  * 
@@ -114,7 +127,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                     "groups": { "$push": "$groups" }
                 }
             }
-        ])
+        ]);
 
         var groups = await Group.aggregate(aggregate);
         groups = await Group.populate(groups, { "path": "groups.user.user_id", "model": "users" });
