@@ -82,14 +82,17 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             aggregate.push({ "$match": filter });
         }
         if (sort) {
+            aggregate.push({
+                "$project":{
+                    "_id":1,
+                    "name":1,
+                    "sortname":{ "$toLower": "$name" },
+                    "image":1,
+                    "created_at":1
+                }
+            });
             aggregate.push({ "$sort": sort });
         }
-
-        // aggregate.push({
-        //     "$lookup":{
-        //         "from":""
-        //     }
-        // });
 
         aggregate.push({
             "$group": {
@@ -128,6 +131,8 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                 }
             }
         ]);
+
+        console.log("aggregate ===> ",JSON.stringify(aggregate));
 
         var groups = await Group.aggregate(aggregate);
         groups = await Group.populate(groups, { "path": "groups.user.user_id", "model": "users" });

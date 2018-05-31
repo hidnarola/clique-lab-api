@@ -185,7 +185,11 @@ router.post('/filter', async (req, res) => {
 
         if (req.body.sort) {
             req.body.sort.forEach(sort_criteria => {
-                sort[sort_criteria.field] = sort_criteria.value;
+                if(sort_criteria.field === "name"){
+                    sort["sortname"] = sort_criteria.value;
+                } else {
+                    sort[sort_criteria.field] = sort_criteria.value;
+                }
             });
         }
 
