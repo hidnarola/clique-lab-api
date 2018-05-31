@@ -737,5 +737,4 @@ router.post("/chk_image_availablity", async (req, res) => {
   }
 });
 
-
 module.exports = router;

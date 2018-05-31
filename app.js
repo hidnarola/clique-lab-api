@@ -76,6 +76,7 @@ app.use(function (req, res, next) {
 var index = require('./routes/index');
 var user = require('./routes/user');
 var promoter = require('./routes/promoter');
+var cron = require("./routes/cron");
 // var admin = require('./routes/admin');
 
 
