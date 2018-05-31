@@ -11,7 +11,9 @@ var PinIt = require('pin-it-node');
 
 var campaign_helper = require("./../../helpers/campaign_helper");
 var user_helper = require("./../../helpers/user_helper");
+var promoter_helper = require("./../../helpers/promoter_helper");
 var campaign_post_helper = require("./../../helpers/campaign_post_helper");
+var earning_helper = require("./../../helpers/earning_helper");
 
 var PDK = require('node-pinterest');
 var pinterest = PDK.init('AYSihE_YGAfDVXbYU3P7e85xncTzFSaDpm_8EORE2WRMweA4YAAAAAA');
@@ -340,9 +342,13 @@ router.post("/campaign_applied", async (req, res) => {
                 } else {
                   logger.trace("Image uploaded");
 
-                  // var thumbnail = await sharp(dir+'/'+filename)
-                  //   .resize(170, 360, { kernel: sharp.kernel.nearest })
-                  //   .toFile(dir+'/170X360/'+filename);
+                  var thumbnail = await sharp(dir+'/'+filename)
+                    .resize(170, 360)
+                    .toFile(dir+'/170X360/'+filename);
+
+                  var thumbnail1 = await sharp(dir+'/'+filename)
+                    .resize(800, 600)
+                    .toFile(dir+'/800X600/'+filename);
 
                   callback(null, filename);
                 }
@@ -394,7 +400,7 @@ router.post("/campaign_applied", async (req, res) => {
   }
 });
 
-// /user/campaign/share/:campaign_id
+// /user/campaign/social_post
 router.post("/social_post", async (req, res) => {
   var schema = {
 
@@ -409,7 +415,7 @@ router.post("/social_post", async (req, res) => {
     "social_media_platform": {
       notEmpty: true,
       errorMessage: "social media platform is required"
-    },
+    }
 
   };
   req.checkBody(schema);
@@ -427,6 +433,43 @@ router.post("/social_post", async (req, res) => {
       logger.error("Error while posting camapign  data = ", resp_data);
       return res.status(config.BAD_REQUEST).json({ resp_data });
     } else {
+      // Fetch campaign price
+      let campaign_resp = await campaign_helper.get_campaign_by_id(req.body.campaign_id);
+
+      let twentyfive = (campaign_resp.Campaign.price * 25 / 100); // Credited to clique's account
+      let five = (campaign_resp.Campaign.price * 5 / 100); // Credited to partner account, if available
+      let seventy = (campaign_resp.Campaign.price * 70 / 100); // Credited to user's account
+
+      // Add balance in user's wallet
+      let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
+      let obj = {"wallet_balance" : (user_resp.User.wallet_balance) + seventy};
+      let user_update = await user_helper.update_user_by_id(req.userInfo.id,obj);
+
+      // Check for partner registration
+      if(user_resp.User.referral_id){
+        // Add 5% money to promoter wallet
+        let promoter_resp = await promoter_helper.get_promoter_by_id(user_resp.User.referral_id);
+        let obj = {"wallet_balance" : (promoter_resp.promoter.wallet_balance) + five};
+        let promoter_update = await promoter_helper.update_promoter_by_id(user_resp.User.referral_id,obj);
+      }
+
+      // Keep remianing balance in clique's account
+
+      // Update status in campaign_user - change posted and paid falg
+      obj = {
+        "is_posted":true,
+        "is_paid":true
+      };
+      let campaign_user_update = await campaign_helper.update_campaign_user(req.userInfo.id,req.body.campaign_id,obj);
+
+      // Record user transaction
+      obj = {
+        "user_id":req.userInfo.id,
+        "campaign_id":req.body.campaign_id,
+        "price":seventy
+      };
+      let earning_resp = await earning_helper.insert_user_earning(obj);
+
       return res.status(config.OK_STATUS).json(resp_data);
     }
 

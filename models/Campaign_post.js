@@ -9,9 +9,9 @@ var Campaign_postSchema = new Schema({
     social_media_platform: { type: String, enum: ["facebook", "instagram", "twitter", "pinterest", "linkedin"] },
     campaign_id: { type: mongoose.Schema.Types.ObjectId, ref: 'campaign' },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
-    no_of_likes: Number,
-    no_of_comments: Number,
-    no_of_shares: Number,
+    no_of_likes: { type:Number, default:0 },
+    no_of_comments: { type:Number, default:0 },
+    no_of_shares: { type:Number, default:0 },
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
