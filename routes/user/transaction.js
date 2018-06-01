@@ -22,7 +22,11 @@ router.post('/', async (req, res) => {
 
     if (!errors) {
         let earnings = await earning_helper.get_earning_by_user(req.userInfo.id);
-        res.status(200).json({"transaction":earnings});
+        if(earnings.status === 1) {
+            res.status(config.OK_STATUS).json(earnings);
+        } else {
+            res.status(config.BAD_REQUEST).json(earnings);
+        }
     } else {
         logger.error("Validation Error = ", errors);
         res.status(config.BAD_REQUEST).json({ message: errors });

@@ -24,106 +24,109 @@ earning_helper.insert_user_earning = async (earning_object) => {
  * 
  */
 earning_helper.get_earning_by_user = async (user_id, page_no, page_size) => {
-    let aggregate = [
-        {
-            "$match": {
-                "user_id": new ObjectId(user_id)
+    try {
+        let aggregate = [
+            {
+                "$match": {
+                    "user_id": new ObjectId(user_id)
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "campaign",
+                    "localField": "campaign_id",
+                    "foreignField": "_id",
+                    "as": "campaign"
+                }
+            },
+            {
+                "$unwind": "$campaign"
+            },
+            {
+                "$lookup": {
+                    "from": "promoters",
+                    "localField": "campaign.promoter_id",
+                    "foreignField": "_id",
+                    "as": "brand"
+                }
+            },
+            {
+                "$unwind": "$brand"
+            },
+            {
+                "$lookup": {
+                    "from": "campaign_applied",
+                    "localField": "campaign.campaign_id",
+                    "foreignField": "camapign_id",
+                    "as": "applied_post"
+                }
+            },
+            {
+                "$unwind": "$applied_post"
+            },
+            {
+                "$redact": {
+                    "$cond": [
+                        {
+                            "$and": [
+                                { "$eq": ["$applied_post.user_id", "$user_id"] },
+                                { "$eq": ["$applied_post.campaign_id", "$campaign_id"] }
+                            ]
+                        },
+                        "$$KEEP",
+                        "$$PRUNE"
+                    ]
+                }
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "campaign_id": 1,
+                    "price": 1,
+                    "created_at": 1,
+                    "camapign_name": "$campaign.name",
+                    "campaign_image": "$campaign.cover_image",
+                    "social_platform": "$campaign.social_media_platform",
+                    "brand": "$brand.company",
+                    "post_description": "$applied_post.desription",
+                    "post_image": "$applied_post.image"
+                }
             }
-        },
-        {
-            "$lookup": {
-                "from": "campaign",
-                "localField": "campaign_id",
-                "foreignField": "_id",
-                "as": "campaign"
-            }
-        },
-        {
-            "$unwind": "$campaign"
-        },
-        {
-            "$lookup": {
-                "from": "promoters",
-                "localField": "campaign.promoter_id",
-                "foreignField": "_id",
-                "as": "brand"
-            }
-        },
-        {
-            "$unwind": "$brand"
-        },
-        {
-            "$lookup": {
-                "from": "campaign_applied",
-                "localField": "campaign.campaign_id",
-                "foreignField": "camapign_id",
-                "as": "applied_post"
-            }
-        },
-        {
-            "$unwind": "$applied_post"
-        },
-        {
-            "$redact": {
-                "$cond": [
-                    {
-                        "$and": [
-                            { "$eq": ["$applied_post.user_id", "$user_id"] },
-                            { "$eq": ["$applied_post.campaign_id", "$campaign_id"] }
-                        ]
-                    },
-                    "$$KEEP",
-                    "$$PRUNE"
-                ]
-            }
-        },
-        {
-            "$project": {
-                "_id": 1,
-                "campaign_id": 1,
-                "price": 1,
-                "created_at": 1,
-                "camapign_name": "$campaign.name",
-                "campaign_image": "$campaign.cover_image",
-                "social_platform": "$campaign.social_media_platform",
-                "brand": "$brand.company",
-                "post_description": "$applied_post.desription",
-                "post_image": "$applied_post.image"
-            }
-        }
-    ];
+        ];
 
-    aggregate.push({
-        "$group": {
-            "_id": null,
-            "total": { "$sum": 1 },
-            'results': { "$push": '$$ROOT' }
-        }
-    });
-
-    if (page_size && page_no) {
         aggregate.push({
-            "$project": {
-                "total": 1,
-                'transaction': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": '$$ROOT' }
             }
         });
-    } else {
-        aggregate.push({
-            "$project": {
-                "total": 1,
-                'transaction': "$results"
-            }
-        });
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'transaction': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'transaction': "$results"
+                }
+            });
+        }
+        let earnings = await Earning.aggregate(aggregate);
+        if (earnings && earnings[0] && earnings[0].total > 0) {
+            return { "status": 1, "message": "Transaction found", "result": earnings[0] };
+        } else {
+            return { "status": 0, "message": "Transaction not found" };
+        }
+        return earnings;
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while fetching transaction", "error": err };
     }
-
-    console.log("aggregate ==> ", aggregate);
-
-    let earnings = await Earning.aggregate(aggregate);
-
-    console.log("Earnings ==> ", earnings);
-
-    return earnings;
 };
 
 module.exports = earning_helper;
