@@ -4,8 +4,6 @@ var ObjectId = mongoose.Types.ObjectId;
 var Transaction = require("./../models/Transaction");
 var transaction_helper = {};
 
-var ObjectId = mongoose.Types.ObjectId;
-
 /*
  * Insert transaction
  * @developed by "ar"
