@@ -17,6 +17,19 @@ var ObjectId = mongoose.Types.ObjectId;
 
 var campaign_helper = {};
 
+campaign_helper.get_all_campaign = async () => {
+    try {
+        var campaigns = await Campaign.find({ });
+        if (campaigns && campaigns.length > 0) {
+            return { "status": 1, "message": "Campaign found", "campaigns": campaigns };
+        } else {
+            return { "status": 2, "message": "No campaign found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding C ampaigns", "error": err }
+    }
+};
+
 campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, sort, page_no, page_size) => {
     try {
         let aggregate = [

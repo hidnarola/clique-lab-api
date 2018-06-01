@@ -3,6 +3,7 @@ var ObjectId = mongoose.Types.ObjectId;
 
 var Notification = require("./../models/Notification");
 var notification_helper = {};
+
 /*
  * get_all_notification is used to fetch all notification data
  * 
@@ -58,4 +59,5 @@ notification_helper.get_notification_for_user = async (user_id, page_no, page_si
         return { "status": 0, "message": "Error occured while finding notification", "error": err }
     }
 }
+
 module.exports = notification_helper;

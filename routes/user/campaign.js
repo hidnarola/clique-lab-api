@@ -342,13 +342,13 @@ router.post("/campaign_applied", async (req, res) => {
                 } else {
                   logger.trace("Image uploaded");
 
-                  var thumbnail = await sharp(dir+'/'+filename)
-                    .resize(170, 360)
-                    .toFile(dir+'/170X360/'+filename);
-
                   var thumbnail1 = await sharp(dir+'/'+filename)
                     .resize(800, 600)
                     .toFile(dir+'/800X600/'+filename);
+
+                  var thumbnail1 = await sharp(dir+'/'+filename)
+                    .resize(512, 384)
+                    .toFile(dir+'/512X384/'+filename);
 
                   callback(null, filename);
                 }

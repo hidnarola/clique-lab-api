@@ -516,10 +516,10 @@ router.post('/social_registration', async (req, res) => {
       notEmpty: true,
       errorMessage: "Name is required"
     },
-    "email": {
-      notEmpty: true,
-      errorMessage: "Email is required"
-    },
+    // "email": {
+    //   notEmpty: true,
+    //   errorMessage: "Email is required"
+    // },
     "gender": {
       notEmpty: true,
       errorMessage: "Gender is required"
@@ -543,10 +543,12 @@ router.post('/social_registration', async (req, res) => {
   if (!errors) {
     var reg_obj = {
       "name": req.body.name,
-      "email": req.body.email,
       "gender": req.body.gender
     };
 
+    if (req.body.email) {
+      reg_obj.email = req.body.email;
+    }
     if (req.body.social_type === "facebook") {
       reg_obj.facebook = {
         "id": req.body.social_id,
@@ -649,11 +651,11 @@ router.post('/login', async (req, res) => {
   logger.debug("req.body = ", req.body);
 
   var schema = {
-    'email': {
-      notEmpty: true,
-      errorMessage: "Email is required.",
-      isEmail: { errorMessage: "Please enter valid email address" }
-    },
+    // 'email': {
+    //   notEmpty: true,
+    //   errorMessage: "Email is required.",
+    //   isEmail: { errorMessage: "Please enter valid email address" }
+    // },
     'social_id': {
       notEmpty: true,
       errorMessage: "Social identification is required."

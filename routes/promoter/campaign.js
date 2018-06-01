@@ -6,6 +6,7 @@ var moment = require("moment");
 var mongoose = require('mongoose');
 var archiver = require('archiver');
 var router = express.Router();
+var sharp = require('sharp');
 
 var config = require('./../../config');
 var campaign_helper = require('./../../helpers/campaign_helper');
@@ -134,6 +135,11 @@ router.post('/', async (req, res) => {
                                 logger.trace("There was an issue in uploading cover image");
                                 callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading cover image" } });
                             } else {
+
+                                var thumbnail1 = await sharp(dir + '/' + filename)
+                                    .resize(512, 384)
+                                    .toFile(dir + '/512X384/' + filename);
+
                                 logger.trace("Campaign cover image has been uploaded");
                                 callback(null, filename);
                             }
@@ -156,11 +162,16 @@ router.post('/', async (req, res) => {
                             }
                             extention = path.extname(file.name);
                             filename = "board_" + new Date().getTime() + (Math.floor(Math.random() * 90000) + 10000) + extention;
-                            file.mv(dir + "/" + filename, function (err) {
+                            file.mv(dir + "/" + filename, async (err) => {
                                 if (err) {
                                     logger.error("There was an issue in uploading image");
                                     loop_callback({ status: config.MEDIA_ERROR_STATUS, resp: { "status": 0, "message": "There was an issue in uploading image" } });
                                 } else {
+
+                                    var thumbnail1 = await sharp(dir + '/' + filename)
+                                        .resize(180, 110)
+                                        .toFile(dir + '/180X110/' + filename);
+
                                     logger.trace("image has been uploaded. Image name = ", filename);
                                     file_path_array.push(filename);
                                     loop_callback();
@@ -691,7 +702,7 @@ router.post('/purchased', async (req, res) => {
         match_filter = await global_helper.rename_keys(match_filter, keys);
         sort = await global_helper.rename_keys(sort, keys);
 
-        let purchased_post = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id,req.body.page_no,req.body.page_size,match_filter,sort);
+        let purchased_post = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size, match_filter, sort);
 
         if (purchased_post.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Post found", "results": purchased_post.post });
@@ -783,7 +794,7 @@ router.post('/get_demographics', async (req, res) => {
  * /promoter/campaign/:campaign_id
  * Developed by "ar"
  */
-router.post('/:campaign_id',async(req,res) => {
+router.post('/:campaign_id', async (req, res) => {
     var schema = {
         'page_size': {
             notEmpty: true,
@@ -802,7 +813,7 @@ router.post('/:campaign_id',async(req,res) => {
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
-                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                    if (filter_criteria.value != null && filter_criteria.value != "") {
                         match_filter[filter_criteria.field] = filter_criteria.value;
                     }
                 } else if (filter_criteria.type === "between") {
@@ -816,7 +827,7 @@ router.post('/:campaign_id',async(req,res) => {
                         match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
-                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                    if (filter_criteria.value != null && filter_criteria.value != "") {
                         var regex = new RegExp(filter_criteria.value);
                         match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                     }
@@ -847,7 +858,7 @@ router.post('/:campaign_id',async(req,res) => {
 
             "name": "user.name",
             "gender": "user.gender",
-            "location":"user.suburb",
+            "location": "user.suburb",
             "job_industry": "user.job_industry",
             "education": "user.education",
             "language": "user.language",
@@ -860,7 +871,7 @@ router.post('/:campaign_id',async(req,res) => {
         match_filter = await global_helper.rename_keys(match_filter, keys);
         sort = await global_helper.rename_keys(sort, keys);
 
-        let campaign_post = await campaign_helper.get_applied_post_of_campaign(req.params.campaign_id,req.body.page_no,req.body.page_size,match_filter,sort);
+        let campaign_post = await campaign_helper.get_applied_post_of_campaign(req.params.campaign_id, req.body.page_no, req.body.page_size, match_filter, sort);
 
         if (campaign_post.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Applied post found", "results": campaign_post.campaign });

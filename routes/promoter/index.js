@@ -5,6 +5,7 @@ var async = require("async");
 var moment = require('moment');
 var router = express.Router();
 var bcrypt = require('bcrypt');
+var sharp = require('sharp');
 
 var config = require('./../../config');
 var promoter_helper = require('./../../helpers/promoter_helper');
@@ -86,6 +87,10 @@ router.post('/update_profile', async (req, res) => {
                                 logger.trace("There was an issue in uploading avatar image");
                                 callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading avatar image" } });
                             } else {
+                                var thumbnail1 = await sharp(dir + '/' + filename)
+                                    .resize(80, 80)
+                                    .toFile(dir + '/80X80/' + filename);
+
                                 logger.trace("Avatar image has uploaded for promoter");
                                 callback(null, filename);
                             }
@@ -171,13 +176,13 @@ router.get('/filter_preference', async (req, res) => {
 
     res.status(config.OK_STATUS).json({
         "status": 1,
-        "job_industry": (job_industry_resp.job_industry)?job_industry_resp.job_industry:{},
-        "interest": (interest_resp.interest)?interest_resp.interest:{},
-        "music_taste": (music_taste_resp.music_taste)?music_taste_resp.music_taste:{},
-        "language": (language_resp.language)?language_resp.language:{},
-        "education": (education_resp.education)?education_resp.education:{},
-        "job_title": (job_title_resp.job_title)?job_title_resp.job_title:{},
-        "ethnicity": (ethnicity_resp.ethnicity)?ethnicity_resp.ethnicity:{}
+        "job_industry": (job_industry_resp.job_industry) ? job_industry_resp.job_industry : {},
+        "interest": (interest_resp.interest) ? interest_resp.interest : {},
+        "music_taste": (music_taste_resp.music_taste) ? music_taste_resp.music_taste : {},
+        "language": (language_resp.language) ? language_resp.language : {},
+        "education": (education_resp.education) ? education_resp.education : {},
+        "job_title": (job_title_resp.job_title) ? job_title_resp.job_title : {},
+        "ethnicity": (ethnicity_resp.ethnicity) ? ethnicity_resp.ethnicity : {}
     });
 });
 
@@ -436,20 +441,20 @@ router.post('/change_password', async (req, res) => {
  * /promoter/wallet_balance
  * Developed by "ar"
  */
-router.get('/wallet_balance', async(req,res) => {
-    try{
+router.get('/wallet_balance', async (req, res) => {
+    try {
         let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
-        if(promoter_resp.status === 1){
-            if(promoter_resp.promoter.wallet_balance){
-                res.status(config.OK_STATUS).json({"status":1,"message":"Wallet balance found","balance":promoter_resp.promoter.wallet_balance});
+        if (promoter_resp.status === 1) {
+            if (promoter_resp.promoter.wallet_balance) {
+                res.status(config.OK_STATUS).json({ "status": 1, "message": "Wallet balance found", "balance": promoter_resp.promoter.wallet_balance });
             } else {
-                res.status(config.OK_STATUS).json({"status":1,"message":"Wallet balance found","balance":0});
+                res.status(config.OK_STATUS).json({ "status": 1, "message": "Wallet balance found", "balance": 0 });
             }
         } else {
-            res.status(config.BAD_REQUEST).json({"status":0,"message":"Error in finding promoter"});
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error in finding promoter" });
         }
-    } catch(err){
-        res.status(config.INTERNAL_SERVER_ERROR).json({"status":0,"message":"Error in fetching wallet balance"});
+    } catch (err) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error in fetching wallet balance" });
     }
 });
 
