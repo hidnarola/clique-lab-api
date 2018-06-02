@@ -177,6 +177,19 @@ router.put('/', function (req, res) {
                             logger.trace("There was an issue in uploading avatar image");
                             callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading avatar image" } });
                         } else {
+
+                            var thumbnail1 = await sharp(dir + '/' + filename)
+                                .resize(80, 80)
+                                .toFile(dir + '80X80/' + filename);
+
+                            var thumbnail1 = await sharp(dir + '/' + filename)
+                                .resize(160, 160)
+                                .toFile(dir + '160X160/' + filename);
+
+                            var thumbnail1 = await sharp(dir + '/' + filename)
+                                .resize(300, 200)
+                                .toFile(dir + '300X200/' + filename);
+
                             logger.trace("Avatar image has uploaded for user");
 
                             callback(null, filename);
