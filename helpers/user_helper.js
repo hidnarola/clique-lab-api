@@ -113,7 +113,7 @@ user_helper.get_user_by_id = async (id) => {
  */
 user_helper.get_all_user = async () => {
     try {
-        var users = await User.find({ status: true }, { "name": 1, "username": 1, "avatar": 1, "facebook": 1, "instagram": 1, "twitter": 1, "pinterest": 1, "linkedin": 1, country: 1 });
+        var users = await User.find({ status: true }, { "name": 1, "username": 1, "avatar": 1, "facebook": 1, "instagram": 1, "twitter": 1, "pinterest": 1, "linkedin": 1, "country": 1, "image":1 });
         if (users && users.length > 0) {
             return { "status": 1, "message": "Users found", "users": users };
         } else {
