@@ -96,6 +96,32 @@ let applied_campaign_image_resize = async() => {
     }
 };
 
-campaign_update();
-promote_image_upload();
-applied_campaign_image_resize();
+let user_image_resize = async() => {
+    let users = await user_helper.get_all_user();
+    if (users.status === 1) {
+        let dir = './uploads/users/';
+        users.users.forEach(async (user) => {
+            if (user.image) {
+                if (fs.existsSync(dir + user.image)) {
+                    console.log("User image available = ", user._id);
+                    var thumbnail1 = await sharp(dir + user.image)
+                        .resize(80, 80)
+                        .toFile(dir + '80X80/' + user.image);
+
+                    var thumbnail1 = await sharp(dir + user.image)
+                        .resize(160, 160)
+                        .toFile(dir + '160X160/' + user.image);
+
+                    var thumbnail1 = await sharp(dir + user.image)
+                        .resize(300, 200)
+                        .toFile(dir + '300X200/' + user.image);
+                }
+            }
+        });
+    }
+}
+
+// campaign_update();
+// promote_image_upload();
+// applied_campaign_image_resize();
+user_image_resize();
