@@ -230,7 +230,7 @@ router.get('/', async (req, res) => {
     } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaigns not found" });
     }
-})
+});
 
 // Fetch campaign in which given user is not available
 // /promoter/campaign/list_for_user/:user_id

@@ -2,6 +2,19 @@ var Promoter = require("./../models/Promoter");
 var Job_industry = require("./../models/Job_industry");
 var promoter_helper = {};
 
+promoter_helper.get_all_promoter = async () => {
+    try {
+        var promoter = await Promoter.find({ });
+        if (promoter && promoter.length > 0) {
+            return { "status": 1, "message": "Promoter found", "promoters": promoter };
+        } else {
+            return { "status": 2, "message": "No promoter found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding promoter", "error": err }
+    }
+};
+
 /*
  * get_promoter_by_id is used to fetch promoter details by promoter id
  * 

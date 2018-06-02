@@ -17,6 +17,19 @@ var ObjectId = mongoose.Types.ObjectId;
 
 var campaign_helper = {};
 
+campaign_helper.get_all_applied_campaign = async () => {
+    try {
+        var applied_campaign = await Campaign_Applied.find({ });
+        if (applied_campaign && applied_campaign.length > 0) {
+            return { "status": 1, "message": "Applied campaign found", "applied_campaign": applied_campaign };
+        } else {
+            return { "status": 2, "message": "No applied campaign found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding applied campaigns", "error": err }
+    }
+};
+
 campaign_helper.get_all_campaign = async () => {
     try {
         var campaigns = await Campaign.find({ });
@@ -26,7 +39,7 @@ campaign_helper.get_all_campaign = async () => {
             return { "status": 2, "message": "No campaign found" };
         }
     } catch (err) {
-        return { "status": 0, "message": "Error occured while finding C ampaigns", "error": err }
+        return { "status": 0, "message": "Error occured while finding Campaigns", "error": err }
     }
 };
 
