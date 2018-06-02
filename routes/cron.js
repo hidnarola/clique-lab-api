@@ -97,6 +97,7 @@ let applied_campaign_image_resize = async() => {
 };
 
 let user_image_resize = async() => {
+    console.log("image resize called");
     let users = await user_helper.get_all_user();
     if (users.status === 1) {
         let dir = './uploads/users/';
