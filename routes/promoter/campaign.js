@@ -528,7 +528,7 @@ router.post('/add_to_cart/:campaign_id/:applied_post_id', async (req, res) => {
     let cart_resp = await cart_helper.insert_cart_item(cart);
 
     if (cart_resp.status === 0) {
-        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": cart_resp.message });
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": cart_resp.message });
     } else {
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added in cart" });
     }
