@@ -147,4 +147,4 @@ let group_image_resize = async() => {
 // promote_image_upload();
 // applied_campaign_image_resize();
 // user_image_resize();
-group_image_resize();
+// group_image_resize();

@@ -296,7 +296,9 @@ router.post("/get_social_analytics", async (req, res) => {
         
         var monthArray = [];
         while (currentDate.isBefore(enddate)) {
-            monthArray.push(currentDate.format("M"));
+            if(monthArray.indexOf(currentDate.format("M")) === -1){
+                monthArray.push(currentDate.format("M"));
+            }
             currentDate.add(1, 'month');
         }
 
@@ -372,16 +374,19 @@ router.post("/get_social_analytics", async (req, res) => {
                     let resp_data = await campaign_helper.get_campaign_social_analysis_by_promoter(req.userInfo.id, match_filter, custom_filter);
 
                     let resp_month = _.pluck(resp_data,"_id");
+                    let return_data = [];
 
                     monthArray.forEach((month)=>{
                         month = parseInt(month);
                         if(resp_month.indexOf(month) === -1){
-                            resp_data.push({"_id":month,"like_cnt":0,"comment_cnt":0,"share_cnt":0});
+                            return_data.push({"_id":month,"like_cnt":0,"comment_cnt":0,"share_cnt":0});
                             resp_month.push(month);
+                        } else {
+                            return_data.push(resp_data[resp_month.indexOf(month)]);
                         }
                     });
 
-                    resp.push(resp_data);
+                    resp.push(return_data);
                     callback(null);
                 }
             ], async (err, resp) => {
