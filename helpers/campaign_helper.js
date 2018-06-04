@@ -1145,7 +1145,7 @@ campaign_helper.get_campaign_social_analysis_by_promoter = async (promoter_id, f
             "_id": 1,
             "campaign_post": 1,
             "start_date": 1,
-            "month": { $month: "$start_date" }
+            "month":{"$month":"$start_date"}
         }
     });
 

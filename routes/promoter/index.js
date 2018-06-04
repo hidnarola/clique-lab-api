@@ -6,6 +6,7 @@ var moment = require('moment');
 var router = express.Router();
 var bcrypt = require('bcrypt');
 var sharp = require('sharp');
+var _ = require("underscore");
 
 var config = require('./../../config');
 var promoter_helper = require('./../../helpers/promoter_helper');
@@ -291,6 +292,14 @@ router.post("/get_social_analytics", async (req, res) => {
         var startdate = moment(req.body.start_date, "YYYY-MM-DD").toDate();
         var enddate = moment(req.body.end_date, "YYYY-MM-DD").toDate();
 
+        var currentDate = moment(req.body.start_date, "YYYY-MM-DD");
+        
+        var monthArray = [];
+        while (currentDate.isBefore(enddate)) {
+            monthArray.push(currentDate.format("M"));
+            currentDate.add(1, 'month');
+        }
+
         console.log("start = ", startdate);
         console.log("end = ", enddate);
 
@@ -317,7 +326,7 @@ router.post("/get_social_analytics", async (req, res) => {
 
             "name": "user.name",
             "gender": "user.gender",
-            "location": "user.location",
+            "location": "user.suburb",
             "job_industry": "user.job_industry",
             "education": "user.education",
             "language": "user.language",
@@ -361,6 +370,17 @@ router.post("/get_social_analytics", async (req, res) => {
                 async (match_filter, callback) => {
                     match_filter = await global_helper.rename_keys(match_filter, keys);
                     let resp_data = await campaign_helper.get_campaign_social_analysis_by_promoter(req.userInfo.id, match_filter, custom_filter);
+
+                    let resp_month = _.pluck(resp_data,"_id");
+
+                    monthArray.forEach((month)=>{
+                        month = parseInt(month);
+                        if(resp_month.indexOf(month) === -1){
+                            resp_data.push({"_id":month,"like_cnt":0,"comment_cnt":0,"share_cnt":0});
+                            resp_month.push(month);
+                        }
+                    });
+
                     resp.push(resp_data);
                     callback(null);
                 }
