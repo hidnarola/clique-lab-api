@@ -129,7 +129,7 @@ let group_image_resize = async() => {
             let dir = './uploads/group/';
             group_resp.groups.forEach(async (group) => {
                 if (group.image) {
-                    if (fs.existsSync(dir + group.avatar)) {
+                    if (fs.existsSync(dir + group.image)) {
                         console.log("group image available = ", group._id);
                         var thumbnail1 = await sharp(dir + group.image)
                             .resize(325, 220)
