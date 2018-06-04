@@ -5,6 +5,7 @@ var async = require("async");
 var moment = require("moment");
 var mongoose = require('mongoose');
 var router = express.Router();
+var sharp = require('sharp');
 
 var config = require('./../../config');
 var group_helper = require('./../../helpers/group_helper');
