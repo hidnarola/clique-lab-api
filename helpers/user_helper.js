@@ -316,19 +316,21 @@ user_helper.add_bank_to_user = async (user_id, bank) => {
 
 user_helper.update_social_connection = async (user_id) => {
     let user_resp = await user_helper.get_user_by_id(user_id);
+    
     if (user_resp.status === 1 && user_resp.User) {
-
+        console.log("\n\n\n========================\nUpdating for user ==> ",user_resp.User.name);
         let user_friends = {};
 
         // Update facebook friends
         if (user_resp.User.facebook) {
-
+            console.log("Updating facebbok friend of => ",user_resp.User.name);
             user_friends.facebook = user_resp.User.facebook;
             if (user_friends.facebook.no_of_friends) {
                 user_friends.facebook.no_of_friends = 0;
             }
 
             if (user_resp.User.facebook.access_token) {
+                console.log("fb token available");
                 user_friends.facebook.no_of_friends = await social_helper.get_facebook_friends_by_token(user_resp.User.facebook.access_token);
             }
             

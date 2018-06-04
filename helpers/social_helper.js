@@ -12,6 +12,8 @@ social_helper.get_facebook_friends_by_token = async (access_token) => {
     try {
         FB.setAccessToken(access_token);
         let response = await FB.api('/me/friends');
+        console.log("Response of fb for access token ===> ",access_token);
+        console.log("resp ==> ", response);
         if (response.summary.total_count > 0) {
             return response.summary.total_count;
         } else {

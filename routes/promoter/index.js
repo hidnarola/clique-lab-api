@@ -397,7 +397,7 @@ router.post("/get_social_analytics", async (req, res) => {
                 console.log("err = ", err);
                 res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please provide filter agrgument" });
             } else {
-                res.status(config.OK_STATUS).json({ "status": 0, "message": "Social analytics calculated", "result": resp });
+                res.status(config.OK_STATUS).json({ "status": 1, "message": "Social analytics calculated", "result": resp });
             }
         });
 
