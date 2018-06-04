@@ -366,7 +366,7 @@ router.post('/:group_id/add_filter_result_to_group', async (req, res) => {
                         "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                     };
                 } else {
-                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                    match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                 }
             } else if (filter_criteria.type === "like") {
                 if(filter_criteria.value != null && filter_criteria.value != ""){
@@ -392,6 +392,8 @@ router.post('/:group_id/add_filter_result_to_group', async (req, res) => {
     match_filter = await global_helper.rename_keys(match_filter, keys);
 
     var users = await user_helper.get_filtered_user(0, 0, match_filter, 0);
+
+    
 
     if (users.status === 1 && users.results && users.results.users) {
         var user_group = [];
