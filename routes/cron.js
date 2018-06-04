@@ -18,6 +18,9 @@ cron.schedule('0 * * * *', async () => {
     }
 });
 
+
+user_helper.update_social_connection("5b0641cfcfae8715605b390a");
+
 let campaign_update = async () => {
     try {
         var campaign_helper = require('./../helpers/campaign_helper');

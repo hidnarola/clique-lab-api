@@ -221,7 +221,8 @@ campaign_helper.get_all_campaign_of_promoter = async (promoter_id) => {
         var aggregate = [{
             "$match": {
                 "promoter_id": new ObjectId(promoter_id),
-                "end_date": { "$gt": new Date() }
+                "end_date": { "$gt": new Date() },
+                "privacy":"invite"
             }
         }];
 
@@ -453,7 +454,8 @@ campaign_helper.user_not_exist_campaign_for_promoter = async (user_id, promoter_
             {
                 "$match": {
                     "promoter_id": new ObjectId(promoter_id),
-                    "end_date": { "$gt": new Date() }
+                    "end_date": { "$gt": new Date() },
+                    "privacy":"invite"
                 }
             },
             {
