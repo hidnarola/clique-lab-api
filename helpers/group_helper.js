@@ -9,7 +9,7 @@ var ObjectId = mongoose.Types.ObjectId;
 group_helper.get_all_groups = async () => {
     try {
         var groups = await Group.find({ });
-        if (gropus && groups.length > 0) {
+        if (groups && groups.length > 0) {
             return { "status": 1, "message": "Groups found", "groups": groups };
         } else {
             return { "status": 2, "message": "No group found" };
