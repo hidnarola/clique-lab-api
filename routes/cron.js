@@ -121,7 +121,30 @@ let user_image_resize = async() => {
     }
 }
 
+let group_image_resize = async() => {
+    try{
+        var group_helper = require("./../helpers/group_helper");
+        let group_resp = await group_helper.get_all_groups();
+        if (group_resp.status === 1) {
+            let dir = './uploads/group/';
+            group_resp.groups.forEach(async (group) => {
+                if (group.image) {
+                    if (fs.existsSync(dir + group.avatar)) {
+                        console.log("group image available = ", group._id);
+                        var thumbnail1 = await sharp(dir + group.image)
+                            .resize(325, 220)
+                            .toFile(dir + '325X220/' + group.image);
+                    }
+                }
+            });
+        }
+    } catch (err) {
+        console.log("Group : error in sharp ===> ", err);
+    }
+}
+
 // campaign_update();
 // promote_image_upload();
 // applied_campaign_image_resize();
 // user_image_resize();
+group_image_resize();

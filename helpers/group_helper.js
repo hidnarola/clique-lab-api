@@ -6,6 +6,19 @@ var group_helper = {};
 
 var ObjectId = mongoose.Types.ObjectId;
 
+group_helper.get_all_groups = async () => {
+    try {
+        var groups = await Group.find({ });
+        if (gropus && groups.length > 0) {
+            return { "status": 1, "message": "Groups found", "groups": groups };
+        } else {
+            return { "status": 2, "message": "No group found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding group", "error": err }
+    }
+};
+
 /*
  * get_group_by_id is used to fetch group details by group id
  * 

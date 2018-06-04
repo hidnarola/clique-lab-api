@@ -64,6 +64,11 @@ router.post("/", async (req, res) => {
                                 logger.error("There was an issue in uploading group image");
                                 callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading group image" } });
                             } else {
+
+                                var thumbnail1 = await sharp(dir + '/' + filename)
+                                    .resize(325, 220)
+                                    .toFile(dir + '/325X220/' + filename);
+
                                 logger.trace("image has been uploaded for group. Image name = ", filename);
                                 callback(null, filename);
                                 // group_obj.image = await filename;
