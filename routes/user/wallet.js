@@ -41,6 +41,10 @@ router.post('/withdraw', async (req, res) => {
         'amount': {
             notEmpty: true,
             errorMessage: "Withdrawal amount is required"
+        },
+        'bank_account': {
+            notEmpty: true,
+            errorMessage: "Bank account is required"
         }
     };
 
@@ -60,7 +64,8 @@ router.post('/withdraw', async (req, res) => {
                         currency: "aud",
                         customer: "cus_Cpn2hYxHQACXYq", // Stripe customer id of clique
                         destination: {
-                            account: user_resp.User.stripe_customer_id // bank account id of user
+                            // account: user_resp.User.stripe_customer_id // bank account id of user
+                            account: req.body.bank_account
                         },
                         description: "Charge for " + user_resp.User.name
                     });

@@ -3,6 +3,7 @@ var router = express.Router();
 var async = require("async");
 var fs = require("fs");
 var path = require("path");
+var sharp = require("sharp");
 
 var config = require("./../../config");
 var logger = config.logger;
@@ -180,15 +181,15 @@ router.put('/', function (req, res) {
 
                             var thumbnail1 = await sharp(dir + '/' + filename)
                                 .resize(80, 80)
-                                .toFile(dir + '80X80/' + filename);
+                                .toFile(dir + '/80X80/' + filename);
 
                             var thumbnail1 = await sharp(dir + '/' + filename)
                                 .resize(160, 160)
-                                .toFile(dir + '160X160/' + filename);
+                                .toFile(dir + '/160X160/' + filename);
 
                             var thumbnail1 = await sharp(dir + '/' + filename)
                                 .resize(300, 200)
-                                .toFile(dir + '300X200/' + filename);
+                                .toFile(dir + '/300X200/' + filename);
 
                             logger.trace("Avatar image has uploaded for user");
 
