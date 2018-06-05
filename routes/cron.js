@@ -30,9 +30,13 @@ let campaign_update = async () => {
                 if (campaign.cover_image) {
                     if (fs.existsSync(dir + campaign.cover_image)) {
                         console.log("campaign cover image available = ", campaign._id);
+                        // var thumbnail1 = await sharp(dir + campaign.cover_image)
+                        //     .resize(512, 384)
+                        //     .toFile(dir + '512X384/' + campaign.cover_image);
+
                         var thumbnail1 = await sharp(dir + campaign.cover_image)
-                            .resize(512, 384)
-                            .toFile(dir + '512X384/' + campaign.cover_image);
+                            .resize(100, 100)
+                            .toFile(dir + '100X100/' + campaign.cover_image);
                     }
                 }
                 if (campaign.mood_board_images && campaign.mood_board_images.length > 0) {
@@ -147,7 +151,7 @@ let group_image_resize = async() => {
     }
 }
 
-// campaign_update();
+campaign_update();
 // promote_image_upload();
 // applied_campaign_image_resize();
 // user_image_resize();

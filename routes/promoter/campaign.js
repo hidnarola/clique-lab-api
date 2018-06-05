@@ -140,6 +140,10 @@ router.post('/', async (req, res) => {
                                     .resize(512, 384)
                                     .toFile(dir + '/512X384/' + filename);
 
+                                var thumbnail1 = await sharp(dir + '/' + filename)
+                                    .resize(100, 100)
+                                    .toFile(dir + '/100X100/' + filename);
+
                                 logger.trace("Campaign cover image has been uploaded");
                                 callback(null, filename);
                             }

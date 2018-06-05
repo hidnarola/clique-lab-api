@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
     var errors = req.validationErrors();
 
     if (!errors) {
-        let earnings = await earning_helper.get_earning_by_user(req.userInfo.id);
+        let earnings = await earning_helper.get_earning_by_user(req.userInfo.id,req.body.page_no,req.body.page_size);
         if(earnings.status === 1) {
             res.status(config.OK_STATUS).json(earnings);
         } else {
