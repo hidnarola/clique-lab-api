@@ -38,16 +38,17 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'doc')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/',express.static(path.join(__dirname, 'frontapp_build')));
+app.use('/api',express.static(path.join(__dirname, 'public')));
+app.use('/api',express.static(path.join(__dirname, 'doc')));
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
 var options = {
   swaggerOptions: {
     authAction :{ JWT: {name: "JWT", schema: {type: "apiKey", in: "header", name: "x-access-token", description: ""}, value: "<JWT>"} }
   }
 };
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument,options));
+app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument,options));
 
 app.use(expressValidator());
 
@@ -80,9 +81,9 @@ var cron = require("./routes/cron");
 // var admin = require('./routes/admin');
 
 
-app.use('/',index);
-app.use('/user', user);
-app.use('/promoter', promoter);
+app.use('/api/',index);
+app.use('/api/user', user);
+app.use('/api/promoter', promoter);
 // app.use('/admin', admin);
 
 

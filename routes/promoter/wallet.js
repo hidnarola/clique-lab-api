@@ -82,4 +82,167 @@ router.post('/withdraw', async (req, res) => {
     }
 });
 
+/**
+ * Get connected bank accounts
+ * /promoter/wallet/bank_account
+ * Developed by "ar"
+ */
+router.get('/bank_account', async (req, res) => {
+    let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
+    if (user_resp.status === 1) {
+        if (user_resp.User.stripe_customer_id) {
+            try {
+                // let accounts = await stripe.customers.listSources( user_resp.User.stripe_customer_id, { limit: 100, object: "bank_account" });
+                let accounts = await stripe.accounts.listExternalAccounts(user_resp.User.stripe_customer_id, { object: "bank_account" });
+
+                let bank_account = [];
+                if (accounts.data.length > 0) {
+                    accounts.data.forEach((obj) => {
+                        console.log("Account data ==> ",accounts.data);
+                        bank_account.push({
+                            "id": obj.id,
+                            "account_holder_name": obj.account_holder_name,
+                            "bank_name": obj.bank_name,
+                            // "bank_name": obj.metadata.bank_name,
+                            "bank_Account_last4": obj.last4,
+                            "bsb": obj.routing_number
+                        });
+                    });
+                }
+
+                if (bank_account.length > 0) {
+                    if (user_resp.User.wallet_balance === undefined) {
+                        user_resp.User.wallet_balance = 0;
+                    }
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account, "wallet_balance": user_resp.User.wallet_balance });
+                } else {
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
+                }
+            } catch (err) {
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });
+            }
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User details not found" });
+    }
+
+});
+
+/**
+ * Add user's bank account using stripe connect
+ * /user/wallet/add_bank_account
+ * Developed by "ar"
+ */
+router.post('/add_bank_account', async (req, res) => {
+    var schema = {
+        "bank_name": {
+            notEmpty: true,
+            errorMessage: "Bank Name is required"
+        },
+        "bsb": {
+            notEmpty: true,
+            errorMessage: "BSB is required"
+        },
+        "account_number": {
+            notEmpty: true,
+            errorMessage: "Account Number is required"
+        },
+        "account_name": {
+            notEmpty: true,
+            errorMessage: "Account Name is required"
+        }
+    };
+
+    req.checkBody(schema);
+    var errors = req.validationErrors();
+
+    if (!errors) {
+        let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
+        if (user_resp.status === 1) {
+            try {
+                let bank_account_token = await stripe.tokens.create({
+                    bank_account: {
+                        account_number: req.body.account_number,
+                        country: 'AU',
+                        currency: 'aud',
+                        account_holder_name: req.body.account_name,
+                        account_holder_type: 'individual',
+                        routing_number: req.body.bsb,
+                        metadata: {
+                            bank_name:req.body.bank_name
+                        }
+                    }
+                });
+
+                if (!user_resp.User.stripe_customer_id) {
+                    // create new stripe account
+                    // Create stripe account of customer
+
+                    let account = await stripe.accounts.create({
+                        type: 'custom',
+                        country: 'AU',
+                        email: user_resp.User.email,
+                        legal_entity: {
+                            dob: {
+                                day: moment(user_resp.User.date_of_birth).date(),
+                                month: moment(user_resp.User.date_of_birth).month(),
+                                year: moment(user_resp.User.date_of_birth).year()
+                            },
+                            first_name: user_resp.User.name,
+                            last_name: user_resp.User.name,
+                            type: "individual"
+                        },
+                        external_account: bank_account_token.id
+                    });
+
+                    let update_resp = await user_helper.update_user_by_id(user_resp.User._id, { "stripe_customer_id": account.id });
+                } else {
+                    await stripe.accounts.createExternalAccount(
+                        user_resp.User.stripe_customer_id,
+                        { external_account: bank_account_token.id }
+                    );
+                }
+                res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been added" });
+            } catch (err) {
+                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err.message });
+            }
+
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't find given user" });
+        }
+    } else {
+        logger.error("Validation Error = ", errors);
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/**
+ * Delete connected bank accounts
+ * /user/wallet/bank_account/:bank_account_id
+ * Developed by "ar"
+ */
+router.delete('/bank_account/:bank_account_id', async (req, res) => {
+    let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
+    if (user_resp.status === 1) {
+        if (user_resp.User.stripe_customer_id) {
+            try {
+                let resp = await stripe.accounts.deleteExternalAccount(user_resp.User.stripe_customer_id,req.params.bank_account_id);
+                if(resp.deleted === true){
+                    res.status(config.OK_STATUS).json({"status":1,"message":"Bank account has been removed"});
+                } else {
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
+                }
+            } catch (err) {
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });
+            }
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User details not found" });
+    }
+});
+
 module.exports = router;
