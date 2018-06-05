@@ -52,10 +52,10 @@ router.post('/purchase', async (req, res) => {
             notEmpty: true,
             errorMessage: "Address line 1 is required"
         },
-        'address_line_2': {
-            notEmpty: true,
-            errorMessage: "Address line 2 is required"
-        },
+        // 'address_line_2': {
+        //     notEmpty: true,
+        //     errorMessage: "Address line 2 is required"
+        // },
         'city': {
             notEmpty: true,
             errorMessage: "City is required"
@@ -89,7 +89,7 @@ router.post('/purchase', async (req, res) => {
             "abn": req.body.abn,
             "country": req.body.country,
             "address_line1": req.body.address_line_1,
-            "address_line2": req.body.address_line_2,
+            
             "city": req.body.city,
             "state": req.body.state,
             "post_code": req.body.post_code,
@@ -99,6 +99,10 @@ router.post('/purchase', async (req, res) => {
 
         if (req.body.company) {
             transaction_obj.company = req.body.company;
+        }
+
+        if (req.body.address_line_2) {
+            transaction_obj.address_line2 = req.body.address_line_2;
         }
 
         let transaction_resp = await transaction_helper.insert_transaction(transaction_obj);
