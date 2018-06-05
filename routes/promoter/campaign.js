@@ -95,6 +95,8 @@ router.post('/', async (req, res) => {
     const errors = req.validationErrors();
     if (!errors) {
 
+        console.log("req.files ==> ",req.files);
+        console.log("board image ==> ",req.files['board_image']);
         // Check cover and board image
         if (req.files && req.files['cover_image'] && req.files['board_image']) {
             var campaign_obj = {
