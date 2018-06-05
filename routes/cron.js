@@ -18,7 +18,7 @@ cron.schedule('0 * * * *', async () => {
     }
 });
 
-// user_helper.update_social_connection("5b152d3ed305974201b60fd1");
+// user_helper.update_social_connection("5b0641cfcfae8715605b390a");
 
 let campaign_update = async () => {
     try {
@@ -88,13 +88,18 @@ let applied_campaign_image_resize = async() => {
                 if (campaign.image) {
                     if (fs.existsSync(dir + campaign.image)) {
                         console.log("campaign applied image available = ", campaign._id);
+                        
                         var thumbnail1 = await sharp(dir + campaign.image)
-                            .resize(512, 384)
-                            .toFile(dir + '512X384/' + campaign.image);
+                            .resize(100, 100)
+                            .toFile(dir + '100X100/' + campaign.image);
 
-                        var thumbnail1 = await sharp(dir + campaign.image)
-                            .resize(800, 600)
-                            .toFile(dir + '800X600/' + campaign.image);
+                        // var thumbnail1 = await sharp(dir + campaign.image)
+                        //     .resize(512, 384)
+                        //     .toFile(dir + '512X384/' + campaign.image);
+
+                        // var thumbnail1 = await sharp(dir + campaign.image)
+                        //     .resize(800, 600)
+                        //     .toFile(dir + '800X600/' + campaign.image);
                     }
                 }
             });
@@ -153,6 +158,6 @@ let group_image_resize = async() => {
 
 // campaign_update();
 // promote_image_upload();
-// applied_campaign_image_resize();
+applied_campaign_image_resize();
 // user_image_resize();
 // group_image_resize();

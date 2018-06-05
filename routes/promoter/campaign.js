@@ -767,6 +767,9 @@ router.post('/calendar', async (req, res) => {
     }
 });
 
+/**
+ * /promoter/campaign/get_demographics
+ */
 router.post('/get_demographics', async (req, res) => {
 
     var country = await campaign_helper.count_country_of_user(req.userInfo.id);
@@ -780,8 +783,6 @@ router.post('/get_demographics', async (req, res) => {
     var music_taste = await campaign_helper.count_music_taste_of_user(req.userInfo.id);
     var relationship_status = await campaign_helper.count_relationship_status_of_user(req.userInfo.id);
     var sexual_orientation = await campaign_helper.count_sexual_orientation_of_user(req.userInfo.id);
-
-
 
     if (country.status === 1 && state.status === 1 && suburb.status === 1 && job_industry.status === 1 && education.status === 1 && language.status === 1 && ethnicity.status === 1 && music_taste.status === 1) {
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "country": country.country, "state": state.state, "suburb": suburb.suburb, "gender": gender.gender, "job_industry": job_industry.job_industry, "education": education.education, "language": language.language, "ethnicity": ethnicity.ethnicity, "music_taste": music_taste.music_taste, "relationship_status": relationship_status.relationship_status, "sexual_orientation": sexual_orientation.sexual_orientation });
