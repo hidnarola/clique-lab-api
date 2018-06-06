@@ -1,5 +1,6 @@
 var FB = require('fb');
 var Twitter = require('twitter');
+var PDK = require('node-pinterest');
 
 var config = require("./../config");
 
@@ -59,6 +60,17 @@ social_helper.get_twitter_friends_by_token = (access_token,access_token_secret) 
 
 social_helper.get_pinterest_friends_by_token = async (access_token) => {
     try {
+        console.log("\n\n============ getting pinterest data === ");
+        var pinterest = PDK.init(access_token);
+        var options = {
+            "qs":{
+                "fields":"counts"
+            }
+        }
+        pinterest.api('me/followers',options).then((data) => {
+            console.log("data ====> ",data);
+        });
+
         return 0;
     } catch (err) {
         return 0;

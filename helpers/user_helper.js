@@ -383,7 +383,7 @@ user_helper.update_social_connection = async (user_id) => {
         // Update pinterest friends
         /*
         if (user_resp.User.pinterest) {
-
+            console.log("pinterest ==> for user ",user_resp.User.name," ===> ",user_resp.User.pinterest);
             user_friends.pinterest = user_resp.User.pinterest;
             if (user_friends.pinterest.no_of_friends) {
                 user_friends.pinterest.no_of_friends = 0;
