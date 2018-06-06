@@ -543,7 +543,12 @@ router.post('/social_registration', async (req, res) => {
   if (!errors) {
     var reg_obj = {
       "name": req.body.name,
-      "gender": req.body.gender
+      "gender": req.body.gender,
+      "facebook":{"no_of_friends":0},
+      "instagram":{"no_of_friends":0},
+      "twitter":{"no_of_friends":0},
+      "pinterest":{"no_of_friends":0},
+      "linkedin":{"no_of_friends":0}
     };
 
     if (req.body.email) {

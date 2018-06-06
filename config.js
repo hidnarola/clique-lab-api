@@ -39,6 +39,9 @@ module.exports = {
     "website_url" : process.env.WEBSITE_URL,
     "base_url": process.env.BASE+':'+process.env.NODE_PORT,
     "IS_HTTPS":process.env.IS_HTTPS,
+    "SSL_CERT":process.env.SSL_CERT,
+    "SSL_KEY":process.env.SSL_KEY,
+    "BUILD_DIR":process.env.BUILD_DIR,
     // "base_url": "http://13.55.64.183:3200"
 
     "SMTP_MAIL": process.env.SMTP_MAIL,

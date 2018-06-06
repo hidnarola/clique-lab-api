@@ -22,8 +22,8 @@ app.set('port', port);
 var server = {};
 
 if (config.IS_HTTPS == "true") {
-  var key = fs.readFileSync('/home/ec2-user/ssl/dev.cliquelabs.key');
-  var cert = fs.readFileSync('/home/ec2-user/ssl/dev.cliquelabs.crt');
+  var cert = fs.readFileSync(config.SSL_CERT);
+  var key = fs.readFileSync(config.SSL_KEY);
 
   var options = {
     key: key,
