@@ -18,7 +18,7 @@ cron.schedule('0 * * * *', async () => {
     }
 });
 
-// user_helper.update_social_connection("5b0641cfcfae8715605b390a");
+// user_helper.update_social_connection("5b1777043239f17b25396409");
 
 let campaign_update = async () => {
     try {

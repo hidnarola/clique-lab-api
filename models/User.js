@@ -78,6 +78,11 @@ var NotificationSettings = new Schema({
     push_got_new_offer: { type: Boolean, default: true },
 });
 
+var TokenSchema = new Schema({
+    token: String,
+    platform: { type: String, enum: ["android", "ios"] }
+});
+
 var UserModelSchema = new Schema({
     name: { type: String, required: true }, // 1
     short_bio: String, // 2
@@ -112,6 +117,7 @@ var UserModelSchema = new Schema({
     bank: [BankSchema], // 25
     sexual_orientation :String,
     referral_id:{type: mongoose.Schema.Types.ObjectId, ref: 'promoters'},
+    device_token:[TokenSchema],
     status :{ type:Boolean, default:true},
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });

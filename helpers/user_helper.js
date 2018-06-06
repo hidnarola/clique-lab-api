@@ -1,4 +1,5 @@
 var moment = require("moment");
+var _ = require("underscore");
 var user_helper = {};
 
 var User = require("./../models/User");
@@ -427,6 +428,21 @@ user_helper.update_social_connection = async (user_id) => {
 
     } else {
         return { "status": 2, "message": "User not found" };
+    }
+};
+
+user_helper.add_device_token_for_user = async(user_id,device_token,device_platform) => {
+    let user_resp = await user_helper.get_user_by_id(user_id);
+
+    // Check token already exist or not
+    if(user_resp.status === 1){
+        if(user_resp.User.device_token && user_resp.User.device_token.length > 0){
+
+        } else {
+
+        }
+    } else {
+        return {"status":0,"message":"User not exist"}
     }
 };
 

@@ -38,7 +38,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use('/',express.static(path.join(__dirname, config.BUILD_DIR)));
+app.use('/',express.static(path.join(__dirname, 'build')));
 app.use('/api',express.static(path.join(__dirname, 'public')));
 app.use('/api',express.static(path.join(__dirname, 'doc')));
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));

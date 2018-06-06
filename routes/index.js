@@ -656,11 +656,11 @@ router.post('/login', async (req, res) => {
   logger.debug("req.body = ", req.body);
 
   var schema = {
-    // 'email': {
-    //   notEmpty: true,
-    //   errorMessage: "Email is required.",
-    //   isEmail: { errorMessage: "Please enter valid email address" }
-    // },
+    'email': {
+      notEmpty: true,
+      errorMessage: "Email is required.",
+      isEmail: { errorMessage: "Please enter valid email address" }
+    },
     'social_id': {
       notEmpty: true,
       errorMessage: "Social identification is required."
