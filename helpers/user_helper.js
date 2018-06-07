@@ -114,7 +114,7 @@ user_helper.get_user_by_id = async (id) => {
  */
 user_helper.get_all_user = async () => {
     try {
-        var users = await User.find({ status: true }, { "name": 1, "username": 1, "avatar": 1, "facebook": 1, "instagram": 1, "twitter": 1, "pinterest": 1, "linkedin": 1, "country": 1, "image":1 });
+        var users = await User.find({ status: true }, { "name": 1, "username": 1, "avatar": 1, "facebook": 1, "instagram": 1, "twitter": 1, "pinterest": 1, "linkedin": 1, "country": 1, "image": 1 });
         if (users && users.length > 0) {
             return { "status": 1, "message": "Users found", "users": users };
         } else {
@@ -171,9 +171,9 @@ user_helper.get_filtered_user = async (page_no, page_size, filter, sort) => {
             });
         }
 
-        console.log("Aggregate ==> ",JSON.stringify(aggregate));
+        console.log("Aggregate ==> ", JSON.stringify(aggregate));
         var users = await User.aggregate(aggregate);
-        console.log("\n\nData ==> ",users);
+        console.log("\n\nData ==> ", users);
 
         if (users && users[0] && users[0].users.length > 0) {
             return { "status": 1, "message": "Users found", "results": users[0] };
@@ -319,14 +319,14 @@ user_helper.add_bank_to_user = async (user_id, bank) => {
 
 user_helper.update_social_connection = async (user_id) => {
     let user_resp = await user_helper.get_user_by_id(user_id);
-    
+
     if (user_resp.status === 1 && user_resp.User) {
-        console.log("\n\n\n========================\nUpdating for user ==> ",user_resp.User.name);
+        console.log("\n\n\n========================\nUpdating for user ==> ", user_resp.User.name);
         let user_friends = {};
 
         // Update facebook friends
         if (user_resp.User.facebook) {
-            console.log("Updating facebbok friend of => ",user_resp.User.name);
+            console.log("Updating facebbok friend of => ", user_resp.User.name);
             user_friends.facebook = user_resp.User.facebook;
             if (user_friends.facebook.no_of_friends) {
                 user_friends.facebook.no_of_friends = 0;
@@ -336,7 +336,7 @@ user_helper.update_social_connection = async (user_id) => {
                 console.log("fb token available");
                 user_friends.facebook.no_of_friends = await social_helper.get_facebook_friends_by_token(user_resp.User.facebook.access_token);
             }
-            
+
         } else {
             user_friends.facebook = {
                 "no_of_friends": 0
@@ -371,9 +371,9 @@ user_helper.update_social_connection = async (user_id) => {
             }
 
             if (user_resp.User.twitter.access_token) {
-                user_friends.twitter.no_of_friends = await social_helper.get_twitter_friends_by_token(user_resp.User.twitter.access_token,user_resp.User.twitter.access_token_secret);
+                user_friends.twitter.no_of_friends = await social_helper.get_twitter_friends_by_token(user_resp.User.twitter.access_token, user_resp.User.twitter.access_token_secret);
             }
-            
+
         } else {
             user_friends.twitter = {
                 "no_of_friends": 0
@@ -411,7 +411,7 @@ user_helper.update_social_connection = async (user_id) => {
             if (user_resp.User.linkedin.access_token) {
                 user_friends.linkedin.no_of_friends = await social_helper.get_linkedin_friends_by_token(user_resp.User.linkedin.access_token);
             }
-            
+
         } else {
             user_friends.linkedin = {
                 "no_of_friends": 0
@@ -431,18 +431,18 @@ user_helper.update_social_connection = async (user_id) => {
     }
 };
 
-user_helper.add_device_token_for_user = async(user_id,device_token,device_platform) => {
+user_helper.add_device_token_for_user = async (user_id, device_token, device_platform) => {
     let user_resp = await user_helper.get_user_by_id(user_id);
 
     // Check token already exist or not
-    if(user_resp.status === 1){
+    if (user_resp.status === 1) {
         var token_obj = {
-            "token":device_token,
-            "platform":device_platform
+            "token": device_token,
+            "platform": device_platform
         };
-        if(user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(token_obj)){
+        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(token_obj)) {
             // Token already available
-            return {"status":2,"message":"Token already added"}
+            return { "status": 2, "message": "Token already added" }
         } else {
             // Add token
             var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $push: token_obj }, { new: true });
@@ -453,7 +453,32 @@ user_helper.add_device_token_for_user = async(user_id,device_token,device_platfo
             }
         }
     } else {
-        return {"status":0,"message":"User not exist"}
+        return { "status": 0, "message": "User not exist" }
+    }
+};
+
+user_helper.remove_device_token_for_user = async (user_id, device_token, device_platform) => {
+    let user_resp = await user_helper.get_user_by_id(user_id);
+
+    // Check token already exist or not
+    if (user_resp.status === 1) {
+        var token_obj = {
+            "token": device_token,
+            "platform": device_platform
+        };
+        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(token_obj)) {
+            // Token already available, remove it
+            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $pull: token_obj }, { new: true });
+            if (!updated_user) {
+                return { "status": 2, "message": "Can't remove token for user" };
+            } else {
+                return { "status": 1, "message": "Token has been removed form user", "user": updated_user };
+            }
+        } else {
+            return { "status": 2, "message": "Token not available" };
+        }
+    } else {
+        return { "status": 0, "message": "User not exist" }
     }
 };
 

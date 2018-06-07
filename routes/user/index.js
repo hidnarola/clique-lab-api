@@ -43,6 +43,19 @@ router.get("/", async (req, res) => {
 });
 
 /**
+ * 
+ */
+router.post("/logout", async(req,res) => {
+    logger.trace("Logout API called");
+    // Remove device token from DB
+    if(req.body.device_token && req.body.device_platform)
+    {
+      await user_helper.remove_device_token_for_user(reg_data.user._id,req.body.device_token,req.body.device_platform);
+    }
+    res.status(config.OK_STATUS).json({"status":1,"message":"User has been signed-out"});
+});
+
+/**
  * @api {get} /user/interest_details Get interest details
  * @apiName Get interest details
  * @apiGroup User
