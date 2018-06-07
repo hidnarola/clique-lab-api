@@ -612,6 +612,7 @@ router.post('/social_registration', async (req, res) => {
       // Add device token to DB
       if(req.body.device_token && req.body.device_platform)
       {
+        console.log("adding device token");
         await user_helper.add_device_token_for_user(reg_data.user._id,req.body.device_token,req.body.device_platform);
       }
 

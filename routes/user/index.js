@@ -50,7 +50,7 @@ router.post("/logout", async(req,res) => {
     // Remove device token from DB
     if(req.body.device_token && req.body.device_platform)
     {
-      await user_helper.remove_device_token_for_user(reg_data.user._id,req.body.device_token,req.body.device_platform);
+      await user_helper.remove_device_token_for_user(req.userInfo.id,req.body.device_token,req.body.device_platform);
     }
     res.status(config.OK_STATUS).json({"status":1,"message":"User has been signed-out"});
 });

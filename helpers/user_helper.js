@@ -440,12 +440,12 @@ user_helper.add_device_token_for_user = async (user_id, device_token, device_pla
             "token": device_token,
             "platform": device_platform
         };
-        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(token_obj)) {
+        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(user_resp.User.device_token,token_obj)) {
             // Token already available
             return { "status": 2, "message": "Token already added" }
         } else {
             // Add token
-            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $push: token_obj }, { new: true });
+            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $push: {"device_token":token_obj} }, { new: true });
             if (!updated_user) {
                 return { "status": 2, "message": "Can't add token for user" };
             } else {
@@ -466,9 +466,9 @@ user_helper.remove_device_token_for_user = async (user_id, device_token, device_
             "token": device_token,
             "platform": device_platform
         };
-        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(token_obj)) {
+        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(user_resp.User.device_token,token_obj)) {
             // Token already available, remove it
-            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $pull: token_obj }, { new: true });
+            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $pull:{"device_token":token_obj}}, { new: true });
             if (!updated_user) {
                 return { "status": 2, "message": "Can't remove token for user" };
             } else {
