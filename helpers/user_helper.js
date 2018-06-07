@@ -436,10 +436,21 @@ user_helper.add_device_token_for_user = async(user_id,device_token,device_platfo
 
     // Check token already exist or not
     if(user_resp.status === 1){
-        if(user_resp.User.device_token && user_resp.User.device_token.length > 0){
-
+        var token_obj = {
+            "token":device_token,
+            "platform":device_platform
+        };
+        if(user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(token_obj)){
+            // Token already available
+            return {"status":2,"message":"Token already added"}
         } else {
-
+            // Add token
+            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $push: token_obj }, { new: true });
+            if (!updated_user) {
+                return { "status": 2, "message": "Can't add token for user" };
+            } else {
+                return { "status": 1, "message": "Token has been added for user", "user": updated_user };
+            }
         }
     } else {
         return {"status":0,"message":"User not exist"}

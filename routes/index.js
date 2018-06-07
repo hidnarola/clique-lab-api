@@ -506,6 +506,8 @@ router.get("/music_taste", async (req, res) => {
  * @apiParam {String} [username] Username of social platform
  * @apiParam {String} access_token Access token of social platform
  * @apiParam {String} access_token_secret Access token secret of social platform (Twitter)
+ * @apiParam {String} [device_token] Token of mobile device
+ * @apiParam {String} [device_platform] OS from which user logged-in. It can be android or ios
  * 
  * @apiSuccess (Success 200) {JSON} User details
  * @apiError (Error 4xx) {String} message Validation or error message
@@ -606,6 +608,13 @@ router.post('/social_registration', async (req, res) => {
     if (reg_data.status === 0) {
       return res.status(config.BAD_REQUEST).json(reg_data);
     } else {
+
+      // Add device token to DB
+      if(req.body.device_token && req.body.device_platform)
+      {
+        await user_helper.add_device_token_for_user(reg_data.user._id,req.body.device_token,req.body.device_platform);
+      }
+
       if (req.body.referral_id) {
         // Find referral promoter
         // Check for referral
@@ -644,6 +653,8 @@ router.post('/social_registration', async (req, res) => {
  * 
  * @apiParam {String} email Email
  * @apiParam {String} social_id as Social identification
+ * @apiParam {String} [device_token] Token of mobile device
+ * @apiParam {String} [device_platform] OS from which user logged-in. It can be android or ios
  * 
  * @apiSuccess (Success 200) {JSON} user  user object.
  * @apiSuccess (Success 200) {String} token Unique token which needs to be passed in subsequent requests.
@@ -651,7 +662,6 @@ router.post('/social_registration', async (req, res) => {
  * @apiError (Error 4xx) {String} message Validation or error message.
  */
 router.post('/login', async (req, res) => {
-
   logger.trace("API - User login called");
   logger.debug("req.body = ", req.body);
 
@@ -684,23 +694,31 @@ router.post('/login', async (req, res) => {
 
       res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Something went wrong while finding promoter", "error": promoter_resp.error });
     } else if (login_resp.status === 1) {
+
       logger.trace("User found. Executing next instruction");
       if (req.body.social_id == login_resp.user[req.body.social_type]['id']) {
+
         logger.trace("valid token. Generating token");
+
         var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
         let update_resp = await user_helper.update_user_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
         var LoginJson = { id: login_resp.user._id, email: login_resp.email, role: "user" };
-        console.log("id= ", login_resp.user._id);
+
         var token = jwt.sign(LoginJson, config.ACCESS_TOKEN_SECRET_KEY, {
           expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
         });
-
 
         delete login_resp.user.status;
         delete login_resp.user.password;
         delete login_resp.user.refresh_token;
         delete login_resp.user.last_login_date;
         delete login_resp.user.created_at;
+
+        // Add device token to DB
+        if(req.body.device_token && req.body.device_platform)
+        {
+          await user_helper.add_device_token_for_user(login_resp.user._id,req.body.device_token,req.body.device_platform);
+        }
 
         logger.info("Token generated");
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "user": login_resp.user, "token": token, "refresh_token": refreshToken });

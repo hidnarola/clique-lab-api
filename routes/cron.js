@@ -18,7 +18,7 @@ cron.schedule('0 * * * *', async () => {
     }
 });
 
-user_helper.update_social_connection("5afe9dea031e6d38cedb6041");
+// user_helper.update_social_connection("5afe9dea031e6d38cedb6041");
 
 let campaign_update = async () => {
     try {
@@ -135,7 +135,7 @@ let user_image_resize = async() => {
 }
 
 let group_image_resize = async() => {
-    try{
+    try {
         var group_helper = require("./../helpers/group_helper");
         let group_resp = await group_helper.get_all_groups();
         if (group_resp.status === 1) {
