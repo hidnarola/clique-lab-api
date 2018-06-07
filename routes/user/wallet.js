@@ -59,22 +59,36 @@ router.post('/withdraw', async (req, res) => {
                 // Verify user's wallet balance and proceed further
                 if (user_resp.User.wallet_balance >= req.body.amount) {
 
-                    let charge = await stripe.charges.create({
+                    let transfer = await stripe.transfers.create({
                         amount: req.body.amount * 100,
-                        currency: "aud",
-                        customer: "cus_Cpn2hYxHQACXYq", // Stripe customer id of clique
-                        destination: {
-                            // account: user_resp.User.stripe_customer_id // bank account id of user
-                            account: req.body.bank_account
-                        },
-                        description: "Charge for " + user_resp.User.name
+                        currency: "usd",
+                        destination: user_resp.User.stripe_customer_id
                     });
 
-                    if (charge) {
-                        // Deduct wallet balance of user by withdrawal amount
-                        let updated_user = await user_helper.update_user_by_id(req.userInfo.id, { "wallet_balance": user_resp.user.wallet_balance - req.body.amount });
+                    // let payout = await stripe.payouts.create({
+                    //     amount: req.body.amount * 100,
+                    //     currency: "aud",
+                    //     description:"Amount withdrawal from wallet",
+                    //     destination:req.body.bank_account
+                    // });
 
-                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Charge has been created", "charge": charge });
+                    // let charge = await stripe.charges.create({
+                    //     amount: req.body.amount * 100,
+                    //     currency: "aud",
+                    //     customer: "cus_Cpn2hYxHQACXYq", // Stripe customer id of clique
+                    //     destination: {
+                    //         // account: user_resp.User.stripe_customer_id // bank account id of user
+                    //         account: req.body.bank_account
+                    //     },
+                    //     description: "Charge for " + user_resp.User.name
+                    // });
+
+                    if (transfer) {
+                        console.log("Transfer ==> ", transfer);
+                        // Deduct wallet balance of user by withdrawal amount
+                        let updated_user = await user_helper.update_user_by_id(req.userInfo.id, { "wallet_balance": user_resp.User.wallet_balance - req.body.amount });
+
+                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Charge has been created" });
                     } else {
                         res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in creating charge" });
                     }
@@ -110,7 +124,7 @@ router.get('/bank_account', async (req, res) => {
                 let bank_account = [];
                 if (accounts.data.length > 0) {
                     accounts.data.forEach((obj) => {
-                        console.log("Account data ==> ",accounts.data);
+                        console.log("Account data ==> ", accounts.data);
                         bank_account.push({
                             "id": obj.id,
                             "account_holder_name": obj.account_holder_name,
@@ -183,7 +197,7 @@ router.post('/add_bank_account', async (req, res) => {
                         account_holder_type: 'individual',
                         routing_number: req.body.bsb,
                         metadata: {
-                            bank_name:req.body.bank_name
+                            bank_name: req.body.bank_name
                         }
                     }
                 });
@@ -208,6 +222,15 @@ router.post('/add_bank_account', async (req, res) => {
                         },
                         external_account: bank_account_token.id
                     });
+
+                    stripe.accounts.update(account.id,
+                        {
+                            tos_acceptance: {
+                                date: Math.floor(Date.now() / 1000),
+                                ip: req.connection.remoteAddress
+                            }
+                        }
+                    );
 
                     let update_resp = await user_helper.update_user_by_id(user_resp.User._id, { "stripe_customer_id": account.id });
                 } else {
@@ -240,9 +263,9 @@ router.delete('/bank_account/:bank_account_id', async (req, res) => {
     if (user_resp.status === 1) {
         if (user_resp.User.stripe_customer_id) {
             try {
-                let resp = await stripe.accounts.deleteExternalAccount(user_resp.User.stripe_customer_id,req.params.bank_account_id);
-                if(resp.deleted === true){
-                    res.status(config.OK_STATUS).json({"status":1,"message":"Bank account has been removed"});
+                let resp = await stripe.accounts.deleteExternalAccount(user_resp.User.stripe_customer_id, req.params.bank_account_id);
+                if (resp.deleted === true) {
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been removed" });
                 } else {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
                 }

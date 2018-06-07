@@ -42,23 +42,29 @@ router.post('/withdraw', async (req, res) => {
     if (!errors) {
         // Get promoter info
         let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
-        if (promoter_resp.status === 1 && promoter_resp.promoter.stripe_customer_id) {
+        if (promoter_resp.status === 1 && promoter_resp.promoter.stripe_connect_id) {
 
             try {
                 // Verify user's wallet balance and proceed further
                 if (promoter_resp.promoter.wallet_balance >= req.body.amount) {
 
-                    let charge = await stripe.charges.create({
+                    let transfer = await stripe.transfers.create({
                         amount: req.body.amount * 100,
                         currency: "usd",
-                        customer: "cus_Cpn2hYxHQACXYq", // Stripe customer id of clique
-                        destination: {
-                            account: "acct_1AL7EZB6ThHUGP1p" // bank account id of promoter
-                        },
-                        description: "Charge for " + promoter_resp.promoter.name
+                        destination: promoter_resp.promoter.stripe_connect_id
                     });
 
-                    if (charge) {
+                    // let charge = await stripe.charges.create({
+                    //     amount: req.body.amount * 100,
+                    //     currency: "usd",
+                    //     customer: "cus_Cpn2hYxHQACXYq", // Stripe customer id of clique
+                    //     destination: {
+                    //         account: "acct_1AL7EZB6ThHUGP1p" // bank account id of promoter
+                    //     },
+                    //     description: "Charge for " + promoter_resp.promoter.name
+                    // });
+
+                    if (transfer) {
                         // Deduct wallet balance of promoter by withdrawal amount
                         let updated_promoter = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "wallet_balance": promoter_resp.promoter.wallet_balance - req.body.amount });
 
