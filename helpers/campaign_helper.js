@@ -19,7 +19,7 @@ var campaign_helper = {};
 
 campaign_helper.get_all_applied_campaign = async () => {
     try {
-        var applied_campaign = await Campaign_Applied.find({ });
+        var applied_campaign = await Campaign_Applied.find({});
         if (applied_campaign && applied_campaign.length > 0) {
             return { "status": 1, "message": "Applied campaign found", "applied_campaign": applied_campaign };
         } else {
@@ -32,7 +32,7 @@ campaign_helper.get_all_applied_campaign = async () => {
 
 campaign_helper.get_all_campaign = async () => {
     try {
-        var campaigns = await Campaign.find({ });
+        var campaigns = await Campaign.find({});
         if (campaigns && campaigns.length > 0) {
             return { "status": 1, "message": "Campaign found", "campaigns": campaigns };
         } else {
@@ -50,7 +50,7 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
                 "$match": {
                     "user_id": new ObjectId(user_id),
                     "is_purchase": true,
-                    "is_posted":false
+                    "is_posted": false
                 }
             },
             {
@@ -65,31 +65,31 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
                 "$unwind": "$campaign"
             },
             {
-                "$match":{
+                "$match": {
                     "campaign.end_date": { "$gt": new Date() }
                 }
             },
             {
-                "$lookup":{
-                  "from":"campaign_applied",
-                  "localField":"campaign._id",
-                  "foreignField":"campaign_id",
-                  "as":"applied_campaign"
-               }
-            },
-            {
-                "$unwind":"$applied_campaign"
-            },
-            {
-                "$match":{
-                    "applied_campaign.user_id":new ObjectId(user_id),
+                "$lookup": {
+                    "from": "campaign_applied",
+                    "localField": "campaign._id",
+                    "foreignField": "campaign_id",
+                    "as": "applied_campaign"
                 }
             },
             {
-                 "$project": {
-                      "_id": 1,
-                      "campaign": { $mergeObjects: ["$campaign", "$applied_campaign"] }
-                  }
+                "$unwind": "$applied_campaign"
+            },
+            {
+                "$match": {
+                    "applied_campaign.user_id": new ObjectId(user_id),
+                }
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "campaign": { $mergeObjects: ["$campaign", "$applied_campaign"] }
+                }
             }
         ];
 
@@ -152,7 +152,7 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
 campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page_size) => {
     try {
         var aggregate = [{
-            "$match":{
+            "$match": {
                 "end_date": { "$gt": new Date() }
             }
         }];
@@ -222,7 +222,7 @@ campaign_helper.get_all_campaign_of_promoter = async (promoter_id) => {
             "$match": {
                 "promoter_id": new ObjectId(promoter_id),
                 "end_date": { "$gt": new Date() },
-                "privacy":"invite"
+                "privacy": "invite"
             }
         }];
 
@@ -386,7 +386,7 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
                 "$unwind": "$campaign"
             },
             {
-                "$match":{
+                "$match": {
                     "campaign.end_date": { "$gt": new Date() }
                 }
             }
@@ -455,7 +455,7 @@ campaign_helper.user_not_exist_campaign_for_promoter = async (user_id, promoter_
                 "$match": {
                     "promoter_id": new ObjectId(promoter_id),
                     "end_date": { "$gt": new Date() },
-                    "privacy":"invite"
+                    "privacy": "invite"
                 }
             },
             {
@@ -813,11 +813,11 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             {
                 "$unwind": "$applied_campaign"
             },
-            { 
-                "$redact": { 
+            {
+                "$redact": {
                     "$cond": [
-                        { "$eq": [ "$applied_campaign.user_id", "$campaign_user.user_id" ] }, 
-                        "$$KEEP", 
+                        { "$eq": ["$applied_campaign.user_id", "$campaign_user.user_id"] },
+                        "$$KEEP",
                         "$$PRUNE"
                     ]
                 }
@@ -835,15 +835,15 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             },
 
             {
-                "$lookup":{
-                    "from":"country",
-                    "localField":"user.country",
-                    "foreignField":"_id",
-                    "as":"user.country"
+                "$lookup": {
+                    "from": "country",
+                    "localField": "user.country",
+                    "foreignField": "_id",
+                    "as": "user.country"
                 }
             },
             {
-                "$unwind":{"path":"$user.country", "preserveNullAndEmptyArrays":true}
+                "$unwind": { "path": "$user.country", "preserveNullAndEmptyArrays": true }
             }
         ];
 
@@ -880,11 +880,11 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             });
         }
 
-        console.log("aggregate ==> ",JSON.stringify(aggregate));
+        console.log("aggregate ==> ", JSON.stringify(aggregate));
 
         var post = await Campaign.aggregate(aggregate);
 
-        console.log("Post ==> ",post);
+        console.log("Post ==> ", post);
 
         if (post && post.length > 0) {
             return { "status": 1, "message": "post found", "post": post[0] };
@@ -952,7 +952,7 @@ campaign_helper.get_campaign_analysis_by_promoter = async (promoter_id, filter) 
     let engage_cnt = campaign_helper.get_total_engaged_person_by_promoter(promoter_id, filter);
     let purchased_post_cnt = await campaign_post_helper.count_purchase_post_by_promoter(promoter_id, filter);
     let spent = await campaign_post_helper.total_spent_by_promoter(promoter_id, filter);
-    let average_cost_per_purchase = (purchased_post_cnt && purchased_post_cnt > 0) ? (spent/purchased_post_cnt) :0
+    let average_cost_per_purchase = (purchased_post_cnt && purchased_post_cnt > 0) ? (spent / purchased_post_cnt) : 0
 
     return {
         "average_cost_per_purchase": average_cost_per_purchase,
@@ -1147,7 +1147,7 @@ campaign_helper.get_campaign_social_analysis_by_promoter = async (promoter_id, f
             "_id": 1,
             "campaign_post": 1,
             "start_date": 1,
-            "month":{"$month":"$start_date"}
+            "month": { "$month": "$start_date" }
         }
     });
 
@@ -1296,7 +1296,7 @@ campaign_helper.count_state_of_user = async (promoter_id) => {
         },
         {
             "$group":
-                { _id: "$user.state", count: { $sum: 1 } }
+                { _id: "$user.state", name: { "$first": "$user.state" }, count: { $sum: 1 } }
         },
         {
             "$group": {
@@ -1366,7 +1366,7 @@ campaign_helper.count_suburb_of_user = async (promoter_id) => {
         },
         {
             "$group":
-                { _id: "$user.suburb", count: { $sum: 1 } }
+                { _id: "$user.suburb", name: { "$first": "$user.suburb" }, count: { $sum: 1 } }
         },
         {
             "$group": {
@@ -1437,7 +1437,7 @@ campaign_helper.count_gender_of_user = async (promoter_id) => {
         },
         {
             "$group":
-                { _id: "$user.gender", count: { $sum: 1 } }
+                { _id: "$user.gender", name: { "$first": "$user.gender" }, count: { $sum: 1 } }
         },
         {
             "$group": {
@@ -1741,7 +1741,7 @@ campaign_helper.count_language_of_user = async (promoter_id) => {
         {
             "$group": {
                 "_id": null,
-                "education": { $push: "$language" },
+                "language": { $push: "$language" },
                 "total": { $first: "$total" }
             }
         }
@@ -1803,7 +1803,7 @@ campaign_helper.count_ethnicity_of_user = async (promoter_id) => {
             "$group": {
                 "_id": "$ethnicity._id",
                 "name": {
-                    "$first": "$ethnicity.name"
+                    "$first": "$ethnicity.ethnicity"
                 },
                 "count": {
                     "$sum": 1
@@ -1978,7 +1978,7 @@ campaign_helper.count_relationship_status_of_user = async (promoter_id) => {
         },
         {
             "$group":
-                { _id: "$user.relationship_status", count: { $sum: 1 } }
+                { _id: "$user.relationship_status", "name": { "$first": "$user.relationship_status" }, count: { $sum: 1 } }
         },
         {
             "$group": {
@@ -2049,7 +2049,7 @@ campaign_helper.count_sexual_orientation_of_user = async (promoter_id) => {
         },
         {
             "$group":
-                { _id: "$user.sexual_orientation", count: { $sum: 1 } }
+                { _id: "$user.sexual_orientation", name: { "$first": "$user.sexual_orientation" }, count: { $sum: 1 } }
         },
         {
             "$group": {
@@ -2126,15 +2126,15 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
                 "$unwind": "$user"
             },
             {
-                "$lookup":{
-                    "from":"country",
-                    "localField":"user.country",
-                    "foreignField":"_id",
-                    "as":"user.country"
+                "$lookup": {
+                    "from": "country",
+                    "localField": "user.country",
+                    "foreignField": "_id",
+                    "as": "user.country"
                 }
             },
             {
-                "$unwind":{"path":"$user.country", "preserveNullAndEmptyArrays":true}
+                "$unwind": { "path": "$user.country", "preserveNullAndEmptyArrays": true }
             }
         ];
 
@@ -2175,7 +2175,7 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
             },
             {
                 "$project": {
-                    "_id":1,
+                    "_id": 1,
                     "campaign_id": 1,
                     "user_id": 1,
                     "applied_at": "$created_at",
@@ -2251,7 +2251,7 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
 /**
  * 
  */
-campaign_helper.get_campaign_user = async(campaign_id,user_id) => {
+campaign_helper.get_campaign_user = async (campaign_id, user_id) => {
     try {
         var campaign = await Campaign_user.findOne({ campaign_id: campaign_id, user_id: user_id }).lean();
         if (campaign) {

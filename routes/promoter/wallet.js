@@ -1,11 +1,13 @@
 var express = require("express");
 var router = express.Router();
+var moment = require("moment");
 
 var config = require('./../../config');
 var cart_helper = require('./../../helpers/cart_helper');
 var promoter_helper = require('./../../helpers/promoter_helper');
 
 var stripe = require("stripe")(config.STRIPE_SECRET_KEY);
+var logger = config.logger;
 
 /**
  * Get card of loggedin user
@@ -33,6 +35,10 @@ router.post('/withdraw', async (req, res) => {
         'amount': {
             notEmpty: true,
             errorMessage: "Withdrawal amount is required"
+        },
+        'bank_account': {
+            notEmpty: true,
+            errorMessage: "Bank account is required"
         }
     };
 
@@ -68,7 +74,7 @@ router.post('/withdraw', async (req, res) => {
                         // Deduct wallet balance of promoter by withdrawal amount
                         let updated_promoter = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "wallet_balance": promoter_resp.promoter.wallet_balance - req.body.amount });
 
-                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Chard has been created", "charge": charge });
+                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Chard has been created"});
                     } else {
                         res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in creating charge" });
                     }
@@ -94,17 +100,15 @@ router.post('/withdraw', async (req, res) => {
  * Developed by "ar"
  */
 router.get('/bank_account', async (req, res) => {
-    let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
-    if (user_resp.status === 1) {
-        if (user_resp.User.stripe_customer_id) {
+    let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+    if (promoter_resp.status === 1) {
+        if (promoter_resp.promoter.stripe_connect_id) {
             try {
-                // let accounts = await stripe.customers.listSources( user_resp.User.stripe_customer_id, { limit: 100, object: "bank_account" });
-                let accounts = await stripe.accounts.listExternalAccounts(user_resp.User.stripe_customer_id, { object: "bank_account" });
+                let accounts = await stripe.accounts.listExternalAccounts(promoter_resp.promoter.stripe_connect_id, { object: "bank_account" });
 
                 let bank_account = [];
                 if (accounts.data.length > 0) {
                     accounts.data.forEach((obj) => {
-                        console.log("Account data ==> ",accounts.data);
                         bank_account.push({
                             "id": obj.id,
                             "account_holder_name": obj.account_holder_name,
@@ -117,10 +121,10 @@ router.get('/bank_account', async (req, res) => {
                 }
 
                 if (bank_account.length > 0) {
-                    if (user_resp.User.wallet_balance === undefined) {
-                        user_resp.User.wallet_balance = 0;
+                    if (promoter_resp.promoter.wallet_balance === undefined) {
+                        promoter_resp.promoter.wallet_balance = 0;
                     }
-                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account, "wallet_balance": user_resp.User.wallet_balance });
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account });
                 } else {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
                 }
@@ -131,9 +135,8 @@ router.get('/bank_account', async (req, res) => {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
         }
     } else {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User details not found" });
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter details not found" });
     }
-
 });
 
 /**
@@ -165,8 +168,8 @@ router.post('/add_bank_account', async (req, res) => {
     var errors = req.validationErrors();
 
     if (!errors) {
-        let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
-        if (user_resp.status === 1) {
+        let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+        if (promoter_resp.status === 1) {
             try {
                 let bank_account_token = await stripe.tokens.create({
                     bank_account: {
@@ -182,31 +185,29 @@ router.post('/add_bank_account', async (req, res) => {
                     }
                 });
 
-                if (!user_resp.User.stripe_customer_id) {
-                    // create new stripe account
-                    // Create stripe account of customer
-
+                if (!promoter_resp.promoter.stripe_connect_id) {
+                    // create new stripe connect account
                     let account = await stripe.accounts.create({
                         type: 'custom',
                         country: 'AU',
-                        email: user_resp.User.email,
+                        email: promoter_resp.promoter.email,
                         legal_entity: {
                             dob: {
-                                day: moment(user_resp.User.date_of_birth).date(),
-                                month: moment(user_resp.User.date_of_birth).month(),
-                                year: moment(user_resp.User.date_of_birth).year()
+                                day: moment(promoter_resp.promoter.date_of_birth).date(),
+                                month: moment(promoter_resp.promoter.date_of_birth).month(),
+                                year: moment(promoter_resp.promoter.date_of_birth).year()
                             },
-                            first_name: user_resp.User.name,
-                            last_name: user_resp.User.name,
+                            first_name: promoter_resp.promoter.full_name,
+                            last_name: promoter_resp.promoter.full_name,
                             type: "individual"
                         },
                         external_account: bank_account_token.id
                     });
 
-                    let update_resp = await user_helper.update_user_by_id(user_resp.User._id, { "stripe_customer_id": account.id });
+                    let update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id, { "stripe_connect_id": account.id });
                 } else {
                     await stripe.accounts.createExternalAccount(
-                        user_resp.User.stripe_customer_id,
+                        promoter_resp.promoter.stripe_connect_id,
                         { external_account: bank_account_token.id }
                     );
                 }
@@ -214,9 +215,8 @@ router.post('/add_bank_account', async (req, res) => {
             } catch (err) {
                 res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err.message });
             }
-
         } else {
-            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't find given user" });
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't find given promoter" });
         }
     } else {
         logger.error("Validation Error = ", errors);
@@ -230,11 +230,11 @@ router.post('/add_bank_account', async (req, res) => {
  * Developed by "ar"
  */
 router.delete('/bank_account/:bank_account_id', async (req, res) => {
-    let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
-    if (user_resp.status === 1) {
-        if (user_resp.User.stripe_customer_id) {
+    let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+    if (promoter_resp.status === 1) {
+        if (promoter_resp.promoter.stripe_connect_id) {
             try {
-                let resp = await stripe.accounts.deleteExternalAccount(user_resp.User.stripe_customer_id,req.params.bank_account_id);
+                let resp = await stripe.accounts.deleteExternalAccount(promoter_resp.promoter.stripe_connect_id,req.params.bank_account_id);
                 if(resp.deleted === true){
                     res.status(config.OK_STATUS).json({"status":1,"message":"Bank account has been removed"});
                 } else {
@@ -247,7 +247,7 @@ router.delete('/bank_account/:bank_account_id', async (req, res) => {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
         }
     } else {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User details not found" });
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter not found" });
     }
 });
 

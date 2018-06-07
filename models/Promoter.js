@@ -27,6 +27,7 @@ var PromoterSchema = new Schema({
     password_changed_date: {type: Date},
 
     stripe_customer_id: String,
+    stripe_connect_id: String,
 
     bank_details: [String], // Bank account id of stripe
     created_at: { type: Date, default: Date.now }

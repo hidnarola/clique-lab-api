@@ -785,22 +785,22 @@ router.post('/get_demographics', async (req, res) => {
     var music_taste = await campaign_helper.count_music_taste_of_user(req.userInfo.id);
     var relationship_status = await campaign_helper.count_relationship_status_of_user(req.userInfo.id);
     var sexual_orientation = await campaign_helper.count_sexual_orientation_of_user(req.userInfo.id);
-
-    var result = {
-        "country": country.country[0], 
-        "state": state.state[0], 
-        "suburb": suburb.suburb[0], 
-        "gender": gender.gender[0], 
-        "job_industry": job_industry.job_industry[0], 
-        "education": education.education[0], 
-        "language": language.language[0], 
-        "ethnicity": ethnicity.ethnicity[0], 
-        "music_taste": music_taste.music_taste[0], 
-        "relationship_status": relationship_status.relationship_status[0], 
-        "sexual_orientation": sexual_orientation.sexual_orientation[0]
-    }
-
+    
     if (country.status === 1 && state.status === 1 && suburb.status === 1 && job_industry.status === 1 && education.status === 1 && language.status === 1 && ethnicity.status === 1 && music_taste.status === 1) {
+        var result = {
+            "country": country.country[0], 
+            "state": state.state[0], 
+            "suburb": suburb.suburb[0], 
+            "gender": gender.gender[0], 
+            "job_industry": job_industry.job_industry[0], 
+            "education": education.education[0], 
+            "language": language.language[0], 
+            "ethnicity": ethnicity.ethnicity[0], 
+            "music_taste": music_taste.music_taste[0], 
+            "relationship_status": relationship_status.relationship_status[0], 
+            "sexual_orientation": sexual_orientation.sexual_orientation[0]
+        }
+    
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results":result });
     } else if (campaigns.status === 2) {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
