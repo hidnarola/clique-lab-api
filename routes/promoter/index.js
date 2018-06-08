@@ -226,7 +226,9 @@ router.post("/get_analytics", async (req, res) => {
                 if (filter) {
                     filter.forEach(filter_criteria => {
                         if (filter_criteria.type === "exact") {
-                            match_filter[filter_criteria.field] = filter_criteria.value;
+                            if(filter_criteria.value != null && filter_criteria.value != ""){
+                                match_filter[filter_criteria.field] = filter_criteria.value;
+                            }
                         } else if (filter_criteria.type === "between") {
                             if (filter_criteria.field === "age") {
                                 // Age is derived attribute and need to calculate based on date of birth
@@ -235,11 +237,13 @@ router.post("/get_analytics", async (req, res) => {
                                     "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                                 };
                             } else {
-                                match_filter[filter_criteria.field] = { "$lte": filter_criteria.max_value, "$gte": filter_criteria.min_value };
+                                match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                             }
                         } else if (filter_criteria.type === "like") {
-                            let regex = new RegExp(filter_criteria.value);
-                            match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                            if(filter_criteria.value != null && filter_criteria.value != ""){
+                                var regex = new RegExp(filter_criteria.value);
+                                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                            }
                         } else if (filter_criteria.type === "id") {
                             match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
                         }
@@ -346,7 +350,9 @@ router.post("/get_social_analytics", async (req, res) => {
                     if (filter) {
                         filter.forEach(filter_criteria => {
                             if (filter_criteria.type === "exact") {
-                                match_filter[filter_criteria.field] = filter_criteria.value;
+                                if(filter_criteria.value != null && filter_criteria.value != ""){
+                                    match_filter[filter_criteria.field] = filter_criteria.value;
+                                }
                             } else if (filter_criteria.type === "between") {
                                 if (filter_criteria.field === "age") {
                                     // Age is derived attribute and need to calculate based on date of birth
@@ -355,11 +361,13 @@ router.post("/get_social_analytics", async (req, res) => {
                                         "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                                     };
                                 } else {
-                                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.max_value, "$gte": filter_criteria.min_value };
+                                    match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                                 }
                             } else if (filter_criteria.type === "like") {
-                                let regex = new RegExp(filter_criteria.value);
-                                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                                if(filter_criteria.value != null && filter_criteria.value != ""){
+                                    var regex = new RegExp(filter_criteria.value);
+                                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                                }
                             } else if (filter_criteria.type === "id") {
                                 match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
                             }

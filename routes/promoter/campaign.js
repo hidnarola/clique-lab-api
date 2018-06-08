@@ -372,7 +372,9 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {
             if (filter_criteria.type === "exact") {
-                match_filter[filter_criteria.field] = filter_criteria.value;
+                if(filter_criteria.value != null && filter_criteria.value != ""){
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                }
             } else if (filter_criteria.type === "between") {
                 if (filter_criteria.field === "age") {
                     // Age is derived attribute and need to calculate based on date of birth
@@ -381,11 +383,13 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
                         "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                     };
                 } else {
-                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                    match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                 }
             } else if (filter_criteria.type === "like") {
-                var regex = new RegExp(filter_criteria.value);
-                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                if(filter_criteria.value != null && filter_criteria.value != ""){
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                }
             } else if (filter_criteria.type === "id") {
                 match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
             }
@@ -436,7 +440,9 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {
             if (filter_criteria.type === "exact") {
-                match_filter[filter_criteria.field] = filter_criteria.value;
+                if(filter_criteria.value != null && filter_criteria.value != ""){
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                }
             } else if (filter_criteria.type === "between") {
                 if (filter_criteria.field === "age") {
                     // Age is derived attribute and need to calculate based on date of birth
@@ -445,11 +451,13 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
                         "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                     };
                 } else {
-                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                    match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                 }
             } else if (filter_criteria.type === "like") {
-                var regex = new RegExp(filter_criteria.value);
-                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                if(filter_criteria.value != null && filter_criteria.value != ""){
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                }
             } else if (filter_criteria.type === "id") {
                 match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
             }
@@ -550,7 +558,9 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {
             if (filter_criteria.type === "exact") {
-                match_filter[filter_criteria.field] = filter_criteria.value;
+                if(filter_criteria.value != null && filter_criteria.value != ""){
+                    match_filter[filter_criteria.field] = filter_criteria.value;
+                }
             } else if (filter_criteria.type === "between") {
                 if (filter_criteria.field === "age") {
                     // Age is derived attribute and need to calculate based on date of birth
@@ -559,11 +569,13 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
                         "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                     };
                 } else {
-                    match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                    match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                 }
             } else if (filter_criteria.type === "like") {
-                var regex = new RegExp(filter_criteria.value);
-                match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                if(filter_criteria.value != null && filter_criteria.value != ""){
+                    var regex = new RegExp(filter_criteria.value);
+                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                }
             } else if (filter_criteria.type === "id") {
                 match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
             }
@@ -654,7 +666,9 @@ router.post('/purchased', async (req, res) => {
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
-                    match_filter[filter_criteria.field] = filter_criteria.value;
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                        match_filter[filter_criteria.field] = filter_criteria.value;
+                    }
                 } else if (filter_criteria.type === "between") {
                     if (filter_criteria.field === "age") {
                         // Age is derived attribute and need to calculate based on date of birth
@@ -663,11 +677,13 @@ router.post('/purchased', async (req, res) => {
                             "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                         };
                     } else {
-                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                        match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
-                    var regex = new RegExp(filter_criteria.value);
-                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                        var regex = new RegExp(filter_criteria.value);
+                        match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                    }
                 } else if (filter_criteria.type === "id") {
                     match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
                 }
@@ -834,7 +850,7 @@ router.post('/:campaign_id', async (req, res) => {
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
-                    if (filter_criteria.value != null && filter_criteria.value != "") {
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
                         match_filter[filter_criteria.field] = filter_criteria.value;
                     }
                 } else if (filter_criteria.type === "between") {
@@ -845,10 +861,10 @@ router.post('/:campaign_id', async (req, res) => {
                             "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                         };
                     } else {
-                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                        match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
-                    if (filter_criteria.value != null && filter_criteria.value != "") {
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
                         var regex = new RegExp(filter_criteria.value);
                         match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                     }
@@ -933,7 +949,9 @@ router.post('/:campaign_id/campaign_users', async (req, res) => {
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
-                    match_filter[filter_criteria.field] = filter_criteria.value;
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                        match_filter[filter_criteria.field] = filter_criteria.value;
+                    }
                 } else if (filter_criteria.type === "between") {
                     if (filter_criteria.field === "age") {
                         // Age is derived attribute and need to calculate based on date of birth
@@ -942,11 +960,13 @@ router.post('/:campaign_id/campaign_users', async (req, res) => {
                             "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                         };
                     } else {
-                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                        match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
-                    var regex = new RegExp(filter_criteria.value);
-                    match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                        var regex = new RegExp(filter_criteria.value);
+                        match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
+                    }
                 } else if (filter_criteria.type === "id") {
                     match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
                 }
