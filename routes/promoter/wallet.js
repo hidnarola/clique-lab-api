@@ -74,7 +74,7 @@ router.post('/withdraw', async (req, res) => {
                         // Deduct wallet balance of promoter by withdrawal amount
                         let updated_promoter = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "wallet_balance": promoter_resp.promoter.wallet_balance - req.body.amount });
 
-                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Chard has been created"});
+                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Chard has been created" });
                     } else {
                         res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in creating charge" });
                     }
@@ -180,7 +180,7 @@ router.post('/add_bank_account', async (req, res) => {
                         account_holder_type: 'individual',
                         routing_number: req.body.bsb,
                         metadata: {
-                            bank_name:req.body.bank_name
+                            bank_name: req.body.bank_name
                         }
                     }
                 });
@@ -234,9 +234,9 @@ router.delete('/bank_account/:bank_account_id', async (req, res) => {
     if (promoter_resp.status === 1) {
         if (promoter_resp.promoter.stripe_connect_id) {
             try {
-                let resp = await stripe.accounts.deleteExternalAccount(promoter_resp.promoter.stripe_connect_id,req.params.bank_account_id);
-                if(resp.deleted === true){
-                    res.status(config.OK_STATUS).json({"status":1,"message":"Bank account has been removed"});
+                let resp = await stripe.accounts.deleteExternalAccount(promoter_resp.promoter.stripe_connect_id, req.params.bank_account_id);
+                if (resp.deleted === true) {
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been removed" });
                 } else {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
                 }
@@ -245,6 +245,151 @@ router.delete('/bank_account/:bank_account_id', async (req, res) => {
             }
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
+        }
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter not found" });
+    }
+});
+
+
+/**
+ * Add credit card using stripe
+ */
+router.post('/credit_card', async (req, res) => {
+    var schema = {
+        "card_holder_name": {
+            notEmpty: true,
+            errorMessage: "Card holder name is required"
+        },
+        "card_number": {
+            notEmpty: true,
+            errorMessage: "Card number is required"
+        },
+        "expiry_month": {
+            notEmpty: true,
+            errorMessage: "Expiry date is required"
+        },
+        "expiry_year": {
+            notEmpty: true,
+            errorMessage: "Expiry date is required"
+        },
+        "cvv": {
+            notEmpty: true,
+            errorMessage: "CVV is required"
+        }
+    };
+
+    req.checkBody(schema);
+    var errors = req.validationErrors();
+
+    if (!errors) {
+        let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+        if (promoter_resp.status === 1) {
+            try {
+                let token = await stripe.tokens.create({
+                    card: {
+                        "number": req.body.card_number,
+                        "exp_month": req.body.expiry_month,
+                        "exp_year": req.body.expiry_year,
+                        "cvc": req.body.cvv,
+                        "name": req.body.card_holder_name
+                    }
+                });
+
+                let card = await stripe.customers.createSource(promoter_resp.promoter.stripe_customer_id,
+                    {
+                        source: token.id
+                    });
+
+                if (card) {
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Card has been added" });
+                } else {
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while adding card" });
+                }
+            } catch (err) {
+                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err.message });
+            }
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't find given user" });
+        }
+    } else {
+        logger.error("Validation Error = ", errors);
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/**
+ * Edit credit card using stripe
+ */
+router.put('/credit_card', async (req, res) => {
+    var schema = {
+        "card_id": {
+            notEmpty: true,
+            errorMessage: "Card id is required"
+        },
+        "card_holder_name": {
+            notEmpty: true,
+            errorMessage: "Card holder name is required"
+        },
+        "expiry_month": {
+            notEmpty: true,
+            errorMessage: "Expiry date is required"
+        },
+        "expiry_year": {
+            notEmpty: true,
+            errorMessage: "Expiry date is required"
+        }
+    };
+
+    req.checkBody(schema);
+    var errors = req.validationErrors();
+
+    if (!errors) {
+        let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+        if (promoter_resp.status === 1) {
+            try {
+                let card = await stripe.customers.updateCard(
+                    promoter_resp.promoter.stripe_customer_id,
+                    req.body.card_id,
+                    {
+                        "name": req.body.card_holder_name,
+                        "exp_month": req.body.expiry_month,
+                        "exp_year": req.body.expiry_year
+                    }
+                );
+
+                if (card) {
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Card has been updated" });
+                } else {
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while updating card" });
+                }
+            } catch (err) {
+                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err.message });
+            }
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't find given promoter" });
+        }
+    } else {
+        logger.error("Validation Error = ", errors);
+        res.status(config.BAD_REQUEST).json({ message: errors });
+    }
+});
+
+/**
+ * Delete credit card
+ */
+router.delete('/credit_card/:card_id', async (req, res) => {
+    let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+    if (promoter_resp.status === 1) {
+        try{
+            let card = await stripe.customers.deleteCard(promoter_resp.promoter.stripe_customer_id,req.params.card_id);
+            if(card.deleted){
+                res.status(config.OK_STATUS).json({"status":1,"message":"Card has been deleted"});
+            } else {
+                res.status(config.BAD_REQUEST).json({"status":0,"message":"Erorr occured while deleting card"});
+            }
+        } catch(err){
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while deleting card", "error":err });
         }
     } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter not found" });

@@ -284,6 +284,8 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
             });
         }
 
+        console.log("Aggregate ==> ",JSON.stringify(aggregate));
+
         var members = await Group_User.aggregate(aggregate);
 
         if (members && members[0] && members[0].users.length > 0) {

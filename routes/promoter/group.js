@@ -277,7 +277,7 @@ router.post('/:group_id/members', async (req, res) => {
                             "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
                         };
                     } else {
-                        match_filter[filter_criteria.field] = { "$lte": filter_criteria.min_value, "$gte": filter_criteria.max_value };
+                        match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
                     if(filter_criteria.value != null && filter_criteria.value != ""){
