@@ -280,4 +280,11 @@ router.delete('/bank_account/:bank_account_id', async (req, res) => {
     }
 });
 
+/**
+ * Add credit card
+ */
+router.post('/credit_card',async(req,res) => {
+
+});
+
 module.exports = router;
