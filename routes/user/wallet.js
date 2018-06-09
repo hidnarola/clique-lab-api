@@ -205,16 +205,16 @@ router.post('/add_bank_account', async (req, res) => {
                 if (!user_resp.User.stripe_customer_id) {
                     // create new stripe account
                     // Create stripe account of customer
-
+                                        
                     let account = await stripe.accounts.create({
                         type: 'custom',
                         country: 'AU',
                         email: user_resp.User.email,
                         legal_entity: {
                             dob: {
-                                day: moment(user_resp.User.date_of_birth).date(),
-                                month: moment(user_resp.User.date_of_birth).month(),
-                                year: moment(user_resp.User.date_of_birth).year()
+                                day: moment(user_resp.User.date_of_birth,'D MMMM YYYY').date(),
+                                month: moment(user_resp.User.date_of_birth,'D MMMM YYYY').month() + 1,
+                                year: moment(user_resp.User.date_of_birth,'D MMMM YYYY').year()
                             },
                             first_name: user_resp.User.name,
                             last_name: user_resp.User.name,
@@ -241,7 +241,7 @@ router.post('/add_bank_account', async (req, res) => {
                 }
                 res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been added" });
             } catch (err) {
-                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err.message });
+                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err });
             }
 
         } else {
