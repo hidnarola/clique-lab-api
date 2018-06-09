@@ -95,7 +95,7 @@ promoter_helper.insert_promoter = async (promoter_object) => {
  */
 promoter_helper.update_promoter_by_id = async (promoter_id, promoter_object) => {
     try {
-        let promoter = await Promoter.findOneAndUpdate({ _id: promoter_id }, promoter_object);
+        let promoter = await Promoter.findOneAndUpdate({ _id: promoter_id }, promoter_object,{new:true});
         if (!promoter) {
             return { "status": 2, "message": "Record has not updated" };
         } else {

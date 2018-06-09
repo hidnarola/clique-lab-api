@@ -117,7 +117,7 @@ router.post('/update_profile', async (req, res) => {
                 } else if (promoter_resp.status === 2) {
                     res.status(config.BAD_REQUEST).json({ "status": "0", "message": "Error in updation of promoter profile" });
                 } else {
-                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter profile has been updated" });
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter profile has been updated","promoter":promoter_resp.promoter });
                 }
             }
         });
