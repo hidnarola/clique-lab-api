@@ -403,7 +403,9 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
         "pinterest_followers": "pinterest.no_of_friends",
         "linkedin_connection": "linkedin.no_of_friends",
         "year_in_industry": "experience",
-        "age": "date_of_birth"
+        "age": "date_of_birth",
+        "location": "suburb",
+        "interested_in": "sexual_orientation"
     };
     match_filter = await global_helper.rename_keys(match_filter, keys);
 
@@ -474,12 +476,13 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
         "age": "members.date_of_birth",
 
         "gender": "members.gender",
-        "location": "members.location",
+        "location": "members.suburb",
         "job_industry": "members.job_industry",
+        "job_title":"members.job_title",
         "education": "members.education",
         "language": "members.language",
         "ethnicity": "members.ethnicity",
-        "interested_in": "members.interested_in",
+        "interested_in": "members.sexual_orientation",
         "relationship_status": "members.relationship_status",
         "music_taste": "members.music_taste"
     };
@@ -592,12 +595,13 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
         "age": "campaign_user.date_of_birth",
 
         "gender": "campaign_user.gender",
-        "location": "campaign_user.location",
+        "location": "campaign_user.suburb",
         "job_industry": "campaign_user.job_industry",
+        "job_title": "campaign_user.job_title",
         "education": "campaign_user.education",
         "language": "campaign_user.language",
         "ethnicity": "campaign_user.ethnicity",
-        "interested_in": "campaign_user.interested_in",
+        "interested_in": "campaign_user.sexual_orientation",
         "relationship_status": "campaign_user.relationship_status",
         "music_taste": "campaign_user.music_taste"
     };
@@ -711,12 +715,13 @@ router.post('/purchased', async (req, res) => {
 
             "name": "user.name",
             "gender": "user.gender",
-            "location": "user.location",
+            "location": "user.suburb",
             "job_industry": "user.job_industry",
+            "job_title": "user.job_title",
             "education": "user.education",
             "language": "user.language",
             "ethnicity": "user.ethnicity",
-            "interested_in": "user.interested_in",
+            "interested_in": "user.sexual_orientation",
             "relationship_status": "user.relationship_status",
             "music_taste": "user.music_taste"
         };
@@ -897,10 +902,11 @@ router.post('/:campaign_id', async (req, res) => {
             "gender": "user.gender",
             "location": "user.suburb",
             "job_industry": "user.job_industry",
+            "job_title": "user.job_title",
             "education": "user.education",
             "language": "user.language",
             "ethnicity": "user.ethnicity",
-            "interested_in": "user.interested_in",
+            "interested_in": "user.sexual_orientation",
             "relationship_status": "user.relationship_status",
             "music_taste": "user.music_taste"
         };
@@ -994,12 +1000,13 @@ router.post('/:campaign_id/campaign_users', async (req, res) => {
 
             "name": "campaign_user.name",
             "gender": "campaign_user.gender",
-            "location": "campaign_user.location",
+            "location": "campaign_user.suburb",
             "job_industry": "campaign_user.job_industry",
+            "job_title": "campaign_user.job_title",
             "education": "campaign_user.education",
             "language": "campaign_user.language",
             "ethnicity": "campaign_user.ethnicity",
-            "interested_in": "campaign_user.interested_in",
+            "interested_in": "campaign_user.sexual_orientation",
             "relationship_status": "campaign_user.relationship_status",
             "music_taste": "campaign_user.music_taste"
         };

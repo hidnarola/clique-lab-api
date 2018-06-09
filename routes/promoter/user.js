@@ -128,7 +128,8 @@ router.post('/', async (req, res) => {
             "linkedin_connection": "linkedin.no_of_friends",
             "year_in_industry": "experience",
             "age": "date_of_birth",
-            "location":"suburb"
+            "location":"suburb",
+            "interested_in": "sexual_orientation"
         };
         match_filter = await global_helper.rename_keys(match_filter, keys);
 

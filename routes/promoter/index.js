@@ -208,12 +208,13 @@ router.post("/get_analytics", async (req, res) => {
 
         "name": "user.name",
         "gender": "user.gender",
-        "location": "user.location",
+        "location": "user.suburb",
         "job_industry": "user.job_industry",
+        "job_title": "user.job_title",
         "education": "user.education",
         "language": "user.language",
         "ethnicity": "user.ethnicity",
-        "interested_in": "user.interested_in",
+        "interested_in": "user.sexual_orientation",
         "relationship_status": "user.relationship_status",
         "music_taste": "user.music_taste"
     };
@@ -334,10 +335,11 @@ router.post("/get_social_analytics", async (req, res) => {
             "gender": "user.gender",
             "location": "user.suburb",
             "job_industry": "user.job_industry",
+            "job_title": "user.job_title",
             "education": "user.education",
             "language": "user.language",
             "ethnicity": "user.ethnicity",
-            "interested_in": "user.interested_in",
+            "interested_in": "user.sexual_orientation",
             "relationship_status": "user.relationship_status",
             "music_taste": "user.music_taste"
         };

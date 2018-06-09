@@ -82,10 +82,11 @@ router.post('/',async (req,res) => {
             "gender": "users.gender",
             "location": "users.suburb",
             "job_industry": "users.job_industry",
+            "job_title": "users.job_title",
             "education": "users.education",
             "language": "users.language",
             "ethnicity": "users.ethnicity",
-            "interested_in": "users.interested_in",
+            "interested_in": "users.sexual_orientation",
             "relationship_status": "users.relationship_status",
             "music_taste": "users.music_taste"
         };

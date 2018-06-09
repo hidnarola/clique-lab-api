@@ -325,10 +325,11 @@ router.post('/:group_id/members', async (req, res) => {
             "gender": "members.gender",
             "location": "members.suburb",
             "job_industry": "members.job_industry",
+            "job_title":"members.job_title",
             "education": "members.education",
             "language": "members.language",
             "ethnicity": "members.ethnicity",
-            "interested_in": "members.interested_in",
+            "interested_in": "members.sexual_orientation",
             "relationship_status": "members.relationship_status",
             "music_taste": "members.music_taste"
         };
@@ -399,7 +400,8 @@ router.post('/:group_id/add_filter_result_to_group', async (req, res) => {
         "linkedin_connection": "linkedin.no_of_friends",
         "year_in_industry": "experience",
         "age": "date_of_birth",
-        "location":"suburb"
+        "location":"suburb",
+        "interested_in": "sexual_orientation"
     };
     match_filter = await global_helper.rename_keys(match_filter, keys);
 
@@ -474,10 +476,11 @@ router.post('/:new_group_id/:old_group_id/add_filter_result_to_group', async (re
         "gender": "members.gender",
         "location": "members.suburb",
         "job_industry": "members.job_industry",
+        "job_title":"members.job_title",
         "education": "members.education",
         "language": "members.language",
         "ethnicity": "members.ethnicity",
-        "interested_in": "members.interested_in",
+        "interested_in": "members.sexual_orientation",
         "relationship_status": "members.relationship_status",
         "music_taste": "members.music_taste"
     };
