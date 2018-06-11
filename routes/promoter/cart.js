@@ -88,7 +88,7 @@ router.post('/purchase', async (req, res) => {
                 // obj.price = item.campaign.price;
             }
 
-            if(item.inspired_post_id){
+            if(item.applied_post_id){
                 obj.applied_post_id = item.applied_post_id;
             }
 
@@ -96,7 +96,6 @@ router.post('/purchase', async (req, res) => {
                 obj.campaign_id = item.campaign_id;
                 obj.price = item.campaign.price;
             }
-
             return obj;
         });
 
