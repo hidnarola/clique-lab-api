@@ -70,11 +70,11 @@ var BankSchema = new Schema({
 var NotificationSettings = new Schema({
     got_approved: { type: Boolean, default: true },
     got_paid: { type: Boolean, default: true },
-    friend_just_got_paid: { type: Boolean, default: false },
+    friend_just_got_paid: { type: Boolean, default: true },
     got_new_offer: { type: Boolean, default: true },
     push_got_approved: { type: Boolean, default: true },
     push_got_paid: { type: Boolean, default: true },
-    push_friend_just_got_paid: { type: Boolean, default: false },
+    push_friend_just_got_paid: { type: Boolean, default: true },
     push_got_new_offer: { type: Boolean, default: true },
 });
 

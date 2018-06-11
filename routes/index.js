@@ -550,7 +550,8 @@ router.post('/social_registration', async (req, res) => {
       "instagram": { "no_of_friends": 0 },
       "twitter": { "no_of_friends": 0 },
       "pinterest": { "no_of_friends": 0 },
-      "linkedin": { "no_of_friends": 0 }
+      "linkedin": { "no_of_friends": 0 },
+      "notification_settings" : {}
     };
 
     if (req.body.email) {
