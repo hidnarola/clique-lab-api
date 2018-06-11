@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 
 var Group = require("./../models/Group");
 var Group_User = require("./../models/Group_user");
+var Campaign_post = require("./../models/Campaign_post");
 var group_helper = {};
 
 var ObjectId = mongoose.Types.ObjectId;
@@ -158,22 +159,36 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
                     group.total_member = 0;
                     group.social_power = 0;
+                    group.activity_rate = 0;
 
                     // Count total memeber
                     if (group.user) {
                         group.total_member = group.user.length;
-                        group.user.forEach(u => {
+                        group.user.forEach(async (u) => {
                             group.social_power += ( u.user_id && u.user_id.facebook && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
                             group.social_power += ( u.user_id && u.user_id.instagram && u.user_id.instagram.no_of_friends) ? u.user_id.instagram.no_of_friends : 0;
                             group.social_power += ( u.user_id && u.user_id.twitter && u.user_id.twitter.no_of_friends) ? u.user_id.twitter.no_of_friends : 0;
                             group.social_power += ( u.user_id && u.user_id.pinterest && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
                             group.social_power += ( u.user_id && u.user_id.linkedin && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
+                            let post = await Campaign_post.find({"user_id":u._id}).count();
+                            console.log("post");
+                            if(post > 0){
+                                group.activity_rate += 1;
+                            }
                         });
+
+                        console.log("calculating total member");
+                        if(group.total_member > 0){
+                            group.activity_rate = group.activity_rate * 100 / group.total_member;
+                        }
                     }
 
                     delete group.user;
                     return group;
                 });
+
+
+
                 return { "status": 1, "message": "Groups found", "results": groups[0] };
             } else {
                 return { "status": 1, "message": "Groups found", "results": groups };

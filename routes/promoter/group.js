@@ -108,7 +108,6 @@ router.post("/", async (req, res) => {
     }
 });
 
-
 /** 
  * @api {get} /promoter/group Get all group
  * @apiName Get all group

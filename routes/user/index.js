@@ -295,4 +295,28 @@ router.post('/social_media', async (req, res) => {
     }
 });
 
+/**
+ * 
+ */
+router.post("/deactivate", async(req,res) => {
+    logger.trace("Deactivate API called");
+    // Remove device token from DB
+    if(req.body.device_token && req.body.device_platform)
+    {
+      await user_helper.remove_device_token_for_user(req.userInfo.id,req.body.device_token,req.body.device_platform);
+    }
+
+    var update_obj = {
+        "status":false
+    }
+
+    let update_resp = await user_helper.update_user_by_id(req.userInfo.id,update_obj)
+
+    if(update_resp.status === 1){
+        res.status(config.OK_STATUS).json({"status":1,"message":"Account has been deactivated"});
+    } else {
+        res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't deactivate account"});
+    }
+});
+
 module.exports = router;
