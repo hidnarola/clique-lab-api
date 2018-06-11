@@ -81,6 +81,25 @@ router.post('/purchase', async (req, res) => {
         // Fetch currently active cart
         var active_cart = await cart_helper.view_cart_details_by_promoter(req.userInfo.id);
 
+        let cart_items = active_cart.results.cart_items.map((item) => {
+            let obj = { "promoter_id":item.promoter_id };
+            if(item.inspired_post_id){
+                obj.inspired_post_id = item.inspired_post_id;
+                // obj.price = item.campaign.price;
+            }
+
+            if(item.inspired_post_id){
+                obj.applied_post_id = item.applied_post_id;
+            }
+
+            if(item.campaign_id){
+                obj.campaign_id = item.campaign_id;
+                obj.price = item.campaign.price;
+            }
+
+            return obj;
+        });
+
         // Add transaction
         let transaction_obj = {
             "promoter_id": req.userInfo.id,
@@ -94,7 +113,8 @@ router.post('/purchase', async (req, res) => {
             "state": req.body.state,
             "post_code": req.body.post_code,
             "credit_card": req.body.credit_card,
-            "total_amount": active_cart.results.total
+            "total_amount": active_cart.results.total,
+            "cart_items":cart_items
         };
 
         if (req.body.company) {

@@ -13,11 +13,7 @@ social_helper.get_facebook_friends_by_token = async (access_token) => {
     try {
         FB.setAccessToken(access_token);
         let response = await FB.api('/me/friends');
-        console.log("Response of fb for access token ===> ",access_token);
-        console.log("fb resp ==> ", response);
-
         let fb_user = await FB.api('me',{fields:['id','name','email','gender','friends']});
-        console.log("FB user ==> ",fb_user);
 
         if (response.summary.total_count > 0) {
             return response.summary.total_count;
@@ -60,18 +56,23 @@ social_helper.get_twitter_friends_by_token = (access_token,access_token_secret) 
 
 social_helper.get_pinterest_friends_by_token = async (access_token) => {
     try {
-        console.log("\n\n============ getting pinterest data === ");
         var pinterest = PDK.init(access_token);
         var options = {
             "qs":{
                 "fields":"counts"
             }
         }
-        pinterest.api('me/followers',options).then((data) => {
-            console.log("data ====> ",data);
-        });
 
-        return 0;
+        var promise = new Promise(function(resolve,reject){
+            pinterest.api('me/followers',options).then((data) => {
+                if(data && data.data[0] && data.data[0]["counts"] && data.data[0]["counts"].followers){
+                    resolve(data.data[0]["counts"].followers);
+                } else {
+                    resolve(0);
+                }
+            });
+        });
+        return promise;
     } catch (err) {
         return 0;
     }

@@ -12,6 +12,7 @@ var TransactionSchema = new Schema({
     cart_items: [{
         campaign_id: { type: mongoose.Schema.Types.ObjectId, ref: 'campaign' },
         inspired_post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'inspired_brands' },
+        applied_post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'campaign_applied' },
         user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
     }],
     country: { type: mongoose.Schema.Types.ObjectId, ref: 'country', required: true },

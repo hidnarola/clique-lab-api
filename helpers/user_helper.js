@@ -381,7 +381,6 @@ user_helper.update_social_connection = async (user_id) => {
         }
 
         // Update pinterest friends
-        /*
         if (user_resp.User.pinterest) {
             console.log("pinterest ==> for user ",user_resp.User.name," ===> ",user_resp.User.pinterest);
             user_friends.pinterest = user_resp.User.pinterest;
@@ -398,7 +397,6 @@ user_helper.update_social_connection = async (user_id) => {
                 "no_of_friends": 0
             };
         }
-        */
 
         // Update linkedin friends
         if (user_resp.User.linkedin) {
