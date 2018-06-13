@@ -13,7 +13,6 @@ social_helper.get_facebook_friends_by_token = async (access_token) => {
     try {
         FB.setAccessToken(access_token);
         let response = await FB.api('/me/friends');
-        let fb_user = await FB.api('me',{fields:['id','name','email','gender','friends']});
 
         if (response.summary.total_count > 0) {
             return response.summary.total_count;
@@ -96,4 +95,43 @@ social_helper.get_linkedin_friends_by_token = async (access_token) => {
     }
 }
 
+social_helper.get_facebook_post_statistics = async(post_id,access_token) => {
+    try {
+        FB.setAccessToken(access_token);
+        let response = await FB.api('/'+post_id,{"fields":["shares","likes.limit(0).summary(true)","comments.limit(0).summary(true)"]});
+        console.log("response ==> ",response);
+
+        var shares = (response.shares) ? response.shares.count : 0;
+        return {"status":1,"likes":response.likes.summary.total_count, "comments":response.comments.summary.total_count, "shares":shares};
+        // return {"status":1,"likes":response.summary.total_count};
+    } catch (err) {
+        return {"status":0,"likes":0};
+    }
+}
+
+social_helper.get_pinterest_post_statistics = async(post_id,access_token) => {
+    try {
+        var pinterest = PDK.init(access_token);
+        var options = {
+            "qs":{
+                "fields":"counts"
+            }
+        }
+
+        var pinterest_resp = new Promise(function(resolve,reject){
+            pinterest.api('pins/'+post_id,options).then((data) => {
+                if(data && data.data[0] && data.data[0]["counts"]){
+                    resolve(data.counts);
+                } else {
+                    resolve(0);
+                }
+            });
+        });
+
+        console.log("resp ==> ", pinterest_resp);
+        return pinterest_resp;
+    } catch (err) {
+        return 0;
+    }
+}
 module.exports = social_helper;

@@ -14,6 +14,7 @@ var cart = require("./promoter/cart");
 var wallet = require("./promoter/wallet");
 var faq = require("./promoter/faq");
 var referral = require("./promoter/referral");
+var transaction = require("./promoter/transaction");
 
 router.use("/",auth, authorization, index);
 router.use("/campaign", campaign);
@@ -24,6 +25,6 @@ router.use("/purchase_post", purchase_post);
 router.use("/cart", cart);
 router.use("/wallet", wallet);
 router.use("/faq", faq);
-router.use("/referral", referral);
+router.use("/transaction", transaction);
 
 module.exports = router;

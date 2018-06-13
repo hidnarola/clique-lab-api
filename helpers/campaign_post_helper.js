@@ -4,8 +4,30 @@ var Campaign_post = require("./../models/Campaign_post");
 var Campaign = require("./../models/Campaign");
 var Transaction = require("./../models/Transaction");
 
+var social_helper = require("./../helpers/social_helper");
+
 var ObjectId = mongoose.Types.ObjectId;
 var campaign_post_helper = {};
+
+/*
+ * get_all_post is used to get all post
+ * 
+ * @return  status 0 - If any internal error occured while fetching post data, with error
+ *          status 1 - If post data found, with post's documents
+ *          status 2 - If post not found, with appropriate message
+ */
+campaign_post_helper.get_all_post = async () => {
+    try {
+        var posts = await Campaign_post.find({}).populate('user_id').lean();
+        if (posts && posts.length > 0) {
+            return { "status": 1, "message": "Post found", "posts": posts };
+        } else {
+            return { "status": 2, "message": "No post found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding Post", "error": err }
+    }
+};
 
 /*
  * insert_campaign is used to insert into campaign collection
@@ -28,6 +50,18 @@ campaign_post_helper.insert_campaign_post = async (obj) => {
     }
 };
 
+campaign_post_helper.update_campaign_post = async (id,obj) => {
+    try {
+        let post = await Campaign_post.findOneAndUpdate({ _id: id }, obj);
+        if (!post) {
+            return { "status": 2, "message": "Record has not updated" };
+        } else {
+            return { "status": 1, "message": "Record has been updated" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while updating post", "error": err }
+    }
+}
 
 /**
  * return count of total purchased post by promoter
@@ -128,6 +162,33 @@ campaign_post_helper.total_spent_by_promoter = async (promoter_id, filter) => {
     } else {
         return 0;
     }
+};
+
+campaign_post_helper.find_post_statistics_by_post = async(post) => {
+    var obj = {
+        "no_of_likes":post.no_of_likes,
+        "no_of_comments":post.no_of_comments,
+        "no_of_shares":post.no_of_shares
+    };
+    // Check appropriate social media and get like count
+    if(post && post.user_id){
+        if(post.social_media_platform === "facebook" && post.user_id.facebook.access_token){
+            var like_resp = await social_helper.get_facebook_post_statistics(post.post_id,post.user_id.facebook.access_token);
+            if(like_resp.status === 1){
+                obj.no_of_likes = like_resp.likes;
+                obj.no_of_comments = like_resp.comments;
+                obj.no_of_shares = like_resp.shares;
+            }
+            campaign_post_helper.update_campaign_post(post._id,obj);
+        } else if(post.social_media_platform === "pinterest" && post.user_id.pinterest.access_token){
+            var like_resp = await social_helper.get_pinterest_post_statistics(post.post_id,post.user_id.pinterest.access_token);
+            
+        }  else if(post.social_media_platform === "linkedin"){
+    
+        }  else if(post.social_media_platform === "twitter"){
+    
+        }
+    }  
 };
 
 module.exports = campaign_post_helper;

@@ -39,14 +39,66 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
             }
         },
         {
-            "$lookup":{
-                "from":""
+            "$unwind": "$cart_items"
+        },
+        {
+            "$lookup": {
+                "from": "campaign_applied",
+                "localField": "cart_items.applied_post_id",
+                "foreignField": "_id",
+                "as": "campaign_post"
             }
+        },
+        {
+            "$unwind": "$campaign_post"
         }
     ];
 
-    if(filter){
+    if (filter) {
         aggregate.push({ "$match": filter });
+    }
+
+    aggregate.concat([
+        {
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': {
+                    "$push": {
+                        "results._id":"$results._id",
+                        "results.campaign_description":"$results.campaign_post.desription",
+                        "results.image":"$results.campaign_post.image",
+                        "results.price":"$results.cart_items.price",
+                        "results.brand":"$results.company"
+                    }
+                }
+            }
+        }
+    ]);
+
+    if (page_size && page_no) {
+        aggregate.push({
+            "$project": {
+                "total": 1,
+                'transaction': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+            }
+        });
+    } else {
+        aggregate.push({
+            "$project": {
+                "total": 1,
+                'transaction': "$results"
+            }
+        });
+    }
+
+    let transactions = await Transaction.aggregate(aggregate);
+
+
+    if (transactions && transactions[0] && transactions[0].transaction.length > 0) {
+        return { "status": 1, "message": "Transaction found", "results": transactions[0] };
+    } else {
+        return { "status": 0, "message": "No transaction found" };
     }
 };
 
