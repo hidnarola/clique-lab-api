@@ -452,15 +452,15 @@ router.post('/change_password', async (req, res) => {
             if (bcrypt.compareSync(req.body.old_password, promoter_resp.promoter.password)) {
                 let update_resp = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "password": bcrypt.hashSync(req.body.new_password, saltRounds) });
                 if (update_resp.status === 0) {
-                    res.status(config.BAD_REQUEST).json({ "message": "Something went wrong while updating password.", "error": update_resp });
+                    res.status(config.BAD_REQUEST).json({ "status":0,"message": "Something went wrong while updating password.", "error": update_resp });
                 } else if (update_resp.status === 2) {
-                    res.status(config.BAD_REQUEST).json({ "message": "Old password and new password can't be same" });
+                    res.status(config.BAD_REQUEST).json({ "status":0,"message": "Old password and new password can't be same" });
                 } else {
                     // Valid request. Password updated
-                    res.status(config.OK_STATUS).json({ "message": "Password has been changed" });
+                    res.status(config.OK_STATUS).json({"status":1, "message": "Password has been changed" });
                 }
             } else {
-                res.status(config.BAD_REQUEST).json({ "message": "Old password is incorrect" });
+                res.status(config.BAD_REQUEST).json({"status":0, "message": "Old password is incorrect" });
             }
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter not exist" });

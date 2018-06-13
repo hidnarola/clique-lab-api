@@ -1,6 +1,7 @@
 var FB = require('fb');
 var Twitter = require('twitter');
 var PDK = require('node-pinterest');
+var request = require("request");
 
 var config = require("./../config");
 
@@ -119,17 +120,38 @@ social_helper.get_pinterest_post_statistics = async (post_id, access_token) => {
 
         var pinterest_resp = new Promise(function (resolve, reject) {
             pinterest.api('pins/' + post_id, options).then((data) => {
-                if (data && data.data[0] && data.data[0]["counts"]) {
-                    resolve(data.counts);
+                console.log("data ==> ", data.data);
+                console.log("count ==> ", data.data.counts);
+                if (data && data.data && data.data.counts) {
+                    console.log("counts ==> ", data.data.counts);
+                    resolve(data.data.counts);
                 } else {
                     resolve(0);
                 }
             });
         });
 
-        return pinterest_resp;
+        console.log("Pinterest resp ==> ", pinterest_resp);
+        return { "status": 1, "comments": pinterest_resp.comments, "saves": pinterest_resp.saves };
+    } catch (err) {
+        return { "status": 0 };
+    }
+}
+
+social_helper.get_linkedin_post_statistics = async (post_id, access_token) => {
+    try {
+        request.get({
+            "url": 'https://api.linkedin.com/v2/socialActions/' + post_id,
+            "headers": {'Authorization':'Bearer '+access_token},
+            json: true
+        }, function (error, response, body) {
+            //console.log(response);
+            console.log(body);
+            // console.log(error);
+        });
     } catch (err) {
         return 0;
     }
 }
+
 module.exports = social_helper;
