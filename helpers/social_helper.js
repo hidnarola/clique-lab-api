@@ -32,7 +32,7 @@ social_helper.get_instagram_friends_by_token = async (access_token) => {
     }
 }
 
-social_helper.get_twitter_friends_by_token = (access_token,access_token_secret) => {
+social_helper.get_twitter_friends_by_token = (access_token, access_token_secret) => {
     try {
         var client = new Twitter({
             consumer_key: config.TWITTER_APP_ID,
@@ -41,8 +41,8 @@ social_helper.get_twitter_friends_by_token = (access_token,access_token_secret) 
             access_token_secret: access_token_secret
         });
 
-        var promise = new Promise(function(resolve, reject) {
-            client.get('account/verify_credentials',function(err,data){
+        var promise = new Promise(function (resolve, reject) {
+            client.get('account/verify_credentials', function (err, data) {
                 resolve(data.followers_count);
             });
         });
@@ -57,14 +57,14 @@ social_helper.get_pinterest_friends_by_token = async (access_token) => {
     try {
         var pinterest = PDK.init(access_token);
         var options = {
-            "qs":{
-                "fields":"counts"
+            "qs": {
+                "fields": "counts"
             }
         }
 
-        var promise = new Promise(function(resolve,reject){
-            pinterest.api('me/followers',options).then((data) => {
-                if(data && data.data[0] && data.data[0]["counts"] && data.data[0]["counts"].followers){
+        var promise = new Promise(function (resolve, reject) {
+            pinterest.api('me/followers', options).then((data) => {
+                if (data && data.data[0] && data.data[0]["counts"] && data.data[0]["counts"].followers) {
                     resolve(data.data[0]["counts"].followers);
                 } else {
                     resolve(0);
@@ -80,9 +80,9 @@ social_helper.get_pinterest_friends_by_token = async (access_token) => {
 social_helper.get_linkedin_friends_by_token = async (access_token) => {
     try {
         var linkedin = Linkedin.init(access_token);
-        var promise = new Promise(function(resolve, reject) {
-            linkedin.people.me(function(err, $in) {
-                if(err){
+        var promise = new Promise(function (resolve, reject) {
+            linkedin.people.me(function (err, $in) {
+                if (err) {
                     resolve(0);
                 } else {
                     resolve($in.numConnections);
@@ -95,31 +95,31 @@ social_helper.get_linkedin_friends_by_token = async (access_token) => {
     }
 }
 
-social_helper.get_facebook_post_statistics = async(post_id,access_token) => {
+social_helper.get_facebook_post_statistics = async (post_id, access_token) => {
     try {
         FB.setAccessToken(access_token);
-        let response = await FB.api('/'+post_id,{"fields":["shares","likes.limit(0).summary(true)","comments.limit(0).summary(true)"]});
+        let response = await FB.api('/' + post_id, { "fields": ["shares", "likes.limit(0).summary(true)", "comments.limit(0).summary(true)"] });
 
         var shares = (response.shares) ? response.shares.count : 0;
-        return {"status":1,"likes":response.likes.summary.total_count, "comments":response.comments.summary.total_count, "shares":shares};
+        return { "status": 1, "likes": response.likes.summary.total_count, "comments": response.comments.summary.total_count, "shares": shares };
         // return {"status":1,"likes":response.summary.total_count};
     } catch (err) {
-        return {"status":0,"likes":0};
+        return { "status": 0, "likes": 0 };
     }
 }
 
-social_helper.get_pinterest_post_statistics = async(post_id,access_token) => {
+social_helper.get_pinterest_post_statistics = async (post_id, access_token) => {
     try {
         var pinterest = PDK.init(access_token);
         var options = {
-            "qs":{
-                "fields":"counts"
+            "qs": {
+                "fields": "counts"
             }
         }
 
-        var pinterest_resp = new Promise(function(resolve,reject){
-            pinterest.api('pins/'+post_id,options).then((data) => {
-                if(data && data.data[0] && data.data[0]["counts"]){
+        var pinterest_resp = new Promise(function (resolve, reject) {
+            pinterest.api('pins/' + post_id, options).then((data) => {
+                if (data && data.data[0] && data.data[0]["counts"]) {
                     resolve(data.counts);
                 } else {
                     resolve(0);

@@ -40,10 +40,10 @@ router.post('/purchase', async (req, res) => {
             notEmpty: true,
             errorMessage: "Email is required"
         },
-        'company': {
-            notEmpty: true,
-            errorMessage: "Company name is required"
-        },
+        // 'company': {
+        //     notEmpty: true,
+        //     errorMessage: "Company name is required"
+        // },
         'abn': {
             notEmpty: true,
             errorMessage: "ABN is required"
@@ -111,7 +111,7 @@ router.post('/purchase', async (req, res) => {
             "abn": req.body.abn,
             "country": req.body.country,
             "address_line1": req.body.address_line_1,
-            "company":req.body.company,
+            // "company":req.body.company,
             "city": req.body.city,
             "state": req.body.state,
             "post_code": req.body.post_code,
