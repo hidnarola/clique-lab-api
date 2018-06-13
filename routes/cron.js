@@ -18,7 +18,7 @@ cron.schedule('0 * * * *', async () => {
     }
 });
 
-cron.schedule('* * * * *',async() => {
+cron.schedule('5 * * * *',async() => {
     // Get all post that are already posted on social media
     let posts = await campaign_post_helper.get_all_post();
     if(posts.status === 1){

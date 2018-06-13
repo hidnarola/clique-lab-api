@@ -99,7 +99,6 @@ social_helper.get_facebook_post_statistics = async(post_id,access_token) => {
     try {
         FB.setAccessToken(access_token);
         let response = await FB.api('/'+post_id,{"fields":["shares","likes.limit(0).summary(true)","comments.limit(0).summary(true)"]});
-        console.log("response ==> ",response);
 
         var shares = (response.shares) ? response.shares.count : 0;
         return {"status":1,"likes":response.likes.summary.total_count, "comments":response.comments.summary.total_count, "shares":shares};
@@ -128,7 +127,6 @@ social_helper.get_pinterest_post_statistics = async(post_id,access_token) => {
             });
         });
 
-        console.log("resp ==> ", pinterest_resp);
         return pinterest_resp;
     } catch (err) {
         return 0;
