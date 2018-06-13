@@ -41,6 +41,69 @@ router.get('/settings', async (req, res) => {
     } else {
         res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't find notification settings for user"});
     }
-})
+});
+
+router.post('/settings',async(req,res) => {
+    var schema = {
+        'got_approved': {
+            notEmpty: true,
+            errorMessage: "'Got approved' flag is required"
+        },
+        'got_paid': {
+            notEmpty: true,
+            errorMessage: "'Got paid' flag is required"
+        },
+        'friend_just_got_paid': {
+            notEmpty: true,
+            errorMessage: "'Friend got paid' flag is required"
+        },
+        'got_new_offer': {
+            notEmpty: true,
+            errorMessage: "'Got new offer' flag is required"
+        },
+        'push_got_approved': {
+            notEmpty: true,
+            errorMessage: "'Push - got approved' flag is required"
+        },
+        'push_got_paid': {
+            notEmpty: true,
+            errorMessage: "'Push - got paid' flag is required"
+        },
+        'push_friend_just_got_paid': {
+            notEmpty: true,
+            errorMessage: "'Push - friend got paid' flag is required"
+        },
+        'push_got_new_offer': {
+            notEmpty: true,
+            errorMessage: "'Push - got new offer' flag is required"
+        }
+    };
+    req.checkBody(schema);
+    var errors = req.validationErrors();
+
+    if (!errors) {
+        obj = {
+            "notification_settings":{
+                "got_approved":req.body.got_approved,
+                "got_paid":req.body.got_paid,
+                "friend_just_got_paid":req.body.friend_just_got_paid,
+                "got_new_offer":req.body.got_new_offer,
+                "push_got_approved":req.body.push_got_approved,
+                "push_got_paid":req.body.push_got_paid,
+                "push_friend_just_got_paid":req.body.push_friend_just_got_paid,
+                "push_got_new_offer":req.body.push_got_new_offer
+            }
+        }
+        let user_resp = await user_helper.update_user_by_id(req.userInfo.id, obj);
+        if (user_resp.status === 1) {
+            res.status(config.OK_STATUS).json({"status":1,"message":"Settings has been updated"});
+        } else {
+            res.status(config.BAD_REQUEST).json({"status":0,"message":"Error occured while updating settings"});
+        }
+    } else {
+        logger.error("Validation Error = ", errors);
+        res.status(config.BAD_REQUEST).json({ "status":0,"message": errors });
+    }
+});
 
 module.exports = router;
