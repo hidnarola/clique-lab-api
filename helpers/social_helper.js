@@ -118,7 +118,7 @@ social_helper.get_pinterest_post_statistics = async (post_id, access_token) => {
             }
         }
 
-        var pinterest_resp = new Promise(function (resolve, reject) {
+        var pinterest_resp = await new Promise(function (resolve, reject) {
             pinterest.api('pins/' + post_id, options).then((data) => {
                 console.log("data ==> ", data.data);
                 console.log("count ==> ", data.data.counts);
@@ -141,7 +141,7 @@ social_helper.get_pinterest_post_statistics = async (post_id, access_token) => {
 social_helper.get_linkedin_post_statistics = async (post_id, access_token) => {
     try {
         request.get({
-            "url": 'https://api.linkedin.com/v2/socialActions/' + post_id,
+            "url": 'https://api.linkedin.com/v2/shares/' + post_id,
             "headers": {'Authorization':'Bearer '+access_token},
             json: true
         }, function (error, response, body) {
@@ -150,6 +150,27 @@ social_helper.get_linkedin_post_statistics = async (post_id, access_token) => {
             // console.log(error);
         });
     } catch (err) {
+        return 0;
+    }
+}
+
+social_helper.get_twitter_post_statistics = async(post_id,access_token,access_token_secret) => {
+    try {
+        var client = new Twitter({
+            consumer_key: config.TWITTER_APP_ID,
+            consumer_secret: config.TWITTER_APP_SECRET,
+            access_token_key: access_token,
+            access_token_secret: access_token_secret
+        });
+
+        var data = await new Promise(function (resolve, reject) {
+            client.get('statuses/show/'+post_id, function (err, data) {
+                resolve(data);
+            });
+        });
+        return {"status":0,"favorite":data.favorite_count,"retweet":data.retweet_count};
+    } catch (err) {
+        console.log("Error ==> ", err);
         return 0;
     }
 }

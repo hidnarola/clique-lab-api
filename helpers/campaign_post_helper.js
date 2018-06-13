@@ -174,28 +174,37 @@ campaign_post_helper.find_post_statistics_by_post = async (post) => {
     if (post && post.user_id) {
         if (post.social_media_platform === "facebook" && post.user_id.facebook.access_token) {
             var like_resp = await social_helper.get_facebook_post_statistics(post.post_id, post.user_id.facebook.access_token);
+            console.log("fb => ",like_resp);
             if (like_resp.status === 1) {
                 obj.no_of_likes = like_resp.likes;
                 obj.no_of_comments = like_resp.comments;
                 obj.no_of_shares = like_resp.shares;
+                campaign_post_helper.update_campaign_post(post._id, obj);
             }
-            campaign_post_helper.update_campaign_post(post._id, obj);
         } else if (post.social_media_platform === "pinterest" && post.user_id.pinterest.access_token) {
             var like_resp = await social_helper.get_pinterest_post_statistics(post.post_id, post.user_id.pinterest.access_token);
-            if (like_resp.status === 1) {
+            console.log("pin => ",like_resp);
+            if (like_resp && like_resp.status === 1) {
                 obj.no_of_comments = like_resp.comments;
                 obj.no_of_shares = like_resp.saves;
+                campaign_post_helper.update_campaign_post(post._id, obj);
             }
-            campaign_post_helper.update_campaign_post(post._id, obj);
         } else if (post.social_media_platform === "linkedin") {
-            var like_resp = await social_helper.get_linkedin_post_statistics(post.post_id, post.user_id.linkedin.access_token);
-            if (like_resp.status === 1) {
-                obj.no_of_likes = like_resp.likes;
-                obj.no_of_comments = like_resp.comments;
-                obj.no_of_shares = like_resp.shares;
-            }
+            // var like_resp = await social_helper.get_linkedin_post_statistics(post.post_id, post.user_id.linkedin.access_token);
+            // if (like_resp.status === 1) {
+            //     obj.no_of_likes = like_resp.likes;
+            //     obj.no_of_comments = like_resp.comments;
+            //     obj.no_of_shares = like_resp.shares;
+            // }
         } else if (post.social_media_platform === "twitter") {
-
+            var like_resp = await social_helper.get_twitter_post_statistics("1006753088240095232",post.user_id.twitter.access_token,post.user_id.twitter.access_token_secret);
+            console.log("Response Twitter ==> ",like_resp);            
+            if (like_resp && like_resp.status === 1) {
+                obj.no_of_likes = like_resp.favorite;
+                // obj.no_of_comments = like_resp.retweet;
+                obj.no_of_shares = like_resp.retweet;
+                campaign_post_helper.update_campaign_post(post._id, obj);
+            }
         }
     }
 };
