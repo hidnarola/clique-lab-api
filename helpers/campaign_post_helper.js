@@ -190,7 +190,7 @@ campaign_post_helper.find_post_statistics_by_post = async (post) => {
                 campaign_post_helper.update_campaign_post(post._id, obj);
             }
         } else if (post.social_media_platform === "linkedin") {
-            // var like_resp = await social_helper.get_linkedin_post_statistics(post.post_id, post.user_id.linkedin.access_token);
+            var like_resp = await social_helper.get_linkedin_post_statistics(post.post_id, post.user_id.linkedin.access_token);
             // if (like_resp.status === 1) {
             //     obj.no_of_likes = like_resp.likes;
             //     obj.no_of_comments = like_resp.comments;

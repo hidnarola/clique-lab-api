@@ -146,7 +146,7 @@ social_helper.get_linkedin_post_statistics = async (post_id, access_token) => {
             json: true
         }, function (error, response, body) {
             //console.log(response);
-            console.log(body);
+            console.log("linkedin resp ==> ",body);
             // console.log(error);
         });
     } catch (err) {

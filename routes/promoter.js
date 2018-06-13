@@ -25,6 +25,7 @@ router.use("/purchase_post", purchase_post);
 router.use("/cart", cart);
 router.use("/wallet", wallet);
 router.use("/faq", faq);
+router.use("/referral", referral);
 router.use("/transaction", transaction);
 
 module.exports = router;
