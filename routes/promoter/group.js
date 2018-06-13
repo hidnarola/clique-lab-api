@@ -272,7 +272,7 @@ router.post('/:group_id/members', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var match_filter = {};
+        var match_filter = {"status":true};
         var sort = {};
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
@@ -330,7 +330,8 @@ router.post('/:group_id/members', async (req, res) => {
             "ethnicity": "members.ethnicity",
             "interested_in": "members.sexual_orientation",
             "relationship_status": "members.relationship_status",
-            "music_taste": "members.music_taste"
+            "music_taste": "members.music_taste",
+            "status":"members.status"
         };
         match_filter = await global_helper.rename_keys(match_filter, keys);
 
