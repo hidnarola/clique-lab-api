@@ -183,7 +183,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                         };
 
                         if(group.total_member > 0){
-                            group.activity_rate = group.activity_rate * 100 / group.total_member;
+                            group.activity_rate = parseInt(group.activity_rate * 100 / group.total_member);
                         }
                     }
 
