@@ -90,7 +90,7 @@ router.post('/update_profile', async (req, res) => {
                             } else {
                                 var thumbnail1 = await sharp(dir + '/' + filename)
                                     .resize(80, 80)
-                                    .background({r: 255, g: 255, b: 255})
+                                    .background({ r: 255, g: 255, b: 255, alpha: 1 })
                                     .toFile(dir + '/80X80/' + filename);
 
                                 logger.trace("Avatar image has uploaded for promoter");
@@ -118,7 +118,7 @@ router.post('/update_profile', async (req, res) => {
                 } else if (promoter_resp.status === 2) {
                     res.status(config.BAD_REQUEST).json({ "status": "0", "message": "Error in updation of promoter profile" });
                 } else {
-                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter profile has been updated","promoter":promoter_resp.promoter });
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter profile has been updated", "promoter": promoter_resp.promoter });
                 }
             }
         });
@@ -228,7 +228,7 @@ router.post("/get_analytics", async (req, res) => {
                 if (filter) {
                     filter.forEach(filter_criteria => {
                         if (filter_criteria.type === "exact") {
-                            if(filter_criteria.value != null && filter_criteria.value != ""){
+                            if (filter_criteria.value != null && filter_criteria.value != "") {
                                 match_filter[filter_criteria.field] = filter_criteria.value;
                             }
                         } else if (filter_criteria.type === "between") {
@@ -242,7 +242,7 @@ router.post("/get_analytics", async (req, res) => {
                                 match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                             }
                         } else if (filter_criteria.type === "like") {
-                            if(filter_criteria.value != null && filter_criteria.value != ""){
+                            if (filter_criteria.value != null && filter_criteria.value != "") {
                                 var regex = new RegExp(filter_criteria.value);
                                 match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                             }
@@ -299,10 +299,10 @@ router.post("/get_social_analytics", async (req, res) => {
         var enddate = moment(req.body.end_date, "YYYY-MM-DD").toDate();
 
         var currentDate = moment(req.body.start_date, "YYYY-MM-DD");
-        
+
         var monthArray = [];
         while (currentDate.isBefore(enddate)) {
-            if(monthArray.indexOf(currentDate.format("M")) === -1){
+            if (monthArray.indexOf(currentDate.format("M")) === -1) {
                 monthArray.push(currentDate.format("M"));
             }
             currentDate.add(1, 'month');
@@ -353,7 +353,7 @@ router.post("/get_social_analytics", async (req, res) => {
                     if (filter) {
                         filter.forEach(filter_criteria => {
                             if (filter_criteria.type === "exact") {
-                                if(filter_criteria.value != null && filter_criteria.value != ""){
+                                if (filter_criteria.value != null && filter_criteria.value != "") {
                                     match_filter[filter_criteria.field] = filter_criteria.value;
                                 }
                             } else if (filter_criteria.type === "between") {
@@ -367,7 +367,7 @@ router.post("/get_social_analytics", async (req, res) => {
                                     match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                                 }
                             } else if (filter_criteria.type === "like") {
-                                if(filter_criteria.value != null && filter_criteria.value != ""){
+                                if (filter_criteria.value != null && filter_criteria.value != "") {
                                     var regex = new RegExp(filter_criteria.value);
                                     match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                                 }
@@ -384,13 +384,13 @@ router.post("/get_social_analytics", async (req, res) => {
                     match_filter = await global_helper.rename_keys(match_filter, keys);
                     let resp_data = await campaign_helper.get_campaign_social_analysis_by_promoter(req.userInfo.id, match_filter, custom_filter);
 
-                    let resp_month = _.pluck(resp_data,"_id");
+                    let resp_month = _.pluck(resp_data, "_id");
                     let return_data = [];
 
-                    monthArray.forEach((month)=>{
+                    monthArray.forEach((month) => {
                         month = parseInt(month);
-                        if(resp_month.indexOf(month) === -1){
-                            return_data.push({"_id":month,"like_cnt":0,"comment_cnt":0,"share_cnt":0});
+                        if (resp_month.indexOf(month) === -1) {
+                            return_data.push({ "_id": month, "like_cnt": 0, "comment_cnt": 0, "share_cnt": 0 });
                             resp_month.push(month);
                         } else {
                             return_data.push(resp_data[resp_month.indexOf(month)]);
@@ -453,15 +453,15 @@ router.post('/change_password', async (req, res) => {
             if (bcrypt.compareSync(req.body.old_password, promoter_resp.promoter.password)) {
                 let update_resp = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "password": bcrypt.hashSync(req.body.new_password, saltRounds) });
                 if (update_resp.status === 0) {
-                    res.status(config.BAD_REQUEST).json({ "status":0,"message": "Something went wrong while updating password.", "error": update_resp });
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Something went wrong while updating password.", "error": update_resp });
                 } else if (update_resp.status === 2) {
-                    res.status(config.BAD_REQUEST).json({ "status":0,"message": "Old password and new password can't be same" });
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Old password and new password can't be same" });
                 } else {
                     // Valid request. Password updated
-                    res.status(config.OK_STATUS).json({"status":1, "message": "Password has been changed" });
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Password has been changed" });
                 }
             } else {
-                res.status(config.BAD_REQUEST).json({"status":0, "message": "Old password is incorrect" });
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Old password is incorrect" });
             }
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter not exist" });
