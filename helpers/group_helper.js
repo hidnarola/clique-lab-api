@@ -162,7 +162,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
                     // Count total memeber
                     if (group.user) {
-                        await group.user.forEach(async (u) => {
+                        group.user.forEach(async (u) => {
                             if(u.user_id.status){
                                 group.total_member += 1;
 
