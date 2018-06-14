@@ -62,7 +62,8 @@ router.post("/", async (req, res) => {
                         filename = "group_" + new Date().getTime() + (Math.floor(Math.random() * 90000)) + extention;
                         file.mv(dir + '/' + filename, async (err) => {
                             if (err) {
-                                logger.error("There was an issue in uploading group image");
+                                console.log("Error : ",err);
+                                logger.error("There was an issue in uploading group image : ",err);
                                 callback({ "status": config.MEDIA_ERROR_STATUS, "resp": { "status": 0, "message": "There was an issue in uploading group image" } });
                             } else {
 

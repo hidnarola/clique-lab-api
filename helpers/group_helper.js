@@ -189,8 +189,6 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                     return group;
                 });
 
-
-
                 return { "status": 1, "message": "Groups found", "results": groups[0] };
             } else {
                 return { "status": 1, "message": "Groups found", "results": groups };
