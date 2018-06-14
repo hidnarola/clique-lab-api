@@ -90,7 +90,7 @@ router.post('/update_profile', async (req, res) => {
                             } else {
                                 var thumbnail1 = await sharp(dir + '/' + filename)
                                     .resize(80, 80)
-                                    .background({ r: 255, g: 255, b: 255, alpha: 1 })
+                                    .background({ r: 255, g: 255, b: 255, a: 0 })
                                     .toFile(dir + '/80X80/' + filename);
 
                                 logger.trace("Avatar image has uploaded for promoter");
