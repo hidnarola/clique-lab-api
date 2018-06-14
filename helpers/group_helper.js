@@ -162,7 +162,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
                     // Count total memeber
                     if (group.user) {
-                        for (let u of group.user) {
+                        group.user.forEach(async (u) => {
                             if(u.user_id.status){
                                 group.total_member += 1;
 
@@ -172,12 +172,12 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                                 group.social_power += ( u.user_id && u.user_id.pinterest && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
                                 group.social_power += ( u.user_id && u.user_id.linkedin && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
                                 let post = await Campaign_post.find({"user_id":u.user_id._id}).count();
-                                console.log("post",post);
+                                console.log("post");
                                 if(post > 0){
                                     group.activity_rate += 1;
                                 }
                             }
-                        };
+                        });
 
                         console.log("calculating total member");
                         if(group.total_member > 0){
@@ -188,6 +188,8 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                     delete group.user;
                     return group;
                 });
+
+
 
                 return { "status": 1, "message": "Groups found", "results": groups[0] };
             } else {
