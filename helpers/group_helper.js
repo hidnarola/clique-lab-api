@@ -192,7 +192,8 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                 });
 
                 let group_res = await Promise.all(group_data);
-                return { "status": 1, "message": "Groups found", "results": group_res };
+                groups[0].groups = group_res;
+                return { "status": 1, "message": "Groups found", "results": groups[0] };
             } else {
                 return { "status": 1, "message": "Groups found", "results": groups };
             }
