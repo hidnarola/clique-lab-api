@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var moment = require("moment");
 
 var Group = require("./../models/Group");
 var Group_User = require("./../models/Group_user");
@@ -146,8 +147,6 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             }
         ]);
 
-        console.log("aggregate ===> ",JSON.stringify(aggregate));
-
         var groups = await Group.aggregate(aggregate);
         groups = await Group.populate(groups, { "path": "groups.user.user_id", "model": "users" });
 
@@ -155,14 +154,14 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             if (page_no && page_size) {
                 // console.log("------------> Type ====>   ",typeof groups[0]);
                 // console.log(groups[0]);
-                groups[0].groups = groups[0].groups.map((group) => {
+                let group_data = groups[0].groups.map(async (group) => {
                     group.total_member = 0;
                     group.social_power = 0;
                     group.activity_rate = 0;
 
                     // Count total memeber
                     if (group.user) {
-                        group.user.forEach(async (u) => {
+                        for (let u of group.user){
                             if(u.user_id.status){
                                 group.total_member += 1;
 
@@ -171,15 +170,18 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                                 group.social_power += ( u.user_id && u.user_id.twitter && u.user_id.twitter.no_of_friends) ? u.user_id.twitter.no_of_friends : 0;
                                 group.social_power += ( u.user_id && u.user_id.pinterest && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
                                 group.social_power += ( u.user_id && u.user_id.linkedin && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
-                                let post = await Campaign_post.find({"user_id":u.user_id._id}).count();
-                                console.log("post");
+                                let post = await Campaign_post.find({
+                                    "user_id":u.user_id._id,
+                                    "created_at":{
+                                        "$gte": moment().subtract(3, "months").toDate()
+                                    }
+                                }).count();
                                 if(post > 0){
                                     group.activity_rate += 1;
                                 }
                             }
-                        });
+                        };
 
-                        console.log("calculating total member");
                         if(group.total_member > 0){
                             group.activity_rate = group.activity_rate * 100 / group.total_member;
                         }
@@ -189,9 +191,8 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                     return group;
                 });
 
-
-
-                return { "status": 1, "message": "Groups found", "results": groups[0] };
+                let group_res = await Promise.all(group_data);
+                return { "status": 1, "message": "Groups found", "results": group_res };
             } else {
                 return { "status": 1, "message": "Groups found", "results": groups };
             }
@@ -300,8 +301,6 @@ group_helper.get_members_of_group = async (group_id, page_no, page_size, filter,
                 }
             });
         }
-
-        console.log("Aggregate ==> ",JSON.stringify(aggregate));
 
         var members = await Group_User.aggregate(aggregate);
 
