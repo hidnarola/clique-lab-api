@@ -162,7 +162,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
                     // Count total memeber
                     if (group.user) {
-                        group.user.forEach(async (u) => {
+                        for (let u of group.user) {
                             if(u.user_id.status){
                                 group.total_member += 1;
 
@@ -177,7 +177,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                                     group.activity_rate += 1;
                                 }
                             }
-                        });
+                        };
 
                         console.log("calculating total member");
                         if(group.total_member > 0){
