@@ -11,12 +11,13 @@ var transporter = nodemailer.createTransport({
     auth: {
         user: config.SMTP_MAIL,
         pass: config.SMTP_PASSWORD
-    }
+    },
+    from: "Clique Labs <noreply@cliquelabs.com>"
 });
 
 mail_helper.send = async(template_name, options, data) => {
     var template_sender = transporter.templateSender( new EmailTemplate('emails/'+template_name), {
-        from: "noreply@cliquelabs.com"
+        from: "Clique Labs <noreply@cliquelabs.com>"
     });
 
     return template_sender({
