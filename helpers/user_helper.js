@@ -61,7 +61,11 @@ user_helper.get_user_by_id = async (id) => {
             .lean();
 
         // Find searchable value
-        var field_need_counted = ["user_interest", "name", "email", "short_bio", "gender", "facebook", "job_industry", "music_taste", "instagram", "pinterest", "twitter", "linkedin", "username", "education", "date_of_birth", "ethnicity", "job_title", "language", "relationship_status", "suburb", "country"];
+        var field_need_counted = [
+            "user_interest", "name", "email", "short_bio", "gender", 
+            "job_industry", "music_taste", "username", "education",
+            "date_of_birth", "ethnicity",  "job_title", "language", 
+            "relationship_status", "suburb", "country"];
 
         var count = 0;
         Object.keys(user).forEach(async (key) => {
@@ -70,7 +74,27 @@ user_helper.get_user_by_id = async (id) => {
             }
         });
 
-        user.searchable = Math.ceil(100 * count / field_need_counted.length);
+        if(user.facebook.enable){
+            count++;
+        }
+
+        if(user.instagram.enable){
+            count++;
+        }
+
+        if(user.twitter.enable){
+            count++;
+        }
+
+        if(user.pinterest.enable){
+            count++;
+        }
+
+        if(user.linkedin.enable){
+            count++;
+        }
+
+        user.searchable = Math.ceil(100 * count / field_need_counted.length + 5);
 
         // Find social power
         if (user) {

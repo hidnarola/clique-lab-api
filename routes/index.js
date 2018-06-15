@@ -551,7 +551,7 @@ router.post('/social_registration', async (req, res) => {
       "twitter": { "no_of_friends": 0 },
       "pinterest": { "no_of_friends": 0 },
       "linkedin": { "no_of_friends": 0 },
-      "notification_settings" : {}
+      "notification_settings": {}
     };
 
     if (req.body.email) {
@@ -611,10 +611,9 @@ router.post('/social_registration', async (req, res) => {
     } else {
 
       // Add device token to DB
-      if(req.body.device_token && req.body.device_platform)
-      {
+      if (req.body.device_token && req.body.device_platform) {
         console.log("adding device token");
-        await user_helper.add_device_token_for_user(reg_data.user._id,req.body.device_token,req.body.device_platform);
+        await user_helper.add_device_token_for_user(reg_data.user._id, req.body.device_token, req.body.device_platform);
       }
 
       if (req.body.referral_id) {
@@ -717,9 +716,8 @@ router.post('/login', async (req, res) => {
         delete login_resp.user.created_at;
 
         // Add device token to DB
-        if(req.body.device_token && req.body.device_platform)
-        {
-          await user_helper.add_device_token_for_user(login_resp.user._id,req.body.device_token,req.body.device_platform);
+        if (req.body.device_token && req.body.device_platform) {
+          await user_helper.add_device_token_for_user(login_resp.user._id, req.body.device_token, req.body.device_platform);
         }
 
         logger.info("Token generated");

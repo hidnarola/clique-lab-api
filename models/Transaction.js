@@ -13,7 +13,9 @@ var TransactionSchema = new Schema({
         campaign_id: { type: mongoose.Schema.Types.ObjectId, ref: 'campaign' },
         inspired_post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'inspired_brands' },
         applied_post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'campaign_applied' },
-        price : { type: Number }
+        price : { type: Number },
+        stripe_charge_id: {type: String, required:true},
+        status: { type: String, enum: ["pending", "paid", "failed"], default: "pending" }
     }],
     country: { type: mongoose.Schema.Types.ObjectId, ref: 'country', required: true },
     address_line1: { type: String, required: true },
@@ -22,8 +24,6 @@ var TransactionSchema = new Schema({
     state: { type: String, required: true },
     post_code: { type: String, required: true },
     credit_card: { type: String, required: true },
-    stripe_charge_id: { type: String },
-    status: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
     created_at: { type: Date, default: Date.now },
 }, { versionKey: false });
 

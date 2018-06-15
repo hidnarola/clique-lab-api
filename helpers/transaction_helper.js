@@ -94,10 +94,10 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
 
     let transactions = await Transaction.aggregate(aggregate);
 
-
-    if (transactions && transactions[0] && transactions[0].transaction.length > 0) {
+    if (transactions && transactions[0] && transactions[0].transaction && transactions[0].transaction.length > 0) {
         return { "status": 1, "message": "Transaction found", "results": transactions[0] };
     } else {
+        console.log("transactions", transactions);
         return { "status": 0, "message": "No transaction found" };
     }
 };

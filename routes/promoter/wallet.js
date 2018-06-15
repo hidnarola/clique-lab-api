@@ -265,6 +265,7 @@ router.delete('/bank_account/:bank_account_id', async (req, res) => {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
                 }
             } catch (err) {
+                console.log("Error while deleting external account ==> ",err);
                 res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });
             }
         } else {
