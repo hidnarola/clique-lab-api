@@ -16,7 +16,7 @@ var transporter = nodemailer.createTransport({
 
 mail_helper.send = async(template_name, options, data) => {
     var template_sender = transporter.templateSender( new EmailTemplate('emails/'+template_name), {
-        from: "support@clique.com"
+        from: "noreply@cliquelabs.com"
     });
 
     return template_sender({
