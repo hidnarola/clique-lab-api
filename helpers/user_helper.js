@@ -94,7 +94,7 @@ user_helper.get_user_by_id = async (id) => {
             count++;
         }
 
-        user.searchable = Math.ceil(100 * count / field_need_counted.length + 5);
+        user.searchable = Math.ceil(100 * count / (field_need_counted.length + 5));
 
         // Find social power
         if (user) {
