@@ -14,6 +14,7 @@ var TransactionSchema = new Schema({
         inspired_post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'inspired_brands' },
         applied_post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'campaign_applied' },
         price : { type: Number },
+        gst: {type: Number},
         stripe_charge_id: {type: String, required:true},
         status: { type: String, enum: ["pending", "paid", "failed"], default: "pending" }
     }],

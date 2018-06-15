@@ -62,9 +62,9 @@ user_helper.get_user_by_id = async (id) => {
 
         // Find searchable value
         var field_need_counted = [
-            "user_interest", "name", "email", "short_bio", "gender", 
+            "user_interest", "name", "email", "short_bio", "gender",
             "job_industry", "music_taste", "username", "education",
-            "date_of_birth", "ethnicity",  "job_title", "language", 
+            "date_of_birth", "ethnicity", "job_title", "language",
             "relationship_status", "suburb", "country"];
 
         var count = 0;
@@ -74,23 +74,23 @@ user_helper.get_user_by_id = async (id) => {
             }
         });
 
-        if(user.facebook.enable){
+        if (user.facebook.enable) {
             count++;
         }
 
-        if(user.instagram.enable){
+        if (user.instagram.enable) {
             count++;
         }
 
-        if(user.twitter.enable){
+        if (user.twitter.enable) {
             count++;
         }
 
-        if(user.pinterest.enable){
+        if (user.pinterest.enable) {
             count++;
         }
 
-        if(user.linkedin.enable){
+        if (user.linkedin.enable) {
             count++;
         }
 
@@ -406,7 +406,7 @@ user_helper.update_social_connection = async (user_id) => {
 
         // Update pinterest friends
         if (user_resp.User.pinterest) {
-            console.log("pinterest ==> for user ",user_resp.User.name," ===> ",user_resp.User.pinterest);
+            console.log("pinterest ==> for user ", user_resp.User.name, " ===> ", user_resp.User.pinterest);
             user_friends.pinterest = user_resp.User.pinterest;
             if (user_friends.pinterest.no_of_friends) {
                 user_friends.pinterest.no_of_friends = 0;
@@ -415,7 +415,7 @@ user_helper.update_social_connection = async (user_id) => {
             if (user_resp.User.pinterest.access_token) {
                 user_friends.pinterest.no_of_friends = await social_helper.get_pinterest_friends_by_token(user_resp.User.pinterest.access_token);
             }
-            
+
         } else {
             user_friends.pinterest = {
                 "no_of_friends": 0
@@ -462,12 +462,12 @@ user_helper.add_device_token_for_user = async (user_id, device_token, device_pla
             "token": device_token,
             "platform": device_platform
         };
-        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(user_resp.User.device_token,token_obj)) {
+        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(user_resp.User.device_token, token_obj)) {
             // Token already available
             return { "status": 2, "message": "Token already added" }
         } else {
             // Add token
-            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $push: {"device_token":token_obj} }, { new: true });
+            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $push: { "device_token": token_obj } }, { new: true });
             if (!updated_user) {
                 return { "status": 2, "message": "Can't add token for user" };
             } else {
@@ -488,9 +488,9 @@ user_helper.remove_device_token_for_user = async (user_id, device_token, device_
             "token": device_token,
             "platform": device_platform
         };
-        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(user_resp.User.device_token,token_obj)) {
+        if (user_resp.User.device_token && user_resp.User.device_token.length > 0 && _.findWhere(user_resp.User.device_token, token_obj)) {
             // Token already available, remove it
-            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $pull:{"device_token":token_obj}}, { new: true });
+            var updated_user = await User.findOneAndUpdate({ _id: user_id }, { $pull: { "device_token": token_obj } }, { new: true });
             if (!updated_user) {
                 return { "status": 2, "message": "Can't remove token for user" };
             } else {

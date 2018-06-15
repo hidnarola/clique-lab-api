@@ -44,7 +44,11 @@ social_helper.get_twitter_friends_by_token = (access_token, access_token_secret)
 
         var promise = new Promise(function (resolve, reject) {
             client.get('account/verify_credentials', function (err, data) {
-                resolve(data.followers_count);
+                if(data && data.followers_count){
+                    resolve(data.followers_count);
+                } else {
+                    resolve(0);
+                }
             });
         });
         return promise;
