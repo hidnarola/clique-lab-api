@@ -24,6 +24,7 @@ var parallel = require('async/parallel');
 var randomstring = require("randomstring");
 var request = require("request");
 var sharp = require('sharp');
+var stripe = require("stripe")(config.STRIPE_SECRET_KEY);
 
 // var Linkedin = require('node-linked-in');
 // var cfg = {};
