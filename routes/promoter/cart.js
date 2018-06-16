@@ -82,18 +82,16 @@ router.post('/purchase', async (req, res) => {
     const errors = req.validationErrors();
 
     if (!errors) {
-
         // get user's stripe account
         let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
         if (promoter_resp.status === 1 && promoter_resp.promoter && promoter_resp.promoter.stripe_customer_id) {
             try {
-
                 // Fetch currently active cart
                 var active_cart = await cart_helper.view_cart_details_by_promoter(req.userInfo.id);
 
                 console.log("Iterating cart item");
                 // Create charge for each post
-                let cart_items = await active_cart.results.cart_items.map(async (item) => {
+                let cart_items = active_cart.results.cart_items.map(async (item) => {
                     var id = "";
                     var type = "";
                     let obj = {
@@ -118,26 +116,20 @@ router.post('/purchase', async (req, res) => {
                         obj.gst = parseFloat(item.campaign.price * 10 / 100).toFixed(2);
                     }
 
-                    console.log("creating token : ",id, " of ",type);
-                    var token = await stripe.tokens.create({
-                        card: req.body.credit_card,
-                        customer: promoter_resp.promoter.stripe_customer_id
-                    });
-
-                    console.log("token ==> ",token.id);
-
-                    console.log("creating charge");
+                    // console.log("token ==> ",token.id);
+                    console.log("Object ==> ",obj);
+                    console.log("creating charge of ",(obj.price * 1 + obj.gst * 1) * 100);
                     // Create charge with additional 10% GST
                     let charge = await stripe.charges.create({
-                        "amount": (obj.price + obj.gst) * 100, // 100 means $1
+                        "amount": (obj.price * 1 + obj.gst * 1) * 100, // 100 means $1
                         "currency": "aud",
                         "capture": false,
-                        "source":token.id,
+                        "source":req.body.credit_card,
                         "customer": promoter_resp.promoter.stripe_customer_id,
                         "statement_descriptor": "Clique purchase", // length must be 22 character max.
                         "metadata": {
                             "CHARGETYPE": "Authorization ONLY",
-                            "id": id,
+                            "id": id.toString(),
                             "type": type,
                             "price": obj.price,
                             "GST": obj.gst,
@@ -150,6 +142,8 @@ router.post('/purchase', async (req, res) => {
 
                     return obj;
                 });
+
+                cart_items = await Promise.all(cart_items);
 
                 console.log("Inserting transaction : ",cart_items);
                 // Add transaction
@@ -190,6 +184,7 @@ router.post('/purchase', async (req, res) => {
                         }
                     });
 
+                    console.log("clear existing cart");
                     // Clear active cart here
                     await cart_helper.clear_cart_by_promoter(req.userInfo.id);
 
@@ -207,7 +202,6 @@ router.post('/purchase', async (req, res) => {
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "User is not having any stripe account" });
         }
-
     } else {
         res.status(config.BAD_REQUEST).json({ message: errors });
     }

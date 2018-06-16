@@ -909,28 +909,28 @@ campaign_helper.get_promoters_by_social_media = async (promoter_id, filter) => {
 
         aggregate.push({
             "$project":
-                {
-                    "at_tag": 1, "at_tag": 1,
-                    "hash_tag": 1,
-                    "privacy": 1,
-                    "mood_board_images": 1,
-                    "status": 1,
-                    "name": 1,
-                    "start_date": 1,
-                    "end_date": 1,
-                    "call_to_action": 1,
-                    "social_media_platform": 1,
-                    "media_format": 1,
-                    "location": 1,
-                    "price": 1,
-                    "currency": 1,
-                    "promoter_id": 1,
-                    "description": 1,
-                    "cover_image": 1,
-                    "days": {
-                        "$divide": [{ "$subtract": ['$end_date', '$start_date'] }, 24 * 60 * 60 * 1000]
-                    }
+            {
+                "at_tag": 1, "at_tag": 1,
+                "hash_tag": 1,
+                "privacy": 1,
+                "mood_board_images": 1,
+                "status": 1,
+                "name": 1,
+                "start_date": 1,
+                "end_date": 1,
+                "call_to_action": 1,
+                "social_media_platform": 1,
+                "media_format": 1,
+                "location": 1,
+                "price": 1,
+                "currency": 1,
+                "promoter_id": 1,
+                "description": 1,
+                "cover_image": 1,
+                "days": {
+                    "$divide": [{ "$subtract": ['$end_date', '$start_date'] }, 24 * 60 * 60 * 1000]
                 }
+            }
         });
 
         var calendar = await Campaign.aggregate(aggregate);
@@ -2261,6 +2261,18 @@ campaign_helper.get_campaign_user = async (campaign_id, user_id) => {
         }
     } catch (err) {
         return { "status": 0, "message": "Error occured while finding campaign_user", "error": err }
+    }
+}
+
+/**
+ * 
+ */
+campaign_helper.get_applied_campaign_by_user_and_campaign = async (user_id, campaign_id) => {
+    let applied_post = await Campaign_Applied.findOne({ "user_id": user_id, "campaign_id": campaign_id });
+    if (applied_post) {
+        return { "status": 1, "message": "Applied post found", "applied_post": applied_post };
+    } else {
+        return { "status": 0, "message": "Applied post not found" };
     }
 }
 

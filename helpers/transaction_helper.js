@@ -102,4 +102,30 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
     }
 };
 
+transaction_helper.get_transaction_by_applied_post_id = async (applied_post_id) => {
+    let transaction = await Transaction.aggregate([
+        {
+            "$unwind":"$cart_items"
+        },
+        {
+            "$match":{
+                "cart_items.applied_post_id":new ObjectId(applied_post_id)
+            }
+        }
+    ]);
+
+    if(transaction && transaction[0]){
+        return {"status":1,"message":"Post found in transaction","transaction":transaction}
+    }
+};
+
+transaction_helper.update_status_of_cart_item = async(cart_item_id,status) => {
+    let update_resp = await Transaction.findOneAndUpdate({
+        "cart_items._id":new ObjectId(cart_item_id)
+    }, {
+        "$set":{"cart_items.$.status":status}
+    });
+    return {"status":1,"message":"Record has been updated"};
+}
+
 module.exports = transaction_helper;
