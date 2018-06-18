@@ -194,7 +194,6 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
                 let group_res = await Promise.all(group_data);
 
-                console.log("sort ==> ",sort);
                 if(typeof sort.social_power != "undefined"){
                     if(sort.social_power == -1){
                         group_res = _.sortBy(group_res,'social_power').reverse();

@@ -222,7 +222,6 @@ router.post('/filter', async (req, res) => {
         // sort = await global_helper.rename_keys(sort, keys);
 
         var groups = await group_helper.get_filtered_group(req.body.page_no, req.body.page_size, match_filter, sort);
-        console.log("resp = ", groups);
         if (groups.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Groups found", "results": groups.results });
         } else {
