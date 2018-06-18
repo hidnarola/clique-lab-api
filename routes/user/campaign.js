@@ -408,6 +408,7 @@ router.post("/campaign_applied", async (req, res) => {
 
 // /user/campaign/social_post
 router.post("/social_post", async (req, res) => {
+  logger.trace("social post API has been called = ",req.body);
   var schema = {
     "campaign_id": {
       notEmpty: true,
@@ -434,31 +435,47 @@ router.post("/social_post", async (req, res) => {
       "social_media_platform": req.body.social_media_platform
     }
 
+    logger.debug("Inserting into campaign post : ",obj);
     let resp_data = await campaign_post_helper.insert_campaign_post(obj);
+    logger.info("campaign post resp : ",resp_data);
 
     if (resp_data.status === 0) {
 
-      logger.error("Error while posting camapign  data = ", resp_data);
+      logger.error("Error while posting camapign data = ", resp_data);
       return res.status(config.BAD_REQUEST).json({ resp_data });
 
     } else {
 
       // Fetch campaign price
+
+      logger.debug("Fetching campaign data by id : ",req.body.campaign_id);
       let campaign_resp = await campaign_helper.get_campaign_by_id(req.body.campaign_id);
+      logger.info("campaign data : ",campaign_resp);
+
+      logger.debug("Fetching applied campaign. User = ",req.userInfo.id);
       let applied_post = await campaign_helper.get_applied_campaign_by_user_and_campaign(req.userInfo.id, req.body.campaign_id);
+      logger.info("applied post = ",applied_post);
 
       if (applied_post.status == 1) {
+
+        logger.debug("Fetching transaction by post id : ",applied_post.applied_post._id);
         let transaction = await transaction_helper.get_transaction_by_applied_post_id(applied_post.applied_post.id);
+        logger.info("Transaction ==> ",transaction);
+
         if (transaction.status == 1) {
 
           let twentyfive = (campaign_resp.Campaign.price * 25 / 100); // Credited to clique's account
           let five = (campaign_resp.Campaign.price * 5 / 100); // Credited to partner account, if available
           let seventy = (campaign_resp.Campaign.price * 70 / 100); // Credited to user's account
 
+          logger.info("Deviding amount. 25% = ",twentyfive," -- 5% = ",five," -- 70% = ",seventy);
+
           // Add balance in user's wallet
           let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
+          logger.info("User object : ",user_resp)
           let obj = { "wallet_balance": (user_resp.User.wallet_balance) + seventy };
           let user_update = await user_helper.update_user_by_id(req.userInfo.id, obj);
+          logger.info("User update resp : ",user_update);
 
           // Update status in campaign_user - change posted and paid falg
           obj = {
@@ -466,6 +483,7 @@ router.post("/social_post", async (req, res) => {
             "is_paid": true
           };
           let campaign_user_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
+          logger.info("update campaign user : ",campaign_user_update);
 
           // Record user transaction
           obj = {
@@ -473,32 +491,45 @@ router.post("/social_post", async (req, res) => {
             "campaign_id": req.body.campaign_id,
             "price": seventy
           };
+          logger.debug("Inserting user earning : ",obj);
           let earning_resp = await earning_helper.insert_user_earning(obj);
+          logger.info("Earning info : ",earning_resp);
 
           // Check for partner registration
           if (user_resp.User.referral_id) {
+            logger.info("Referral exist : ",user_resp.User.referral_id);
             // Add 5% money to promoter wallet
             let promoter_resp = await promoter_helper.get_promoter_by_id(user_resp.User.referral_id);
+            logger.info("Referral profile : ",promoter_resp);
             let obj = { "wallet_balance": (promoter_resp.promoter.wallet_balance) + five };
             let promoter_update = await promoter_helper.update_promoter_by_id(user_resp.User.referral_id, obj);
+            logger.info("Promoter update resp : ",promoter_update);
           }
 
           // Keep remianing balance in clique's account amd charge promoter
-          let charge = stripe.Charges.capture(transaction.transaction.cart_items.stripe_charge_id);
+          logger.info("Capturing charge : ",transaction.transaction.cart_items.stripe_charge_id);
+          let charge = await stripe.Charges.capture(transaction.transaction.cart_items.stripe_charge_id);
+          logger.info("captured charge resp ==> ",charge);
 
           // Update transaction table
           if (charge) {
-            await transaction_helper.update_status_of_cart_item(transaction.transaction.cart_items._id, "paid");
+            logger.info("Updating status to paid for cart_item : ",transaction.transaction.cart_items._id);
+            let update_resp = await transaction_helper.update_status_of_cart_item(transaction.transaction.cart_items._id, "paid");
+            logger.info("Status update resp : ",update_resp);
           } else {
+            logger.info("Updating status to failed for cart_item : ",transaction.transaction.cart_items._id);
             await transaction_helper.update_status_of_cart_item(transaction.transaction.cart_items._id, "failed");
+            logger.info("Status update resp : ",update_resp);
           }
 
-          return res.status(config.OK_STATUS).json(resp_data);
+          return res.status(config.OK_STATUS).json({"status":1,"message":"Payment has been done for post"});
 
         } else {
+          logger.error("Transaction not found")
           res.status(config.BAD_REQUEST).status({ "status": 0, "message": "Transaction not found" });
         }
       } else {
+        logger.error("Post not found");
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post not found" });
       }
     }
