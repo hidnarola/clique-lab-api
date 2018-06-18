@@ -850,6 +850,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
         if (filter) {
             aggregate.push({ "$match": filter });
         }
+
         if (sort) {
             aggregate.push({ "$sort": sort });
         }

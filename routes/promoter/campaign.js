@@ -701,7 +701,7 @@ router.post('/purchased', async (req, res) => {
         }
 
         if (Object.keys(sort).length === 0) {
-            sort["_id"] = 1;
+            sort["created_date"] = -1;
         }
 
         let keys = {
