@@ -42,6 +42,11 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
             "$unwind": "$cart_items"
         },
         {
+            "$match":{
+                "cart_items.status":"paid"
+            }
+        },
+        {
             "$lookup": {
                 "from": "campaign_applied",
                 "localField": "cart_items.applied_post_id",
@@ -69,6 +74,7 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
                         "results.campaign_description":"$results.campaign_post.desription",
                         "results.image":"$results.campaign_post.image",
                         "results.price":"$results.cart_items.price",
+                        "results.gst":"$results.cart_items.gst",
                         "results.brand":"$results.company"
                     }
                 }
