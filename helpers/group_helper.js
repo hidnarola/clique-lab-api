@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var moment = require("moment");
+var _ = require("underscore");
 
 var Group = require("./../models/Group");
 var Group_User = require("./../models/Group_user");
@@ -113,18 +114,18 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
             "$group": {
                 "_id": null,
                 "total": { "$sum": 1 },
-                'results': { "$push": '$$ROOT' }
+                'groups': { "$push": '$$ROOT' }
             }
         });
 
-        if (page_size && page_no) {
-            aggregate.push({
-                "$project": {
-                    "total": 1,
-                    'groups': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
-                }
-            });
-        }
+        // if (page_size && page_no) {
+        //     aggregate.push({
+        //         "$project": {
+        //             "total": 1,
+        //             'groups': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+        //         }
+        //     });
+        // }
 
         aggregate = aggregate.concat([
             {
@@ -192,7 +193,20 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                 });
 
                 let group_res = await Promise.all(group_data);
+
+                console.log("sort ==> ",sort);
+                if(typeof sort.social_power != "undefined"){
+                    if(sort.social_power == -1){
+                        group_res = _.sortBy(group_res,'social_power').reverse();
+                    } else {
+                        group_res = _.sortBy(group_res,'social_power');
+                    }
+                }
+
+                group_res = group_res.slice(page_size * (page_no - 1), (page_size * (page_no - 1)) + page_size);
+
                 groups[0].groups = group_res;
+
                 return { "status": 1, "message": "Groups found", "results": groups[0] };
             } else {
                 return { "status": 1, "message": "Groups found", "results": groups };
