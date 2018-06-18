@@ -508,7 +508,7 @@ router.post("/social_post", async (req, res) => {
 
           // Keep remianing balance in clique's account amd charge promoter
           logger.info("Capturing charge : ",transaction.transaction.cart_items.stripe_charge_id);
-          let charge = await stripe.Charges.capture(transaction.transaction.cart_items.stripe_charge_id);
+          let charge = await stripe.charges.capture(transaction.transaction.cart_items.stripe_charge_id);
           logger.info("captured charge resp ==> ",charge);
 
           // Update transaction table

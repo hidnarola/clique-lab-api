@@ -115,7 +115,7 @@ transaction_helper.get_transaction_by_applied_post_id = async (applied_post_id) 
     ]);
 
     if(transaction && transaction[0]){
-        return {"status":1,"message":"Post found in transaction","transaction":transaction}
+        return {"status":1,"message":"Post found in transaction","transaction":transaction[0]}
     }
 };
 
