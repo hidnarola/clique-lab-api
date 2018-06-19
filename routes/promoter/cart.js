@@ -3,6 +3,8 @@ var router = express.Router();
 
 var config = require('./../../config');
 var cart_helper = require('./../../helpers/cart_helper');
+var user_helper = require('./../../helpers/user_helper');
+var push_notification_helper = require('./../../helpers/push_notification_helper');
 var campaign_helper = require('./../../helpers/campaign_helper');
 var transaction_helper = require('./../../helpers/transaction_helper');
 var promoter_helper = require('./../../helpers/promoter_helper');
@@ -117,14 +119,14 @@ router.post('/purchase', async (req, res) => {
                     }
 
                     // console.log("token ==> ",token.id);
-                    console.log("Object ==> ",obj);
-                    console.log("creating charge of ",(obj.price * 1 + obj.gst * 1) * 100);
+                    console.log("Object ==> ", obj);
+                    console.log("creating charge of ", (obj.price * 1 + obj.gst * 1) * 100);
                     // Create charge with additional 10% GST
                     let charge = await stripe.charges.create({
                         "amount": parseInt((obj.price * 1 + obj.gst * 1) * 100), // 100 means $1
                         "currency": "aud",
                         "capture": false,
-                        "source":req.body.credit_card,
+                        "source": req.body.credit_card,
                         "customer": promoter_resp.promoter.stripe_customer_id,
                         "statement_descriptor": "Clique purchase", // length must be 22 character max.
                         "metadata": {
@@ -136,7 +138,7 @@ router.post('/purchase', async (req, res) => {
                             "promoterID": req.userInfo.id
                         }
                     });
-                    console.log("charge id => ",charge.id);
+                    console.log("charge id => ", charge.id);
 
                     obj.stripe_charge_id = charge.id;
 
@@ -145,7 +147,7 @@ router.post('/purchase', async (req, res) => {
 
                 cart_items = await Promise.all(cart_items);
 
-                console.log("Inserting transaction : ",cart_items);
+                console.log("Inserting transaction : ", cart_items);
                 // Add transaction
                 let transaction_obj = {
                     "promoter_id": req.userInfo.id,
@@ -172,13 +174,41 @@ router.post('/purchase', async (req, res) => {
                 }
 
                 let transaction_resp = await transaction_helper.insert_transaction(transaction_obj);
-                console.log("Transaction resp ==> ",transaction_resp);
+                console.log("Transaction resp ==> ", transaction_resp);
 
                 if (transaction_resp.status === 1) {
 
                     console.log("Updating status of campaign user");
                     // mark status as purchased for campaign_user
                     active_cart.results.cart_items.forEach(async (cart_item) => {
+                        if (cart_item.user._id) {
+
+                            // Send push notification to user
+                            let user_res = await user_helper.get_user_by_id(cart_item.user._id);
+                            if (user_res.state === 1 && user_res.User) {
+
+                                if(user_res.User.device_token && user_res.User.device_token.length > 0){
+                                    if(user_res.User.notification_settings && user_res.User.notification_settings.push_got_approved){
+                                        let notification_resp = user_res.User.device_token.forEach(async (token) => {
+                                            if(token.platform && token.token){
+                                                if(token.platform == "ios"){
+                                                    await push_notification_helper.sendToIOS(token.token,{
+                                                        "message":"You applied post has been approved."
+                                                    });
+                                                } else if(token.platform == "android"){
+                                                    await push_notification_helper.sendToAndroid(token.token,{
+                                                        "message":"You applied post has been approved."
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+
+                            }
+
+                        }
+
                         if (cart_item.campaign_id) {
                             await campaign_helper.update_campaign_user(cart_item.user._id, cart_item.campaign_id, { "is_purchase": true });
                         }

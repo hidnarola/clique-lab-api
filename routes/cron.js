@@ -8,6 +8,29 @@ var campaign_post_helper = require("./../helpers/campaign_post_helper");
 
 var cron = require('node-cron');
 
+/* -------------------------------------------- */
+
+var push_notification_helper = require('./../helpers/push_notification_helper');
+
+// Send notification to IOS Device
+IOSCall = async() => {
+    console.log("Sending notification to IOS Device");
+    let result = await push_notification_helper.sendToIOS("c77b476e1c8a46b67db6de24fdcfa01674323192b0bbc36242d8fdf3bd4af254",{"message":"IOS : Did you receive this only?","another":"Or this one also?"});
+    console.log("IOS => Result : ",JSON.stringify(result));
+}
+
+// Send notification to Android Device
+AndroidCall = async() => {
+    console.log("Sending notification to Android Device");
+    let result = await push_notification_helper.sendToAndroid("eg06BiDd_cc:APA91bEo7StyJiK-ZLWpOlawCWeh0_JzFfdpRu3SG8jcD0cmf_Bh5NtSnYSPyf5RRTHlccOyAx_PqQUzW43kFyfWbZ4GlZOFna76Alwr3JvdSvrM-ylCAnx62Pv6l5bLBycCmlkRhiK9",{"message":"Android : Let me know if you received this"});
+    console.log("Android => Result : ",result);
+}
+
+// IOSCall();
+// AndroidCall();
+
+/* -------------------------------------------- */
+
 cron.schedule('0 * * * *', async () => {
     let users = await user_helper.get_all_user();
     if (users.status === 1) {

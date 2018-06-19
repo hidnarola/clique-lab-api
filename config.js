@@ -50,5 +50,12 @@ module.exports = {
     "TWITTER_APP_ID": process.env.TWITTER_APP_ID,
     "TWITTER_APP_SECRET":process.env.TWITTER_APP_SECRET,
     "LINKEDIN_APP_ID": process.env.LINKEDIN_APP_ID,
-    "LINKEDIN_APP_SECRET":process.env.LINKEDIN_APP_SECRET
+    "LINKEDIN_APP_SECRET":process.env.LINKEDIN_APP_SECRET,
+
+    "APN_KEY_FILE":process.env.APN_KEY_FILE,
+    "APN_KEY_ID":process.env.APN_KEY_ID,
+    "APN_TEAM_ID":process.env.APN_TEAM_ID,
+    "APN_BUNDLE_ID":process.env.APN_BUNDLE_ID,
+
+    "ANDROID_SERVER_KEY":process.env.ANDROID_SERVER_KEY
 };
