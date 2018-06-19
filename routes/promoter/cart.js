@@ -121,7 +121,7 @@ router.post('/purchase', async (req, res) => {
                     console.log("creating charge of ",(obj.price * 1 + obj.gst * 1) * 100);
                     // Create charge with additional 10% GST
                     let charge = await stripe.charges.create({
-                        "amount": (obj.price * 1 + obj.gst * 1) * 100, // 100 means $1
+                        "amount": parseInt((obj.price * 1 + obj.gst * 1) * 100), // 100 means $1
                         "currency": "aud",
                         "capture": false,
                         "source":req.body.credit_card,
@@ -149,26 +149,26 @@ router.post('/purchase', async (req, res) => {
                 // Add transaction
                 let transaction_obj = {
                     "promoter_id": req.userInfo.id,
-                    "name": req.body.name,
+                    "name": trim(req.body.name),
                     "email": req.body.email,
                     "abn": req.body.abn,
                     "country": req.body.country,
-                    "address_line1": req.body.address_line_1,
+                    "address_line1": trim(req.body.address_line_1),
                     // "company":req.body.company,
-                    "city": req.body.city,
+                    "city": trim(req.body.city),
                     "state": req.body.state,
-                    "post_code": req.body.post_code,
+                    "post_code": trim(req.body.post_code),
                     "credit_card": req.body.credit_card,
                     "total_amount": active_cart.results.total,
                     "cart_items": cart_items
                 };
 
                 if (req.body.company) {
-                    transaction_obj.company = req.body.company;
+                    transaction_obj.company = trim(req.body.company);
                 }
 
                 if (req.body.address_line_2) {
-                    transaction_obj.address_line2 = req.body.address_line_2;
+                    transaction_obj.address_line2 = trim(req.body.address_line_2);
                 }
 
                 let transaction_resp = await transaction_helper.insert_transaction(transaction_obj);

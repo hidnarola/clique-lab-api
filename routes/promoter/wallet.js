@@ -317,7 +317,7 @@ router.post('/credit_card', async (req, res) => {
                         "exp_month": req.body.expiry_month,
                         "exp_year": req.body.expiry_year,
                         "cvc": req.body.cvv,
-                        "name": req.body.card_holder_name
+                        "name": trim(req.body.card_holder_name)
                     }
                 });
 
@@ -377,7 +377,7 @@ router.put('/credit_card', async (req, res) => {
                     promoter_resp.promoter.stripe_customer_id,
                     req.body.card_id,
                     {
-                        "name": req.body.card_holder_name,
+                        "name": trim(req.body.card_holder_name),
                         "exp_month": req.body.expiry_month,
                         "exp_year": req.body.expiry_year
                     }
