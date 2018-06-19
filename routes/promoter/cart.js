@@ -149,26 +149,26 @@ router.post('/purchase', async (req, res) => {
                 // Add transaction
                 let transaction_obj = {
                     "promoter_id": req.userInfo.id,
-                    "name": trim(req.body.name),
+                    "name": req.body.name.trim(),
                     "email": req.body.email,
                     "abn": req.body.abn,
                     "country": req.body.country,
-                    "address_line1": trim(req.body.address_line_1),
+                    "address_line1": req.body.address_line_1.trim(),
                     // "company":req.body.company,
-                    "city": trim(req.body.city),
+                    "city": req.body.city.trim(),
                     "state": req.body.state,
-                    "post_code": trim(req.body.post_code),
+                    "post_code": req.body.post_code.trim(),
                     "credit_card": req.body.credit_card,
                     "total_amount": active_cart.results.total,
                     "cart_items": cart_items
                 };
 
                 if (req.body.company) {
-                    transaction_obj.company = trim(req.body.company);
+                    transaction_obj.company = req.body.company.trim();
                 }
 
                 if (req.body.address_line_2) {
-                    transaction_obj.address_line2 = trim(req.body.address_line_2);
+                    transaction_obj.address_line2 = req.body.address_line_2.trim();
                 }
 
                 let transaction_resp = await transaction_helper.insert_transaction(transaction_obj);
