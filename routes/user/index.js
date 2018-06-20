@@ -131,13 +131,15 @@ router.put('/', function (req, res) {
     if (req.body.job_title && req.body.job_title != null) {
         obj.job_title = req.body.job_title;
     }
-    if (req.body.username) {
+
+    if (typeof req.body.username != "undefined") {
         obj.username = req.body.username;
     }
+
     if (req.body.email && req.body.email != null) {
         obj.email = req.body.email;
     }
-    if (req.body.short_bio) {
+    if (typeof req.body.short_bio != "undefined") {
         obj.short_bio = req.body.short_bio;
     }
     if (req.body.education && req.body.education != null) {
@@ -155,7 +157,7 @@ router.put('/', function (req, res) {
     if (req.body.state && req.body.state != null) {
         obj.state = req.body.state;
     }
-    if (req.body.suburb) {
+    if (typeof req.body.suburb != "undefined") {
         obj.suburb = req.body.suburb;
     }
     if (req.body.gender && req.body.gender != null) {
