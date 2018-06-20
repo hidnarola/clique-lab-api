@@ -241,7 +241,7 @@ router.post('/add_bank_account', async (req, res) => {
                 }
                 res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been added" });
             } catch (err) {
-                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err });
+                res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": err.message });
             }
 
         } else {
@@ -270,7 +270,7 @@ router.delete('/bank_account/:bank_account_id', async (req, res) => {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
                 }
             } catch (err) {
-                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": err.message });
             }
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found" });
