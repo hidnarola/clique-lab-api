@@ -14,6 +14,8 @@ var cart_helper = require('./../../helpers/cart_helper');
 var user_helper = require('./../../helpers/user_helper');
 var group_helper = require('./../../helpers/group_helper');
 var global_helper = require("./../../helpers/global_helper");
+var push_notification_helper = require('./../../helpers/push_notification_helper');
+var notification_helper = require('./../../helpers/notification_helper');
 
 var logger = config.logger;
 var ObjectId = mongoose.Types.ObjectId;
@@ -95,8 +97,8 @@ router.post('/', async (req, res) => {
     const errors = req.validationErrors();
     if (!errors) {
 
-        console.log("req.files ==> ",req.files);
-        console.log("board image ==> ",req.files['board_image']);
+        console.log("req.files ==> ", req.files);
+        console.log("board image ==> ", req.files['board_image']);
         // Check cover and board image
         if (req.files && req.files['cover_image'] && req.files['board_image']) {
             var campaign_obj = {
@@ -262,6 +264,45 @@ router.post('/:campaign_id/add_user/:user_id', async (req, res) => {
     if (campaign_resp.status === 0) {
         res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while adding user into campaign", "error": campaign_resp.error });
     } else {
+        let campaign_resp = await campaign_helper.get_campaign_by_id(req.params.campaign_id);
+
+        // Send push notification to user
+        let user_res = await user_helper.get_user_by_id(req.params.user_id);
+        if (user_res.state === 1 && user_res.User) {
+
+            // Check status and enter notification into DB
+            if (user_res.User.notification_settings && user_res.User.notification_settings.got_new_offer) {
+                var notification_obj = {
+                    "user_id":user_res.User._id,
+                    "text":"You got new offer",
+                    "image_url":campaign_resp.Campaign.cover_image,
+                    "is_read":false,
+                    "type":"got-offer"
+                };
+
+                let notification_resp = await notification_helper.insert_notification(notification_obj);
+            }
+
+            if (user_res.User.device_token && user_res.User.device_token.length > 0) {
+                if (user_res.User.notification_settings && user_res.User.notification_settings.push_got_new_offer) {
+                    let notification_resp = user_res.User.device_token.forEach(async (token) => {
+                        if (token.platform && token.token) {
+                            if (token.platform == "ios") {
+                                await push_notification_helper.sendToIOS(token.token, {
+                                    "message": "You got new offer."
+                                });
+                            } else if (token.platform == "android") {
+                                await push_notification_helper.sendToAndroid(token.token, {
+                                    "message": "You got new offer."
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+
+        }
+
         res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been added into campaign" });
     }
 });
@@ -289,6 +330,16 @@ router.post('/active', async (req, res) => {
         if (campaign_resp.status === 0) {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching active campaign", "error": campaign_resp.error });
         } else if (campaign_resp.status === 1) {
+            campaign_resp.campaigns[0].campaigns = campaign_resp.campaigns[0].campaigns.map((campaign) => {
+                if (fs.existsSync('./uploads/campaign/512X384/' + campaign.cover_image)) {
+                    campaign.is_image = 1;
+                    return campaign;
+                } else {
+                    campaign.is_image = 0;
+                    cover_image.cover_image = "http://placehold.it/465x300/ececec/525f7f?text=No Image Found";
+                    return campaign;
+                }
+            });
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaigns found", "results": campaign_resp.campaigns });
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No campaign found for given promoter" });
@@ -372,7 +423,7 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {
             if (filter_criteria.type === "exact") {
-                if(filter_criteria.value != null && filter_criteria.value != ""){
+                if (filter_criteria.value != null && filter_criteria.value != "") {
                     match_filter[filter_criteria.field] = filter_criteria.value;
                 }
             } else if (filter_criteria.type === "between") {
@@ -386,7 +437,7 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
                     match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                 }
             } else if (filter_criteria.type === "like") {
-                if(filter_criteria.value != null && filter_criteria.value != ""){
+                if (filter_criteria.value != null && filter_criteria.value != "") {
                     var regex = new RegExp(filter_criteria.value);
                     match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                 }
@@ -415,7 +466,7 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
         var user_campaign = [];
 
         for (let user of users.results.users) {
-            await user_campaign.push({
+            user_campaign.push({
                 "campaign_id": req.params.campaign_id,
                 "user_id": user._id
             });
@@ -425,6 +476,50 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
         if (campaign_users_resp.status == 0) {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "No user available to add" });
         } else {
+
+            // Currently it will send notification to all filtered user.
+            // Need to change it to send to only those who are actually added
+            user_campaign.forEach(async (data) => {
+                // Send push notification to user
+                let user_res = await user_helper.get_user_by_id(data.user_id);
+                if (user_res.state === 1 && user_res.User) {
+
+                    let campaign_resp = await campaign_helper.get_campaign_by_id(req.params.campaign_id);
+
+                    // Check status and enter notification into DB
+                    if (user_res.User.notification_settings && user_res.User.notification_settings.got_new_offer) {
+                        var notification_obj = {
+                            "user_id":user_res.User._id,
+                            "text":"You got new offer",
+                            "image_url":campaign_resp.Campaign.cover_image,
+                            "is_read":false,
+                            "type":"got-offer"
+                        };
+
+                        let notification_resp = await notification_helper.insert_notification(notification_obj);
+                    }
+
+                    if (user_res.User.device_token && user_res.User.device_token.length > 0) {
+                        if (user_res.User.notification_settings && user_res.User.notification_settings.push_got_new_offer) {
+                            let notification_resp = user_res.User.device_token.forEach(async (token) => {
+                                if (token.platform && token.token) {
+                                    if (token.platform == "ios") {
+                                        await push_notification_helper.sendToIOS(token.token, {
+                                            "message": "You got new offer."
+                                        });
+                                    } else if (token.platform == "android") {
+                                        await push_notification_helper.sendToAndroid(token.token, {
+                                            "message": "You got new offer."
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                }
+            });
+
             res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been added to given campaign" });
         }
     } else {
@@ -442,7 +537,7 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {
             if (filter_criteria.type === "exact") {
-                if(filter_criteria.value != null && filter_criteria.value != ""){
+                if (filter_criteria.value != null && filter_criteria.value != "") {
                     match_filter[filter_criteria.field] = filter_criteria.value;
                 }
             } else if (filter_criteria.type === "between") {
@@ -456,7 +551,7 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
                     match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                 }
             } else if (filter_criteria.type === "like") {
-                if(filter_criteria.value != null && filter_criteria.value != ""){
+                if (filter_criteria.value != null && filter_criteria.value != "") {
                     var regex = new RegExp(filter_criteria.value);
                     match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                 }
@@ -478,7 +573,7 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
         "gender": "members.gender",
         "location": "members.suburb",
         "job_industry": "members.job_industry",
-        "job_title":"members.job_title",
+        "job_title": "members.job_title",
         "education": "members.education",
         "language": "members.language",
         "ethnicity": "members.ethnicity",
@@ -494,7 +589,7 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
         var user_campaign = [];
 
         for (let user of members.results.users) {
-            await user_campaign.push({
+            user_campaign.push({
                 "campaign_id": req.params.campaign_id,
                 "user_id": user._id
             });
@@ -504,6 +599,50 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
         if (campaign_users_resp.status == 0) {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
         } else {
+
+            let campaign_resp = await campaign_helper.get_campaign_by_id(req.params.campaign_id);
+
+            // Currently it will send notification to all filtered user.
+            // Need to change it to send to only those who are actually added
+            user_campaign.forEach(async (data) => {
+                // Send push notification to user
+                let user_res = await user_helper.get_user_by_id(data.user_id);
+                if (user_res.state === 1 && user_res.User) {
+
+                    // Check status and enter notification into DB
+                    if (user_res.User.notification_settings && user_res.User.notification_settings.push_got_new_offer) {
+                        var notification_obj = {
+                            "user_id":user_res.User._id,
+                            "text":"You got new offer",
+                            "image_url":campaign_resp.Campaign.cover_image,
+                            "is_read":false,
+                            "type":"got-offer"
+                        };
+
+                        let notification_resp = await notification_helper.insert_notification(notification_obj);
+                    }
+
+                    if (user_res.User.device_token && user_res.User.device_token.length > 0) {
+                        if (user_res.User.notification_settings && user_res.User.notification_settings.push_got_new_offer) {
+                            let notification_resp = user_res.User.device_token.forEach(async (token) => {
+                                if (token.platform && token.token) {
+                                    if (token.platform == "ios") {
+                                        await push_notification_helper.sendToIOS(token.token, {
+                                            "message": "You got new offer."
+                                        });
+                                    } else if (token.platform == "android") {
+                                        await push_notification_helper.sendToAndroid(token.token, {
+                                            "message": "You got new offer."
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                }
+            });
+
             res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been added to given campaign" });
         }
     } else {
@@ -561,7 +700,7 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {
             if (filter_criteria.type === "exact") {
-                if(filter_criteria.value != null && filter_criteria.value != ""){
+                if (filter_criteria.value != null && filter_criteria.value != "") {
                     match_filter[filter_criteria.field] = filter_criteria.value;
                 }
             } else if (filter_criteria.type === "between") {
@@ -575,7 +714,7 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
                     match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                 }
             } else if (filter_criteria.type === "like") {
-                if(filter_criteria.value != null && filter_criteria.value != ""){
+                if (filter_criteria.value != null && filter_criteria.value != "") {
                     var regex = new RegExp(filter_criteria.value);
                     match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                 }
@@ -670,7 +809,7 @@ router.post('/purchased', async (req, res) => {
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
-                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                    if (filter_criteria.value != null && filter_criteria.value != "") {
                         match_filter[filter_criteria.field] = filter_criteria.value;
                     }
                 } else if (filter_criteria.type === "between") {
@@ -684,7 +823,7 @@ router.post('/purchased', async (req, res) => {
                         match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
-                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                    if (filter_criteria.value != null && filter_criteria.value != "") {
                         var regex = new RegExp(filter_criteria.value);
                         match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                     }
@@ -806,23 +945,23 @@ router.post('/get_demographics', async (req, res) => {
     var music_taste = await campaign_helper.count_music_taste_of_user(req.userInfo.id);
     var relationship_status = await campaign_helper.count_relationship_status_of_user(req.userInfo.id);
     var sexual_orientation = await campaign_helper.count_sexual_orientation_of_user(req.userInfo.id);
-    
+
     if (country.status === 1 && state.status === 1 && suburb.status === 1 && job_industry.status === 1 && education.status === 1 && language.status === 1 && ethnicity.status === 1 && music_taste.status === 1) {
         var result = {
-            "country": country.country[0], 
-            "state": state.state[0], 
-            "suburb": suburb.suburb[0], 
-            "gender": gender.gender[0], 
-            "job_industry": job_industry.job_industry[0], 
-            "education": education.education[0], 
-            "language": language.language[0], 
-            "ethnicity": ethnicity.ethnicity[0], 
-            "music_taste": music_taste.music_taste[0], 
-            "relationship_status": relationship_status.relationship_status[0], 
+            "country": country.country[0],
+            "state": state.state[0],
+            "suburb": suburb.suburb[0],
+            "gender": gender.gender[0],
+            "job_industry": job_industry.job_industry[0],
+            "education": education.education[0],
+            "language": language.language[0],
+            "ethnicity": ethnicity.ethnicity[0],
+            "music_taste": music_taste.music_taste[0],
+            "relationship_status": relationship_status.relationship_status[0],
             "sexual_orientation": sexual_orientation.sexual_orientation[0]
         }
-    
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results":result });
+
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": result });
     } else if (campaigns.status === 2) {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
     } else {
@@ -855,7 +994,7 @@ router.post('/:campaign_id', async (req, res) => {
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
-                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                    if (filter_criteria.value != null && filter_criteria.value != "") {
                         match_filter[filter_criteria.field] = filter_criteria.value;
                     }
                 } else if (filter_criteria.type === "between") {
@@ -869,7 +1008,7 @@ router.post('/:campaign_id', async (req, res) => {
                         match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
-                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                    if (filter_criteria.value != null && filter_criteria.value != "") {
                         var regex = new RegExp(filter_criteria.value);
                         match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                     }
@@ -955,7 +1094,7 @@ router.post('/:campaign_id/campaign_users', async (req, res) => {
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
                 if (filter_criteria.type === "exact") {
-                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                    if (filter_criteria.value != null && filter_criteria.value != "") {
                         match_filter[filter_criteria.field] = filter_criteria.value;
                     }
                 } else if (filter_criteria.type === "between") {
@@ -969,7 +1108,7 @@ router.post('/:campaign_id/campaign_users', async (req, res) => {
                         match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
                     }
                 } else if (filter_criteria.type === "like") {
-                    if(filter_criteria.value != null && filter_criteria.value != ""){
+                    if (filter_criteria.value != null && filter_criteria.value != "") {
                         var regex = new RegExp(filter_criteria.value);
                         match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
                     }

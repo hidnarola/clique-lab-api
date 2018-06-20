@@ -4,7 +4,7 @@ var ObjectId = mongoose.Types.ObjectId;
 var Notification = require("./../models/Notification");
 var notification_helper = {};
 
-/*
+/**
  * get_all_notification is used to fetch all notification data
  * 
  * @return  status 0 - If any internal error occured while fetching notification data, with error
@@ -59,5 +59,15 @@ notification_helper.get_notification_for_user = async (user_id, page_no, page_si
         return { "status": 0, "message": "Error occured while finding notification", "error": err }
     }
 }
+
+notification_helper.insert_notification = async (notification_object) => {
+    let notification = new Notification(notification_object)
+    try {
+        let notification_data = await notification.save();
+        return { "status": 1, "message": "Notification has been inserted", "notification": notification_data };
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while inserting notification", "error": err };
+    }
+};
 
 module.exports = notification_helper;
