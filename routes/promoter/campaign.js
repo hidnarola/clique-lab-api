@@ -331,12 +331,13 @@ router.post('/active', async (req, res) => {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching active campaign", "error": campaign_resp.error });
         } else if (campaign_resp.status === 1) {
             campaign_resp.campaigns[0].campaigns = campaign_resp.campaigns[0].campaigns.map((campaign) => {
+                console.log("campaign : ",campaign);
                 if (fs.existsSync('./uploads/campaign/512X384/' + campaign.cover_image)) {
                     campaign.is_image = 1;
                     return campaign;
                 } else {
                     campaign.is_image = 0;
-                    cover_image.cover_image = "http://placehold.it/465x300/ececec/525f7f?text=No Image Found";
+                    campaign.cover_image = "http://placehold.it/465x300/ececec/525f7f?text=No Image Found";
                     return campaign;
                 }
             });
