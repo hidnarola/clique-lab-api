@@ -621,7 +621,7 @@ campaign_helper.get_past_campaign_by_promoter = async (promoter_id, page_no, pag
                     "end_date": { "$lt": new Date() }
                 }
             },
-            { "$sort": { "created_at": -1 } },
+            { "$sort": { "end_date": -1 } },
             {
                 "$group": {
                     "_id": null,
