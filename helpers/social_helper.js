@@ -179,4 +179,21 @@ social_helper.get_twitter_post_statistics = async(post_id,access_token,access_to
     }
 }
 
+social_helper.get_facebook_friend_details_by_token = async(access_token) => {
+    try {
+        FB.setAccessToken(access_token);
+        let response = await FB.api('/me/friends');
+
+        console.log("FB resp ==> ",response);
+        if (response.summary.total_count > 0) {
+            return response;
+        } else {
+            return 0;
+        }
+    } catch (err) {
+        console.log("error => ",err);
+        return 0;
+    }
+}
+
 module.exports = social_helper;

@@ -8,6 +8,27 @@ var campaign_post_helper = require("./../helpers/campaign_post_helper");
 
 var cron = require('node-cron');
 
+cron.schedule('0 * * * *', async () => {
+    let users = await user_helper.get_all_user();
+    if (users.status === 1) {
+        users.users.forEach(async (user) => {
+            let resp = await user_helper.update_social_connection(user._id);
+            console.log("Resp ==> ",resp);
+        });
+    }
+});
+
+cron.schedule('5 * * * *',async() => {
+    // Get all post that are already posted on social media
+    let posts = await campaign_post_helper.get_all_post();
+    if(posts.status === 1){
+        // Iterate each post one by one
+        posts.posts.forEach(async(post)=> {
+            await campaign_post_helper.find_post_statistics_by_post(post);
+        });
+    }
+});
+
 /* -------------------------------------------- */
 
 var push_notification_helper = require('./../helpers/push_notification_helper');
@@ -31,27 +52,16 @@ AndroidCall = async() => {
 
 /* -------------------------------------------- */
 
-cron.schedule('0 * * * *', async () => {
-    let users = await user_helper.get_all_user();
-    if (users.status === 1) {
-        users.users.forEach(async (user) => {
-            let resp = await user_helper.update_social_connection(user._id);
-            console.log("Resp ==> ",resp);
-        });
-    }
-});
+var social_helper = require('./../helpers/social_helper');
 
-cron.schedule('5 * * * *',async() => {
-    // Get all post that are already posted on social media
-    let posts = await campaign_post_helper.get_all_post();
-    if(posts.status === 1){
-        // Iterate each post one by one
-        posts.posts.forEach(async(post)=> {
-            await campaign_post_helper.find_post_statistics_by_post(post);
-        });
-    }
-});
+find_fb_friends = async() => {
+    let friends = await social_helper.get_facebook_friend_details_by_token("EAAFSgTjDYm0BADWp48qmxZA1ZAZCsiB6mFBn8fKwm09wmnk8baktB4jk8ZB1YSK4j2QEZCSKcH4YaILVRvjHZBp4OdMwn0HQqoaxv0RnkJiBQdBWeS2NVEXhHAnSZClfuIRcxd6gu0EudljtF2dJbXAetZA0ynZB7HQaRZCOZBnZBbmrisloNyX429fZBd1txNsPxO0D2ziYpvw0aoxDDlqwRkZCoRy09Cv7rEB6K8rJT86p8d0wZDZD");
+    console.log("\n\n------------------\n\nfriends ==> ",JSON.stringify(friends));
+};
 
+find_fb_friends();
+
+/* ---------------------------------------------- */
 let campaign_update = async () => {
     try {
         var campaign_helper = require('./../helpers/campaign_helper');
@@ -193,3 +203,5 @@ let group_image_resize = async() => {
 // applied_campaign_image_resize();
 // user_image_resize();
 // group_image_resize();
+
+/* ---------------------------------------------- */

@@ -108,7 +108,7 @@ router.post('/settings', async (req, res) => {
 
 router.get('/read/:notification_id', async (req, res) => {
     try {
-        let notification_resp = notification_helper.update_notification_by_id(req.params.notification_id, { "is_read": true });
+        let notification_resp = await notification_helper.update_notification_by_id(req.params.notification_id, { "is_read": true });
         if (notification_resp.status == 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Notification has been marked as read" });
         } else {
@@ -121,7 +121,7 @@ router.get('/read/:notification_id', async (req, res) => {
 
 router.get('/unread_count', async (req, res) => {
     try {
-        let notification_resp = notification_helper.get_users_total_unread_notification(req.userInfo.id);
+        let notification_resp = await notification_helper.get_users_total_unread_notification(req.userInfo.id);
         if (notification_resp.status == 1) {
             res.status(config.OK_STATUS).json(notification_resp);
         } else {
