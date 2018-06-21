@@ -13,6 +13,7 @@ var campaign_helper = require("./../../helpers/campaign_helper");
 var user_helper = require("./../../helpers/user_helper");
 var promoter_helper = require("./../../helpers/promoter_helper");
 var push_notification_helper = require('./../../helpers/push_notification_helper');
+var notification_helper = require('./../../helpers/notification_helper');
 var campaign_post_helper = require("./../../helpers/campaign_post_helper");
 var earning_helper = require("./../../helpers/earning_helper");
 var transaction_helper = require("./../../helpers/transaction_helper");
@@ -481,17 +482,30 @@ router.post("/social_post", async (req, res) => {
           // Send push notification to user
           if (user_resp.state === 1 && user_resp.User) {
 
+            // Check status and enter notification into DB
+            if (user_resp.User.notification_settings && user_resp.User.notification_settings.got_paid) {
+
+              var notification_obj = {
+                "user_id": user_resp.User._id,
+                "text": 'You got paid for the your campaign <b>"' + campaign_resp.Campaign.name + '"</b>',
+                "image_url": campaign_resp.Campaign.cover_image,
+                "is_read": false,
+                "type": "got-paid"
+              };
+              let notification_resp = await notification_helper.insert_notification(notification_obj);
+            }
+
             if (user_resp.User.device_token && user_resp.User.device_token.length > 0) {
               if (user_resp.User.notification_settings && user_resp.User.notification_settings.push_got_paid) {
                 let notification_resp = user_resp.User.device_token.forEach(async (token) => {
                   if (token.platform && token.token) {
                     if (token.platform == "ios") {
                       await push_notification_helper.sendToIOS(token.token, {
-                        "message":'You got paid for the your campaign <b>"'+campaign_resp.Campaign.name+'"</b>'
+                        "message": 'You got paid for the your campaign <b>"' + campaign_resp.Campaign.name + '"</b>'
                       });
                     } else if (token.platform == "android") {
                       await push_notification_helper.sendToAndroid(token.token, {
-                        "message":'You got paid for the your campaign <b>"'+campaign_resp.Campaign.name+'"</b>'
+                        "message": 'You got paid for the your campaign <b>"' + campaign_resp.Campaign.name + '"</b>'
                       });
                     }
                   }

@@ -97,8 +97,6 @@ router.post('/', async (req, res) => {
     const errors = req.validationErrors();
     if (!errors) {
 
-        console.log("req.files ==> ", req.files);
-        console.log("board image ==> ", req.files['board_image']);
         // Check cover and board image
         if (req.files && req.files['cover_image'] && req.files['board_image']) {
             var campaign_obj = {
@@ -268,10 +266,11 @@ router.post('/:campaign_id/add_user/:user_id', async (req, res) => {
 
         // Send push notification to user
         let user_res = await user_helper.get_user_by_id(req.params.user_id);
-        if (user_res.state === 1 && user_res.User) {
+        if (user_res.status === 1 && user_res.User) {
 
             // Check status and enter notification into DB
             if (user_res.User.notification_settings && user_res.User.notification_settings.got_new_offer) {
+                
                 var notification_obj = {
                     "user_id":user_res.User._id,
                     "text":"You got new offer",
@@ -279,7 +278,6 @@ router.post('/:campaign_id/add_user/:user_id', async (req, res) => {
                     "is_read":false,
                     "type":"got-offer"
                 };
-
                 let notification_resp = await notification_helper.insert_notification(notification_obj);
             }
 
@@ -331,7 +329,6 @@ router.post('/active', async (req, res) => {
             res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching active campaign", "error": campaign_resp.error });
         } else if (campaign_resp.status === 1) {
             campaign_resp.campaigns[0].campaigns = campaign_resp.campaigns[0].campaigns.map((campaign) => {
-                console.log("campaign : ",campaign);
                 if (fs.existsSync('./uploads/campaign/512X384/' + campaign.cover_image)) {
                     campaign.is_image = 1;
                     return campaign;
@@ -483,7 +480,7 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
             user_campaign.forEach(async (data) => {
                 // Send push notification to user
                 let user_res = await user_helper.get_user_by_id(data.user_id);
-                if (user_res.state === 1 && user_res.User) {
+                if (user_res.status === 1 && user_res.User) {
 
                     let campaign_resp = await campaign_helper.get_campaign_by_id(req.params.campaign_id);
 
@@ -608,7 +605,7 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
             user_campaign.forEach(async (data) => {
                 // Send push notification to user
                 let user_res = await user_helper.get_user_by_id(data.user_id);
-                if (user_res.state === 1 && user_res.User) {
+                if (user_res.status === 1 && user_res.User) {
 
                     // Check status and enter notification into DB
                     if (user_res.User.notification_settings && user_res.User.notification_settings.push_got_new_offer) {
@@ -901,9 +898,6 @@ router.post('/calendar', async (req, res) => {
 
         var startdate = moment(req.body.start_date, "YYYY-MM-DD").toDate();
         var enddate = moment(req.body.end_date, "YYYY-MM-DD").toDate();
-
-        console.log("start = ", startdate);
-        console.log("end = ", enddate);
 
         let filter = {
             "start_date": {

@@ -187,17 +187,32 @@ router.post('/purchase', async (req, res) => {
                             let user_res = await user_helper.get_user_by_id(cart_item.user._id);
                             if (user_res.state === 1 && user_res.User) {
 
-                                if(user_res.User.device_token && user_res.User.device_token.length > 0){
-                                    if(user_res.User.notification_settings && user_res.User.notification_settings.push_got_approved){
+                                let campaign_resp = await campaign_helper.get_campaign_by_id(cart_item.campaign_id);
+
+                                // Check status and enter notification into DB
+                                if (user_res.User.notification_settings && user_res.User.notification_settings.got_paid) {
+
+                                    var notification_obj = {
+                                        "user_id": user_res.User._id,
+                                        "text": "You applied post has been approved.",
+                                        "image_url": campaign_resp.Campaign.cover_image,
+                                        "is_read": false,
+                                        "type": "got-paid"
+                                    };
+                                    let notification_resp = await notification_helper.insert_notification(notification_obj);
+                                }
+
+                                if (user_res.User.device_token && user_res.User.device_token.length > 0) {
+                                    if (user_res.User.notification_settings && user_res.User.notification_settings.push_got_approved) {
                                         let notification_resp = user_res.User.device_token.forEach(async (token) => {
-                                            if(token.platform && token.token){
-                                                if(token.platform == "ios"){
-                                                    await push_notification_helper.sendToIOS(token.token,{
-                                                        "message":"You applied post has been approved."
+                                            if (token.platform && token.token) {
+                                                if (token.platform == "ios") {
+                                                    await push_notification_helper.sendToIOS(token.token, {
+                                                        "message": "You applied post has been approved."
                                                     });
-                                                } else if(token.platform == "android"){
-                                                    await push_notification_helper.sendToAndroid(token.token,{
-                                                        "message":"You applied post has been approved."
+                                                } else if (token.platform == "android") {
+                                                    await push_notification_helper.sendToAndroid(token.token, {
+                                                        "message": "You applied post has been approved."
                                                     });
                                                 }
                                             }

@@ -36,14 +36,14 @@ router.post('/', async (req, res) => {
 
 router.get('/settings', async (req, res) => {
     let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
-    if(user_resp.status === 1){
-        res.status(config.OK_STATUS).json({"status":1,"message":"Notification settings found", "settings":user_resp.User.notification_settings});
+    if (user_resp.status === 1) {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Notification settings found", "settings": user_resp.User.notification_settings });
     } else {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't find notification settings for user"});
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't find notification settings for user" });
     }
 });
 
-router.post('/settings',async(req,res) => {
+router.post('/settings', async (req, res) => {
     var schema = {
         'got_approved': {
             notEmpty: true,
@@ -83,26 +83,52 @@ router.post('/settings',async(req,res) => {
 
     if (!errors) {
         obj = {
-            "notification_settings":{
-                "got_approved":req.body.got_approved,
-                "got_paid":req.body.got_paid,
-                "friend_just_got_paid":req.body.friend_just_got_paid,
-                "got_new_offer":req.body.got_new_offer,
-                "push_got_approved":req.body.push_got_approved,
-                "push_got_paid":req.body.push_got_paid,
-                "push_friend_just_got_paid":req.body.push_friend_just_got_paid,
-                "push_got_new_offer":req.body.push_got_new_offer
+            "notification_settings": {
+                "got_approved": req.body.got_approved,
+                "got_paid": req.body.got_paid,
+                "friend_just_got_paid": req.body.friend_just_got_paid,
+                "got_new_offer": req.body.got_new_offer,
+                "push_got_approved": req.body.push_got_approved,
+                "push_got_paid": req.body.push_got_paid,
+                "push_friend_just_got_paid": req.body.push_friend_just_got_paid,
+                "push_got_new_offer": req.body.push_got_new_offer
             }
         }
         let user_resp = await user_helper.update_user_by_id(req.userInfo.id, obj);
         if (user_resp.status === 1) {
-            res.status(config.OK_STATUS).json({"status":1,"message":"Settings has been updated"});
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Settings has been updated" });
         } else {
-            res.status(config.BAD_REQUEST).json({"status":0,"message":"Error occured while updating settings"});
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while updating settings" });
         }
     } else {
         logger.error("Validation Error = ", errors);
-        res.status(config.BAD_REQUEST).json({ "status":0,"message": errors });
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": errors });
+    }
+});
+
+router.get('/read/:notification_id', async (req, res) => {
+    try {
+        let notification_resp = notification_helper.update_notification_by_id(req.params.notification_id, { "is_read": true });
+        if (notification_resp.status == 1) {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Notification has been marked as read" });
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error in updating notification status" });
+        }
+    } catch (err) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error in updating notification status" });
+    }
+});
+
+router.get('/unread_count', async (req, res) => {
+    try {
+        let notification_resp = notification_helper.get_users_total_unread_notification(req.userInfo.id);
+        if (notification_resp.status == 1) {
+            res.status(config.OK_STATUS).json(notification_resp);
+        } else {
+            res.status(config.BAD_REQUEST).json(notification_resp);
+        }
+    } catch (err) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error while finding unread count" });
     }
 });
 

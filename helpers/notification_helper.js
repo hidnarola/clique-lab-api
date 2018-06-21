@@ -61,12 +61,34 @@ notification_helper.get_notification_for_user = async (user_id, page_no, page_si
 }
 
 notification_helper.insert_notification = async (notification_object) => {
-    let notification = new Notification(notification_object)
     try {
+        let notification = new Notification(notification_object);
         let notification_data = await notification.save();
         return { "status": 1, "message": "Notification has been inserted", "notification": notification_data };
     } catch (err) {
         return { "status": 0, "message": "Error occured while inserting notification", "error": err };
+    }
+};
+
+notification_helper.update_notification_by_id = async (notification_id, notification_object) => {
+    try {
+        let notification = await Notification.findOneAndUpdate({ _id: notification_id }, notification_object);
+        if (!notification) {
+            return { "status": 2, "message": "Record has not updated" };
+        } else {
+            return { "status": 1, "message": "Record has been updated", "notification": notification };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while updating notification", "error": err }
+    }
+};
+
+notification_helper.get_users_total_unread_notification = async(user_id) => {
+    try{
+        let count = await Notification.find({"user_id":user_id,"is_read":true}).count();
+        return {"status":1,"message":"Total notification found","count":count};
+    } catch(err){
+        return {"status":0,"message":"Error in finding total unread notification","error":err}
     }
 };
 
