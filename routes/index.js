@@ -212,8 +212,9 @@ router.post('/promoter_signup', async (req, res) => {
           logger.trace("sending mail");
           let mail_resp = await mail_helper.send("email_confirmation", {
             "to": promoter_data.promoter.email,
-            "subject": "Clique Labs - Email confirmation"
+            "subject": "Clique Labs – Last step is to Confirm your Email."
           }, {
+              "name":promoter_data.promoter.full_name,
               "confirm_url": config.website_url + "/email_confirm/" + promoter_data.promoter._id
             });
 
@@ -341,6 +342,7 @@ router.post('/promoter_forgot_password', async (req, res) => {
         "to": promoter_resp.promoter.email,
         "subject": "Clique Labs - Reset password request"
       }, {
+          "name":promoter_resp.promoter.full_name,
           "reset_link": config.website_url + "/forgot_password/" + reset_token
         });
 

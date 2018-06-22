@@ -149,13 +149,32 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
     }
 }
 
-campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page_size) => {
+campaign_helper.get_public_campaign_for_user = async (user_id,filter, redact, sort, page_no, page_size) => {
     try {
-        var aggregate = [{
-            "$match": {
-                "end_date": { "$gt": new Date() }
+        var aggregate = [
+            {
+                "$match": {
+                    "end_date": { "$gt": new Date() }
+                }
+            },
+            {
+                "$lookup":
+                   {
+                     "from": "campaign_applied",
+                     "localField":"_id",
+                     "foreignField":"campaign_id",
+                     "as": "campaign"
+                   }
+            },
+            {
+                "$unwind":{"path":"$cmapaign","preserveNullAndEmptyArrays":true}
+            },
+            {
+                "$match":{
+                    "campaign.user_id":{"$ne":new ObjectId(user_id)}
+                }
             }
-        }];
+        ];
         if (filter) {
             aggregate.push({ "$match": filter });
         }
@@ -191,6 +210,8 @@ campaign_helper.get_public_campaign = async (filter, redact, sort, page_no, page
                 }
             });
         }
+
+        console.log("Aggregate ==> ",JSON.stringify(aggregate));
 
         var campaign = await Campaign.aggregate(aggregate);
 

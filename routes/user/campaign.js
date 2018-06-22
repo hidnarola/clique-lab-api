@@ -151,7 +151,7 @@ router.post("/public_campaign", async (req, res) => {
     } else {
       sort["_id"] = 1;
     }
-    var resp_data = await campaign_helper.get_public_campaign(filter, redact, sort, req.body.page_no, req.body.page_size);
+    var resp_data = await campaign_helper.get_public_campaign_for_user(req.userInfo.id,filter, redact, sort, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Public Campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
