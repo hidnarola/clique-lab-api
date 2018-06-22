@@ -13,6 +13,7 @@ var job_title = require("./../models/Job_title");
 var education = require("./../models/Education");
 
 var social_helper = require("./social_helper");
+var earning_helper = require("./earning_helper");
 
 /*
  * get_login_by_email is used to fetch single user by email address
@@ -501,6 +502,44 @@ user_helper.remove_device_token_for_user = async (user_id, device_token, device_
         }
     } else {
         return { "status": 0, "message": "User not exist" }
+    }
+};
+
+user_helper.find_fb_friends_ranking = async (user_id, page_no, page_size) => {
+
+    let user_resp = await user_helper.get_user_by_id(user_id);
+    console.log("user resp ==> ", user_resp);
+    if (user_resp.status === 1 && user_resp.User) {
+        let user_friends = {};
+
+        // Update facebook friends
+        if (user_resp.User.facebook) {
+            if (user_resp.User.facebook.access_token) {
+                let friends = await social_helper.get_facebook_friend_details_by_token(user_resp.User.facebook.access_token);
+                let fb_ids = [];
+                if (friends.status === 1 && friends.friends) {
+                    fb_ids = friends.friends.map((data) => {
+                        return data.id;
+                    });
+                    let rank = await earning_helper.get_earning_of_users_by_fb_ids(fb_ids, page_no, page_size);
+                    if (rank.status == 1) {
+                        return { "status": 1, "message": "Rank found", "results": rank.ranking }
+                    } else if (rank.status == 2) {
+                        return { "status": 0, "message": "No rank data found" }
+                    } else {
+                        return { "status": 0, "message": "Error in finding ranking data" }
+                    }
+                } else {
+                    return { "status": 0, "message": "No rank data found" }
+                }
+            } else {
+                return { "status": 0, "message": "No rank data found" }
+            }
+        } else {
+            return { "status": 0, "message": "No rank data found" }
+        }
+    } else {
+        return { "status": 2, "message": "User not found" };
     }
 };
 

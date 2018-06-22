@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
 
+var User = require("./../models/User");
 var Earning = require("./../models/User_earnings");
 var earning_helper = {};
 
@@ -128,5 +129,148 @@ earning_helper.get_earning_by_user = async (user_id, page_no, page_size) => {
         return { "status": 0, "message": "Error occured while fetching transaction", "error": err };
     }
 };
+
+earning_helper.get_earning_of_users_by_fb_ids = async (fb_ids, page_no, page_size) => {
+    try {
+        let aggregate = [
+            {
+                "$match": {
+                    "facebook.id": { "$in": fb_ids }
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "user_earnings",
+                    "localField": "_id",
+                    "foreignField": "user_id",
+                    "as": "earning"
+                }
+            },
+            {
+                "$unwind": "$earning"
+            },
+            {
+                "$group": {
+                    "_id": "$_id",
+                    "image": { "$first": "$image" },
+                    "name": { "$first": "$name" },
+                    "username":{ "$first": "$username" },
+                    "total_earnings": { "$sum": "$earning.price" }
+                }
+            },
+            {
+                "$sort": { "total_earnings": -1 }
+            },
+            {
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'results': { "$push": '$$ROOT' }
+                }
+            }
+        ];
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'users': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'users': "$results"
+                }
+            });
+        }
+
+        let earning = await User.aggregate(aggregate);
+
+        if (earning && earning[0] && earning[0].users.length > 0) {
+            let rank = 0;
+            earning[0].users = earning[0].users.map((user) => {
+                user.rank = rank = rank + 1;
+                return user;
+            });
+            return { "status": 1, "message": "Record found", "ranking": earning[0] }
+        } else {
+            return { "status": 2, "message": "No user found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while fetching transaction", "error": err };
+    }
+}
+
+earning_helper.get_earning_of_users = async (page_no, page_size) => {
+    try {
+        let aggregate = [
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "user_id",
+                    "foreignField": "_id",
+                    "as": "user"
+                }
+            },
+            {
+                "$unwind": "$user"
+            },
+            {
+                "$group": {
+                    "_id": "$user_id",
+                    "image": { "$first": "$user.image" },
+                    "name": { "$first": "$user.name" },
+                    "username":{ "$first": "$user.username" },
+                    "total_earnings": { "$sum": "$price" }
+                }
+            },
+            {
+                "$sort": { "total_earnings": -1 }
+            },
+            {
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    'results': { "$push": '$$ROOT' }
+                }
+            }
+        ];
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'users': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'users': "$results"
+                }
+            });
+        }
+
+        console.log("aggregate ==> ",JSON.stringify(aggregate));
+        let earning = await Earning.aggregate(aggregate);
+        console.log("Earning ==> ",earning);
+
+        if (earning && earning[0] && earning[0].users.length > 0) {
+            let rank = 0;
+            earning[0].users = earning[0].users.map((user) => {
+                user.rank = rank = rank + 1;
+                return user;
+            });
+            return { "status": 1, "message": "Record found", "ranking": earning[0] }
+        } else {
+            return { "status": 2, "message": "No user found" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while fetching transaction", "error": err };
+    }
+}
 
 module.exports = earning_helper;

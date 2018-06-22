@@ -185,10 +185,10 @@ social_helper.get_facebook_friend_details_by_token = async(access_token) => {
         let response = await FB.api('/me/friends');
 
         console.log("FB resp ==> ",response);
-        if (response.summary.total_count > 0) {
-            return response;
+        if (response.data.length > 0) {
+            return {"status":1,"message":"Friends found","friends":response.data};
         } else {
-            return 0;
+            return {"status":0,"message":"No friends found"};
         }
     } catch (err) {
         console.log("error => ",err);
