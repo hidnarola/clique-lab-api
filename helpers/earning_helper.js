@@ -201,7 +201,7 @@ earning_helper.get_earning_of_users_by_fb_ids = async (fb_ids, page_no, page_siz
     } catch (err) {
         return { "status": 0, "message": "Error occured while fetching transaction", "error": err };
     }
-}
+};
 
 earning_helper.get_earning_of_users = async (page_no, page_size) => {
     try {
@@ -271,6 +271,6 @@ earning_helper.get_earning_of_users = async (page_no, page_size) => {
     } catch (err) {
         return { "status": 0, "message": "Error occured while fetching transaction", "error": err };
     }
-}
+};
 
 module.exports = earning_helper;

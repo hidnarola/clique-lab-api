@@ -723,24 +723,24 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
     }
 
     let keys = {
-        "fb_friends": "campaign_user.facebook.no_of_friends",
-        "insta_followers": "campaign_user.instagram.no_of_friends",
-        "twitter_followers": "campaign_user.twitter.no_of_friends",
-        "pinterest_followers": "campaign_user.pinterest.no_of_friends",
-        "linkedin_connection": "campaign_user.linkedin.no_of_friends",
-        "year_in_industry": "campaign_user.experience",
-        "age": "campaign_user.date_of_birth",
+        "fb_friends": "user.facebook.no_of_friends",
+        "insta_followers": "user.instagram.no_of_friends",
+        "twitter_followers": "user.twitter.no_of_friends",
+        "pinterest_followers": "user.pinterest.no_of_friends",
+        "linkedin_connection": "user.linkedin.no_of_friends",
+        "year_in_industry": "user.experience",
+        "age": "user.date_of_birth",
 
-        "gender": "campaign_user.gender",
-        "location": "campaign_user.suburb",
-        "job_industry": "campaign_user.job_industry",
-        "job_title": "campaign_user.job_title",
-        "education": "campaign_user.education",
-        "language": "campaign_user.language",
-        "ethnicity": "campaign_user.ethnicity",
-        "interested_in": "campaign_user.sexual_orientation",
-        "relationship_status": "campaign_user.relationship_status",
-        "music_taste": "campaign_user.music_taste"
+        "gender": "user.gender",
+        "location": "user.suburb",
+        "job_industry": "user.job_industry",
+        "job_title": "user.job_title",
+        "education": "user.education",
+        "language": "user.language",
+        "ethnicity": "user.ethnicity",
+        "interested_in": "user.sexual_orientation",
+        "relationship_status": "user.relationship_status",
+        "music_taste": "user.music_taste"
     };
 
     match_filter = await global_helper.rename_keys(match_filter, keys);
