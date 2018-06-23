@@ -1165,13 +1165,13 @@ router.post('/:campaign_id/campaign_users', async (req, res) => {
 
 /**
  * Download campaign images
- * /promoter/campaign/:campaign_id/download
+ * /promoter/campaign/:post_id/download
  */
-router.get('/:campaign_id/download', async (req, res) => {
+router.get('/:post_id/download', async (req, res) => {
     try {
-        let campaign_resp = await campaign_helper.get_campaign_by_id(req.params.campaign_id);
+        let applied_campaign_resp = await campaign_helper.get_applied_post_by_id(req.params.post_id);
 
-        if (campaign_resp.status == 1) {
+        if (applied_campaign_resp.status == 1) {
 
             var filename = new Date().getTime() + (Math.floor(Math.random() * 90000) + 10000) + '.zip';
             // create a file to stream archive data to.
@@ -1183,13 +1183,13 @@ router.get('/:campaign_id/download', async (req, res) => {
             // pipe archive data to the file
             archive.pipe(output);
 
-            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
+            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign_applied/' + campaign_resp.Campaign.cover_image), { name: campaign_resp.post.image });
 
-            campaign_resp.Campaign.mood_board_images.forEach(image => {
-                archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + image), { name: image });
-            });
+            // campaign_resp.Campaign.mood_board_images.forEach(image => {
+            //     archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + image), { name: image });
+            // });
 
-            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
+            // archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
             archive.finalize();
 
             res.status(200).json({ "status": 1, "message": "file is ready to download", "filename": filename });

@@ -273,6 +273,19 @@ campaign_helper.get_campaign_by_id = async (campaign_id) => {
     }
 }
 
+campaign_helper.get_applied_post_by_id = async (post_id) => {
+    try {
+        var post = await Campaign_Applied.findOne({ _id: post_id }).lean();
+        if (post) {
+            return { "status": 1, "message": "Post found", "post": post };
+        } else {
+            return { "status": 2, "message": "No post available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding post", "error": err }
+    }
+}
+
 /*
  * insert_campaign_applied is used to insert into User collection
  * 
