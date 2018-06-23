@@ -78,7 +78,8 @@ router.post('/',async (req,res) => {
             "linkedin_connection": "users.linkedin.no_of_friends",
             "year_in_industry": "users.experience",
             "age": "users.date_of_birth",
-    
+
+            "name":"users.name",
             "gender": "users.gender",
             "location": "users.suburb",
             "job_industry": "users.job_industry",
