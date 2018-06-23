@@ -14,6 +14,7 @@ var education = require("./../models/Education");
 
 var social_helper = require("./social_helper");
 var earning_helper = require("./earning_helper");
+var notification_helper = require("./notification_helper");
 
 /*
  * get_login_by_email is used to fetch single user by email address
@@ -121,7 +122,9 @@ user_helper.get_user_by_id = async (id) => {
                 user.date_of_birth = moment(user.date_of_birth).format("D MMMM YYYY");
             }
 
-            return { "status": 1, "message": "User found", "User": user };
+            notification_count = await notification_helper.get_total_notification_for_user(id);
+
+            return { "status": 1, "message": "User found", "User": user, "notification_count": notification_count};
         } else {
             return { "status": 2, "message": "User not available" };
         }

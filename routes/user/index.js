@@ -18,6 +18,7 @@ var language_helper = require("./../../helpers/language_helper");
 var ethnicity_helper = require("./../../helpers/ethnicity_helper");
 var education_helper = require("./../../helpers/education_helper");
 var job_title_helper = require("./../../helpers/job_title_helper");
+var notification_helper = require("./../../helpers/notification_helper");
 
 /**
  * @api {get} /user Profile - Get 

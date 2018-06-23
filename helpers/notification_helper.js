@@ -60,6 +60,20 @@ notification_helper.get_notification_for_user = async (user_id, page_no, page_si
     }
 }
 
+notification_helper.get_total_notification_for_user = async (user_id) => {
+    try {
+        let notification_count = await Notification.count({"user_id":user_id});
+
+        if (notification_count) {
+            return { "status": 1, "message": "Notification count found", "count": notification_count };
+        } else {
+            return { "status": 1, "message": "No notification found", "count": 0 };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding notification count", "error": err }
+    }
+}
+
 notification_helper.insert_notification = async (notification_object) => {
     try {
         let notification = new Notification(notification_object);
