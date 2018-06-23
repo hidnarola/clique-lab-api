@@ -13,7 +13,7 @@ var CartSchema = new Schema({
 }, { versionKey: false });
 
 CartSchema.index( { "promoter_id": 1, "applied_post_id": 1 }, { unique: true, partialFilterExpression: {applied_post_id: {$exists:true}} } )
-CartSchema.index( { "promoter_id": 1, "inspired_post_id": 1 }, { unique: true, partialFilterExpression: {inspired_post_id: {$type: mongoose.Schema.Types.ObjectId}} } )
+CartSchema.index( { "promoter_id": 1, "inspired_post_id": 1 }, { unique: true, partialFilterExpression: {inspired_post_id: {$exists:true}} } )
 
 // Compile model from schema
 var cart = mongoose.model('cart', CartSchema, 'cart');
