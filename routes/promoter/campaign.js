@@ -1183,7 +1183,7 @@ router.get('/:post_id/download', async (req, res) => {
             // pipe archive data to the file
             archive.pipe(output);
 
-            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign_applied/' + campaign_resp.Campaign.cover_image), { name: campaign_resp.post.image });
+            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign_applied/' + applied_campaign_resp.post.image), { name: campaign_resp.post.image });
 
             // campaign_resp.Campaign.mood_board_images.forEach(image => {
             //     archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + image), { name: image });
