@@ -674,17 +674,22 @@ router.post('/stop/:campaign_id', async (req, res) => {
  * Developed by "ar"
  */
 router.post('/add_to_cart/:campaign_id/:applied_post_id', async (req, res) => {
-    var cart = {
-        "promoter_id": req.userInfo.id,
-        "campaign_id": req.params.campaign_id,
-        "applied_post_id": req.params.applied_post_id
-    };
-    let cart_resp = await cart_helper.insert_cart_item(cart);
 
-    if (cart_resp.status === 0) {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": cart_resp.message });
+    if((await cart_helper.promoter_applied_post_available) > 0){
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post is already added in cart" });
     } else {
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added in cart" });
+        var cart = {
+            "promoter_id": req.userInfo.id,
+            "campaign_id": req.params.campaign_id,
+            "applied_post_id": req.params.applied_post_id
+        };
+        let cart_resp = await cart_helper.insert_cart_item(cart);
+    
+        if (cart_resp.status === 0) {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": cart_resp.message });
+        } else {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added in cart" });
+        }
     }
 });
 

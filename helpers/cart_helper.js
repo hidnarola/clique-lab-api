@@ -134,4 +134,8 @@ cart_helper.remove_cart_item = async (cart_item_id) => {
     }
 };
 
+cart_helper.promoter_applied_post_available = async(promoter_id,applied_post_id) => {
+    return await Cart.count({"promoter_id":promoter_id,"applied_post_id":applied_post_id});
+};
+
 module.exports = cart_helper;
