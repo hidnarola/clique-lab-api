@@ -214,7 +214,7 @@ router.post('/promoter_signup', async (req, res) => {
             "to": promoter_data.promoter.email,
             "subject": "Clique Labs – Last step is to Confirm your Email."
           }, {
-              "name":promoter_data.promoter.full_name,
+              "name": promoter_data.promoter.full_name,
               "confirm_url": config.website_url + "/email_confirm/" + promoter_data.promoter._id
             });
 
@@ -233,6 +233,43 @@ router.post('/promoter_signup', async (req, res) => {
     }
   } else {
     logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
+router.post('/resend_email', async (req, res) => {
+  var schema = {
+    'email': {
+      notEmpty: true,
+      errorMessage: "Email is required.",
+      isEmail: { errorMessage: "Please enter valid email address" }
+    }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+    var promoter_resp = await promoter_helper.get_promoter_by_email_or_username(req.body.email);
+    if (promoter_resp.status === 0) {
+      res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error while finding promoter" });
+    } else if (promoter_resp.status === 2) {
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available with given email" });
+    } else {
+      let mail_resp = await mail_helper.send("email_confirmation", {
+        "to": promoter_resp.promoter.email,
+        "subject": "Clique Labs – Last step is to Confirm your Email."
+      }, {
+          "name": promoter_resp.promoter.full_name,
+          "confirm_url": config.website_url + "/email_confirm/" + promoter_resp.promoter._id
+        });
+
+      console.log("mail resp = ", mail_resp);
+      if (mail_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending confirmation email", "error": mail_resp.error });
+      } else {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter registered successfully" });
+      }
+    }
+  } else {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
@@ -342,7 +379,7 @@ router.post('/promoter_forgot_password', async (req, res) => {
         "to": promoter_resp.promoter.email,
         "subject": "Clique Labs - Reset password request"
       }, {
-          "name":promoter_resp.promoter.full_name,
+          "name": promoter_resp.promoter.full_name,
           "reset_link": config.website_url + "/forgot_password/" + reset_token
         });
 

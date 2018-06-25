@@ -15,8 +15,8 @@ var ObjectId = mongoose.Types.ObjectId;
  * @developed by "ar"
  */
 cart_helper.insert_cart_item = async (cart_object) => {
-    let cart = new Cart(cart_object)
     try {
+        let cart = new Cart(cart_object)
         let cart_data = await cart.save();
         return { "status": 1, "message": "Cart item has been added", "cart": cart_data };
     } catch (err) {
