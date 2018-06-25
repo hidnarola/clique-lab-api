@@ -28,6 +28,20 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * Get cart count
+ * /promoter/cart/count
+ * Developed by "ar"
+ */
+router.get('/count', async (req, res) => {
+    var cart_item_resp = await cart_helper.get_total_cart_items(req.userInfo.id);
+    if (cart_item_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while fetching total cart items", "error": cart_item_resp.error });
+    } else {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Cart items count found", "count": cart_item_resp.count });
+    }
+});
+
+/**
  * Purchase Item available in cart
  * /promoter/cart/purchase
  * Developed by "ar"

@@ -41,6 +41,15 @@ cart_helper.insert_multiple_cart_item = async (cart_item_array) => {
     }
 };
 
+cart_helper.get_total_cart_items = async(promoter_id) => {
+    try {
+        var count = await Cart.count({"promoter_id":promoter_id});
+        return {"status":1,"message":"Count found","count":count};
+    } catch(err) {
+        return { "status": 0, "message": "Error occured while fetching total cart items", "error": err };
+    }
+}
+
 cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
     try {
         var cart_items = await Cart.aggregate([
