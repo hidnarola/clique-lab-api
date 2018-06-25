@@ -675,7 +675,7 @@ router.post('/stop/:campaign_id', async (req, res) => {
  */
 router.post('/add_to_cart/:campaign_id/:applied_post_id', async (req, res) => {
 
-    if((await cart_helper.promoter_applied_post_available) > 0){
+    if((await cart_helper.promoter_applied_post_available(req.userInfo.id,req.params.applied_post_id)) > 0){
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post is already added in cart" });
     } else {
         var cart = {
