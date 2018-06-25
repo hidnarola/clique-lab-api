@@ -41,11 +41,11 @@ cart_helper.insert_multiple_cart_item = async (cart_item_array) => {
     }
 };
 
-cart_helper.get_total_cart_items = async(promoter_id) => {
+cart_helper.get_total_cart_items = async (promoter_id) => {
     try {
-        var count = await Cart.count({"promoter_id":promoter_id});
-        return {"status":1,"message":"Count found","count":count};
-    } catch(err) {
+        var count = await Cart.count({ "promoter_id": promoter_id });
+        return { "status": 1, "message": "Count found", "count": count };
+    } catch (err) {
         return { "status": 0, "message": "Error occured while fetching total cart items", "error": err };
     }
 }
@@ -100,9 +100,63 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
             }
         ]);
 
-        if (cart_items && cart_items[0]) {
-            cart_items[0].gst = await (cart_items[0].sub_total * 10) / 100;
-            cart_items[0].total = await cart_items[0].sub_total + cart_items[0].gst;
+        console.log("Applied post => ", cart_items);
+
+        let inspired_post = await Cart.aggregate([
+            {
+                "$match": {
+                    "promoter_id": new ObjectId(promoter_id)
+                }
+            },
+            {
+                "$lookup": {
+                    from: "inspired_brands",
+                    localField: "inspired_post_id",
+                    foreignField: "_id",
+                    as: "inspired_post"
+                }
+            },
+            {
+                "$unwind": "$inspired_post"
+            },
+            {
+                "$lookup": {
+                    from: "users",
+                    localField: "inspired_post.user_id",
+                    foreignField: "_id",
+                    as: "user"
+                }
+            },
+            {
+                "$unwind": "$user"
+            },
+            {
+                "$group": {
+                    "_id": null,
+                    "sub_total": { $sum: "$inspired_post.price" },
+                    "cart_items": { "$push": "$$ROOT" }
+                }
+            }
+        ]);
+
+        console.log("Inspired post => ", inspired_post);
+        if (cart_items && cart_items[0].cart_items.length > 0 && inspired_post[0].cart_items.length > 0) {
+            cart_items[0].sub_total = cart_items[0].sub_total + inspired_post[0].sub_total;
+            cart_items[0].gst = (cart_items[0].sub_total * 10) / 100;
+            cart_items[0].total = cart_items[0].sub_total + cart_items[0].gst;
+            cart_items[0].cart_items = cart_items[0].cart_items.concat(inspired_post[0].cart_items);
+        } else if (cart_items && cart_items[0].cart_items.length > 0) {
+            cart_items[0].gst = (cart_items[0].sub_total * 10) / 100;
+            cart_items[0].total = cart_items[0].sub_total + cart_items[0].gst;
+        } else if (inspired_post && inspired_post[0].cart_items.length > 0) {
+            cart_items = inspired_post;
+            cart_items[0].gst = (cart_items[0].sub_total * 10) / 100;
+            cart_items[0].total = cart_items[0].sub_total + cart_items[0].gst;
+        }
+
+        console.log("cart_items ==> ", cart_items);
+
+        if (cart_items && cart_items[0] && cart_items[0].cart_items.length > 0) {
             return { "status": 1, "message": "Cart items found", "results": cart_items[0] }
         } else {
             return { "status": 2, "message": "No item available in cart" }
@@ -134,12 +188,12 @@ cart_helper.remove_cart_item = async (cart_item_id) => {
     }
 };
 
-cart_helper.promoter_applied_post_available = async(promoter_id,applied_post_id) => {
-    return await Cart.count({"promoter_id":promoter_id,"applied_post_id":applied_post_id});
+cart_helper.promoter_applied_post_available = async (promoter_id, applied_post_id) => {
+    return await Cart.count({ "promoter_id": promoter_id, "applied_post_id": applied_post_id });
 };
 
-cart_helper.promoter_inspired_post_available = async(promoter_id,inspired_post_id) => {
-    return await Cart.count({"promoter_id":promoter_id,"inspired_post_id":inspired_post_id});
+cart_helper.promoter_inspired_post_available = async (promoter_id, inspired_post_id) => {
+    return await Cart.count({ "promoter_id": promoter_id, "inspired_post_id": inspired_post_id });
 };
 
 module.exports = cart_helper;
