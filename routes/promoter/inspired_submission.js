@@ -124,16 +124,21 @@ router.post('/',async (req,res) => {
  * Developed by "ar"
  */
 router.post('/add_to_cart/:post_id', async (req, res) => {
-    var cart = {
-        "promoter_id": req.userInfo.id,
-        "inspired_post_id": req.params.post_id
-    };
-    let cart_resp = await cart_helper.insert_cart_item(cart);
 
-    if (cart_resp.status === 0) {
-        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": cart_resp.message });
+    if((await cart_helper.promoter_applied_post_available(req.userInfo.id,req.params.post_id)) <= 0){
+        var cart = {
+            "promoter_id": req.userInfo.id,
+            "inspired_post_id": req.params.post_id
+        };
+        let cart_resp = await cart_helper.insert_cart_item(cart);
+    
+        if (cart_resp.status === 0) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": cart_resp.message });
+        } else {
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Post has been added in cart" });
+        }
     } else {
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Post has been added in cart" });
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post has already available in cart" });
     }
 });
 

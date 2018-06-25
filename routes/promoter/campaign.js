@@ -757,16 +757,12 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
         var applied_post = [];
 
         for (let post of campaign_post.campaign.users) {
-            console.log("inside");
             if((await cart_helper.promoter_applied_post_available(req.userInfo.id,post.applied_post_id)) <= 0){
                 applied_post.push({
                     "promoter_id": req.userInfo.id,
                     "campaign_id": req.params.campaign_id,
                     "applied_post_id": post.applied_post_id
                 });
-                console.log("Inside if");
-            } else {
-                console.log("inside else");
             }
         }
 
