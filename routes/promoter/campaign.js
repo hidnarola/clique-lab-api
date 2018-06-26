@@ -676,7 +676,7 @@ router.post('/stop/:campaign_id', async (req, res) => {
 router.post('/add_to_cart/:campaign_id/:applied_post_id', async (req, res) => {
 
     if((await cart_helper.promoter_applied_post_available(req.userInfo.id,req.params.applied_post_id)) > 0){
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post is already added in cart" });
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post has already added in cart" });
     } else {
         var cart = {
             "promoter_id": req.userInfo.id,
@@ -765,8 +765,6 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
                 });
             }
         }
-
-        console.log("\n\n---> outside loop");
 
         let cart_resp = await cart_helper.insert_multiple_cart_item(applied_post);
         if (cart_resp.status == 0) {

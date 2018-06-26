@@ -137,7 +137,7 @@ router.post('/add_to_cart/:post_id', async (req, res) => {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Post has been added in cart" });
         }
     } else {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post has already available in cart" });
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post has already added in cart" });
     }
 });
 
