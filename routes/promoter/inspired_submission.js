@@ -124,7 +124,7 @@ router.post('/',async (req,res) => {
  */
 router.post('/add_to_cart/:post_id', async (req, res) => {
 
-    if((await cart_helper.promoter_applied_post_available(req.userInfo.id,req.params.post_id)) <= 0){
+    if((await cart_helper.promoter_inspired_post_available(req.userInfo.id,req.params.post_id)) <= 0){
         var cart = {
             "promoter_id": req.userInfo.id,
             "inspired_post_id": req.params.post_id
