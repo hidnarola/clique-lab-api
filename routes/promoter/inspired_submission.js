@@ -66,9 +66,8 @@ router.post('/',async (req,res) => {
                 sort[sort_criteria.field] = sort_criteria.value;
             });
         } else {
-            sort["_id"] = 1;
+            sort["created_at"] = -1;
         }
-
 
         let keys = {
             "fb_friends": "users.facebook.no_of_friends",

@@ -12,6 +12,7 @@ var InspiredBrandModelSchema = new Schema({
     text: String,
     price: Number,
     status: Boolean,
+    created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
 // Compile modyel from schema

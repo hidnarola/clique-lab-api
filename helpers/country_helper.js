@@ -10,7 +10,6 @@ var country_helper = {};
 country_helper.get_all_country= async () => {
     try {
         var countries = await country.find({"status" : true},{"name":1}).sort("name");
-        console.log(countries);
         if (countries && countries.length > 0) {
             return { "status": 1, "message": "countries found", "countries": countries};
         } else {
@@ -20,4 +19,5 @@ country_helper.get_all_country= async () => {
         return { "status": 0, "message": "Error occured while finding countries", "error": err }
     }
 }
+
 module.exports = country_helper;

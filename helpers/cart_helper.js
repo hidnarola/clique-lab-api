@@ -140,15 +140,21 @@ cart_helper.view_cart_details_by_promoter = async (promoter_id) => {
         ]);
 
         console.log("Inspired post => ", inspired_post);
-        if (cart_items && cart_items[0].cart_items.length > 0 && inspired_post[0].cart_items.length > 0) {
+        if (cart_items && cart_items[0] && cart_items[0].cart_items && cart_items[0].cart_items.length > 0 
+            && inspired_post && inspired_post[0] && inspired_post[0].cart_items && inspired_post[0].cart_items.length > 0) {
+
             cart_items[0].sub_total = cart_items[0].sub_total + inspired_post[0].sub_total;
             cart_items[0].gst = (cart_items[0].sub_total * 10) / 100;
             cart_items[0].total = cart_items[0].sub_total + cart_items[0].gst;
             cart_items[0].cart_items = cart_items[0].cart_items.concat(inspired_post[0].cart_items);
-        } else if (cart_items && cart_items[0].cart_items.length > 0) {
+
+        } else if (cart_items && cart_items[0] && cart_items[0].cart_items && cart_items[0].cart_items.length > 0) {
+
             cart_items[0].gst = (cart_items[0].sub_total * 10) / 100;
             cart_items[0].total = cart_items[0].sub_total + cart_items[0].gst;
-        } else if (inspired_post && inspired_post[0].cart_items.length > 0) {
+
+        } else if (inspired_post && inspired_post[0] && inspired_post[0].cart_items && inspired_post[0].cart_items.length > 0) {
+
             cart_items = inspired_post;
             cart_items[0].gst = (cart_items[0].sub_total * 10) / 100;
             cart_items[0].total = cart_items[0].sub_total + cart_items[0].gst;

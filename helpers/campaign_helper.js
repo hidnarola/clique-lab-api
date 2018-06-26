@@ -83,6 +83,9 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
             {
                 "$match": {
                     "applied_campaign.user_id": new ObjectId(user_id),
+                    "applied_campaign.created_at":{
+                        "$gte": moment().subtract(3, "days").toDate()
+                    }
                 }
             },
             {
