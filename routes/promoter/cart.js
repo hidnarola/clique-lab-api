@@ -108,6 +108,9 @@ router.post('/purchase', async (req, res) => {
                 console.log("Iterating cart item");
                 // Create charge for each post
                 let cart_items = active_cart.results.cart_items.map(async (item) => {
+
+                    console.log("Item ==> ", item);
+
                     var id = "";
                     var type = "";
                     let obj = {
@@ -118,7 +121,8 @@ router.post('/purchase', async (req, res) => {
                     if (item.inspired_post_id) {
                         id = obj.inspired_post_id = item.inspired_post_id;
                         type = "inspired_post";
-                        // obj.price = item.campaign.price;
+                        obj.price = item.inspired_post.price;
+                        obj.gst = parseFloat(item.inspired_post.price * 10 / 100).toFixed(2);
                     }
 
                     if (item.applied_post_id) {
@@ -196,7 +200,6 @@ router.post('/purchase', async (req, res) => {
                     // mark status as purchased for campaign_user
                     active_cart.results.cart_items.forEach(async (cart_item) => {
                         if (cart_item.user._id) {
-
                             // Send push notification to user
                             let user_res = await user_helper.get_user_by_id(cart_item.user._id);
                             if (user_res.state === 1 && user_res.User) {
@@ -235,11 +238,10 @@ router.post('/purchase', async (req, res) => {
                                 }
 
                             }
-
                         }
 
                         if (cart_item.campaign_id) {
-                            await campaign_helper.update_campaign_user(cart_item.user._id, cart_item.campaign_id, { "is_purchase": true,purchased_at:Date.now() });
+                            await campaign_helper.update_campaign_user(cart_item.user._id, cart_item.campaign_id, { "is_purchase": true, purchased_at: Date.now() });
                         }
                     });
 
