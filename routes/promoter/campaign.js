@@ -688,7 +688,7 @@ router.post('/add_to_cart/:campaign_id/:applied_post_id', async (req, res) => {
         if (cart_resp.status === 0) {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": cart_resp.message });
         } else {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign has been added in cart" });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Post has been added in cart" });
         }
     }
 });
