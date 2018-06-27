@@ -10,7 +10,7 @@ var logger = config.logger;
 
 var promoter_helper = require("./../../helpers/promoter_helper");
 var inspired_submission_helper = require("./../../helpers/inspired_submission_helper");
-var job_industry_helper = require("./../../helpers/job_industry_helper");
+var campaign_helper = require("./../../helpers/campaign_helper");
 var user_helper = require("./../../helpers/user_helper");
 
 /**
@@ -157,7 +157,6 @@ router.post("/inspired_submission", async (req, res) => {
       ],
       async (err, filename) => {
         //End image upload
-
         if (filename) {
           inspire_obj.image = filename;
         }
@@ -167,6 +166,15 @@ router.post("/inspired_submission", async (req, res) => {
           logger.error("Error while inserting Inspire  data = ", inspire_data);
           return res.status(config.BAD_REQUEST).json({ inspire_data });
         } else {
+          // Add record in campaign_user
+          let obj = {
+            "user_id":req.userInfo.id,
+            "inspired_post_id":inspire_data.brand._id,
+            "is_apply":true
+          }
+          let resp = await campaign_helper.insert_campaign_user(obj);
+          console.log("Resp ==> ",resp);
+
           return res.status(config.OK_STATUS).json(inspire_data);
         }
       }

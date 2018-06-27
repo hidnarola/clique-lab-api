@@ -506,6 +506,12 @@ campaign_helper.user_not_exist_campaign_for_promoter = async (user_id, promoter_
             {
                 "$match": { "campaign_user.user_id": { $ne: new ObjectId(user_id) } }
             }
+            // {
+            //     "$lookup":{
+            //         "from":"users",
+            //         "localField":""
+            //     }
+            // }
         ]);
 
         if (campaigns && campaigns.length > 0) {

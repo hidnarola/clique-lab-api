@@ -56,10 +56,10 @@ router.post('/purchase', async (req, res) => {
             notEmpty: true,
             errorMessage: "Email is required"
         },
-        // 'company': {
-        //     notEmpty: true,
-        //     errorMessage: "Company name is required"
-        // },
+        'company': {
+            notEmpty: true,
+            errorMessage: "Company name is required"
+        },
         'abn': {
             notEmpty: true,
             errorMessage: "ABN is required"
@@ -174,7 +174,7 @@ router.post('/purchase', async (req, res) => {
                     "abn": req.body.abn,
                     "country": req.body.country,
                     "address_line1": req.body.address_line_1.trim(),
-                    // "company":req.body.company,
+                    // "company":req.body.company.trim(),
                     "city": req.body.city.trim(),
                     "state": req.body.state,
                     "post_code": req.body.post_code.trim(),
@@ -184,7 +184,7 @@ router.post('/purchase', async (req, res) => {
                 };
 
                 if (req.body.company) {
-                    transaction_obj.company = req.body.company.trim();
+                    transaction_obj.company = req.body.company;
                 }
 
                 if (req.body.address_line_2) {
@@ -204,7 +204,13 @@ router.post('/purchase', async (req, res) => {
                             let user_res = await user_helper.get_user_by_id(cart_item.user._id);
                             if (user_res.state === 1 && user_res.User) {
 
-                                let campaign_resp = await campaign_helper.get_campaign_by_id(cart_item.campaign_id);
+                                let image_url = "";
+                                if (cart_item.campaign_id) {
+                                    let campaign_resp = await campaign_helper.get_campaign_by_id(cart_item.campaign_id);
+                                    image_url = campaign_resp.Campaign.cover_image;
+                                } else {
+                                    image_url = cart_item.inspired_post.image;
+                                }
 
                                 // Check status and enter notification into DB
                                 if (user_res.User.notification_settings && user_res.User.notification_settings.got_paid) {
@@ -212,7 +218,7 @@ router.post('/purchase', async (req, res) => {
                                     var notification_obj = {
                                         "user_id": user_res.User._id,
                                         "text": "You applied post has been approved.",
-                                        "image_url": campaign_resp.Campaign.cover_image,
+                                        "image_url": image_url,
                                         "is_read": false,
                                         "type": "got-paid"
                                     };
@@ -242,6 +248,8 @@ router.post('/purchase', async (req, res) => {
 
                         if (cart_item.campaign_id) {
                             await campaign_helper.update_campaign_user(cart_item.user._id, cart_item.campaign_id, { "is_purchase": true, purchased_at: Date.now() });
+                        } else if(cart_item.inspired_post){
+                            
                         }
                     });
 
