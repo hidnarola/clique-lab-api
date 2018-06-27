@@ -138,7 +138,8 @@ router.get('/bank_account', async (req, res) => {
                             "bank_name": obj.bank_name,
                             // "bank_name": obj.metadata.bank_name,
                             "bank_Account_last4": obj.last4,
-                            "bsb": obj.routing_number
+                            "bsb": obj.routing_number,
+                            "default":obj.default_for_currency
                         });
                     });
                 }
