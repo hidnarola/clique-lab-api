@@ -174,7 +174,7 @@ router.post('/purchase', async (req, res) => {
                     "abn": req.body.abn,
                     "country": req.body.country,
                     "address_line1": req.body.address_line_1.trim(),
-                    // "company":req.body.company.trim(),
+                    "company":req.body.company.trim(),
                     "city": req.body.city.trim(),
                     "state": req.body.state,
                     "post_code": req.body.post_code.trim(),
@@ -182,10 +182,6 @@ router.post('/purchase', async (req, res) => {
                     "total_amount": active_cart.results.total,
                     "cart_items": cart_items
                 };
-
-                if (req.body.company) {
-                    transaction_obj.company = req.body.company;
-                }
 
                 if (req.body.address_line_2) {
                     transaction_obj.address_line2 = req.body.address_line_2.trim();
@@ -249,7 +245,7 @@ router.post('/purchase', async (req, res) => {
                         if (cart_item.campaign_id) {
                             await campaign_helper.update_campaign_user(cart_item.user._id, cart_item.campaign_id, { "is_purchase": true, purchased_at: Date.now() });
                         } else if(cart_item.inspired_post){
-                            await campaign_helper.update_campaign_user(cart_item.inspired_post_id, { "is_purchase": true, purchased_at: Date.now() });
+                            await campaign_helper.update_campaign_user_by_inspired_post(cart_item.inspired_post_id, { "is_purchase": true, purchased_at: Date.now() });
                         }
                     });
 
