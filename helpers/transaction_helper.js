@@ -63,19 +63,19 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
         aggregate.push({ "$match": filter });
     }
 
-    aggregate.concat([
+    aggregate = aggregate.concat([
         {
             "$group": {
                 "_id": null,
                 "total": { "$sum": 1 },
                 'results': {
                     "$push": {
-                        "results._id":"$results._id",
-                        "results.campaign_description":"$results.campaign_post.desription",
-                        "results.image":"$results.campaign_post.image",
-                        "results.price":"$results.cart_items.price",
-                        "results.gst":"$results.cart_items.gst",
-                        "results.brand":"$results.company"
+                        "_id":"$_id",
+                        "campaign_description":"$campaign_post.desription",
+                        "image":"$campaign_post.image",
+                        "price":"$cart_items.price",
+                        "gst":"$cart_items.gst",
+                        "brand":"$company"
                     }
                 }
             }
@@ -98,6 +98,7 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
         });
     }
 
+    console.log("Aggregate ==> ",JSON.stringify(aggregate));
     let transactions = await Transaction.aggregate(aggregate);
 
     if (transactions && transactions[0] && transactions[0].transaction && transactions[0].transaction.length > 0) {

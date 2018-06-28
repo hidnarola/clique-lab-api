@@ -71,6 +71,7 @@ router.post('/withdraw', async (req, res) => {
     if (!errors) {
         // Get promoter info
         let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
+        console.log("Promoter resp ==> ",promoter_resp);
         if (promoter_resp.status === 1 && promoter_resp.promoter.stripe_connect_id) {
 
             try {
@@ -132,6 +133,7 @@ router.get('/bank_account', async (req, res) => {
                 let bank_account = [];
                 if (accounts.data.length > 0) {
                     accounts.data.forEach((obj) => {
+                        console.log("obj ==> ",obj);
                         bank_account.push({
                             "id": obj.id,
                             "account_holder_name": obj.account_holder_name,

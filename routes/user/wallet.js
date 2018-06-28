@@ -61,7 +61,7 @@ router.post('/withdraw', async (req, res) => {
 
                     let transfer = await stripe.transfers.create({
                         amount: req.body.amount * 100,
-                        currency: "usd",
+                        currency: "aud",
                         destination: user_resp.User.stripe_customer_id
                     });
 
