@@ -18,7 +18,7 @@ var Campaign_userSchema = new Schema({
     purchased_at: Date
 }, { versionKey: false });
 
-Campaign_userSchema.index({ campaign_id: 1, user_id: 1}, { unique: true });
+// Campaign_userSchema.index({ campaign_id: 1, user_id: 1}, { unique: true });
 
 // Compile model from schema
 var Campaign_user = mongoose.model('campaign_user', Campaign_userSchema, 'campaign_user');
