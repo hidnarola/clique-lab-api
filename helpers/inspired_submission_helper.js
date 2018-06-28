@@ -18,6 +18,22 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
             },
             {
                 "$lookup": {
+                    "from": "campaign_user",
+                    "localField": "_id",
+                    "foreignField": "inspired_post_id",
+                    "as": "inspired_post"
+                }
+            },
+            {
+                "$unwind": "$inspired_post"
+            },
+            {
+                "$match":{
+                    "inspired_post.is_purchase":false
+                }
+            },
+            {
+                "$lookup": {
                     "from": "users",
                     "localField": "user_id",
                     "foreignField": "_id",
