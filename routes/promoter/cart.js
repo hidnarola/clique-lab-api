@@ -249,7 +249,7 @@ router.post('/purchase', async (req, res) => {
                         if (cart_item.campaign_id) {
                             await campaign_helper.update_campaign_user(cart_item.user._id, cart_item.campaign_id, { "is_purchase": true, purchased_at: Date.now() });
                         } else if(cart_item.inspired_post){
-                            
+                            await campaign_helper.update_campaign_user(cart_item.inspired_post_id, { "is_purchase": true, purchased_at: Date.now() });
                         }
                     });
 

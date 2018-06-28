@@ -2320,4 +2320,19 @@ campaign_helper.get_applied_campaign_by_user_and_campaign = async (user_id, camp
     }
 }
 
+campaign_helper.update_campaign_user_by_inspired_post = async(inspired_post_id,obj) => {
+    try {
+        let user = await Campaign_User.findOneAndUpdate({ "inspired_post_id": new ObjectId(inspired_post_id) }, obj);
+
+        if (!user) {
+            return { "status": 2, "message": "Record has not updated" };
+        } else {
+            return { "status": 1, "message": "Record has been updated", "user": user };
+        }
+    } catch (err) {
+
+        return { "status": 0, "message": "Error occured while updating user", "error": err }
+    }
+}
+
 module.exports = campaign_helper;
