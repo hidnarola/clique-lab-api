@@ -98,9 +98,9 @@ router.post('/withdraw', async (req, res) => {
                         // Deduct wallet balance of promoter by withdrawal amount
                         let updated_promoter = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "wallet_balance": promoter_resp.promoter.wallet_balance - req.body.amount });
 
-                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Chard has been created" });
+                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Amount has been credited in bank account" });
                     } else {
-                        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in creating charge" });
+                        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in transfering amount" });
                     }
                 } else {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Insufficient wallet balance" });
