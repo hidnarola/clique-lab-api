@@ -386,7 +386,7 @@ router.post("/campaign_applied", async (req, res) => {
           // Check for already existing entry
           let campaign_user_resp = await campaign_helper.get_campaign_user(req.body.campaign_id, req.userInfo.id);
           if (campaign_user_resp.status === 1) {
-            let obj = { "is_apply": true };
+            let obj = { "is_apply": true, "applied_post_id":campaign_data.campaign._id };
             let campaign_apply_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
           } else {
             let obj = {

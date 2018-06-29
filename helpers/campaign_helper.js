@@ -302,7 +302,6 @@ campaign_helper.get_applied_post_by_id = async (post_id) => {
 campaign_helper.insert_campaign_applied = async (campaign_object) => {
     let campaign = new Campaign_Applied(campaign_object)
     try {
-
         let campaign_data = await campaign.save();
         // let camapign_applied = await campaign_user.findOneAndUpdate({user_id : user_id,campaign_id:campaign_id},obj);
         return { "status": 1, "message": "Campaign inserted", "campaign": campaign_data };
@@ -827,67 +826,91 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
     try {
         var aggregate = [
             {
-                "$match": { "promoter_id": new ObjectId(promoter_id) },
-            },
-            {
-                "$lookup": {
-                    "from": "campaign_user",
-                    "localField": "_id",
-                    "foreignField": "campaign_id",
-                    "as": "campaign_user"
+                "$match":{
+                    "is_purchase":true
                 }
             },
             {
-                "$unwind": "$campaign_user"
+               "$lookup":{
+                    "from":"campaign_applied",
+                    "foreignField":"_id",
+                    "localField":"applied_post_id",
+                    "as":"applied_post"
+               }
             },
             {
-                "$match": {
-                    "campaign_user.is_purchase": true
+                "$unwind":{
+                    "path":"$applied_post",
+                    "preserveNullAndEmptyArrays":true
                 }
             },
             {
-                "$lookup": {
-                    "from": "campaign_applied",
-                    "localField": "campaign_user.campaign_id",
-                    "foreignField": "campaign_id",
-                    "as": "applied_campaign"
+               "$lookup":{
+                    "from":"campaign",
+                    "foreignField":"_id",
+                    "localField":"applied_post_id.campaign_id",
+                    "as":"campaign"
+               }
+            },
+            {
+                "$unwind":{
+                    "path":"$campaign",
+                    "preserveNullAndEmptyArrays":true
                 }
             },
             {
-                "$unwind": "$applied_campaign"
+               "$lookup":{
+                    "from":"inspired_brands",
+                    "foreignField":"_id",
+                    "localField":"inspired_post_id",
+                    "as":"inspired_post"
+               }
+            },
+            {
+                "$unwind":{
+                    "path":"$inspired_post",
+                    "preserveNullAndEmptyArrays":true
+                }
             },
             {
                 "$redact": {
                     "$cond": [
-                        { "$eq": ["$applied_campaign.user_id", "$campaign_user.user_id"] },
+                        { 
+                            "$or":[ 
+                                {"$eq": ["$campaign.promoter_id", ObjectId("5b1a1e6aded57b2056b8fe68")]},
+                                {"$eq": ["$inspired_post.brand_id", ObjectId("5b1a1e6aded57b2056b8fe68")]}
+                            ]
+                        },
                         "$$KEEP",
                         "$$PRUNE"
                     ]
                 }
             },
             {
-                "$lookup": {
-                    "from": "users",
-                    "localField": "applied_campaign.user_id",
-                    "foreignField": "_id",
-                    "as": "users"
-                }
+                "$lookup":{
+                    "from":"users",
+                    "foreignField":"_id",
+                    "localField":"user_id",
+                    "as":"user"
+               }
             },
             {
-                "$unwind": "$users"
-            },
-
-            {
-                "$lookup": {
-                    "from": "country",
-                    "localField": "user.country",
-                    "foreignField": "_id",
-                    "as": "user.country"
-                }
+                "$unwind":"$user"
             },
             {
-                "$unwind": { "path": "$user.country", "preserveNullAndEmptyArrays": true }
-            }
+              "$lookup":{
+                 "from":"country",
+                 "foreignField":"_id",
+                 "localField":"user.country",
+                 "as":"user.country"
+              }
+           },
+           {
+              "$unwind":{
+                 "path":"$user.country",
+                 "preserveNullAndEmptyArrays":true
+              }
+           }
         ];
 
         if (filter) {
@@ -902,7 +925,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             {
                 "$group": {
                     "_id": null,
-                    "applied_post": { $push: "$$ROOT" }
+                    "post": { $push: "$$ROOT" }
                 }
             });
 
@@ -910,16 +933,16 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             aggregate.push({
                 "$project": {
                     "_id": "$_id",
-                    "total": { "$size": "$applied_post" },
-                    "applied_post": { "$slice": ["$applied_post", page_size * (page_no - 1), page_size] }
+                    "total": { "$size": "$post" },
+                    "post": { "$slice": ["$post", page_size * (page_no - 1), page_size] }
                 }
             });
         } else {
             aggregate.push({
                 "$project": {
                     "_id": "$_id",
-                    "total": { "$size": "$applied_post" },
-                    "applied_post": "$applied_post"
+                    "total": { "$size": "$post" },
+                    "post": "$post"
                 }
             });
         }
