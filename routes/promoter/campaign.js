@@ -845,7 +845,7 @@ router.post('/purchased', async (req, res) => {
         }
 
         if (Object.keys(sort).length === 0) {
-            sort["campaign_user.purchased_at"] = -1;
+            sort["purchased_at"] = -1;
         }
 
         let keys = {
