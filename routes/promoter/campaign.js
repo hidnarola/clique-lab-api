@@ -1181,12 +1181,12 @@ router.get('/:post_type/:post_id/download', async (req, res) => {
         if (req.params.post_type == "inspired") {
             let resp = await inspired_submission_helper.get_inspired_post_by_id(req.params.post_id);
             if(resp.status == 1){
-                img_name = resp.post.image;
+                img_name = 'inspired_submission/'+resp.post.image;
             }
         } else if (req.params.post_type == "applied") {
             let resp = await campaign_helper.get_applied_post_by_id(req.params.post_id);
             if(resp.status == 1){
-                img_name = resp.post.image;
+                img_name = 'campaign_applied/'+resp.post.image;
             }
         }
 
@@ -1201,7 +1201,7 @@ router.get('/:post_type/:post_id/download', async (req, res) => {
 
             // pipe archive data to the file
             archive.pipe(output);
-            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign_applied/' + img_name), { name: img_name });
+            archive.append(fs.createReadStream(__dirname + '/../../uploads/' + img_name), { name: img_name });
             archive.finalize();
 
             res.status(200).json({ "status": 1, "message": "file is ready to download", "filename": filename });
