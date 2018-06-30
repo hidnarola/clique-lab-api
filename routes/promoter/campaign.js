@@ -1175,7 +1175,7 @@ router.post('/:campaign_id/campaign_users', async (req, res) => {
  * Download campaign images
  * /promoter/campaign/:post_id/download
  */
-router.get(':post_type/:post_id/download', async (req, res) => {
+router.get('/:post_type/:post_id/download', async (req, res) => {
     try {
         let img_name = "";
         if (req.params.post_type == "inspired") {
