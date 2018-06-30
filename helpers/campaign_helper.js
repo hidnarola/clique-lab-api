@@ -875,7 +875,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
             {
                 "$redact": {
                     "$cond": [
-                        { 
+                        {
                             "$or":[ 
                                 {"$eq": ["$campaign.promoter_id", new ObjectId(promoter_id)]},
                                 {"$eq": ["$inspired_post.brand_id", new ObjectId(promoter_id)]}
@@ -949,7 +949,7 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
 
         console.log("aggregate ==> ", JSON.stringify(aggregate));
 
-        var post = await Campaign.aggregate(aggregate);
+        var post = await Campaign_User.aggregate(aggregate);
 
         console.log("Post ==> ", post);
 
