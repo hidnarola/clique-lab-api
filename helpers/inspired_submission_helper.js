@@ -109,4 +109,17 @@ submission_helper.insert_inspired_brand = async (promoter_object) => {
     }
 };
 
+submission_helper.get_inspired_post_by_id = async (post_id) => {
+    try {
+        var post = await Inspire_submission.findOne({ _id: post_id }).lean();
+        if (post) {
+            return { "status": 1, "message": "Post found", "post": post };
+        } else {
+            return { "status": 2, "message": "No post available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding post", "error": err }
+    }
+}
+
 module.exports = submission_helper;

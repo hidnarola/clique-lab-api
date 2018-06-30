@@ -16,6 +16,7 @@ var group_helper = require('./../../helpers/group_helper');
 var global_helper = require("./../../helpers/global_helper");
 var push_notification_helper = require('./../../helpers/push_notification_helper');
 var notification_helper = require('./../../helpers/notification_helper');
+var inspired_submission_helper = require('./../../helpers/inspired_submission_helper');
 
 var logger = config.logger;
 var ObjectId = mongoose.Types.ObjectId;
@@ -270,13 +271,13 @@ router.post('/:campaign_id/add_user/:user_id', async (req, res) => {
 
             // Check status and enter notification into DB
             if (user_res.User.notification_settings && user_res.User.notification_settings.got_new_offer) {
-                
+
                 var notification_obj = {
-                    "user_id":user_res.User._id,
-                    "text":"You got new offer",
-                    "image_url":campaign_resp.Campaign.cover_image,
-                    "is_read":false,
-                    "type":"got-offer"
+                    "user_id": user_res.User._id,
+                    "text": "You got new offer",
+                    "image_url": campaign_resp.Campaign.cover_image,
+                    "is_read": false,
+                    "type": "got-offer"
                 };
                 let notification_resp = await notification_helper.insert_notification(notification_obj);
             }
@@ -487,11 +488,11 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
                     // Check status and enter notification into DB
                     if (user_res.User.notification_settings && user_res.User.notification_settings.got_new_offer) {
                         var notification_obj = {
-                            "user_id":user_res.User._id,
-                            "text":"You got new offer",
-                            "image_url":campaign_resp.Campaign.cover_image,
-                            "is_read":false,
-                            "type":"got-offer"
+                            "user_id": user_res.User._id,
+                            "text": "You got new offer",
+                            "image_url": campaign_resp.Campaign.cover_image,
+                            "is_read": false,
+                            "type": "got-offer"
                         };
 
                         let notification_resp = await notification_helper.insert_notification(notification_obj);
@@ -610,11 +611,11 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
                     // Check status and enter notification into DB
                     if (user_res.User.notification_settings && user_res.User.notification_settings.push_got_new_offer) {
                         var notification_obj = {
-                            "user_id":user_res.User._id,
-                            "text":"You got new offer",
-                            "image_url":campaign_resp.Campaign.cover_image,
-                            "is_read":false,
-                            "type":"got-offer"
+                            "user_id": user_res.User._id,
+                            "text": "You got new offer",
+                            "image_url": campaign_resp.Campaign.cover_image,
+                            "is_read": false,
+                            "type": "got-offer"
                         };
 
                         let notification_resp = await notification_helper.insert_notification(notification_obj);
@@ -675,7 +676,7 @@ router.post('/stop/:campaign_id', async (req, res) => {
  */
 router.post('/add_to_cart/:campaign_id/:applied_post_id', async (req, res) => {
 
-    if((await cart_helper.promoter_applied_post_available(req.userInfo.id,req.params.applied_post_id)) > 0){
+    if ((await cart_helper.promoter_applied_post_available(req.userInfo.id, req.params.applied_post_id)) > 0) {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post has already added in cart" });
     } else {
         var cart = {
@@ -684,7 +685,7 @@ router.post('/add_to_cart/:campaign_id/:applied_post_id', async (req, res) => {
             "applied_post_id": req.params.applied_post_id
         };
         let cart_resp = await cart_helper.insert_cart_item(cart);
-    
+
         if (cart_resp.status === 0) {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": cart_resp.message });
         } else {
@@ -757,7 +758,7 @@ router.post('/:campaign_id/add_filtered_applied_post_to_cart', async (req, res) 
         var applied_post = [];
 
         for (let post of campaign_post.campaign.users) {
-            if((await cart_helper.promoter_applied_post_available(req.userInfo.id,post.applied_post_id)) <= 0){
+            if ((await cart_helper.promoter_applied_post_available(req.userInfo.id, post.applied_post_id)) <= 0) {
                 applied_post.push({
                     "promoter_id": req.userInfo.id,
                     "campaign_id": req.params.campaign_id,
@@ -1174,11 +1175,22 @@ router.post('/:campaign_id/campaign_users', async (req, res) => {
  * Download campaign images
  * /promoter/campaign/:post_id/download
  */
-router.get('/:post_id/download', async (req, res) => {
+router.get(':post_type/:post_id/download', async (req, res) => {
     try {
-        let applied_campaign_resp = await campaign_helper.get_applied_post_by_id(req.params.post_id);
+        let img_name = "";
+        if (req.params.post_type == "inspired") {
+            let resp = await inspired_submission_helper.get_inspired_post_by_id(req.params.post_id);
+            if(resp.status == 1){
+                img_name = resp.post.image;
+            }
+        } else if (req.params.post_type == "applied") {
+            let resp = await campaign_helper.get_applied_post_by_id(req.params.post_id);
+            if(resp.status == 1){
+                img_name = resp.post.image;
+            }
+        }
 
-        if (applied_campaign_resp.status == 1) {
+        if (img_name != "") {
 
             var filename = new Date().getTime() + (Math.floor(Math.random() * 90000) + 10000) + '.zip';
             // create a file to stream archive data to.
@@ -1189,20 +1201,14 @@ router.get('/:post_id/download', async (req, res) => {
 
             // pipe archive data to the file
             archive.pipe(output);
-
-            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign_applied/' + applied_campaign_resp.post.image), { name: applied_campaign_resp.post.image });
-
-            // campaign_resp.Campaign.mood_board_images.forEach(image => {
-            //     archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + image), { name: image });
-            // });
-
-            // archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign/' + campaign_resp.Campaign.cover_image), { name: campaign_resp.Campaign.cover_image });
+            archive.append(fs.createReadStream(__dirname + '/../../uploads/campaign_applied/' + img_name), { name: img_name });
             archive.finalize();
 
             res.status(200).json({ "status": 1, "message": "file is ready to download", "filename": filename });
         } else {
             res.status(200).json({ "status": 0, "message": "campaign not found" });
         }
+
     } catch (err) {
         console.log("error = ", err);
         res.send(err);
