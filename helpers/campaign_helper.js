@@ -877,8 +877,8 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                     "$cond": [
                         { 
                             "$or":[ 
-                                {"$eq": ["$campaign.promoter_id", ObjectId("5b1a1e6aded57b2056b8fe68")]},
-                                {"$eq": ["$inspired_post.brand_id", ObjectId("5b1a1e6aded57b2056b8fe68")]}
+                                {"$eq": ["$campaign.promoter_id", new ObjectId(promoter_id)]},
+                                {"$eq": ["$inspired_post.brand_id", new ObjectId(promoter_id)]}
                             ]
                         },
                         "$$KEEP",

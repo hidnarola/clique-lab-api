@@ -282,7 +282,7 @@ router.get("/:campaign_id", async (req, res) => {
  * @api {post} /user/campaign/campaign_applied Campaign  Add
  * @apiName campaign_applied - Add
  * @apiGroup User
-
+ *
  * @apiHeader {String}  Content-Type application/json
  * @apiHeader {String}  x-access-token  unique access-key
  * 
