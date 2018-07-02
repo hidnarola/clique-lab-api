@@ -8,6 +8,7 @@ var fs = require("fs");
 const saltRounds = 10;
 var async = require("async");
 var promoter_helper = require('./../helpers/promoter_helper');
+var admin_helper = require('./../helpers/admin_helper');
 var mail_helper = require('./../helpers/mail_helper');
 var interest_helper = require("../helpers/interest_helper");
 var job_industry = require("../helpers/job_industry_helper");
@@ -798,6 +799,101 @@ router.post("/chk_image_availablity", async (req, res) => {
     res.status(config.OK_STATUS).json({ "status": 1, "message": "Image is available" });
   } else {
     res.status(config.NOT_FOUND).json({ "status": 404, "message": "Image is not available" });
+  }
+});
+
+/**
+ * @api {post} /admin_login Admin Login
+ * @apiName Admin Login
+ * @apiGroup Root
+ * 
+ * @apiDescription  Login request for admin role
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} login_id Email or username
+ * @apiParam {String} password Password
+ * 
+ * @apiSuccess (Success 200) {JSON} admin Admin object.
+ * @apiSuccess (Success 200) {String} token Unique token which needs to be passed in subsequent requests.
+ * @apiSuccess (Success 200) {String} refresh_token Unique token which needs to be passed to generate next access token.
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/admin_login', async (req, res) => {
+
+  logger.trace("API - Admin login called");
+  logger.debug("req.body = ", req.body);
+
+  var schema = {
+    'login_id': {
+      notEmpty: true,
+      errorMessage: "Email or username is required."
+    },
+    'password': {
+      notEmpty: true,
+      errorMessage: "Password is required."
+    }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+    logger.trace("Valid request of login");
+
+    // Checking for admin availability
+    logger.trace("Checking for admin availability");
+
+    let admin_resp = await admin_helper.get_admin_by_email_or_username(req.body.login_id);
+    logger.trace("Admin checked resp = ", admin_resp);
+    if (admin_resp.status === 0) {
+      logger.error("Error in finding admin by email_or_username in admin_login API. Err = ", admin_resp.err);
+
+      res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Something went wrong while finding admin", "error": admin_resp.error });
+    } else if (admin_resp.status === 1) {
+
+      logger.trace("Admin found. Executing next instruction");
+      // Checking password
+      if (req.body.password == admin_resp.admin.password) {
+
+        // Valid password, now check account is active or not
+        if (admin_resp.admin.status) {
+          // Account is active
+          logger.trace("valid password. Generating token");
+
+          var refreshToken = jwt.sign({ id: admin_resp.admin._id, role: 'admin' }, config.REFRESH_TOKEN_SECRET_KEY, {});
+          let update_resp = await admin_helper.update_admin_by_id(admin_resp.admin._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
+          var adminJson = { id: admin_resp.admin._id, email: admin_resp.admin.email, role: 'admin' };
+          var token = jwt.sign(adminJson, config.ACCESS_TOKEN_SECRET_KEY, {
+            expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
+          });
+
+          if (!admin_resp.admin.industry_fill) {
+            admin_resp.admin.first_login = true;
+          } else {
+            admin_resp.admin.first_login = false;
+          }
+
+          delete admin_resp.admin.password;
+          delete admin_resp.admin.status;
+          delete admin_resp.admin.refresh_token;
+          delete admin_resp.admin.last_login_date;
+          delete admin_resp.admin.created_at;
+
+          logger.info("Token generated");
+          res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "admin": admin_resp.admin, "token": token, "refresh_token": refreshToken });
+        } else {
+          logger.trace("Account is inactive");
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not active." });
+        }
+      } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid login id or password" });
+      }
+    } else {
+      logger.info("Account doesn't exist.");
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid login id or password" });
+    }
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
 

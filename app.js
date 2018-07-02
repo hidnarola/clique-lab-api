@@ -77,6 +77,7 @@ app.use(function (req, res, next) {
 var index = require('./routes/index');
 var user = require('./routes/user');
 var promoter = require('./routes/promoter');
+var admin = require('./routes/admin');
 var cron = require("./routes/cron");
 // var admin = require('./routes/admin');
 
@@ -84,8 +85,7 @@ var cron = require("./routes/cron");
 app.use('/api/',index);
 app.use('/api/user', user);
 app.use('/api/promoter', promoter);
-// app.use('/admin', admin);
-
+app.use('/api/admin', admin);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
