@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var moment = require('moment');
 var ObjectId = mongoose.Types.ObjectId;
 
 var Transaction = require("./../models/Transaction");
@@ -136,5 +137,115 @@ transaction_helper.update_status_of_cart_item = async(cart_item_id,status) => {
     });
     return {"status":1,"message":"Record has been updated"};
 }
+
+transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size) => {
+    let aggregate = [
+        {
+            "$unwind": "$cart_items"
+        },
+        {
+            "$lookup": {
+                "from": "campaign_applied",
+                "localField": "cart_items.applied_post_id",
+                "foreignField": "_id",
+                "as": "campaign_post"
+            }
+        },
+        {
+            "$unwind": "$campaign_post"
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "campaign_post.user_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            "$unwind": "$user"
+        },
+        {
+            "$lookup": {
+                "from": "promoters",
+                "localField": "promoter_id",
+                "foreignField": "_id",
+                "as": "promoter"
+            }
+        },
+        {
+            "$unwind": "$promoter"
+        }
+    ];
+
+    if (filter) {
+        aggregate.push({ "$match": filter });
+    }
+
+    if(sort) {
+        aggregate.push({ "$sort": sort });
+    }
+    aggregate = aggregate.concat([
+        {
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': {
+                    "$push": {
+                        "_id":"$_id",
+                        "date":"$created_at",
+                        "campaign_description":"$campaign_post.desription",
+                        "brand":"$company",
+                        "user":"$user.name",
+                        "promoter":"$promoter.full_name",
+                        "price":"$cart_items.price",
+                        "gst":"$cart_items.gst",
+                        "status":"$cart_items.status",
+                        "image":"$campaign_post.image"
+                    }
+                }
+            }
+        }
+    ]);
+
+    if (page_size && page_no) {
+        aggregate.push({
+            "$project": {
+                "total": 1,
+                'transaction': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+            }
+        });
+    } else {
+        aggregate.push({
+            "$project": {
+                "total": 1,
+                'transaction': "$results"
+            }
+        });
+    }
+
+    let transactions = await Transaction.aggregate(aggregate);
+
+    if (transactions && transactions[0] && transactions[0].transaction && transactions[0].transaction.length > 0) {
+
+        transactions[0].transaction = transactions[0].transaction.map((transaction) => {
+            if(transaction.status != "paid"){
+                if(moment().diff(moment(transaction.date), 'days') > 3){
+                    transaction.status = "Refunded";
+                } else {
+                    transaction.status = "In Progress";
+                }
+            } else {
+                transaction.status = "Paid";
+            }
+            return transaction;
+        })
+
+        return { "status": 1, "message": "Transaction found", "results": transactions[0] };
+    } else {
+        console.log("transactions", transactions);
+        return { "status": 0, "message": "No transaction found" };
+    }
+};
 
 module.exports = transaction_helper;

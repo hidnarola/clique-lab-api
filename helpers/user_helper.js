@@ -1,5 +1,6 @@
 var moment = require("moment");
 var _ = require("underscore");
+var lo_ = require("lodash");
 var user_helper = {};
 
 var User = require("./../models/User");
@@ -11,6 +12,7 @@ var language = require("./../models/Language");
 var ethnicity = require("./../models/Ethnicity");
 var job_title = require("./../models/Job_title");
 var education = require("./../models/Education");
+var Promoter = require("./../models/Promoter");
 
 var social_helper = require("./social_helper");
 var earning_helper = require("./earning_helper");
@@ -124,7 +126,7 @@ user_helper.get_user_by_id = async (id) => {
 
             notification_count = await notification_helper.get_total_notification_for_user(id);
 
-            return { "status": 1, "message": "User found", "User": user, "notification_count": notification_count};
+            return { "status": 1, "message": "User found", "User": user, "notification_count": notification_count };
         } else {
             return { "status": 2, "message": "User not available" };
         }
@@ -543,6 +545,80 @@ user_helper.find_fb_friends_ranking = async (user_id, page_no, page_size) => {
         }
     } else {
         return { "status": 2, "message": "User not found" };
+    }
+};
+
+user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) => {
+    try {
+        var promoter_aggregate = [];
+        var user_aggregate = [];
+        if (filter) {
+            promoter_aggregate.push({ "$match": filter });
+            user_aggregate.push({ "$match": filter });
+        }
+
+        promoter_aggregate.push({
+            "$project": {
+                "_id": 1,
+                "name": "$full_name",
+                "status": 1,
+                "email": 1,
+                "created_at": 1,
+                "type": "promoter"
+            }
+        });
+
+        user_aggregate.push({
+            "$project": {
+                "_id": 1,
+                "name": 1,
+                "status": 1,
+                "email": 1,
+                "created_at": 1,
+                "type": "user"
+            }
+        });
+
+        if (sort) {
+            promoter_aggregate.push({ "$sort": sort });
+            user_aggregate.push({ "$sort": sort });
+        }
+
+        // if (page_no && page_size) {
+        //     var pagination = [{ "$skip": page_size * (page_no - 1) },
+        //     { "$limit": page_size }];
+        //     promoter_aggregate = promoter_aggregate.concat(pagination);
+        //     user_aggregate = user_aggregate.concat(pagination);
+        // }
+
+        let promoters = await Promoter.aggregate(promoter_aggregate);
+        let users = await User.aggregate(user_aggregate);
+
+        users = users.concat(promoters);
+        if (sort) {
+            let fields = [];
+            let order = [];
+            Object.keys(sort).forEach((key) => {
+                if (sort[key] == -1) {
+                    fields.push(key);
+                    order.push("desc");
+                } else if (sort[key] == 1) {
+                    fields.push(key);
+                    order.push("asc");
+                }
+            });
+            users = lo_.orderBy(users, fields, order);
+        }
+
+        if(page_no && page_size){
+            users = users.slice(((page_no - 1) * page_size),page_size);
+        }
+
+        return { "status": 1, "message": "Users has been found", "users": users }
+
+    } catch (err) {
+        console.log("err ==> ", err);
+        return { "status": 0, "message": "Error occured while finding users", "error": err }
     }
 };
 
