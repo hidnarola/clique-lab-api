@@ -3,6 +3,7 @@ var router = express.Router();
 var moment = require('moment');
 
 var user_helper = require('./../../helpers/user_helper');
+var promoter_helper = require('./../../helpers/promoter_helper');
 var transaction_helper = require('./../../helpers/transaction_helper');
 
 var config = require('./../../config');
@@ -57,7 +58,7 @@ router.post('/users', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var match_filter = {};
+        var match_filter = { "removed": false };
         var sort = {};
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
@@ -117,15 +118,57 @@ router.post('/users', async (req, res) => {
 
 router.get('/user/suspend/:user_id', async (req, res) => {
     var update_obj = {
-        "status":false
+        "status": false
     }
 
-    let update_resp = await user_helper.update_user_by_id(req.params.user_id,update_obj)
+    let update_resp = await user_helper.update_user_by_id(req.params.user_id, update_obj)
 
-    if(update_resp.status === 1){
-        res.status(config.OK_STATUS).json({"status":1,"message":"User has been suspended"});
+    if (update_resp.status === 1) {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been suspended" });
     } else {
-        res.status(config.BAD_REQUEST).json({"status":0,"message":"Can't suspend this user"});
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't suspend this user" });
+    }
+});
+
+router.get('/user/remove/:user_id', async (req, res) => {
+    var update_obj = {
+        "removed": true
+    }
+
+    let update_resp = await user_helper.update_user_by_id(req.params.user_id, update_obj)
+
+    if (update_resp.status === 1) {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been removed" });
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't remove this user" });
+    }
+});
+
+router.get('/promoter/suspend/:promoter_id', async (req, res) => {
+    var update_obj = {
+        "status": false
+    }
+
+    let update_resp = await promoter_helper.update_promoter_by_id(req.params.promoter_id, update_obj)
+
+    if (update_resp.status === 1) {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been suspended" });
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't suspend this user" });
+    }
+});
+
+router.get('/promoter/remove/:promoter_id', async (req, res) => {
+    var update_obj = {
+        "removed": true
+    }
+
+    let update_resp = await promoter_helper.update_promoter_by_id(req.params.promoter_id, update_obj)
+
+    if (update_resp.status === 1) {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "User has been removed" });
+    } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Can't remove this user" });
     }
 });
 

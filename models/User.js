@@ -119,6 +119,7 @@ var UserModelSchema = new Schema({
     referral_id:{type: mongoose.Schema.Types.ObjectId, ref: 'promoters'},
     device_token:[TokenSchema],
     status :{ type:Boolean, default:true},
+    removed: { type:Boolean, default:false},
     created_at: { type: Date, default: Date.now }
 }, { versionKey: false });
 
