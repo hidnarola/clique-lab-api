@@ -1201,7 +1201,7 @@ router.get('/:post_type/:post_id/download', async (req, res) => {
 
             // pipe archive data to the file
             archive.pipe(output);
-            archive.append(fs.createReadStream(__dirname + '/../../uploads/' + resp.post.image), { name: resp.post.image });
+            archive.append(fs.createReadStream(__dirname + '/../../uploads/' + img_name), { name: resp.post.image });
             archive.finalize();
 
             res.status(200).json({ "status": 1, "message": "file is ready to download", "filename": filename });
