@@ -230,7 +230,9 @@ transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size
 
         transactions[0].transaction = transactions[0].transaction.map((transaction) => {
             if(transaction.status != "paid"){
-                if(moment().diff(moment(transaction.date), 'days') > 3){
+                console.log("\n\n======================\ndate => ",transaction.date);
+                console.log("diff => ",moment().diff(moment(transaction.date), 'days'));
+                if(moment().diff(moment(transaction.date), 'days') >= 3){
                     transaction.status = "Refunded";
                 } else {
                     transaction.status = "In Progress";
