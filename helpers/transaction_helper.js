@@ -43,8 +43,8 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
             "$unwind": "$cart_items"
         },
         {
-            "$match":{
-                "cart_items.status":"paid"
+            "$match": {
+                "cart_items.status": "paid"
             }
         },
         {
@@ -71,12 +71,12 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
                 "total": { "$sum": 1 },
                 'results': {
                     "$push": {
-                        "_id":"$_id",
-                        "campaign_description":"$campaign_post.desription",
-                        "image":"$campaign_post.image",
-                        "price":"$cart_items.price",
-                        "gst":"$cart_items.gst",
-                        "brand":"$company"
+                        "_id": "$_id",
+                        "campaign_description": "$campaign_post.desription",
+                        "image": "$campaign_post.image",
+                        "price": "$cart_items.price",
+                        "gst": "$cart_items.gst",
+                        "brand": "$company"
                     }
                 }
             }
@@ -99,7 +99,7 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
         });
     }
 
-    console.log("Aggregate ==> ",JSON.stringify(aggregate));
+    console.log("Aggregate ==> ", JSON.stringify(aggregate));
     let transactions = await Transaction.aggregate(aggregate);
 
     if (transactions && transactions[0] && transactions[0].transaction && transactions[0].transaction.length > 0) {
@@ -113,126 +113,169 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
 transaction_helper.get_transaction_by_applied_post_id = async (applied_post_id) => {
     let transaction = await Transaction.aggregate([
         {
-            "$unwind":"$cart_items"
-        },
-        {
-            "$match":{
-                "cart_items.applied_post_id":new ObjectId(applied_post_id)
-            }
-        }
-    ]);
-
-    if(transaction && transaction[0]){
-        return {"status":1,"message":"Post found in transaction","transaction":transaction[0]}
-    } else {
-        return {"status":0,"message":"No transaction found","transaction":transaction[0]}
-    }
-};
-
-transaction_helper.update_status_of_cart_item = async(cart_item_id,status) => {
-    let update_resp = await Transaction.findOneAndUpdate({
-        "cart_items._id":new ObjectId(cart_item_id)
-    }, {
-        "$set":{"cart_items.$.status":status}
-    });
-    return {"status":1,"message":"Record has been updated"};
-}
-
-transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size) => {
-    let aggregate = [
-        {
             "$unwind": "$cart_items"
         },
         {
-            "$lookup": {
-                "from": "campaign_applied",
-                "localField": "cart_items.applied_post_id",
-                "foreignField": "_id",
-                "as": "campaign_post"
-            }
-        },
-        {
-            "$unwind": "$campaign_post"
-        },
-        {
-            "$lookup": {
-                "from": "users",
-                "localField": "campaign_post.user_id",
-                "foreignField": "_id",
-                "as": "user"
-            }
-        },
-        {
-            "$unwind": "$user"
-        },
-        {
-            "$lookup": {
-                "from": "promoters",
-                "localField": "promoter_id",
-                "foreignField": "_id",
-                "as": "promoter"
-            }
-        },
-        {
-            "$unwind": "$promoter"
-        }
-    ];
-
-    if (filter) {
-        aggregate.push({ "$match": filter });
-    }
-
-    if(sort) {
-        aggregate.push({ "$sort": sort });
-    }
-    aggregate = aggregate.concat([
-        {
-            "$group": {
-                "_id": null,
-                "total": { "$sum": 1 },
-                'results': {
-                    "$push": {
-                        "_id":"$_id",
-                        "date":"$created_at",
-                        "campaign_description":"$campaign_post.desription",
-                        "brand":"$company",
-                        "user":"$user.name",
-                        "promoter":"$promoter.full_name",
-                        "price":"$cart_items.price",
-                        "gst":"$cart_items.gst",
-                        "status":"$cart_items.status",
-                        "image":"$campaign_post.image"
-                    }
-                }
+            "$match": {
+                "cart_items.applied_post_id": new ObjectId(applied_post_id)
             }
         }
     ]);
 
-    if (page_size && page_no) {
-        aggregate.push({
-            "$project": {
-                "total": 1,
-                'transaction': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
-            }
-        });
+    if (transaction && transaction[0]) {
+        return { "status": 1, "message": "Post found in transaction", "transaction": transaction[0] }
     } else {
-        aggregate.push({
-            "$project": {
-                "total": 1,
-                'transaction': "$results"
-            }
-        });
+        return { "status": 0, "message": "No transaction found", "transaction": transaction[0] }
     }
+};
 
-    let transactions = await Transaction.aggregate(aggregate);
+transaction_helper.update_status_of_cart_item = async (cart_item_id, status) => {
+    let update_resp = await Transaction.findOneAndUpdate({
+        "cart_items._id": new ObjectId(cart_item_id)
+    }, {
+            "$set": { "cart_items.$.status": status }
+        });
+    return { "status": 1, "message": "Record has been updated" };
+}
 
-    if (transactions && transactions[0] && transactions[0].transaction && transactions[0].transaction.length > 0) {
+transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size) => {
 
-        transactions[0].transaction = transactions[0].transaction.map((transaction) => {
-            if(transaction.status != "paid"){
-                console.log("\n\n======================\ndate => ",transaction.date);
-                console.log("diff => ",moment().diff(moment(transaction.date), 'days'));
-                if(moment().diff(moment(transaction.date), 'days') >= 3){
+    let transactions = await Transaction.aggregate([
+        {
+            "$unwind":"$cart_items"
+        },
+        {
+            "$facet":{
+                "applied_post":[
+                    {
+                        "$lookup": {
+                            "from": "campaign_applied",
+                            "localField": "cart_items.applied_post_id",
+                            "foreignField": "_id",
+                            "as": "post"
+                        }
+                    },
+                    {
+                        "$unwind":"$post"
+                    },
+                    {
+                        "$project":{
+                            "_id":1,
+                            "date":"$created_at",
+                            "campaign_description":"$post.desription",
+                            "promoter_id":"$promoter_id",
+                            "user_id":"$post.user_id",
+                            "price":"$cart_items.price",
+                            "gst":"$cart_items.gst",
+                            "status":"$cart_items.status",
+                            "post_id":"$post._id",
+                            "post_type":"applied_post"
+                        }
+                    }
+                ],
+                "inspired_post":[
+                    {
+                        "$lookup": {
+                            "from": "inspired_brands",
+                            "localField": "cart_items.inspired_post_id",
+                            "foreignField": "_id",
+                            "as": "post"
+                        }
+                    },
+                    {
+                        "$unwind":"$post"
+                    },
+                    {
+                        "$project":{
+                            "_id":1,
+                            "date":"$created_at",
+                            "campaign_description":"$post.text",
+                            "promoter_id":"$promoter_id",
+                            "user_id":"$post.user_id",
+                            "price":"$cart_items.price",
+                            "gst":"$cart_items.gst",
+                            "status":"$cart_items.status",
+                            "post_id":"$post._id",
+                            "post_type":"inspired_post"
+                        }
+                    }
+                ],
+            }
+        },
+        {
+            "$project":{
+                "post":{
+                    "$concatArrays":["$applied_post","$inspired_post"]
+                }
+            }
+        },
+        {
+            "$unwind":"$post"
+        },
+        {
+            "$lookup":{
+                "from":"promoters",
+                "foreignField":"_id",
+                "localField":"post.promoter_id",
+                "as":"promoter"
+            }
+        },
+        {
+            "$unwind":"$promoter"
+        },
+        {
+            "$lookup":{
+                "from":"users",
+                "foreignField":"_id",
+                "localField":"post.user_id",
+                "as":"user"
+            }
+        },
+        {
+            "$unwind":"$user"
+        },
+        {
+            "$project":{
+                "_id":"$post._id",
+                "date":"$post.date",
+                "campaign_description":"$post.campaign_description",
+                "brand":"$promoter.company",
+                "promoter":"$promoter.full_name",
+                "user":"$user.name",
+                "price":"$post.price",
+                "gst":"$post.gst",
+                "status":"$post.status",
+                "post_id":"$post.post_id",
+                "post_type":"$post.post_type"
+            }
+        },
+        {
+            "$match": filter
+        },
+        {
+            "$sort":sort
+        },
+        {
+            "$group":{
+                "_id":null,
+                "total":{"$sum":1},
+                "post":{"$push":"$$ROOT"}
+            }
+        },
+        {
+            "$project":{
+                "_id":1,
+                "total":1,
+                "post":{ "$slice": ["$post", page_size * (page_no - 1), page_size] }
+            }
+        }
+    ]);
+
+    if (transactions && transactions[0] && transactions[0].post && transactions[0].post.length > 0) {
+
+        transactions[0].post = transactions[0].post.map((transaction) => {
+            if (transaction.status != "paid") {
+                if (moment().diff(moment(transaction.date), 'days') >= 3) {
                     transaction.status = "Refunded";
                 } else {
                     transaction.status = "In Progress";
@@ -241,7 +284,7 @@ transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size
                 transaction.status = "Paid";
             }
             return transaction;
-        })
+        });
 
         return { "status": 1, "message": "Transaction found", "results": transactions[0] };
     } else {
