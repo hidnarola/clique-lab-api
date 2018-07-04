@@ -587,7 +587,7 @@ campaign_helper.get_active_campaign_by_promoter = async (promoter_id, page_no, p
 
         if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
             _.map(campaigns[0].campaigns, function (campaign) {
-                campaign.remaining_days = moment(campaign.end_date).diff(moment(), 'days');
+                campaign.remaining_days = moment(campaign.end_date).diff(moment(), 'days') + 1;
                 return campaign;
             });
             return { "status": 1, "message": "campaign found", "campaigns": campaigns };
