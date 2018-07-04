@@ -140,7 +140,7 @@ transaction_helper.update_status_of_cart_item = async (cart_item_id, status) => 
 
 transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size) => {
 
-    let transactions = await Transaction.aggregate([
+    let aggregate = [
         {
             "$unwind":"$cart_items"
         },
@@ -269,7 +269,9 @@ transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size
                 "post":{ "$slice": ["$post", page_size * (page_no - 1), page_size] }
             }
         }
-    ]);
+    ];
+
+    let transactions = await Transaction.aggregate(aggregate);
 
     if (transactions && transactions[0] && transactions[0].post && transactions[0].post.length > 0) {
 

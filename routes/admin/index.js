@@ -29,7 +29,18 @@ router.post('/transactions', async (req, res) => {
             filter["campaign_post.desription"] = { "$regex": regex, "$options": "i" };
         }
 
-        let transaction_resp = await transaction_helper.get_all_transaction(filter, { "created_at": -1 }, req.body.page_no, req.body.page_size);
+        var sort = {};
+        if (req.body.sort) {
+            req.body.sort.forEach(sort_criteria => {
+                sort[sort_criteria.field] = sort_criteria.value;
+            });
+        }
+
+        if (Object.keys(sort).length === 0) {
+            sort["date"] = -1;
+        }
+
+        let transaction_resp = await transaction_helper.get_all_transaction(filter, sort, req.body.page_no, req.body.page_size);
 
         if (transaction_resp.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Transactions found", "results": transaction_resp.results });
