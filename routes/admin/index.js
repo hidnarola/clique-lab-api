@@ -74,7 +74,7 @@ router.post('/users', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var match_filter = { "removed": false };
+        var match_filter = {  };
         var sort = {};
         if (req.body.search) {
             var regex = new RegExp(req.body.search);
