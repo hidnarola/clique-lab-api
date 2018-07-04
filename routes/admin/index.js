@@ -76,31 +76,11 @@ router.post('/users', async (req, res) => {
     if (!errors) {
         var match_filter = { "removed": false };
         var sort = {};
-        if (req.body.filter) {
-            req.body.filter.forEach(filter_criteria => {
-                if (filter_criteria.type === "exact") {
-                    if (filter_criteria.value != null && filter_criteria.value != "") {
-                        match_filter[filter_criteria.field] = filter_criteria.value;
-                    }
-                } else if (filter_criteria.type === "between") {
-                    if (filter_criteria.field === "age") {
-                        // Age is derived attribute and need to calculate based on date of birth
-                        match_filter[filter_criteria.field] = {
-                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
-                            "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
-                        };
-                    } else {
-                        match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
-                    }
-                } else if (filter_criteria.type === "like") {
-                    if (filter_criteria.value != null && filter_criteria.value != "") {
-                        var regex = new RegExp(filter_criteria.value);
-                        match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
-                    }
-                } else if (filter_criteria.type === "id") {
-                    match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
-                }
-            });
+        if (req.body.search) {
+            var regex = new RegExp(req.body.search);
+            let or_filter = [{"name":{ "$regex": regex, "$options": "i" }},
+                            {"type":{ "$regex": regex, "$options": "i" }}]
+            match_filter["$or"] = or_filter;
         }
 
         if (req.body.sort) {
