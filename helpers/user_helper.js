@@ -632,7 +632,7 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
 
         var users = await User.aggregate(aggregate);
 
-        return { "status": 1, "message": "Users has been found", "users": users }
+        return { "status": 1, "message": "Users has been found", "users": users[0] }
 
     } catch (err) {
         console.log("err ==> ", err);
