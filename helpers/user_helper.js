@@ -560,7 +560,6 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
                                 "from":"users",
                                 "pipeline":[
                                     {"$match":{"removed":false}},
-                                    { "$match":filter },
                                     {
                                         "$project":{
                                             "_id": 1,
@@ -584,7 +583,7 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
                             "$lookup":{
                                 "from":"promoters",
                                 "pipeline":[
-                                    { "$match":filter },
+                                    {"$match":{"removed":false}},
                                     {
                                         "$project":{
                                             "_id": 1,
@@ -614,6 +613,7 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
             },
             { "$unwind": "$data" },
             { "$replaceRoot": { "newRoot": "$data" } },
+            { "$match":filter },
             { "$sort" : sort},
             {
                 "$group":{
