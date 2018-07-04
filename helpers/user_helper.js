@@ -559,7 +559,7 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
                             "$lookup":{
                                 "from":"users",
                                 "pipeline":[
-                                    {"$match":{"removed":false}}
+                                    {"$match":{"removed":false}},
                                     { "$match":filter },
                                     {
                                         "$project":{
