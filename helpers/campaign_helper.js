@@ -642,7 +642,7 @@ campaign_helper.get_future_campaign_by_promoter = async (promoter_id, page_no, p
 
         if (campaigns && campaigns[0] && campaigns[0].campaigns.length > 0) {
             _.map(campaigns[0].campaigns, function (campaign) {
-                campaign.starts_in = moment(campaign.start_date).diff(moment(), 'days');
+                campaign.starts_in = moment(campaign.start_date).diff(moment(), 'days') + 1;
                 return campaign;
             });
             return { "status": 1, "message": "campaign found", "campaigns": campaigns };
