@@ -24,7 +24,7 @@ router.post('/users', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var match_filter = { "status": true };
+        var match_filter = {  };
         var sort = {};
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
@@ -73,7 +73,7 @@ router.post('/users', async (req, res) => {
         var users = await user_helper.get_all_users_promoters(req.body.page_no, req.body.page_size, match_filter, sort);
 
         if (users.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "results": users });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Users found", "results": users.users });
         } else {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Users not found" });
         }

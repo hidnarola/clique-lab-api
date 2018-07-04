@@ -550,69 +550,86 @@ user_helper.find_fb_friends_ranking = async (user_id, page_no, page_size) => {
 
 user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) => {
     try {
-        var promoter_aggregate = [];
-        var user_aggregate = [];
-        if (filter) {
-            promoter_aggregate.push({ "$match": filter });
-            user_aggregate.push({ "$match": filter });
-        }
-
-        promoter_aggregate.push({
-            "$project": {
-                "_id": 1,
-                "name": "$full_name",
-                "status": 1,
-                "email": 1,
-                "created_at": 1,
-                "type": "promoter"
-            }
-        });
-
-        user_aggregate.push({
-            "$project": {
-                "_id": 1,
-                "name": 1,
-                "status": 1,
-                "email": 1,
-                "created_at": 1,
-                "type": "user"
-            }
-        });
-
-        if (sort) {
-            promoter_aggregate.push({ "$sort": sort });
-            user_aggregate.push({ "$sort": sort });
-        }
-
-        // if (page_no && page_size) {
-        //     var pagination = [{ "$skip": page_size * (page_no - 1) },
-        //     { "$limit": page_size }];
-        //     promoter_aggregate = promoter_aggregate.concat(pagination);
-        //     user_aggregate = user_aggregate.concat(pagination);
-        // }
-
-        let promoters = await Promoter.aggregate(promoter_aggregate);
-        let users = await User.aggregate(user_aggregate);
-
-        users = users.concat(promoters);
-        if (sort) {
-            let fields = [];
-            let order = [];
-            Object.keys(sort).forEach((key) => {
-                if (sort[key] == -1) {
-                    fields.push(key);
-                    order.push("desc");
-                } else if (sort[key] == 1) {
-                    fields.push(key);
-                    order.push("asc");
+        var aggregate = [
+            { "$limit": 1 },
+            {
+                "$facet":{
+                    "users":[
+                        {
+                            "$lookup":{
+                                "from":"users",
+                                "pipeline":[
+                                    { "$match":filter },
+                                    {
+                                        "$project":{
+                                            "_id": 1,
+                                            "name": 1,
+                                            "status": 1,
+                                            "email": 1,
+                                            "created_at": 1,
+                                            "type": "user"
+                                        }
+                                    }
+                                ],
+                                "as":"users"
+                            }
+                        },
+                        {"$project":{"users":1,"_id":0}},
+                        {"$unwind":"$users"},
+                        { "$replaceRoot": { "newRoot": "$users" } }
+                    ],
+                    "promoters":[
+                        {
+                            "$lookup":{
+                                "from":"promoters",
+                                "pipeline":[
+                                    { "$match":filter },
+                                    {
+                                        "$project":{
+                                            "_id": 1,
+                                            "name": "$full_name",
+                                            "status": 1,
+                                            "email": 1,
+                                            "created_at": 1,
+                                            "type": "promoter"
+                                        }
+                                    }
+                                ],
+                                "as":"promoters"
+                            }
+                        },
+                        {"$project":{"promoters":1,"_id":0}},
+                        {"$unwind":"$promoters"},
+                        { "$replaceRoot": { "newRoot": "$promoters" } }
+                    ]
                 }
-            });
-            users = lo_.orderBy(users, fields, order);
-        }
+            },
+            {
+                "$project": {
+                    "data": {
+                        "$concatArrays": [ "$users", "$promoters" ]
+                    }
+                }
+            },
+            { "$unwind": "$data" },
+            { "$replaceRoot": { "newRoot": "$data" } },
+            {
+                "$group":{
+                    "_id":null,
+                    "total":{"$sum":1},
+                    "users":{ "$push": "$$ROOT" }
+                }
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "total": 1,
+                    "users": { "$slice": ["$users", page_size * (page_no - 1), page_size] }
+                }
+            }
+        ];
 
-        if(page_no && page_size){
-            users = users.slice(((page_no - 1) * page_size),page_size);
-        }
+        var users = await User.aggregate(aggregate);
 
         return { "status": 1, "message": "Users has been found", "users": users }
 
