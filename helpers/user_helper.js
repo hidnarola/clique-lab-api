@@ -104,19 +104,19 @@ user_helper.get_user_by_id = async (id) => {
         if (user) {
 
             user.power = 0;
-            if (user.facebook) {
+            if (user.facebook.enable) {
                 user.power += user.facebook.no_of_friends;
             }
-            if (user.pinterset) {
+            if (user.pinterset.enable) {
                 user.power += user.pinterset.no_of_friends;
             }
-            if (user.linkedin) {
+            if (user.linkedin.enable) {
                 user.power += user.linkedin.no_of_friends;
             }
-            if (user.twitter) {
+            if (user.twitter.enable) {
                 user.power += user.twitter.no_of_friends;
             }
-            if (user.instagram) {
+            if (user.instagram.enable) {
                 user.power += user.instagram.no_of_friends;
             }
 
