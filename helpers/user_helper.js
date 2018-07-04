@@ -613,6 +613,7 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
             },
             { "$unwind": "$data" },
             { "$replaceRoot": { "newRoot": "$data" } },
+            { "$sort" : sort},
             {
                 "$group":{
                     "_id":null,
