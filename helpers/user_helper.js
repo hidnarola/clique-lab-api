@@ -553,17 +553,18 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
         var aggregate = [
             { "$limit": 1 },
             {
-                "$facet":{
-                    "users":[
+                "$facet": {
+                    "users": [
                         {
-                            "$lookup":{
-                                "from":"users",
-                                "pipeline":[
-                                    {"$match":{"removed":false}},
+                            "$lookup": {
+                                "from": "users",
+                                "pipeline": [
+                                    { "$match": { "removed": false } },
                                     {
-                                        "$project":{
+                                        "$project": {
                                             "_id": 1,
                                             "name": 1,
+                                            "sortname":{ "$toLower": "$name" },
                                             "status": 1,
                                             "email": 1,
                                             "created_at": 1,
@@ -571,23 +572,24 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
                                         }
                                     }
                                 ],
-                                "as":"users"
+                                "as": "users"
                             }
                         },
-                        {"$project":{"users":1,"_id":0}},
-                        {"$unwind":"$users"},
+                        { "$project": { "users": 1, "_id": 0 } },
+                        { "$unwind": "$users" },
                         { "$replaceRoot": { "newRoot": "$users" } }
                     ],
-                    "promoters":[
+                    "promoters": [
                         {
-                            "$lookup":{
-                                "from":"promoters",
-                                "pipeline":[
-                                    {"$match":{"removed":false}},
+                            "$lookup": {
+                                "from": "promoters",
+                                "pipeline": [
+                                    { "$match": { "removed": false } },
                                     {
-                                        "$project":{
+                                        "$project": {
                                             "_id": 1,
                                             "name": "$full_name",
+                                            "sortname":{ "$toLower": "$full_name" },
                                             "status": 1,
                                             "email": 1,
                                             "created_at": 1,
@@ -595,11 +597,11 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
                                         }
                                     }
                                 ],
-                                "as":"promoters"
+                                "as": "promoters"
                             }
                         },
-                        {"$project":{"promoters":1,"_id":0}},
-                        {"$unwind":"$promoters"},
+                        { "$project": { "promoters": 1, "_id": 0 } },
+                        { "$unwind": "$promoters" },
                         { "$replaceRoot": { "newRoot": "$promoters" } }
                     ]
                 }
@@ -607,19 +609,19 @@ user_helper.get_all_users_promoters = async (page_no, page_size, filter, sort) =
             {
                 "$project": {
                     "data": {
-                        "$concatArrays": [ "$users", "$promoters" ]
+                        "$concatArrays": ["$users", "$promoters"]
                     }
                 }
             },
             { "$unwind": "$data" },
             { "$replaceRoot": { "newRoot": "$data" } },
-            { "$match":filter },
-            { "$sort" : sort},
+            { "$match": filter },
+            { "$sort": sort },
             {
-                "$group":{
-                    "_id":null,
-                    "total":{"$sum":1},
-                    "users":{ "$push": "$$ROOT" }
+                "$group": {
+                    "_id": null,
+                    "total": { "$sum": 1 },
+                    "users": { "$push": "$$ROOT" }
                 }
             },
             {

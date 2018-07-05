@@ -94,11 +94,11 @@ router.post('/users', async (req, res) => {
         }
 
         let keys = {
-            "location": "suburb"
+            "name":"sortname"
         };
 
-        // match_filter = await global_helper.rename_keys(match_filter, keys);
-        // sort = await global_helper.rename_keys(sort, keys);
+        match_filter = await global_helper.rename_keys(match_filter, keys);
+        sort = await global_helper.rename_keys(sort, keys);
 
         var users = await user_helper.get_all_users_promoters(req.body.page_no, req.body.page_size, match_filter, sort);
 
