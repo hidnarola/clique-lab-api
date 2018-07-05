@@ -11,7 +11,7 @@ var ObjectId = mongoose.Types.ObjectId;
 
 group_helper.get_all_groups = async () => {
     try {
-        var groups = await Group.find({ });
+        var groups = await Group.find({});
         if (groups && groups.length > 0) {
             return { "status": 1, "message": "Groups found", "groups": groups };
         } else {
@@ -66,15 +66,15 @@ group_helper.insert_group = async (group_object) => {
     }
 };
 
-group_helper.get_all_group_of_promoter = async(promoter_id) => {
-    try{
+group_helper.get_all_group_of_promoter = async (promoter_id) => {
+    try {
         var group = await Group.find({ "promoter_id": { "$eq": promoter_id } });
         if (group) {
             return { "status": 1, "message": "Group details found", "results": group };
         } else {
             return { "status": 2, "message": "Group not found" };
         }
-    } catch(err){
+    } catch (err) {
         return { "status": 0, "message": "Error occured while finding group", "error": err };
     }
 }
@@ -99,12 +99,12 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
         }
         if (sort) {
             aggregate.push({
-                "$project":{
-                    "_id":1,
-                    "name":1,
-                    "sortname":{ "$toLower": "$name" },
-                    "image":1,
-                    "created_at":1
+                "$project": {
+                    "_id": 1,
+                    "name": 1,
+                    "sortname": { "$toLower": "$name" },
+                    "image": 1,
+                    "created_at": 1
                 }
             });
             aggregate.push({ "$sort": sort });
@@ -162,28 +162,28 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
                     // Count total memeber
                     if (group.user) {
-                        for (let u of group.user){
-                            if(u.user_id.status){
+                        for (let u of group.user) {
+                            if (u.user_id.status) {
                                 group.total_member += 1;
 
-                                group.social_power += ( u.user_id && u.user_id.facebook && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
-                                group.social_power += ( u.user_id && u.user_id.instagram && u.user_id.instagram.no_of_friends) ? u.user_id.instagram.no_of_friends : 0;
-                                group.social_power += ( u.user_id && u.user_id.twitter && u.user_id.twitter.no_of_friends) ? u.user_id.twitter.no_of_friends : 0;
-                                group.social_power += ( u.user_id && u.user_id.pinterest && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
-                                group.social_power += ( u.user_id && u.user_id.linkedin && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
+                                group.social_power += (u.user_id && u.user_id.facebook && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
+                                group.social_power += (u.user_id && u.user_id.instagram && u.user_id.instagram.no_of_friends) ? u.user_id.instagram.no_of_friends : 0;
+                                group.social_power += (u.user_id && u.user_id.twitter && u.user_id.twitter.no_of_friends) ? u.user_id.twitter.no_of_friends : 0;
+                                group.social_power += (u.user_id && u.user_id.pinterest && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
+                                group.social_power += (u.user_id && u.user_id.linkedin && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
                                 let post = await Campaign_post.find({
-                                    "user_id":u.user_id._id,
-                                    "created_at":{
+                                    "user_id": u.user_id._id,
+                                    "created_at": {
                                         "$gte": moment().subtract(3, "months").toDate()
                                     }
                                 }).count();
-                                if(post > 0){
+                                if (post > 0) {
                                     group.activity_rate += 1;
                                 }
                             }
                         };
 
-                        if(group.total_member > 0){
+                        if (group.total_member > 0) {
                             group.activity_rate = parseInt(group.activity_rate * 100 / group.total_member);
                         }
                     }
@@ -194,11 +194,11 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
                 let group_res = await Promise.all(group_data);
 
-                if(typeof sort.social_power != "undefined"){
-                    if(sort.social_power == -1){
-                        group_res = _.sortBy(group_res,'social_power').reverse();
+                if (typeof sort.social_power != "undefined") {
+                    if (sort.social_power == -1) {
+                        group_res = _.sortBy(group_res, 'social_power').reverse();
                     } else {
-                        group_res = _.sortBy(group_res,'social_power');
+                        group_res = _.sortBy(group_res, 'social_power');
                     }
                 }
 

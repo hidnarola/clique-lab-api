@@ -78,23 +78,23 @@ user_helper.get_user_by_id = async (id) => {
             }
         });
 
-        if (user.facebook.enable) {
+        if (user.facebook && user.facebook.enable) {
             count++;
         }
 
-        if (user.instagram.enable) {
+        if (user.instagram && user.instagram.enable) {
             count++;
         }
 
-        if (user.twitter.enable) {
+        if (user.twitter && user.twitter.enable) {
             count++;
         }
 
-        if (user.pinterest.enable) {
+        if (user.pinterest && user.pinterest.enable) {
             count++;
         }
 
-        if (user.linkedin.enable) {
+        if (user.linkedin && user.linkedin.enable) {
             count++;
         }
 
@@ -104,19 +104,19 @@ user_helper.get_user_by_id = async (id) => {
         if (user) {
 
             user.power = 0;
-            if (user.facebook.enable) {
+            if (user.facebook && user.facebook.enable) {
                 user.power += user.facebook.no_of_friends;
             }
-            if (user.pinterset.enable) {
+            if (user.pinterset && user.pinterset.enable) {
                 user.power += user.pinterset.no_of_friends;
             }
-            if (user.linkedin.enable) {
+            if (user.linkedin && user.linkedin.enable) {
                 user.power += user.linkedin.no_of_friends;
             }
-            if (user.twitter.enable) {
+            if (user.twitter && user.twitter.enable) {
                 user.power += user.twitter.no_of_friends;
             }
-            if (user.instagram.enable) {
+            if (user.instagram && user.instagram.enable) {
                 user.power += user.instagram.no_of_friends;
             }
 
