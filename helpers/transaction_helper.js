@@ -323,6 +323,7 @@ transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size
         {
             "$project": {
                 "_id": "$post._id",
+                "search_id": {"$toString":"$post._id"},
                 "date": "$post.date",
                 "campaign_description": "$post.campaign_description",
                 "brand": "$promoter.company",
