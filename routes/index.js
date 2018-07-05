@@ -107,7 +107,7 @@ router.post('/promoter_login', async (req, res) => {
           logger.info("Token generated");
           res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "promoter": promoter_resp.promoter, "token": token, "refresh_token": refreshToken });
         } else {
-          if (promoter_resp.promoter.status) {
+          if (promoter_resp.promoter.status && promoter_resp.promoter.removed) {
             logger.trace("Account is inactive");
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not active. Contact to admin for more information." });
           } else {
