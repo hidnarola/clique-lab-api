@@ -43,66 +43,152 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
             "$unwind": "$cart_items"
         },
         {
-            "$match": {
-                "cart_items.status": "paid"
+            "$facet": {
+                "applied_post": [
+                    {
+                        "$lookup": {
+                            "from": "campaign_applied",
+                            "localField": "cart_items.applied_post_id",
+                            "foreignField": "_id",
+                            "as": "post"
+                        }
+                    },
+                    {
+                        "$unwind": "$post"
+                    },
+                    {
+                        "$project": {
+                            "_id": 1,
+                            "date": "$created_at",
+                            "campaign_description": "$post.desription",
+                            "image":"$post.image",
+                            "promoter_id": "$promoter_id",
+                            "user_id": "$post.user_id",
+                            "price": "$cart_items.price",
+                            "gst": "$cart_items.gst",
+                            "status": "$cart_items.status",
+                            "post_id": "$post._id",
+                            "post_type": "applied_post"
+                        }
+                    }
+                ],
+                "inspired_post": [
+                    {
+                        "$lookup": {
+                            "from": "inspired_brands",
+                            "localField": "cart_items.inspired_post_id",
+                            "foreignField": "_id",
+                            "as": "post"
+                        }
+                    },
+                    {
+                        "$unwind": "$post"
+                    },
+                    {
+                        "$project": {
+                            "_id": 1,
+                            "date": "$created_at",
+                            "campaign_description": "$post.text",
+                            "iamge":"$post.image",
+                            "promoter_id": "$promoter_id",
+                            "user_id": "$post.user_id",
+                            "price": "$cart_items.price",
+                            "gst": "$cart_items.gst",
+                            "status": "$cart_items.status",
+                            "post_id": "$post._id",
+                            "post_type": "inspired_post"
+                        }
+                    }
+                ],
             }
+        },
+        {
+            "$project": {
+                "post": {
+                    "$concatArrays": ["$applied_post", "$inspired_post"]
+                }
+            }
+        },
+        {
+            "$unwind": "$post"
         },
         {
             "$lookup": {
-                "from": "campaign_applied",
-                "localField": "cart_items.applied_post_id",
+                "from": "promoters",
                 "foreignField": "_id",
-                "as": "campaign_post"
+                "localField": "post.promoter_id",
+                "as": "promoter"
             }
         },
         {
-            "$unwind": "$campaign_post"
-        }
-    ];
-
-    if (filter) {
-        aggregate.push({ "$match": filter });
-    }
-
-    aggregate = aggregate.concat([
+            "$unwind": "$promoter"
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "foreignField": "_id",
+                "localField": "post.user_id",
+                "as": "user"
+            }
+        },
+        {
+            "$unwind": "$user"
+        },
+        {
+            "$project": {
+                "_id": "$post._id",
+                "date": "$post.date",
+                "campaign_description": "$post.campaign_description",
+                "image":"$post.image",
+                "brand": "$promoter.company",
+                "promoter": "$promoter.full_name",
+                "user": "$user.name",
+                "price": "$post.price",
+                "gst": "$post.gst",
+                "status": "$post.status",
+                "post_id": "$post.post_id",
+                "post_type": "$post.post_type"
+            }
+        },
+        {
+            "$match": filter
+        },
+        {
+            "$sort": {"date":-1}
+        },
         {
             "$group": {
                 "_id": null,
                 "total": { "$sum": 1 },
-                'results': {
-                    "$push": {
-                        "_id": "$_id",
-                        "campaign_description": "$campaign_post.desription",
-                        "image": "$campaign_post.image",
-                        "price": "$cart_items.price",
-                        "gst": "$cart_items.gst",
-                        "brand": "$company"
-                    }
-                }
+                "post": { "$push": "$$ROOT" }
+            }
+        },
+        {
+            "$project": {
+                "_id": 1,
+                "total": 1,
+                "transaction": { "$slice": ["$post", page_size * (page_no - 1), page_size] }
             }
         }
-    ]);
+    ];
 
-    if (page_size && page_no) {
-        aggregate.push({
-            "$project": {
-                "total": 1,
-                'transaction': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
-            }
-        });
-    } else {
-        aggregate.push({
-            "$project": {
-                "total": 1,
-                'transaction': "$results"
-            }
-        });
-    }
-
-    console.log("Aggregate ==> ", JSON.stringify(aggregate));
     let transactions = await Transaction.aggregate(aggregate);
 
     if (transactions && transactions[0] && transactions[0].transaction && transactions[0].transaction.length > 0) {
+
+        transactions[0].transaction = transactions[0].transaction.map((transaction) => {
+            if (transaction.status != "paid") {
+                if (moment().diff(moment(transaction.date), 'days') >= 3) {
+                    transaction.status = "Refunded";
+                } else {
+                    transaction.status = "In Progress";
+                }
+            } else {
+                transaction.status = "Paid";
+            }
+            return transaction;
+        });
+
         return { "status": 1, "message": "Transaction found", "results": transactions[0] };
     } else {
         console.log("transactions", transactions);
@@ -142,11 +228,11 @@ transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size
 
     let aggregate = [
         {
-            "$unwind":"$cart_items"
+            "$unwind": "$cart_items"
         },
         {
-            "$facet":{
-                "applied_post":[
+            "$facet": {
+                "applied_post": [
                     {
                         "$lookup": {
                             "from": "campaign_applied",
@@ -156,24 +242,24 @@ transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size
                         }
                     },
                     {
-                        "$unwind":"$post"
+                        "$unwind": "$post"
                     },
                     {
-                        "$project":{
-                            "_id":1,
-                            "date":"$created_at",
-                            "campaign_description":"$post.desription",
-                            "promoter_id":"$promoter_id",
-                            "user_id":"$post.user_id",
-                            "price":"$cart_items.price",
-                            "gst":"$cart_items.gst",
-                            "status":"$cart_items.status",
-                            "post_id":"$post._id",
-                            "post_type":"applied_post"
+                        "$project": {
+                            "_id": 1,
+                            "date": "$created_at",
+                            "campaign_description": "$post.desription",
+                            "promoter_id": "$promoter_id",
+                            "user_id": "$post.user_id",
+                            "price": "$cart_items.price",
+                            "gst": "$cart_items.gst",
+                            "status": "$cart_items.status",
+                            "post_id": "$post._id",
+                            "post_type": "applied_post"
                         }
                     }
                 ],
-                "inspired_post":[
+                "inspired_post": [
                     {
                         "$lookup": {
                             "from": "inspired_brands",
@@ -183,90 +269,90 @@ transaction_helper.get_all_transaction = async (filter, sort, page_no, page_size
                         }
                     },
                     {
-                        "$unwind":"$post"
+                        "$unwind": "$post"
                     },
                     {
-                        "$project":{
-                            "_id":1,
-                            "date":"$created_at",
-                            "campaign_description":"$post.text",
-                            "promoter_id":"$promoter_id",
-                            "user_id":"$post.user_id",
-                            "price":"$cart_items.price",
-                            "gst":"$cart_items.gst",
-                            "status":"$cart_items.status",
-                            "post_id":"$post._id",
-                            "post_type":"inspired_post"
+                        "$project": {
+                            "_id": 1,
+                            "date": "$created_at",
+                            "campaign_description": "$post.text",
+                            "promoter_id": "$promoter_id",
+                            "user_id": "$post.user_id",
+                            "price": "$cart_items.price",
+                            "gst": "$cart_items.gst",
+                            "status": "$cart_items.status",
+                            "post_id": "$post._id",
+                            "post_type": "inspired_post"
                         }
                     }
                 ],
             }
         },
         {
-            "$project":{
-                "post":{
-                    "$concatArrays":["$applied_post","$inspired_post"]
+            "$project": {
+                "post": {
+                    "$concatArrays": ["$applied_post", "$inspired_post"]
                 }
             }
         },
         {
-            "$unwind":"$post"
+            "$unwind": "$post"
         },
         {
-            "$lookup":{
-                "from":"promoters",
-                "foreignField":"_id",
-                "localField":"post.promoter_id",
-                "as":"promoter"
+            "$lookup": {
+                "from": "promoters",
+                "foreignField": "_id",
+                "localField": "post.promoter_id",
+                "as": "promoter"
             }
         },
         {
-            "$unwind":"$promoter"
+            "$unwind": "$promoter"
         },
         {
-            "$lookup":{
-                "from":"users",
-                "foreignField":"_id",
-                "localField":"post.user_id",
-                "as":"user"
+            "$lookup": {
+                "from": "users",
+                "foreignField": "_id",
+                "localField": "post.user_id",
+                "as": "user"
             }
         },
         {
-            "$unwind":"$user"
+            "$unwind": "$user"
         },
         {
-            "$project":{
-                "_id":"$post._id",
-                "date":"$post.date",
-                "campaign_description":"$post.campaign_description",
-                "brand":"$promoter.company",
-                "promoter":"$promoter.full_name",
-                "user":"$user.name",
-                "price":"$post.price",
-                "gst":"$post.gst",
-                "status":"$post.status",
-                "post_id":"$post.post_id",
-                "post_type":"$post.post_type"
+            "$project": {
+                "_id": "$post._id",
+                "date": "$post.date",
+                "campaign_description": "$post.campaign_description",
+                "brand": "$promoter.company",
+                "promoter": "$promoter.full_name",
+                "user": "$user.name",
+                "price": "$post.price",
+                "gst": "$post.gst",
+                "status": "$post.status",
+                "post_id": "$post.post_id",
+                "post_type": "$post.post_type"
             }
         },
         {
             "$match": filter
         },
         {
-            "$sort":sort
+            "$sort": sort
         },
         {
-            "$group":{
-                "_id":null,
-                "total":{"$sum":1},
-                "post":{"$push":"$$ROOT"}
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                "post": { "$push": "$$ROOT" }
             }
         },
         {
-            "$project":{
-                "_id":1,
-                "total":1,
-                "post":{ "$slice": ["$post", page_size * (page_no - 1), page_size] }
+            "$project": {
+                "_id": 1,
+                "total": 1,
+                "post": { "$slice": ["$post", page_size * (page_no - 1), page_size] }
             }
         }
     ];
