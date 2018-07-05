@@ -110,7 +110,7 @@ router.post('/promoter_login', async (req, res) => {
           } else {
             if (!promoter_resp.promoter.status) {
               logger.trace("Account is inactive");
-              res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not suspended. Contact to admin for more information." });
+              res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is suspended. Contact to admin for more information." });
             } else {
               logger.trace("Account is inactive");
               res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please verify your email to logged-in" });
