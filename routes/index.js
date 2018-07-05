@@ -80,41 +80,46 @@ router.post('/promoter_login', async (req, res) => {
       if (bcrypt.compareSync(req.body.password, promoter_resp.promoter.password)) {
 
         // Valid password, now check account is active or not
-        if (promoter_resp.promoter.status && promoter_resp.promoter.email_verified) {
-          // Account is active
-          logger.trace("valid password. Generating token");
-
-          var refreshToken = jwt.sign({ id: promoter_resp.promoter._id, role: 'promoter' }, config.REFRESH_TOKEN_SECRET_KEY, {});
-          let update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
-          var promoterJson = { id: promoter_resp.promoter._id, email: promoter_resp.promoter.email, role: 'promoter' };
-          var token = jwt.sign(promoterJson, config.ACCESS_TOKEN_SECRET_KEY, {
-            expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
-          });
-
-          if (!promoter_resp.promoter.industry_fill) {
-            promoter_resp.promoter.first_login = true;
+        if(!promoter_resp.promoter.removed){
+          if (promoter_resp.promoter.status && promoter_resp.promoter.email_verified) {
+            // Account is active
+            logger.trace("valid password. Generating token");
+  
+            var refreshToken = jwt.sign({ id: promoter_resp.promoter._id, role: 'promoter' }, config.REFRESH_TOKEN_SECRET_KEY, {});
+            let update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
+            var promoterJson = { id: promoter_resp.promoter._id, email: promoter_resp.promoter.email, role: 'promoter' };
+            var token = jwt.sign(promoterJson, config.ACCESS_TOKEN_SECRET_KEY, {
+              expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
+            });
+  
+            if (!promoter_resp.promoter.industry_fill) {
+              promoter_resp.promoter.first_login = true;
+            } else {
+              promoter_resp.promoter.first_login = false;
+            }
+  
+            delete promoter_resp.promoter.password;
+            delete promoter_resp.promoter.status;
+            delete promoter_resp.promoter.refresh_token;
+            delete promoter_resp.promoter.last_login_date;
+            delete promoter_resp.promoter.industry_fill;
+            delete promoter_resp.promoter.created_at;
+  
+            logger.info("Token generated");
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "promoter": promoter_resp.promoter, "token": token, "refresh_token": refreshToken });
           } else {
-            promoter_resp.promoter.first_login = false;
+            if (promoter_resp.promoter.status) {
+              logger.trace("Account is inactive");
+              res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not active. Contact to admin for more information." });
+            } else {
+              logger.trace("Account is inactive");
+              res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please verify your email to logged-in" });
+            }
           }
-
-          delete promoter_resp.promoter.password;
-          delete promoter_resp.promoter.status;
-          delete promoter_resp.promoter.refresh_token;
-          delete promoter_resp.promoter.last_login_date;
-          delete promoter_resp.promoter.industry_fill;
-          delete promoter_resp.promoter.created_at;
-
-          logger.info("Token generated");
-          res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "promoter": promoter_resp.promoter, "token": token, "refresh_token": refreshToken });
         } else {
-          if (promoter_resp.promoter.status && promoter_resp.promoter.removed) {
-            logger.trace("Account is inactive");
-            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not active. Contact to admin for more information." });
-          } else {
-            logger.trace("Account is inactive");
-            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please verify your email to logged-in" });
-          }
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Acccount has been removed by admin. Contact to admin for more information" });
         }
+        
       } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid login id or password" });
       }
