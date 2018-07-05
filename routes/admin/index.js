@@ -3,6 +3,7 @@ var router = express.Router();
 var moment = require('moment');
 
 var user_helper = require('./../../helpers/user_helper');
+var global_helper = require('./../../helpers/global_helper');
 var promoter_helper = require('./../../helpers/promoter_helper');
 var transaction_helper = require('./../../helpers/transaction_helper');
 
