@@ -89,7 +89,7 @@ transaction_helper.get_transaction_by_promoter = async (promoter_id, filter, pag
                             "_id": 1,
                             "date": "$created_at",
                             "campaign_description": "$post.text",
-                            "iamge":"$post.image",
+                            "image":"$post.image",
                             "promoter_id": "$promoter_id",
                             "user_id": "$post.user_id",
                             "price": "$cart_items.price",
