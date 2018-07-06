@@ -107,8 +107,8 @@ user_helper.get_user_by_id = async (id) => {
             if (user.facebook && user.facebook.enable) {
                 user.power += user.facebook.no_of_friends;
             }
-            if (user.pinterset && user.pinterset.enable) {
-                user.power += user.pinterset.no_of_friends;
+            if (user.pinterest && user.pinterset.enable) {
+                user.power += user.pinterest.no_of_friends;
             }
             if (user.linkedin && user.linkedin.enable) {
                 user.power += user.linkedin.no_of_friends;
