@@ -111,7 +111,7 @@ var UserModelSchema = new Schema({
     ethnicity: { type: mongoose.Schema.Types.ObjectId, ref: 'ethnicity' },// 22
     interested_in: { type: String, enum: ["male", "female", "both"] },
     country : { type: mongoose.Schema.Types.ObjectId, ref: 'country' },
-    relationship_status: { type: String, enum: ["Married", "Unmarried", "Single"] }, // 24
+    relationship_status: { type: String, enum: ["Married", "Single"] }, // 24
     stripe_customer_id: String,
     wallet_balance: { type: Number, default: 0 },
     bank: [BankSchema], // 25

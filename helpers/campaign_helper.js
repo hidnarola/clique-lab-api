@@ -1306,14 +1306,16 @@ campaign_helper.count_country_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "country.percentage_value": { "$multiply": [{ "$divide": ["$country.count", "$total"] }, 100] }
+                "country.percentage_value": { "$multiply": [{ "$divide": ["$country.count", "$total"] }, 100] },
+                "key":"Country"
             }
         },
         {
             "$group": {
                 "_id": null,
                 "country": { $push: "$country" },
-                "total": { $first: "$total" }
+                "total": { $first: "$total" },
+                "key": { $first: "$key" }
             }
         }
     ];
@@ -1378,7 +1380,8 @@ campaign_helper.count_state_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "state.percentage_value": { "$multiply": [{ "$divide": ["$state.count", "$total"] }, 100] }
+                "state.percentage_value": { "$multiply": [{ "$divide": ["$state.count", "$total"] }, 100] },
+                "key":"State"
             }
         },
         {
@@ -1448,7 +1451,8 @@ campaign_helper.count_suburb_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "suburb.percentage_value": { "$multiply": [{ "$divide": ["$suburb.count", "$total"] }, 100] }
+                "suburb.percentage_value": { "$multiply": [{ "$divide": ["$suburb.count", "$total"] }, 100] },
+                "key":"Suburb"
             }
         },
         {
@@ -1519,7 +1523,8 @@ campaign_helper.count_gender_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "gender.percentage_value": { "$multiply": [{ "$divide": ["$gender.count", "$total"] }, 100] }
+                "gender.percentage_value": { "$multiply": [{ "$divide": ["$gender.count", "$total"] }, 100] },
+                "key":"Gender"
             }
         },
         {
@@ -1614,7 +1619,8 @@ campaign_helper.count_job_industry_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "job_industry.percentage_value": { "$multiply": [{ "$divide": ["$job_industry.count", "$total"] }, 100] }
+                "job_industry.percentage_value": { "$multiply": [{ "$divide": ["$job_industry.count", "$total"] }, 100] },
+                "key":"Job Industry"
             }
         },
         {
@@ -1708,7 +1714,8 @@ campaign_helper.count_education_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "education.percentage_value": { "$multiply": [{ "$divide": ["$education.count", "$total"] }, 100] }
+                "education.percentage_value": { "$multiply": [{ "$divide": ["$education.count", "$total"] }, 100] },
+                "key":"Education level"
             }
         },
         {
@@ -1802,7 +1809,8 @@ campaign_helper.count_language_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "language.percentage_value": { "$multiply": [{ "$divide": ["$language.count", "$total"] }, 100] }
+                "language.percentage_value": { "$multiply": [{ "$divide": ["$language.count", "$total"] }, 100] },
+                "key":"Languages spoken"
             }
         },
         {
@@ -1896,7 +1904,8 @@ campaign_helper.count_ethnicity_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "ethnicity.percentage_value": { "$multiply": [{ "$divide": ["$ethnicity.count", "$total"] }, 100] }
+                "ethnicity.percentage_value": { "$multiply": [{ "$divide": ["$ethnicity.count", "$total"] }, 100] },
+                "key":"Ethnicity"
             }
         },
         {
@@ -1990,7 +1999,8 @@ campaign_helper.count_music_taste_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "music_taste.percentage_value": { "$multiply": [{ "$divide": ["$music_taste.count", "$total"] }, 100] }
+                "music_taste.percentage_value": { "$multiply": [{ "$divide": ["$music_taste.count", "$total"] }, 100] },
+                "key":"Music Taste"
             }
         },
         {
@@ -2060,7 +2070,8 @@ campaign_helper.count_relationship_status_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "relationship_status.percentage_value": { "$multiply": [{ "$divide": ["$relationship_status.count", "$total"] }, 100] }
+                "relationship_status.percentage_value": { "$multiply": [{ "$divide": ["$relationship_status.count", "$total"] }, 100] },
+                "key":"Relationship status"
             }
         },
         {
@@ -2131,7 +2142,8 @@ campaign_helper.count_sexual_orientation_of_user = async (promoter_id) => {
         },
         {
             $addFields: {
-                "sexual_orientation.percentage_value": { "$multiply": [{ "$divide": ["$sexual_orientation.count", "$total"] }, 100] }
+                "sexual_orientation.percentage_value": { "$multiply": [{ "$divide": ["$sexual_orientation.count", "$total"] }, 100] },
+                "key":"Sexual orienation"
             }
         },
         {

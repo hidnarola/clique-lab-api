@@ -47,7 +47,7 @@ var ObjectId = mongoose.Types.ObjectId;
  * 
  * {"field":"interested_in", "type":"exact", "value":"male"},
  * 
- * {"field":"relationship_status", "type":"exact", "value":"Unmarried"},
+ * {"field":"relationship_status", "type":"exact", "value":"Single"},
  * 
  * {"field":"music_taste", "type":"id", "value":"5ac1a4477111f5d4332a4351"}],
  * 
