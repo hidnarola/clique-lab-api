@@ -9,7 +9,6 @@ var transaction_helper = require('./../../helpers/transaction_helper');
 
 var config = require('./../../config');
 
-
 router.post('/transactions', async (req, res) => {
     var schema = {
         'page_size': {
@@ -28,7 +27,7 @@ router.post('/transactions', async (req, res) => {
         if (req.body.search) {
             var regex = new RegExp(req.body.search);
             let or_filter = [{"campaign_description":{ "$regex": regex, "$options": "i" }},
-                            {"search_id":{ "$regex": regex, "$options": "i" }},
+                            {"_id":{ "$regex": regex, "$options": "i" }},
                             {"brand":{ "$regex": regex, "$options": "i" }},
                             {"promoter":{ "$regex": regex, "$options": "i" }},
                             {"user":{ "$regex": regex, "$options": "i" }}];

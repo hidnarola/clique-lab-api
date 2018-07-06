@@ -4,14 +4,17 @@ var EmailTemplate = require('email-templates').EmailTemplate;
 var config = require("./../config");
 var mail_helper = {};
 
-
 var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    tls: { rejectUnauthorized: false },
+    // service: 'gmail',
+    host: 'cliquelabs.com',
+    port: 465,
+    // secure: false, // upgrade later with STARTTLS
     auth: {
         user: config.SMTP_MAIL,
         pass: config.SMTP_PASSWORD
     },
+    // tls: { ciphers: 'SSLv3' },
+    tls:{rejectUnauthorized:false},
     from: "Clique Labs <noreply@cliquelabs.com>"
 });
 

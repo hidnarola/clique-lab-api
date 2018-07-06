@@ -459,7 +459,7 @@ router.post('/promoter_reset_password', async (req, res) => {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Password has been changed" });
           }
         } else {
-
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid token sent" });
         }
       }
     });
@@ -898,6 +898,132 @@ router.post('/admin_login', async (req, res) => {
     }
   } else {
     logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
+/**
+ * @api {post} /admin_forgot_password Admin forgot password
+ * @apiName Admin forgot password
+ * @apiGroup Root
+ * 
+ * @apiDescription   Forgot password request for admin role
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} email Email
+ * 
+ * @apiSuccess (Success 200) {String} message Appropriate success message
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/admin_forgot_password', async (req, res) => {
+
+  logger.trace("API - Admin forgot password called");
+  logger.debug("req.body = ", req.body);
+  var schema = {
+    'email': {
+      notEmpty: true,
+      errorMessage: "Email is required.",
+      isEmail: { errorMessage: "Please enter valid email address" }
+    }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+    var admin_resp = await admin_helper.get_admin_by_email_or_username(req.body.email);
+    if (admin_resp.status === 0) {
+      res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error while finding admin" });
+    } else if (admin_resp.status === 2) {
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No admin available with given email" });
+    } else {
+      // Send mail on user's email address
+      var reset_token = Buffer.from(jwt.sign({ "admin_id": admin_resp.admin._id }, config.ACCESS_TOKEN_SECRET_KEY, {
+        expiresIn: 60 * 60 * 2 // expires in 2 hour
+      })).toString('base64');
+
+      let mail_resp = await mail_helper.send("reset_password", {
+        "to": admin_resp.admin.email,
+        "subject": "Clique Labs - Reset password request"
+      }, {
+          "name": admin_resp.admin.full_name,
+          "reset_link": config.website_url + "/admin/forgot_password/" + reset_token
+        });
+
+      logger.debug("mail resp = ", mail_resp);
+      if (mail_resp.status === 0) {
+        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending mail to admin", "error": mail_resp.error });
+      } else {
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Reset link has been sent on your email address" });
+      }
+    }
+  } else {
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
+/**
+ * @api {post} /admin_reset_password Admin reset password
+ * @apiName Admin reset password
+ * @apiGroup Root
+ * 
+ * @apiDescription   Reset password request for admin role
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} token Reset password token
+ * @apiParam {String} password New password
+ * 
+ * @apiSuccess (Success 200) {String} message Appropriate success message
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/admin_reset_password', async (req, res) => {
+  logger.trace("API - Admin reset password called");
+  logger.debug("req.body = ", req.body);
+  var schema = {
+    'token': {
+      notEmpty: true,
+      errorMessage: "Reset password token is required."
+    },
+    'password': {
+      notEmpty: true,
+      errorMessage: "Password is required."
+    }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+
+    logger.trace("Verifying JWT");
+    jwt.verify(Buffer.from(req.body.token, 'base64').toString(), config.ACCESS_TOKEN_SECRET_KEY, async (err, decoded) => {
+      if (err) {
+        if (err.name === "TokenExpiredError") {
+          logger.trace("Link has expired");
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Link has been expired" });
+        } else {
+          logger.trace("Invalid link");
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid token sent" });
+        }
+      } else {
+        logger.trace("Valid token. Reseting password for promoter");
+        if (decoded.admin_id) {
+          var update_resp = await admin_helper.update_admin_by_id(decoded.admin_id, { "password": req.body.password });
+          if (update_resp.status === 0) {
+            logger.trace("Error occured while updating admin : ", update_resp.error);
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while verifying user's email" });
+          } else if (update_resp.status === 2) {
+            logger.trace("Admin has not updated");
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while reseting password of admin" });
+          } else {
+            // Password reset!
+            logger.trace("Password has been changed for admin - ", decoded.admin_id);
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Password has been changed" });
+          }
+        } else {
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid token sent" });
+        }
+      }
+    });
+  } else {
     res.status(config.BAD_REQUEST).json({ message: errors });
   }
 });
