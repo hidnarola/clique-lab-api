@@ -29,7 +29,12 @@ router.post('/', async (req, res) => {
         var filter = {};
         if (req.body.search) {
             var regex = new RegExp(req.body.search);
-            filter["campaign_description"] = { "$regex": regex, "$options": "i" };
+            let or_filter = [{"campaign_description":{ "$regex": regex, "$options": "i" }},
+                            // {"_id":{ "$regex": regex, "$options": "i" }},
+                            {"brand":{ "$regex": regex, "$options": "i" }},
+                            // {"promoter":{ "$regex": regex, "$options": "i" }},
+                            // {"user":{ "$regex": regex, "$options": "i" }}];
+            filter["$or"] = or_filter;
         }
 
         let transaction_resp = await transaction_helper.get_transaction_by_promoter(req.userInfo.id, filter, req.body.page_no, req.body.page_size);
