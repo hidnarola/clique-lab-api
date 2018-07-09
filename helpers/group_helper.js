@@ -149,6 +149,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
         ]);
 
         var groups = await Group.aggregate(aggregate);
+
         groups = await Group.populate(groups, { "path": "groups.user.user_id", "model": "users" });
 
         if (groups && groups[0]) {
@@ -163,7 +164,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                     // Count total memeber
                     if (group.user) {
                         for (let u of group.user) {
-                            if (u.user_id.status) {
+                            if (u && u.user_id && u.user_id.status) {
                                 group.total_member += 1;
 
                                 group.social_power += (u.user_id && u.user_id.facebook && u.user_id.facebook.enabled && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
