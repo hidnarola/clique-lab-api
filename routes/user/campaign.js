@@ -101,6 +101,62 @@ router.post("/approved", async (req, res) => {
   }
 });
 
+router.post("/approved_post", async (req, res) => {
+  var schema = {
+    "page_no": {
+      notEmpty: true,
+      errorMessage: "page_no is required"
+    },
+    "page_size": {
+      notEmpty: true,
+      errorMessage: "page_size is required"
+    },
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+
+  if (!errors) {
+    let filter = {};
+    let sort = {};
+    var redact = {};
+
+    if (req.body.social_media_platform) {
+      filter["social_media_platform"] = { "$in": req.body.social_media_platform };
+    }
+
+    if (req.body.search) {
+      var r = new RegExp(req.body.search);
+      var regex = { "$regex": r, "$options": "i" };
+      redact = {
+        "$or": [
+          { "$setIsSubset": [[req.body.search], "$campaign.at_tag"] },
+          { "$setIsSubset": [[req.body.search], "$campaign.hash_tag"] },
+          { "$eq": [{ "$substr": ["$campaign.name", 0, -1] }, req.body.search] }
+        ]
+      }
+    }
+
+    if (typeof req.body.price != "undefined") {
+      sort["price"] = req.body.price;
+    } else {
+      sort["purchased_at"] = -1;
+    }
+
+    var resp_data = await campaign_helper.get_users_approved_post(req.userInfo.id, filter, redact, sort, req.body.page_no, req.body.page_size);
+
+    if (resp_data.status == 0) {
+      logger.error("Error occured while fetching campaign = ", resp_data);
+      res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
+    } else {
+      logger.trace("Public Campaign got successfully = ", resp_data);
+      res.status(config.OK_STATUS).json(resp_data);
+    }
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
 /**
  * @api {post} /user/campaign/public_campaign Campaign  - Get all
  * @apiName public campaign - Get all

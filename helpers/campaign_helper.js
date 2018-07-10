@@ -83,7 +83,7 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
             {
                 "$match": {
                     "applied_campaign.user_id": new ObjectId(user_id),
-                    "applied_campaign.created_at":{
+                    "applied_campaign.created_at": {
                         "$gte": moment().subtract(3, "days").toDate()
                     }
                 }
@@ -152,7 +152,172 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
     }
 }
 
-campaign_helper.get_public_campaign_for_user = async (user_id,filter, redact, sort, page_no, page_size) => {
+campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, page_no, page_size) => {
+    try {
+        let aggregate = [
+            {
+                "$match": {
+                    "user_id": new ObjectId(user_id),
+                    "is_purchase": true,
+                    "is_posted": false,
+                    "purchased_at": { "$gte": moment().subtract(3, "days").toDate() }
+                }
+            },
+            {
+                "$facet": {
+                    "applied_post": [{
+                        "$lookup": {
+                            "from": "campaign_applied",
+                            "localField": "applied_post_id",
+                            "foreignField": "_id",
+                            "as": "applied_post"
+                        }
+                    },
+                    {
+                        "$unwind": "$applied_post"
+                    },
+                    {
+                        "$lookup": {
+                            "from": "campaign",
+                            "localField": "applied_post.campaign_id",
+                            "foreignField": "_id",
+                            "as": "campaign"
+                        }
+                    },
+                    {
+                        "$unwind": "$campaign"
+                    },
+                    {
+                        "$match": {
+                            "campaign.end_date": { "gt": new Date() }
+                        }
+                    },
+                    {
+                        "$project": {
+                            "_id": 1,
+                            "type": "applied_post",
+                            "social_media_platform": "$campaign.social_media_platform",
+                            "price": "$campaign.price",
+                            "currency": "$campaign.currency",
+                            "promoter_id": "$campaign.promoter_id",
+                            "image": "$campaign.cover_image",
+                            "purchased_at":1,
+                            "campaign": {
+                                "_id": "$campaign._id",
+                                "hash_tag": "$campaign.hash_tag",
+                                "at_tag": "$campaign.at_tag",
+                                "privacy": "$campaign.privacy",
+                                "name": "$campaign.name",
+                                "media_format": "$campaign.media_format",
+                                "description": "$campaign.description"
+                            },
+                            "applied_post": {
+                                "_id": "$applied_post._id",
+                                "description": "$applied_post.desription",
+                                "image": "$applied_post.image"
+                            }
+                        }
+                    }],
+                    "inspired_post": [{
+                        "$lookup": {
+                            "from": "inspired_brands",
+                            "localField": "inspired_post_id",
+                            "foreignField": "_id",
+                            "as": "inspired_post"
+                        }
+                    },
+                    {
+                        "$unwind": "$inspired_post"
+                    },
+                    {
+                        "$project": {
+                            "_id": 1,
+                            "type": "inspired_post",
+                            "social_media_platform": "$inspired_post.social_media_platform",
+                            "price": "$inspired_post.price",
+                            "image": "$inspired_post.image",
+                            "promoter_id": "$inspired_post.brand_id",
+                            "purchased_at":1,
+                            "inspired_post": {
+                                "_id": "$inspired_post._id",
+                                "description": "$inspired_post.text"
+                            }
+                        }
+                    }]
+                }
+            },
+            {
+                "$project": {
+                    "data": {
+                        "$concatArrays": ["$applied_post", "$inspired_post"]
+                    }
+                }
+            },
+            {
+                "$unwind": "$data"
+            },
+            {
+                "$replaceRoot": { "newRoot": "$data" }
+            }
+        ];
+
+        if (filter) {
+            aggregate.push({ "$match": filter });
+        }
+
+        if (redact) {
+            aggregate.push({ "$redact": { "$cond": { "if": redact, "then": "$$KEEP", "else": "$$PRUNE" } } });
+        }
+
+        if (sort) {
+            aggregate.push({ "$sort": sort });
+        }
+
+        aggregate.push({
+            "$group": {
+                "_id": null,
+                "total": { "$sum": 1 },
+                'results': { "$push": "$campaign" }
+            }
+        });
+
+        if (page_size && page_no) {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'campaign': { "$slice": ["$results", page_size * (page_no - 1), page_size] }
+                }
+            });
+        } else {
+            aggregate.push({
+                "$project": {
+                    "total": 1,
+                    'campaign': "$results"
+                }
+            });
+        }
+
+        var approved_campaign = await Campaign_User.aggregate(aggregate);
+
+        if (approved_campaign && approved_campaign[0] && approved_campaign[0].campaign.length > 0) {
+            approved_campaign[0].campaign.map(function (campaign) {
+                if (campaign.price) {
+                    campaign.price = (campaign.price * 70 / 100).toFixed(2);
+                } else {
+                    campaign.price = 0;
+                }
+                return campaign;
+            });
+            return { "status": 1, "message": "User's approved campaign found", "results": approved_campaign[0] };
+        } else {
+            return { "status": 2, "message": "No approve campaign available" };
+        }
+    } catch (err) {
+        return { "status": 0, "message": "Error occured while finding campaign", "error": err }
+    }
+}
+
+campaign_helper.get_public_campaign_for_user = async (user_id, filter, redact, sort, page_no, page_size) => {
     try {
         var aggregate = [
             {
@@ -162,19 +327,19 @@ campaign_helper.get_public_campaign_for_user = async (user_id,filter, redact, so
             },
             {
                 "$lookup":
-                   {
-                     "from": "campaign_applied",
-                     "localField":"_id",
-                     "foreignField":"campaign_id",
-                     "as": "campaign"
-                   }
+                {
+                    "from": "campaign_applied",
+                    "localField": "_id",
+                    "foreignField": "campaign_id",
+                    "as": "campaign"
+                }
             },
             {
-                "$unwind":{"path":"$cmapaign","preserveNullAndEmptyArrays":true}
+                "$unwind": { "path": "$cmapaign", "preserveNullAndEmptyArrays": true }
             },
             {
-                "$match":{
-                    "campaign.user_id":{"$ne":new ObjectId(user_id)}
+                "$match": {
+                    "campaign.user_id": { "$ne": new ObjectId(user_id) }
                 }
             }
         ];
@@ -214,7 +379,7 @@ campaign_helper.get_public_campaign_for_user = async (user_id,filter, redact, so
             });
         }
 
-        console.log("Aggregate ==> ",JSON.stringify(aggregate));
+        console.log("Aggregate ==> ", JSON.stringify(aggregate));
 
         var campaign = await Campaign.aggregate(aggregate);
 
@@ -826,59 +991,59 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
     try {
         var aggregate = [
             {
-                "$match":{
-                    "is_purchase":true
+                "$match": {
+                    "is_purchase": true
                 }
             },
             {
-               "$lookup":{
-                    "from":"campaign_applied",
-                    "foreignField":"_id",
-                    "localField":"applied_post_id",
-                    "as":"applied_post"
-               }
-            },
-            {
-                "$unwind":{
-                    "path":"$applied_post",
-                    "preserveNullAndEmptyArrays":true
+                "$lookup": {
+                    "from": "campaign_applied",
+                    "foreignField": "_id",
+                    "localField": "applied_post_id",
+                    "as": "applied_post"
                 }
             },
             {
-               "$lookup":{
-                    "from":"campaign",
-                    "foreignField":"_id",
-                    "localField":"applied_post.campaign_id",
-                    "as":"campaign"
-               }
-            },
-            {
-                "$unwind":{
-                    "path":"$campaign",
-                    "preserveNullAndEmptyArrays":true
+                "$unwind": {
+                    "path": "$applied_post",
+                    "preserveNullAndEmptyArrays": true
                 }
             },
             {
-               "$lookup":{
-                    "from":"inspired_brands",
-                    "foreignField":"_id",
-                    "localField":"inspired_post_id",
-                    "as":"inspired_post"
-               }
+                "$lookup": {
+                    "from": "campaign",
+                    "foreignField": "_id",
+                    "localField": "applied_post.campaign_id",
+                    "as": "campaign"
+                }
             },
             {
-                "$unwind":{
-                    "path":"$inspired_post",
-                    "preserveNullAndEmptyArrays":true
+                "$unwind": {
+                    "path": "$campaign",
+                    "preserveNullAndEmptyArrays": true
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "inspired_brands",
+                    "foreignField": "_id",
+                    "localField": "inspired_post_id",
+                    "as": "inspired_post"
+                }
+            },
+            {
+                "$unwind": {
+                    "path": "$inspired_post",
+                    "preserveNullAndEmptyArrays": true
                 }
             },
             {
                 "$redact": {
                     "$cond": [
                         {
-                            "$or":[ 
-                                {"$eq": ["$campaign.promoter_id", new ObjectId(promoter_id)]},
-                                {"$eq": ["$inspired_post.brand_id", new ObjectId(promoter_id)]}
+                            "$or": [
+                                { "$eq": ["$campaign.promoter_id", new ObjectId(promoter_id)] },
+                                { "$eq": ["$inspired_post.brand_id", new ObjectId(promoter_id)] }
                             ]
                         },
                         "$$KEEP",
@@ -887,30 +1052,30 @@ campaign_helper.get_purchased_post_by_promoter = async (promoter_id, page_no, pa
                 }
             },
             {
-                "$lookup":{
-                    "from":"users",
-                    "foreignField":"_id",
-                    "localField":"user_id",
-                    "as":"user"
-               }
+                "$lookup": {
+                    "from": "users",
+                    "foreignField": "_id",
+                    "localField": "user_id",
+                    "as": "user"
+                }
             },
             {
-                "$unwind":"$user"
+                "$unwind": "$user"
             },
             {
-              "$lookup":{
-                 "from":"country",
-                 "foreignField":"_id",
-                 "localField":"user.country",
-                 "as":"user.country"
-              }
-           },
-           {
-              "$unwind":{
-                 "path":"$user.country",
-                 "preserveNullAndEmptyArrays":true
-              }
-           }
+                "$lookup": {
+                    "from": "country",
+                    "foreignField": "_id",
+                    "localField": "user.country",
+                    "as": "user.country"
+                }
+            },
+            {
+                "$unwind": {
+                    "path": "$user.country",
+                    "preserveNullAndEmptyArrays": true
+                }
+            }
         ];
 
         if (filter) {
@@ -1307,7 +1472,7 @@ campaign_helper.count_country_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "country.percentage_value": { "$multiply": [{ "$divide": ["$country.count", "$total"] }, 100] },
-                "key":"Country"
+                "key": "Country"
             }
         },
         {
@@ -1381,7 +1546,7 @@ campaign_helper.count_state_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "state.percentage_value": { "$multiply": [{ "$divide": ["$state.count", "$total"] }, 100] },
-                "key":"State"
+                "key": "State"
             }
         },
         {
@@ -1452,7 +1617,7 @@ campaign_helper.count_suburb_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "suburb.percentage_value": { "$multiply": [{ "$divide": ["$suburb.count", "$total"] }, 100] },
-                "key":"Suburb"
+                "key": "Suburb"
             }
         },
         {
@@ -1524,7 +1689,7 @@ campaign_helper.count_gender_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "gender.percentage_value": { "$multiply": [{ "$divide": ["$gender.count", "$total"] }, 100] },
-                "key":"Gender"
+                "key": "Gender"
             }
         },
         {
@@ -1620,7 +1785,7 @@ campaign_helper.count_job_industry_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "job_industry.percentage_value": { "$multiply": [{ "$divide": ["$job_industry.count", "$total"] }, 100] },
-                "key":"Job Industry"
+                "key": "Job Industry"
             }
         },
         {
@@ -1715,7 +1880,7 @@ campaign_helper.count_education_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "education.percentage_value": { "$multiply": [{ "$divide": ["$education.count", "$total"] }, 100] },
-                "key":"Education level"
+                "key": "Education level"
             }
         },
         {
@@ -1810,7 +1975,7 @@ campaign_helper.count_language_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "language.percentage_value": { "$multiply": [{ "$divide": ["$language.count", "$total"] }, 100] },
-                "key":"Languages spoken"
+                "key": "Languages spoken"
             }
         },
         {
@@ -1905,7 +2070,7 @@ campaign_helper.count_ethnicity_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "ethnicity.percentage_value": { "$multiply": [{ "$divide": ["$ethnicity.count", "$total"] }, 100] },
-                "key":"Ethnicity"
+                "key": "Ethnicity"
             }
         },
         {
@@ -2000,7 +2165,7 @@ campaign_helper.count_music_taste_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "music_taste.percentage_value": { "$multiply": [{ "$divide": ["$music_taste.count", "$total"] }, 100] },
-                "key":"Music Taste"
+                "key": "Music Taste"
             }
         },
         {
@@ -2071,7 +2236,7 @@ campaign_helper.count_relationship_status_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "relationship_status.percentage_value": { "$multiply": [{ "$divide": ["$relationship_status.count", "$total"] }, 100] },
-                "key":"Relationship status"
+                "key": "Relationship status"
             }
         },
         {
@@ -2143,7 +2308,7 @@ campaign_helper.count_sexual_orientation_of_user = async (promoter_id) => {
         {
             $addFields: {
                 "sexual_orientation.percentage_value": { "$multiply": [{ "$divide": ["$sexual_orientation.count", "$total"] }, 100] },
-                "key":"Sexual orienation"
+                "key": "Sexual orienation"
             }
         },
         {
@@ -2355,7 +2520,7 @@ campaign_helper.get_applied_campaign_by_user_and_campaign = async (user_id, camp
     }
 }
 
-campaign_helper.update_campaign_user_by_inspired_post = async(inspired_post_id,obj) => {
+campaign_helper.update_campaign_user_by_inspired_post = async (inspired_post_id, obj) => {
     try {
         let user = await Campaign_User.findOneAndUpdate({ "inspired_post_id": new ObjectId(inspired_post_id) }, obj);
 

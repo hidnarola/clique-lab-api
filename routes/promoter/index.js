@@ -472,7 +472,10 @@ router.post('/change_password', async (req, res) => {
     }
 });
 
-router.post('/post',async() => {
+/**
+ * Display campaign post of promoter
+ */
+router.post('/post',async(req,res) => {
     var schema = {
         'page_size': {
             notEmpty: true,
