@@ -189,7 +189,7 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
                     },
                     {
                         "$match": {
-                            "campaign.end_date": { "gt": new Date() }
+                            // "campaign.end_date": { "gt": new Date() }
                         }
                     },
                     {
