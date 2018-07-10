@@ -277,7 +277,7 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
             "$group": {
                 "_id": null,
                 "total": { "$sum": 1 },
-                'results': { "$push": "$campaign" }
+                'results': { "$push": "$$ROOT" }
             }
         });
 
