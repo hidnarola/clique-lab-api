@@ -207,7 +207,7 @@ router.post("/public_campaign", async (req, res) => {
     } else {
       sort["_id"] = 1;
     }
-    var resp_data = await campaign_helper.get_public_campaign_for_user(req.userInfo.id,filter, redact, sort, req.body.page_no, req.body.page_size);
+    var resp_data = await campaign_helper.get_public_campaign_for_user(req.userInfo.id, filter, redact, sort, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Public Campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
@@ -442,7 +442,7 @@ router.post("/campaign_applied", async (req, res) => {
           // Check for already existing entry
           let campaign_user_resp = await campaign_helper.get_campaign_user(req.body.campaign_id, req.userInfo.id);
           if (campaign_user_resp.status === 1) {
-            let obj = { "is_apply": true, "applied_post_id":campaign_data.campaign._id };
+            let obj = { "is_apply": true, "applied_post_id": campaign_data.campaign._id };
             let campaign_apply_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
           } else {
             let obj = {
@@ -626,6 +626,188 @@ router.post("/social_post", async (req, res) => {
         logger.error("Post not found");
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post not found" });
       }
+    }
+
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
+router.post("/social_post_new", async (req, res) => {
+  logger.trace("social post API has been called = ", req.body);
+  var schema = {
+    "post_id": {
+      notEmpty: true,
+      errorMessage: "post id is required"
+    },
+    "post_type": {
+      notEmpty: true,
+      errorMessage: "post type is required"
+    },
+    "social_post_id": {
+      notEmpty: true,
+      errorMessage: "Social post id is required"
+    },
+    "social_media_platform": {
+      notEmpty: true,
+      errorMessage: "social media platform is required"
+    }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+
+  if (!errors) {
+
+    var obj = {
+      "user_id": req.userInfo.id,
+      "post_id": req.body.social_post_id,
+      "social_media_platform": req.body.social_media_platform
+    }
+
+    if (req.body.post_type == "applied_post") {
+      obj.campaign_id = req.body.campaign_id;
+      obj.applied_post_id = req.body.post_id
+    } else if (req.body.post_type == "inspired_post") {
+      obj.inspired_post_id = req.body.post_id
+    }
+
+    logger.debug("Inserting into campaign post : ", obj);
+    let resp_data = await campaign_post_helper.insert_campaign_post(obj);
+    logger.info("campaign post resp : ", resp_data);
+
+    if (resp_data.status === 0) {
+      logger.error("Error while posting camapign data = ", resp_data);
+      return res.status(config.BAD_REQUEST).json({ resp_data });
+
+    } else {
+
+      // Fetch campaign price
+      if (req.body.campaign_id) {
+
+        logger.debug("Fetching campaign data by id : ", req.body.campaign_id);
+        let campaign_resp = await campaign_helper.get_campaign_by_id(req.body.campaign_id);
+        logger.info("campaign data : ", campaign_resp);
+
+        logger.debug("Fetching applied campaign. User = ", req.userInfo.id);
+        let applied_post = await campaign_helper.get_applied_campaign_by_user_and_campaign(req.userInfo.id, req.body.campaign_id);
+        logger.info("applied post = ", applied_post);
+
+        if (applied_post.status == 1) {
+
+          logger.debug("Fetching transaction by post id : ", applied_post.applied_post._id);
+          let transaction = await transaction_helper.get_transaction_by_applied_post_id(applied_post.applied_post.id);
+          logger.info("Transaction ==> ", transaction);
+
+          if (transaction.status == 1) {
+
+            let twentyfive = (campaign_resp.Campaign.price * 25 / 100); // Credited to clique's account
+            let five = (campaign_resp.Campaign.price * 5 / 100); // Credited to partner account, if available
+            let seventy = (campaign_resp.Campaign.price * 70 / 100); // Credited to user's account
+
+            logger.info("Deviding amount. 25% = ", twentyfive, " -- 5% = ", five, " -- 70% = ", seventy);
+
+            // Add balance in user's wallet
+            let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
+            logger.info("User object : ", user_resp)
+            let obj = { "wallet_balance": (user_resp.User.wallet_balance) + seventy };
+            let user_update = await user_helper.update_user_by_id(req.userInfo.id, obj);
+            logger.info("User update resp : ", user_update);
+
+            // Send push notification to user
+            if (user_resp.state === 1 && user_resp.User) {
+
+              // Check status and enter notification into DB
+              if (user_resp.User.notification_settings && user_resp.User.notification_settings.got_paid) {
+
+                var notification_obj = {
+                  "user_id": user_resp.User._id,
+                  "text": 'You got paid for the your campaign <b>"' + campaign_resp.Campaign.name + '"</b>',
+                  "image_url": campaign_resp.Campaign.cover_image,
+                  "is_read": false,
+                  "type": "got-paid"
+                };
+                let notification_resp = await notification_helper.insert_notification(notification_obj);
+              }
+
+              if (user_resp.User.device_token && user_resp.User.device_token.length > 0) {
+                if (user_resp.User.notification_settings && user_resp.User.notification_settings.push_got_paid) {
+                  let notification_resp = user_resp.User.device_token.forEach(async (token) => {
+                    if (token.platform && token.token) {
+                      if (token.platform == "ios") {
+                        await push_notification_helper.sendToIOS(token.token, {
+                          "message": 'You got paid for the your campaign <b>"' + campaign_resp.Campaign.name + '"</b>'
+                        });
+                      } else if (token.platform == "android") {
+                        await push_notification_helper.sendToAndroid(token.token, {
+                          "message": 'You got paid for the your campaign <b>"' + campaign_resp.Campaign.name + '"</b>'
+                        });
+                      }
+                    }
+                  });
+                }
+              }
+
+            }
+
+            // Update status in campaign_user - change posted and paid falg
+            obj = {
+              "is_posted": true,
+              "is_paid": true
+            };
+            let campaign_user_update = await campaign_helper.update_campaign_user(req.userInfo.id, req.body.campaign_id, obj);
+            logger.info("update campaign user : ", campaign_user_update);
+
+            // Record user transaction
+            obj = {
+              "user_id": req.userInfo.id,
+              "campaign_id": req.body.campaign_id,
+              "price": seventy
+            };
+            logger.debug("Inserting user earning : ", obj);
+            let earning_resp = await earning_helper.insert_user_earning(obj);
+            logger.info("Earning info : ", earning_resp);
+
+            // Check for partner registration
+            if (user_resp.User.referral_id) {
+              logger.info("Referral exist : ", user_resp.User.referral_id);
+              // Add 5% money to promoter wallet
+              let promoter_resp = await promoter_helper.get_promoter_by_id(user_resp.User.referral_id);
+              logger.info("Referral profile : ", promoter_resp);
+              let obj = { "wallet_balance": (promoter_resp.promoter.wallet_balance) + five };
+              let promoter_update = await promoter_helper.update_promoter_by_id(user_resp.User.referral_id, obj);
+              logger.info("Promoter update resp : ", promoter_update);
+            }
+
+            // Keep remianing balance in clique's account amd charge promoter
+            logger.info("Capturing charge : ", transaction.transaction.cart_items.stripe_charge_id);
+            let charge = await stripe.charges.capture(transaction.transaction.cart_items.stripe_charge_id);
+            logger.info("captured charge resp ==> ", charge);
+
+            // Update transaction table
+            if (charge) {
+              logger.info("Updating status to paid for cart_item : ", transaction.transaction.cart_items._id);
+              let update_resp = await transaction_helper.update_status_of_cart_item(transaction.transaction.cart_items._id, "paid");
+              logger.info("Status update resp : ", update_resp);
+            } else {
+              logger.info("Updating status to failed for cart_item : ", transaction.transaction.cart_items._id);
+              await transaction_helper.update_status_of_cart_item(transaction.transaction.cart_items._id, "failed");
+              logger.info("Status update resp : ", update_resp);
+            }
+
+            return res.status(config.OK_STATUS).json({ "status": 1, "message": "Payment has been done for post" });
+
+          } else {
+            logger.error("Transaction not found")
+            res.status(config.BAD_REQUEST).status({ "status": 0, "message": "Transaction not found" });
+          }
+        } else {
+          logger.error("Post not found");
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Post not found" });
+        }
+
+      }
+
     }
 
   } else {
