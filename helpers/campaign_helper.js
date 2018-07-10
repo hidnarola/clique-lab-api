@@ -189,7 +189,7 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
                     },
                     {
                         "$match": {
-                            // "campaign.end_date": { "gt": new Date() }
+                            "campaign.end_date": { "$gte": new Date() }
                         }
                     },
                     {
@@ -200,7 +200,7 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
                             "price": "$campaign.price",
                             "currency": "$campaign.currency",
                             "promoter_id": "$campaign.promoter_id",
-                            "image": "$campaign.cover_image",
+                            "cover_image": "$campaign.cover_image",
                             "purchased_at":1,
                             "campaign": {
                                 "_id": "$campaign._id",
@@ -235,7 +235,7 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
                             "type": "inspired_post",
                             "social_media_platform": "$inspired_post.social_media_platform",
                             "price": "$inspired_post.price",
-                            "image": "$inspired_post.image",
+                            "cover_image": "$inspired_post.image",
                             "promoter_id": "$inspired_post.brand_id",
                             "purchased_at":1,
                             "inspired_post": {
