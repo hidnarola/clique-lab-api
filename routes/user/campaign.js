@@ -448,7 +448,8 @@ router.post("/campaign_applied", async (req, res) => {
             let obj = {
               "campaign_id": req.body.campaign_id,
               "user_id": req.userInfo.id,
-              "is_apply": true
+              "is_apply": true,
+              "applied_post_id": campaign_data.campaign._id
             }
             let camapign_user_insert = await campaign_helper.insert_campaign_user(obj);
           }
