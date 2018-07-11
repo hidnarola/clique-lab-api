@@ -164,7 +164,7 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                     // Count total memeber
                     if (group.user) {
                         for (let u of group.user) {
-                            if (u && u.user_id && u.user_id.status) {
+                            if (u && u.user_id && u.user_id.status && !u.user_id.removed) {
                                 group.total_member += 1;
 
                                 group.social_power += (u.user_id && u.user_id.facebook && u.user_id.facebook.enabled && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
