@@ -1431,6 +1431,12 @@ campaign_helper.count_country_of_user = async (promoter_id) => {
             "$unwind": "$user"
         },
         {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
+        },
+        {
             "$lookup": {
                 "from": "country",
                 "localField": "user.country",
@@ -1529,6 +1535,12 @@ campaign_helper.count_state_of_user = async (promoter_id) => {
             $unwind: "$user"
         },
         {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
+        },
+        {
             "$group":
                 { _id: "$user.state", name: { "$first": "$user.state" }, count: { $sum: 1 } }
         },
@@ -1598,6 +1610,12 @@ campaign_helper.count_suburb_of_user = async (promoter_id) => {
         },
         {
             $unwind: "$user"
+        },
+        {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
         },
         {
             "$group":
@@ -1672,6 +1690,12 @@ campaign_helper.count_gender_of_user = async (promoter_id) => {
             $unwind: "$user"
         },
         {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
+        },
+        {
             "$group":
                 { _id: "$user.gender", name: { "$first": "$user.gender" }, count: { $sum: 1 } }
         },
@@ -1742,6 +1766,12 @@ campaign_helper.count_job_industry_of_user = async (promoter_id) => {
         },
         {
             "$unwind": "$user"
+        },
+        {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
         },
         {
             "$lookup": {
@@ -1839,6 +1869,12 @@ campaign_helper.count_education_of_user = async (promoter_id) => {
             "$unwind": "$user"
         },
         {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
+        },
+        {
             "$lookup": {
                 "from": "educations",
                 "localField": "user.education",
@@ -1932,6 +1968,12 @@ campaign_helper.count_language_of_user = async (promoter_id) => {
         },
         {
             "$unwind": "$user"
+        },
+        {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
         },
         {
             "$lookup": {
@@ -2029,6 +2071,12 @@ campaign_helper.count_ethnicity_of_user = async (promoter_id) => {
             "$unwind": "$user"
         },
         {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
+        },
+        {
             "$lookup": {
                 "from": "ethnicity",
                 "localField": "user.ethnicity",
@@ -2122,6 +2170,12 @@ campaign_helper.count_music_taste_of_user = async (promoter_id) => {
         },
         {
             "$unwind": "$user"
+        },
+        {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
         },
         {
             "$lookup": {
@@ -2219,6 +2273,12 @@ campaign_helper.count_relationship_status_of_user = async (promoter_id) => {
             $unwind: "$user"
         },
         {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
+        },
+        {
             "$group":
                 { _id: "$user.relationship_status", "name": { "$first": "$user.relationship_status" }, count: { $sum: 1 } }
         },
@@ -2289,6 +2349,12 @@ campaign_helper.count_sexual_orientation_of_user = async (promoter_id) => {
         },
         {
             $unwind: "$user"
+        },
+        {
+            "$match":{
+                "user.status":true,
+                "user.removed":false
+            }
         },
         {
             "$group":
