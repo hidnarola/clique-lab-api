@@ -2671,7 +2671,6 @@ campaign_helper.get_posted_post_by_promoter = async (promoter_id, page_no, page_
                 "$match":filter
             },
             { "$sort": sort },
-            { "$limit": page_size },
             {
                 "$lookup": {
                     "from": "users",
@@ -2682,13 +2681,30 @@ campaign_helper.get_posted_post_by_promoter = async (promoter_id, page_no, page_
             },
             {
                 "$unwind": "$user"
+            },
+            {
+                "$group":{
+                    "_id":1,
+                    "total":{"$sum":1},
+                    "posts":{"$push":"$$ROOT"}
+                }
+            },
+            {
+                "$project":{
+                    "_id":1,
+                    "total":1,
+                    "posts":{"$slice":["$posts",page_size * (page_no - 1), page_size]}
+                }
             }
         ];
 
         var posts = await Campaign_post.aggregate(aggregate);
 
-        return {"status":1,"message":"Post found","posts":posts};
-
+        if (posts && posts[0]) {
+            return {"status":1,"message":"Post found","posts":posts[0]};
+        } else {
+            return { "status": 2, "message": "No post found" };
+        }
     } catch (err) {
         return {"status":0,"message":"Error occured while getting data","error":err};
     }

@@ -483,6 +483,10 @@ router.post('/post',async(req,res) => {
             notEmpty: true,
             errorMessage: "Page size is required"
         },
+        'page_no': {
+            notEmpty: true,
+            errorMessage: "Page number is required"
+        },
         'start_date': {
             notEmpty: true,
             errorMessage: "start date is required"
