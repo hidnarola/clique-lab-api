@@ -331,7 +331,8 @@ router.post('/:group_id/members', async (req, res) => {
             "interested_in": "members.sexual_orientation",
             "relationship_status": "members.relationship_status",
             "music_taste": "members.music_taste",
-            "status":"members.status"
+            "status":"members.status",
+            "removed":"members.removed"
         };
         match_filter = await global_helper.rename_keys(match_filter, keys);
 
