@@ -7,6 +7,9 @@ var router = express.Router();
 var bcrypt = require('bcrypt');
 var sharp = require('sharp');
 var _ = require("underscore");
+var mongoose = require('mongoose');
+
+var ObjectId = mongoose.Types.ObjectId;
 
 var config = require('./../../config');
 var promoter_helper = require('./../../helpers/promoter_helper');
