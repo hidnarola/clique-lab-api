@@ -2588,7 +2588,7 @@ campaign_helper.get_posted_post_by_promoter = async (promoter_id, page_no, page_
                                 "image": "$applied_post.image",
                                 "description": "$applied_post.desription",
                                 "campaign_name": "$name",
-
+                                "start_date":"$start_date",
                                 "no_of_likes": "$campaign_post.no_of_likes",
                                 "no_of_comments": "$campaign_post.no_of_comments",
                                 "no_of_shares": "$campaign_post.no_of_shares",
@@ -2601,6 +2601,9 @@ campaign_helper.get_posted_post_by_promoter = async (promoter_id, page_no, page_
             },
             { "$unwind": "$applied_post" },
             { "$replaceRoot": { "newRoot": "$applied_post" } },
+            {
+                "$match":filter
+            },
             { "$sort": sort },
             { "$limit": page_size },
             {

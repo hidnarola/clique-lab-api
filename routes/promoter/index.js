@@ -346,7 +346,6 @@ router.post("/get_social_analytics", async (req, res) => {
         };
 
         async.each(req.body.filter, function (filter, loop_callback) {
-
             async.waterfall([
                 function (callback) {
                     let match_filter = {};
@@ -481,43 +480,20 @@ router.post('/post',async(req,res) => {
             notEmpty: true,
             errorMessage: "Page size is required"
         },
-        'page_no': {
+        'start_date': {
             notEmpty: true,
-            errorMessage: "Page number is required"
+            errorMessage: "start date is required"
+        },
+        'end_date': {
+            notEmpty: true,
+            errorMessage: "End date is required"
         }
     };
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var match_filter = {};
         var sort = {};
-        if (req.body.filter) {
-            req.body.filter.forEach(filter_criteria => {
-                if (filter_criteria.type === "exact") {
-                    if (filter_criteria.value != null && filter_criteria.value != "") {
-                        match_filter[filter_criteria.field] = filter_criteria.value;
-                    }
-                } else if (filter_criteria.type === "between") {
-                    if (filter_criteria.field === "age") {
-                        // Age is derived attribute and need to calculate based on date of birth
-                        match_filter[filter_criteria.field] = {
-                            "$lte": moment().subtract(filter_criteria.min_value, "years").toDate(),
-                            "$gte": moment().subtract(filter_criteria.max_value, "years").toDate()
-                        };
-                    } else {
-                        match_filter[filter_criteria.field] = { "$gte": filter_criteria.min_value, "$lte": filter_criteria.max_value };
-                    }
-                } else if (filter_criteria.type === "like") {
-                    if (filter_criteria.value != null && filter_criteria.value != "") {
-                        var regex = new RegExp(filter_criteria.value);
-                        match_filter[filter_criteria.field] = { "$regex": regex, "$options": "i" };
-                    }
-                } else if (filter_criteria.type === "id") {
-                    match_filter[filter_criteria.field] = { "$eq": new ObjectId(filter_criteria.value) };
-                }
-            });
-        }
-
+        
         if (req.body.sort) {
             req.body.sort.forEach(sort_criteria => {
                 sort[sort_criteria.field] = sort_criteria.value;
@@ -528,24 +504,18 @@ router.post('/post',async(req,res) => {
             sort["purchased_at"] = -1;
         }
 
-        let keys = {
-            "name": "user.name",
-            "gender": "user.gender",
-            "location": "user.suburb",
-            "job_industry": "user.job_industry",
-            "job_title": "user.job_title",
-            "education": "user.education",
-            "language": "user.language",
-            "ethnicity": "user.ethnicity",
-            "interested_in": "user.sexual_orientation",
-            "relationship_status": "user.relationship_status",
-            "music_taste": "user.music_taste"
-        };
+        let custom_filter = {
+            "start_date": {
+                "$gte": moment(req.body.start_date, "YYYY-MM-DD").toDate(),
+                "$lte": moment(req.body.end_date, "YYYY-MM-DD").toDate()
+            }
+        }
 
-        match_filter = await global_helper.rename_keys(match_filter, keys);
-        sort = await global_helper.rename_keys(sort, keys);
+        if (req.body.social_media_platform) {
+            custom_filter["social_media_platform"] = req.body.social_media_platform
+        }
 
-        let purchased_post = await campaign_helper.get_posted_post_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size, match_filter, sort);
+        let purchased_post = await campaign_helper.get_posted_post_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size, custom_filter, sort);
 
         if (purchased_post.status === 1) {
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Post found", "results": purchased_post.posts });
