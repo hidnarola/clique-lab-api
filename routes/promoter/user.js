@@ -81,7 +81,7 @@ router.post('/', async (req, res) => {
     req.checkBody(schema);
     const errors = req.validationErrors();
     if (!errors) {
-        var match_filter = {"status":true};
+        var match_filter = {"status":true, "removed":false};
         var sort = {};
         if (req.body.filter) {
             req.body.filter.forEach(filter_criteria => {
