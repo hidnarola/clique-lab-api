@@ -545,10 +545,10 @@ router.post('/post',async(req,res) => {
         match_filter = await global_helper.rename_keys(match_filter, keys);
         sort = await global_helper.rename_keys(sort, keys);
 
-        let purchased_post = await campaign_helper.get_purchased_post_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size, match_filter, sort);
+        let purchased_post = await campaign_helper.get_posted_post_by_promoter(req.userInfo.id, req.body.page_no, req.body.page_size, match_filter, sort);
 
         if (purchased_post.status === 1) {
-            res.status(config.OK_STATUS).json({ "status": 1, "message": "Post found", "results": purchased_post.post });
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Post found", "results": purchased_post.posts });
         } else if (purchased_post.status === 2) {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No purchase post available" });
         } else {

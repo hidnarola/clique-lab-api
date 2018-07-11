@@ -44,7 +44,7 @@ social_helper.get_twitter_friends_by_token = (access_token, access_token_secret)
 
         var promise = new Promise(function (resolve, reject) {
             client.get('account/verify_credentials', function (err, data) {
-                if(data && data.followers_count){
+                if (data && data.followers_count) {
                     resolve(data.followers_count);
                 } else {
                     resolve(0);
@@ -104,10 +104,8 @@ social_helper.get_facebook_post_statistics = async (post_id, access_token) => {
     try {
         FB.setAccessToken(access_token);
         let response = await FB.api('/' + post_id, { "fields": ["shares", "likes.limit(0).summary(true)", "comments.limit(0).summary(true)"] });
-
         var shares = (response.shares) ? response.shares.count : 0;
         return { "status": 1, "likes": response.likes.summary.total_count, "comments": response.comments.summary.total_count, "shares": shares };
-        // return {"status":1,"likes":response.summary.total_count};
     } catch (err) {
         return { "status": 0, "likes": 0 };
     }
@@ -124,10 +122,7 @@ social_helper.get_pinterest_post_statistics = async (post_id, access_token) => {
 
         var pinterest_resp = await new Promise(function (resolve, reject) {
             pinterest.api('pins/' + post_id, options).then((data) => {
-                console.log("data ==> ", data.data);
-                console.log("count ==> ", data.data.counts);
                 if (data && data.data && data.data.counts) {
-                    console.log("counts ==> ", data.data.counts);
                     resolve(data.data.counts);
                 } else {
                     resolve(0);
@@ -135,7 +130,6 @@ social_helper.get_pinterest_post_statistics = async (post_id, access_token) => {
             });
         });
 
-        console.log("Pinterest resp ==> ", pinterest_resp);
         return { "status": 1, "comments": pinterest_resp.comments, "saves": pinterest_resp.saves };
     } catch (err) {
         return { "status": 0 };
@@ -146,19 +140,20 @@ social_helper.get_linkedin_post_statistics = async (post_id, access_token) => {
     try {
         request.get({
             "url": 'https://api.linkedin.com/v2/shares/' + post_id,
-            "headers": {'Authorization':'Bearer '+access_token},
+            "headers": { 'Authorization': 'Bearer ' + access_token },
             json: true
         }, function (error, response, body) {
             //console.log(response);
-            console.log("linkedin resp ==> ",body);
+            console.log("linkedin resp ==> ", body);
             // console.log(error);
+            return {"status":1};
         });
     } catch (err) {
-        return 0;
+        return {"status":0};
     }
 }
 
-social_helper.get_twitter_post_statistics = async(post_id,access_token,access_token_secret) => {
+social_helper.get_twitter_post_statistics = async (post_id, access_token, access_token_secret) => {
     try {
         var client = new Twitter({
             consumer_key: config.TWITTER_APP_ID,
@@ -168,30 +163,29 @@ social_helper.get_twitter_post_statistics = async(post_id,access_token,access_to
         });
 
         var data = await new Promise(function (resolve, reject) {
-            client.get('statuses/show/'+post_id, function (err, data) {
+            client.get('statuses/show/' + post_id, function (err, data) {
                 resolve(data);
             });
         });
-        return {"status":0,"favorite":data.favorite_count,"retweet":data.retweet_count};
+        return { "status": 1, "favorite": data.favorite_count, "retweet": data.retweet_count };
     } catch (err) {
-        console.log("Error ==> ", err);
-        return 0;
+        return { "status": 0 }
     }
 }
 
-social_helper.get_facebook_friend_details_by_token = async(access_token) => {
+social_helper.get_facebook_friend_details_by_token = async (access_token) => {
     try {
         FB.setAccessToken(access_token);
         let response = await FB.api('/me/friends');
 
-        console.log("FB resp ==> ",response);
+        console.log("FB resp ==> ", response);
         if (response.data.length > 0) {
-            return {"status":1,"message":"Friends found","friends":response.data};
+            return { "status": 1, "message": "Friends found", "friends": response.data };
         } else {
-            return {"status":0,"message":"No friends found"};
+            return { "status": 0, "message": "No friends found" };
         }
     } catch (err) {
-        console.log("error => ",err);
+        console.log("error => ", err);
         return 0;
     }
 }

@@ -172,9 +172,14 @@ campaign_post_helper.find_post_statistics_by_post = async (post) => {
     };
     // Check appropriate social media and get like count
     if (post && post.user_id) {
+        console.log("\n\n==============================\n");
+        console.log("Finding post count for post => ",post.post_id, " for platform => ",post.social_media_platform);
+
+        
+
         if (post.social_media_platform === "facebook" && post.user_id.facebook.access_token) {
             var like_resp = await social_helper.get_facebook_post_statistics(post.post_id, post.user_id.facebook.access_token);
-            console.log("fb => ",like_resp);
+            console.log("resp from facebook of post => ",post.post_id, "is : ",like_resp);
             if (like_resp.status === 1) {
                 obj.no_of_likes = like_resp.likes;
                 obj.no_of_comments = like_resp.comments;
@@ -183,7 +188,7 @@ campaign_post_helper.find_post_statistics_by_post = async (post) => {
             }
         } else if (post.social_media_platform === "pinterest" && post.user_id.pinterest.access_token) {
             var like_resp = await social_helper.get_pinterest_post_statistics(post.post_id, post.user_id.pinterest.access_token);
-            console.log("pin => ",like_resp);
+            console.log("resp from pinterest of post => ",post.post_id, "is : ",like_resp);
             if (like_resp && like_resp.status === 1) {
                 obj.no_of_comments = like_resp.comments;
                 obj.no_of_shares = like_resp.saves;
@@ -191,14 +196,15 @@ campaign_post_helper.find_post_statistics_by_post = async (post) => {
             }
         } else if (post.social_media_platform === "linkedin") {
             var like_resp = await social_helper.get_linkedin_post_statistics(post.post_id, post.user_id.linkedin.access_token);
+            console.log("resp from linkedin of post => ",post.post_id, "is : ",like_resp);
             // if (like_resp.status === 1) {
             //     obj.no_of_likes = like_resp.likes;
             //     obj.no_of_comments = like_resp.comments;
             //     obj.no_of_shares = like_resp.shares;
             // }
         } else if (post.social_media_platform === "twitter") {
-            var like_resp = await social_helper.get_twitter_post_statistics("1006753088240095232",post.user_id.twitter.access_token,post.user_id.twitter.access_token_secret);
-            console.log("Response Twitter ==> ",like_resp);            
+            var like_resp = await social_helper.get_twitter_post_statistics(post.post_id, post.user_id.twitter.access_token, post.user_id.twitter.access_token_secret);
+            console.log("resp from Twitter of post => ",post.post_id, "is : ",like_resp);
             if (like_resp && like_resp.status === 1) {
                 obj.no_of_likes = like_resp.favorite;
                 // obj.no_of_comments = like_resp.retweet;

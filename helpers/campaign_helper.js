@@ -9,7 +9,7 @@ var Promoter = require("./../models/Promoter");
 var campaign_user = require("./../models/Promoter");
 var Campaign = require("./../models/Campaign");
 var Campaign_user = require("./../models/Campaign_user");
-var campaign_post = require("./../models/Campaign_post");
+var Campaign_post = require("./../models/Campaign_post");
 
 var campaign_post_helper = require('./campaign_post_helper');
 
@@ -201,7 +201,7 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
                             "currency": "$campaign.currency",
                             "promoter_id": "$campaign.promoter_id",
                             "cover_image": "$campaign.cover_image",
-                            "purchased_at":1,
+                            "purchased_at": 1,
                             "campaign": {
                                 "_id": "$campaign._id",
                                 "hash_tag": "$campaign.hash_tag",
@@ -237,7 +237,7 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
                             "price": "$inspired_post.price",
                             "cover_image": "$inspired_post.image",
                             "promoter_id": "$inspired_post.brand_id",
-                            "purchased_at":1,
+                            "purchased_at": 1,
                             "inspired_post": {
                                 "_id": "$inspired_post._id",
                                 "description": "$inspired_post.text"
@@ -2532,6 +2532,96 @@ campaign_helper.update_campaign_user_by_inspired_post = async (inspired_post_id,
     } catch (err) {
 
         return { "status": 0, "message": "Error occured while updating user", "error": err }
+    }
+}
+
+campaign_helper.get_posted_post_by_promoter = async (promoter_id, page_no, page_size, filter, sort) => {
+    try {
+        var aggregate = [
+            {
+                "$limit": 1
+            },
+            {
+                "$facet": {
+
+                    "applied_post": [
+                        {
+                            "$lookup": {
+                                "from": "campaign",
+                                "pipeline": [{
+                                    "$match": {
+                                        "promoter_id": new ObjectId(promoter_id)
+                                    }
+                                }],
+                                "as": "campaign"
+                            }
+                        },
+                        { "$project": { "campaign": 1, "_id": 0 } },
+                        { "$unwind": "$campaign" },
+                        { "$replaceRoot": { "newRoot": "$campaign" } },
+                        {
+                            "$lookup": {
+                                "from": "campaign_applied",
+                                "foreignField": "campaign_id",
+                                "localField": "_id",
+                                "as": "applied_post"
+                            }
+                        },
+                        {
+                            "$unwind": "$applied_post"
+                        },
+                        {
+                            "$lookup": {
+                                "from": "campaign_post",
+                                "foreignField": "applied_post_id",
+                                "localField": "applied_post._id",
+                                "as": "campaign_post"
+                            }
+                        },
+                        {
+                            "$unwind": "$campaign_post"
+                        },
+                        {
+                            "$project": {
+                                "_id": "$campaign_post._id",
+                                "type": "applied_post",
+                                "image": "$applied_post.image",
+                                "description": "$applied_post.desription",
+                                "campaign_name": "$name",
+
+                                "no_of_likes": "$campaign_post.no_of_likes",
+                                "no_of_comments": "$campaign_post.no_of_comments",
+                                "no_of_shares": "$campaign_post.no_of_shares",
+                                "social_media_platform": "$campaign_post.social_media_platform",
+                                "user_id": "$campaign_post.user_id"
+                            }
+                        }
+                    ]
+                }
+            },
+            { "$unwind": "$applied_post" },
+            { "$replaceRoot": { "newRoot": "$applied_post" } },
+            { "$sort": sort },
+            { "$limit": page_size },
+            {
+                "$lookup": {
+                    "from": "users",
+                    "foreignField": "_id",
+                    "localField": "user_id",
+                    "as": "user"
+                }
+            },
+            {
+                "$unwind": "$user"
+            }
+        ];
+
+        var posts = await Campaign_post.aggregate(aggregate);
+
+        return {"status":1,"message":"Post found","posts":posts};
+
+    } catch (err) {
+        return {"status":0,"message":"Error occured while getting data","error":err};
     }
 }
 
