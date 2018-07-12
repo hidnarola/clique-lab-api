@@ -468,7 +468,7 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
         let users_data = users.results.users.map(async(user) => {
             // check campaign user before pushing
             var campaign_user_resp = await campaign_helper.get_campaign_user(req.params.campaign_id,user._id);
-            if(campaign_user_resp.status == 0){
+            if(campaign_user_resp.status == 2){
                 count++;
                 user_campaign.push({
                     "campaign_id": req.params.campaign_id,
@@ -600,7 +600,7 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
         let users_data = members.results.users.map(async(user) => {
             // check campaign user before pushing
             var campaign_user_resp = await campaign_helper.get_campaign_user(req.params.campaign_id,user._id);
-            if(campaign_user_resp.status == 0){
+            if(campaign_user_resp.status == 2){
                 count++;
                 user_campaign.push({
                     "campaign_id": req.params.campaign_id,
