@@ -167,11 +167,11 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                             if (u && u.user_id && u.user_id.status && !u.user_id.removed) {
                                 group.total_member += 1;
 
-                                group.social_power += (u.user_id && u.user_id.facebook && u.user_id.facebook.enabled && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
-                                group.social_power += (u.user_id && u.user_id.instagram && u.user_id.instagram.enabled && u.user_id.instagram.no_of_friends) ? u.user_id.instagram.no_of_friends : 0;
-                                group.social_power += (u.user_id && u.user_id.twitter && u.user_id.twitter.enabled && u.user_id.twitter.no_of_friends) ? u.user_id.twitter.no_of_friends : 0;
-                                group.social_power += (u.user_id && u.user_id.pinterest && u.user_id.pinterest.enabled && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
-                                group.social_power += (u.user_id && u.user_id.linkedin && u.user_id.linkedin.enabled && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
+                                group.social_power += (u.user_id.facebook && u.user_id.facebook.enabled && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
+                                group.social_power += (u.user_id.instagram && u.user_id.instagram.enabled && u.user_id.instagram.no_of_friends) ? u.user_id.instagram.no_of_friends : 0;
+                                group.social_power += (u.user_id.twitter && u.user_id.twitter.enabled && u.user_id.twitter.no_of_friends) ? u.user_id.twitter.no_of_friends : 0;
+                                group.social_power += (u.user_id.pinterest && u.user_id.pinterest.enabled && u.user_id.pinterest.no_of_friends) ? u.user_id.pinterest.no_of_friends : 0;
+                                group.social_power += (u.user_id.linkedin && u.user_id.linkedin.enabled && u.user_id.linkedin.no_of_friends) ? u.user_id.linkedin.no_of_friends : 0;
                                 let post = await Campaign_post.find({
                                     "user_id": u.user_id._id,
                                     "created_at": {

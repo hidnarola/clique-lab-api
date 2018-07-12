@@ -418,7 +418,7 @@ router.post('/past', async (req, res) => {
  * Developed by "ar"
  */
 router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
-    var match_filter = {};
+    var match_filter = {"status":true,"removed":false};
     if (req.body.filter) {
         req.body.filter.forEach(filter_criteria => {
             if (filter_criteria.type === "exact") {
@@ -463,13 +463,22 @@ router.post('/:campaign_id/add_filter_result_to_campaign', async (req, res) => {
 
     if (users.status === 1 && users.results && users.results.users) {
         var user_campaign = [];
+        var count = 0;
 
-        for (let user of users.results.users) {
-            user_campaign.push({
-                "campaign_id": req.params.campaign_id,
-                "user_id": user._id
-            });
-        }
+        let users_data = users.results.users.map(async(user) => {
+            // check campaign user before pushing
+            var campaign_user_resp = await campaign_helper.get_campaign_user(req.params.campaign_id,user._id);
+            if(campaign_user_resp.status == 0){
+                count++;
+                user_campaign.push({
+                    "campaign_id": req.params.campaign_id,
+                    "user_id": user._id
+                });
+            }
+            return user;
+        });
+
+        users.results.users = await Promise.all(users_data);
 
         let campaign_users_resp = await campaign_helper.insert_multiple_campaign_user(user_campaign);
         if (campaign_users_resp.status == 0) {
@@ -586,15 +595,25 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
 
     if (members.status === 1 && members.results && members.results.users) {
         var user_campaign = [];
+        var count = 0;
 
-        for (let user of members.results.users) {
-            user_campaign.push({
-                "campaign_id": req.params.campaign_id,
-                "user_id": user._id
-            });
-        }
+        let users_data = members.results.users.map(async(user) => {
+            // check campaign user before pushing
+            var campaign_user_resp = await campaign_helper.get_campaign_user(req.params.campaign_id,user._id);
+            if(campaign_user_resp.status == 0){
+                count++;
+                user_campaign.push({
+                    "campaign_id": req.params.campaign_id,
+                    "user_id": user._id
+                });
+            }
+            return user;
+        });
+
+        users.results.users = await Promise.all(users_data);
 
         let campaign_users_resp = await campaign_helper.insert_multiple_campaign_user(user_campaign);
+
         if (campaign_users_resp.status == 0) {
             res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available to add" });
         } else {
