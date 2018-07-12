@@ -610,7 +610,7 @@ router.post('/:campaign_id/:group_id/add_filter_result_to_campaign', async (req,
             return user;
         });
 
-        users.results.users = await Promise.all(users_data);
+        members.results.users = await Promise.all(users_data);
 
         let campaign_users_resp = await campaign_helper.insert_multiple_campaign_user(user_campaign);
 
