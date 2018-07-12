@@ -154,8 +154,6 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
 
         if (groups && groups[0]) {
             if (page_no && page_size) {
-                // console.log("------------> Type ====>   ",typeof groups[0]);
-                // console.log(groups[0]);
                 let group_data = groups[0].groups.map(async (group) => {
                     group.total_member = 0;
                     group.social_power = 0;
