@@ -155,15 +155,28 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
         if (groups && groups[0]) {
             if (page_no && page_size) {
                 let group_data = groups[0].groups.map(async (group) => {
+
+                    console.log("\n\n==========\n\nGroup ==> ",group.name);
+
                     group.total_member = 0;
                     group.social_power = 0;
                     group.activity_rate = 0;
 
                     // Count total memeber
                     if (group.user) {
-                        for (let u of group.user) {
+
+                        let userdata = group.user.map(async(u) => {
                             if (u && u.user_id && u.user_id.status && !u.user_id.removed) {
+
+                                // console.log("\n\n========\nUser => ",u.user_id.name);
+
                                 group.total_member += 1;
+
+                                // console.log("\n\n====> \nFacebook => ",u.user_id.facebook.enable," => Friends => ",u.user_id.facebook.no_of_friends);
+                                // console.log("Instagram => ",u.user_id.instagram.enable," => Friends => ",u.user_id.instagram.no_of_friends);
+                                // console.log("Twitter => ",u.user_id.twitter.enable," => Friends => ",u.user_id.twitter.no_of_friends);
+                                // console.log("Pinterest => ",u.user_id.pinterest.enable," => Friends => ",u.user_id.pinterest.no_of_friends);
+                                // console.log("Linkedin => ",u.user_id.linkedin.enable," => Friends => ",u.user_id.linkedin.no_of_friends);
 
                                 group.social_power += (u.user_id.facebook && u.user_id.facebook.enable && u.user_id.facebook.no_of_friends) ? u.user_id.facebook.no_of_friends : 0;
                                 group.social_power += (u.user_id.instagram && u.user_id.instagram.enable && u.user_id.instagram.no_of_friends) ? u.user_id.instagram.no_of_friends : 0;
@@ -180,7 +193,10 @@ group_helper.get_filtered_group = async (page_no, page_size, filter, sort) => {
                                     group.activity_rate += 1;
                                 }
                             }
-                        };
+                            return u;
+                        });
+
+                        userdata = await Promise.all(userdata);
 
                         if (group.total_member > 0) {
                             group.activity_rate = parseInt(group.activity_rate * 100 / group.total_member);
