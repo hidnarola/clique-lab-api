@@ -208,7 +208,7 @@ router.post("/get_analytics", async (req, res) => {
         "pinterest_followers": "user.pinterest.no_of_friends",
         "linkedin_connection": "user.linkedin.no_of_friends",
         "year_in_industry": "user.experience",
-        "age": "user.dob",
+        "age": "user.date_of_birth",
 
         "name": "user.name",
         "gender": "user.gender",
