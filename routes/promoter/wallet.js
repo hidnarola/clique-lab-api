@@ -122,7 +122,7 @@ router.get('/bank_account', async (req, res) => {
     if (promoter_resp.status === 1) {
         if (promoter_resp.promoter.stripe_connect_id) {
             try {
-                let accounts = await stripe.accounts.listExternalAccounts(promoter_resp.promoter.stripe_connect_id, { object: "bank_account" });
+                let accounts = await stripe.accounts.listExternalAccounts(promoter_resp.promoter.stripe_connect_id, { object: "bank_account", "limit":100 });
 
                 let bank_account = [];
                 if (accounts.data.length > 0) {
