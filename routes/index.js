@@ -277,10 +277,10 @@ router.post('/resend_email', async (req, res) => {
           res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter registered successfully" });
         }
       } else {
-        if(promoter_resp.promoter.removed){
-          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details."});
+        if (promoter_resp.promoter.removed) {
+          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details." });
         } else {
-          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been suspended by admin. Please contact to admin for more details."});
+          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been suspended by admin. Please contact to admin for more details." });
         }
       }
 
@@ -381,30 +381,44 @@ router.post('/promoter_forgot_password', async (req, res) => {
   req.checkBody(schema);
   var errors = req.validationErrors();
   if (!errors) {
+
+
+
     var promoter_resp = await promoter_helper.get_promoter_by_email_or_username(req.body.email);
     if (promoter_resp.status === 0) {
       res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error while finding promoter" });
     } else if (promoter_resp.status === 2) {
       res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available with given email" });
     } else {
-      // Send mail on user's email address
-      var reset_token = Buffer.from(jwt.sign({ "promoter_id": promoter_resp.promoter._id }, config.ACCESS_TOKEN_SECRET_KEY, {
-        expiresIn: 60 * 60 * 2 // expires in 2 hour
-      })).toString('base64');
 
-      let mail_resp = await mail_helper.send("reset_password", {
-        "to": promoter_resp.promoter.email,
-        "subject": "Clique Labs - Reset password request"
-      }, {
-          "name": promoter_resp.promoter.full_name,
-          "reset_link": config.website_url + "/forgot_password/" + reset_token
-        });
+      if (promoter_resp.promoter.status && !promoter_resp.promoter.removed) {
+        // Send mail on user's email address
+        var reset_token = Buffer.from(jwt.sign({ "promoter_id": promoter_resp.promoter._id }, config.ACCESS_TOKEN_SECRET_KEY, {
+          expiresIn: 60 * 60 * 2 // expires in 2 hour
+        })).toString('base64');
 
-      if (mail_resp.status === 0) {
-        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending mail to promoter", "error": mail_resp.error });
+        let mail_resp = await mail_helper.send("reset_password", {
+          "to": promoter_resp.promoter.email,
+          "subject": "Clique Labs - Reset password request"
+        }, {
+            "name": promoter_resp.promoter.full_name,
+            "reset_link": config.website_url + "/forgot_password/" + reset_token
+          });
+
+        if (mail_resp.status === 0) {
+          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending mail to promoter", "error": mail_resp.error });
+        } else {
+          res.status(config.OK_STATUS).json({ "status": 1, "message": "Reset link has been sent on your email address" });
+        }
       } else {
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Reset link has been sent on your email address" });
+        if (promoter_resp.promoter.removed) {
+          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details." });
+        } else {
+          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been suspended by admin. Please contact to admin for more details." });
+        }
       }
+
+
     }
   } else {
     res.status(config.BAD_REQUEST).json({ message: errors });

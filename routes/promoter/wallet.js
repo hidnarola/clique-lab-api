@@ -97,7 +97,7 @@ router.post('/withdraw', async (req, res) => {
                         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Insufficient wallet balance" });
                     }
                 } else {
-                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please enter amount greater then or equal to 1" });
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please enter amount greater than or equal to 1" });
                 }
             } catch (err) {
                 console.log("err => ", err);
