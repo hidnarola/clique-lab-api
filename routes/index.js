@@ -80,31 +80,31 @@ router.post('/promoter_login', async (req, res) => {
       if (bcrypt.compareSync(req.body.password, promoter_resp.promoter.password)) {
 
         // Valid password, now check account is active or not
-        if(!promoter_resp.promoter.removed){
+        if (!promoter_resp.promoter.removed) {
           if (promoter_resp.promoter.status && promoter_resp.promoter.email_verified) {
             // Account is active
             logger.trace("valid password. Generating token");
-  
+
             var refreshToken = jwt.sign({ id: promoter_resp.promoter._id, role: 'promoter' }, config.REFRESH_TOKEN_SECRET_KEY, {});
             let update_resp = await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
             var promoterJson = { id: promoter_resp.promoter._id, email: promoter_resp.promoter.email, role: 'promoter' };
             var token = jwt.sign(promoterJson, config.ACCESS_TOKEN_SECRET_KEY, {
               expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
             });
-  
+
             if (!promoter_resp.promoter.industry_fill) {
               promoter_resp.promoter.first_login = true;
             } else {
               promoter_resp.promoter.first_login = false;
             }
-  
+
             delete promoter_resp.promoter.password;
             delete promoter_resp.promoter.status;
             delete promoter_resp.promoter.refresh_token;
             delete promoter_resp.promoter.last_login_date;
             delete promoter_resp.promoter.industry_fill;
             delete promoter_resp.promoter.created_at;
-  
+
             logger.info("Token generated");
             res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "promoter": promoter_resp.promoter, "token": token, "refresh_token": refreshToken });
           } else {
@@ -119,7 +119,7 @@ router.post('/promoter_login', async (req, res) => {
         } else {
           res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Acccount has been removed by admin. Contact to admin for more information" });
         }
-        
+
       } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid login id or password" });
       }
@@ -260,20 +260,31 @@ router.post('/resend_email', async (req, res) => {
     } else if (promoter_resp.status === 2) {
       res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available with given email" });
     } else {
-      let mail_resp = await mail_helper.send("email_confirmation", {
-        "to": promoter_resp.promoter.email,
-        "subject": "Clique Labs – Last step is to Confirm your Email."
-      }, {
-          "name": promoter_resp.promoter.full_name,
-          "confirm_url": config.website_url + "/email_confirm/" + promoter_resp.promoter._id
-        });
 
-      console.log("mail resp = ", mail_resp);
-      if (mail_resp.status === 0) {
-        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending confirmation email", "error": mail_resp.error });
+      if (promoter_resp.promoter.status && !promoter_resp.promoter.removed) {
+        let mail_resp = await mail_helper.send("email_confirmation", {
+          "to": promoter_resp.promoter.email,
+          "subject": "Clique Labs – Last step is to Confirm your Email."
+        }, {
+            "name": promoter_resp.promoter.full_name,
+            "confirm_url": config.website_url + "/email_confirm/" + promoter_resp.promoter._id
+          });
+
+        console.log("mail resp = ", mail_resp);
+        if (mail_resp.status === 0) {
+          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending confirmation email", "error": mail_resp.error });
+        } else {
+          res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter registered successfully" });
+        }
       } else {
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter registered successfully" });
+        if(promoter_resp.promoter.removed){
+          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details."});
+        } else {
+          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been suspended by admin. Please contact to admin for more details."});
+        }
       }
+
+
     }
   } else {
     res.status(config.BAD_REQUEST).json({ message: errors });
