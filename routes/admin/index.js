@@ -1,4 +1,5 @@
 var express = require("express");
+var mongoose = require('mongoose');
 var router = express.Router();
 var moment = require('moment');
 
@@ -8,6 +9,7 @@ var promoter_helper = require('./../../helpers/promoter_helper');
 var transaction_helper = require('./../../helpers/transaction_helper');
 
 var config = require('./../../config');
+var ObjectId = mongoose.Types.ObjectId;
 
 router.post('/transactions', async (req, res) => {
     var schema = {
