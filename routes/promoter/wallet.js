@@ -71,39 +71,33 @@ router.post('/withdraw', async (req, res) => {
     if (!errors) {
         // Get promoter info
         let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
-        console.log("Promoter resp ==> ",promoter_resp);
+        console.log("Promoter resp ==> ", promoter_resp);
         if (promoter_resp.status === 1 && promoter_resp.promoter.stripe_connect_id) {
 
             try {
-                // Verify user's wallet balance and proceed further
-                if (promoter_resp.promoter.wallet_balance >= req.body.amount) {
+                if (req.body.amount >= 1) {
+                    // Verify user's wallet balance and proceed further
+                    if (promoter_resp.promoter.wallet_balance >= req.body.amount) {
 
-                    let transfer = await stripe.transfers.create({
-                        amount: req.body.amount * 100,
-                        currency: "aud",
-                        destination: promoter_resp.promoter.stripe_connect_id
-                    });
+                        let transfer = await stripe.transfers.create({
+                            amount: req.body.amount * 100,
+                            currency: "aud",
+                            destination: promoter_resp.promoter.stripe_connect_id
+                        });
 
-                    // let charge = await stripe.charges.create({
-                    //     amount: req.body.amount * 100,
-                    //     currency: "usd",
-                    //     customer: "cus_Cpn2hYxHQACXYq", // Stripe customer id of clique
-                    //     destination: {
-                    //         account: "acct_1AL7EZB6ThHUGP1p" // bank account id of promoter
-                    //     },
-                    //     description: "Charge for " + promoter_resp.promoter.name
-                    // });
+                        if (transfer) {
+                            // Deduct wallet balance of promoter by withdrawal amount
+                            let updated_promoter = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "wallet_balance": promoter_resp.promoter.wallet_balance - req.body.amount });
 
-                    if (transfer) {
-                        // Deduct wallet balance of promoter by withdrawal amount
-                        let updated_promoter = await promoter_helper.update_promoter_by_id(req.userInfo.id, { "wallet_balance": promoter_resp.promoter.wallet_balance - req.body.amount });
-
-                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Amount has been credited in bank account" });
+                            res.status(config.OK_STATUS).json({ "status": 1, "message": "Amount has been credited in bank account" });
+                        } else {
+                            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in transfering amount" });
+                        }
                     } else {
-                        res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured in transfering amount" });
+                        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Insufficient wallet balance" });
                     }
                 } else {
-                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Insufficient wallet balance" });
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please enter amount greater then or equal to 1" });
                 }
             } catch (err) {
                 console.log("err => ", err);
@@ -133,7 +127,7 @@ router.get('/bank_account', async (req, res) => {
                 let bank_account = [];
                 if (accounts.data.length > 0) {
                     accounts.data.forEach((obj) => {
-                        console.log("obj ==> ",obj);
+                        console.log("obj ==> ", obj);
                         bank_account.push({
                             "id": obj.id,
                             "account_holder_name": obj.account_holder_name,
@@ -141,7 +135,7 @@ router.get('/bank_account', async (req, res) => {
                             // "bank_name": obj.metadata.bank_name,
                             "bank_Account_last4": obj.last4,
                             "bsb": obj.routing_number,
-                            "default":obj.default_for_currency
+                            "default": obj.default_for_currency
                         });
                     });
                 }
@@ -151,9 +145,9 @@ router.get('/bank_account', async (req, res) => {
                 }
 
                 if (bank_account.length > 0) {
-                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account, "wallet_balance":promoter_resp.promoter.wallet_balance });
+                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account found", "bank_account": bank_account, "wallet_balance": promoter_resp.promoter.wallet_balance });
                 } else {
-                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found","wallet_balance":promoter_resp.promoter.wallet_balance });
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No bank account found", "wallet_balance": promoter_resp.promoter.wallet_balance });
                 }
             } catch (err) {
                 res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });
@@ -268,7 +262,7 @@ router.delete('/bank_account/:bank_account_id', async (req, res) => {
                     res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
                 }
             } catch (err) {
-                console.log("Error while deleting external account ==> ",err);
+                console.log("Error while deleting external account ==> ", err);
                 res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });
             }
         } else {
@@ -409,15 +403,15 @@ router.put('/credit_card', async (req, res) => {
 router.delete('/credit_card/:card_id', async (req, res) => {
     let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
     if (promoter_resp.status === 1) {
-        try{
-            let card = await stripe.customers.deleteCard(promoter_resp.promoter.stripe_customer_id,req.params.card_id);
-            if(card.deleted){
-                res.status(config.OK_STATUS).json({"status":1,"message":"Card has been deleted"});
+        try {
+            let card = await stripe.customers.deleteCard(promoter_resp.promoter.stripe_customer_id, req.params.card_id);
+            if (card.deleted) {
+                res.status(config.OK_STATUS).json({ "status": 1, "message": "Card has been deleted" });
             } else {
-                res.status(config.BAD_REQUEST).json({"status":0,"message":"Erorr occured while deleting card"});
+                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Erorr occured while deleting card" });
             }
-        } catch(err){
-            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while deleting card", "error":err });
+        } catch (err) {
+            res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while deleting card", "error": err });
         }
     } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Promoter not found" });
