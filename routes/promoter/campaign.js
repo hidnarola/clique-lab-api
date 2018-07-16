@@ -983,7 +983,11 @@ router.post('/get_demographics', async (req, res) => {
             "music_taste": music_taste.music_taste[0]
         }
 
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": result });
+        if(Object.keys(result).length > 0){
+            res.status(config.OK_STATUS).json({ "status": 1, "message": "Campaign details found", "results": result });
+        } else {
+            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No data found" });
+        }
     } else if (campaigns.status === 2) {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Campaign not found" });
     } else {
