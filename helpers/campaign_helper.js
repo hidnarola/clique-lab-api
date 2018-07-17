@@ -2436,6 +2436,12 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
                 "$unwind": "$user"
             },
             {
+                "$match":{
+                    "user.status":true,
+                    "user.removed":false
+                }
+            },
+            {
                 "$lookup": {
                     "from": "country",
                     "localField": "user.country",
