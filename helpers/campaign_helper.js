@@ -590,6 +590,23 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
                 "$match": {
                     "campaign.end_date": { "$gt": new Date() }
                 }
+            },
+            {
+                "$lookup": {
+                    "from": "promoters",
+                    "localField": "campaign.promoter_id",
+                    "foreignField": "_id",
+                    "as": "promoter"
+                }
+            },
+            {
+                "$unwind": "$promoter"
+            },
+            {
+                "$match": {
+                    "promoter.status": true,
+                    "promoter.removed": false,
+                }
             }
         ];
 
