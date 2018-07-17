@@ -69,7 +69,7 @@ group_helper.insert_group = async (group_object) => {
 group_helper.get_all_group_of_promoter = async (promoter_id) => {
     try {
         var group = await Group.find({ "promoter_id": { "$eq": promoter_id } });
-        if (group) {
+        if (group && group.length > 0) {
             return { "status": 1, "message": "Group details found", "results": group };
         } else {
             return { "status": 2, "message": "Group not found" };
