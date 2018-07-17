@@ -326,6 +326,23 @@ campaign_helper.get_public_campaign_for_user = async (user_id, filter, redact, s
                 }
             },
             {
+                "$lookup": {
+                    "from": "promoters",
+                    "localField": "promoter_id",
+                    "foreignField": "_id",
+                    "as": "promoter"
+                }
+            },
+            {
+                "$unwind": "$promoter"
+            },
+            {
+                "$match": {
+                    "promoter.status": true,
+                    "promoter.removed": false,
+                }
+            },
+            {
                 "$lookup":
                 {
                     "from": "campaign_applied",
