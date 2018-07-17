@@ -42,6 +42,12 @@ submission_helper.get_filtered_submission_for_promoter = async (promoter_id, pag
             },
             {
                 "$unwind": "$users"
+            },
+            {
+                "$match":{
+                    "users.status":true,
+                    "users.removed":false
+                }
             }
         ];
 
