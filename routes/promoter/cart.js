@@ -210,14 +210,14 @@ router.post('/purchase', async (req, res) => {
                                 }
 
                                 // Check status and enter notification into DB
-                                if (user_res.User.notification_settings && user_res.User.notification_settings.got_paid) {
+                                if (user_res.User.notification_settings && user_res.User.notification_settings.got_approved) {
 
                                     var notification_obj = {
                                         "user_id": user_res.User._id,
                                         "text": "You applied post has been approved.",
                                         "image_url": image_url,
                                         "is_read": false,
-                                        "type": "got-paid"
+                                        "type": "got-approved"
                                     };
                                     let notification_resp = await notification_helper.insert_notification(notification_obj);
                                 }
