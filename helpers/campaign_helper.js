@@ -323,7 +323,7 @@ campaign_helper.get_public_campaign_for_user = async (user_id, filter, redact, s
             {
                 "$match": {
                     "end_date": { "$gt": new Date() },
-                    "start_date": { "$gt": new Date() }
+                    "start_date": { "$lt": new Date() }
                 }
             },
             {
