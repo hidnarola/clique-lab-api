@@ -195,7 +195,7 @@ router.post('/purchase', async (req, res) => {
 
                     console.log("Updating status of campaign user");
                     // mark status as purchased for campaign_user
-                    active_cart.results.cart_items.forEach(async (cart_item) => {
+                    let cart_items_resp = active_cart.results.cart_items.map(async (cart_item) => {
                         if (cart_item.user._id) {
                             // Send push notification to user
                             let user_res = await user_helper.get_user_by_id(cart_item.user._id);
@@ -224,7 +224,7 @@ router.post('/purchase', async (req, res) => {
 
                                 if (user_res.User.device_token && user_res.User.device_token.length > 0) {
                                     if (user_res.User.notification_settings && user_res.User.notification_settings.push_got_approved) {
-                                        let notification_resp = user_res.User.device_token.forEach(async (token) => {
+                                        let notification_resp = user_res.User.device_token.map(async (token) => {
                                             if (token.platform && token.token) {
                                                 if (token.platform == "ios") {
                                                     await push_notification_helper.sendToIOS(token.token, {
@@ -237,6 +237,8 @@ router.post('/purchase', async (req, res) => {
                                                 }
                                             }
                                         });
+
+                                        notification_resp = await Promise.all(notification_resp);
                                     }
                                 }
 
@@ -249,6 +251,8 @@ router.post('/purchase', async (req, res) => {
                             await campaign_helper.update_campaign_user_by_inspired_post(cart_item.inspired_post_id, { "is_purchase": true, purchased_at: Date.now() });
                         }
                     });
+
+                    cart_items_resp = await Promise.all(cart_items_resp);
 
                     console.log("clear existing cart");
                     // Clear active cart here
