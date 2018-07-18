@@ -322,7 +322,8 @@ campaign_helper.get_public_campaign_for_user = async (user_id, filter, redact, s
         var aggregate = [
             {
                 "$match": {
-                    "end_date": { "$gt": new Date() }
+                    "end_date": { "$gt": new Date() },
+                    "start_date": { "$gt": new Date() }
                 }
             },
             {
@@ -605,7 +606,8 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
             },
             {
                 "$match": {
-                    "campaign.end_date": { "$gt": new Date() }
+                    "campaign.end_date": { "$gt": new Date() },
+                    "campaign.start_date": { "$lt": new Date() }
                 }
             },
             {

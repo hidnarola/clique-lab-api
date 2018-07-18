@@ -146,10 +146,10 @@ social_helper.get_linkedin_post_statistics = async (post_id, access_token) => {
             //console.log(response);
             console.log("linkedin resp ==> ", body);
             // console.log(error);
-            return {"status":1};
+            return { "status": 1 };
         });
     } catch (err) {
-        return {"status":0};
+        return { "status": 0 };
     }
 }
 
@@ -164,6 +164,7 @@ social_helper.get_twitter_post_statistics = async (post_id, access_token, access
 
         var data = await new Promise(function (resolve, reject) {
             client.get('statuses/show/' + post_id, function (err, data) {
+                // console.log("data ==> ", data);
                 resolve(data);
             });
         });
