@@ -466,6 +466,8 @@ router.post("/campaign_applied", async (req, res) => {
 });
 
 // /user/campaign/social_post
+// Not in use
+// New API is social_post_new
 router.post("/social_post", async (req, res) => {
   logger.trace("social post API has been called = ", req.body);
   var schema = {
@@ -537,7 +539,7 @@ router.post("/social_post", async (req, res) => {
           logger.info("User update resp : ", user_update);
 
           // Send push notification to user
-          if (user_resp.state === 1 && user_resp.User) {
+          if (user_resp.status === 1 && user_resp.User) {
 
             // Check status and enter notification into DB
             if (user_resp.User.notification_settings && user_resp.User.notification_settings.got_paid) {
@@ -716,7 +718,7 @@ router.post("/social_post_new", async (req, res) => {
             logger.info("User update resp : ", user_update);
 
             // Send push notification to user
-            if (user_resp.state === 1 && user_resp.User) {
+            if (user_resp.status === 1 && user_resp.User) {
 
               // Check status and enter notification into DB
               if (user_resp.User.notification_settings && user_resp.User.notification_settings.got_paid) {
@@ -733,7 +735,7 @@ router.post("/social_post_new", async (req, res) => {
 
               if (user_resp.User.device_token && user_resp.User.device_token.length > 0) {
                 if (user_resp.User.notification_settings && user_resp.User.notification_settings.push_got_paid) {
-                  let notification_resp = user_resp.User.device_token.forEach(async (token) => {
+                  let notification_resp = user_resp.User.device_token.map(async (token) => {
                     if (token.platform && token.token) {
                       if (token.platform == "ios") {
                         await push_notification_helper.sendToIOS(token.token, {
@@ -746,6 +748,7 @@ router.post("/social_post_new", async (req, res) => {
                       }
                     }
                   });
+                  notification_resp = await Promise.all(notification_resp);
                 }
               }
 
