@@ -6,6 +6,7 @@ var config = require('./../../config');
 var cart_helper = require('./../../helpers/cart_helper');
 var user_helper = require('./../../helpers/user_helper');
 var push_notification_helper = require('./../../helpers/push_notification_helper');
+var notification_helper = require('./../../helpers/notification_helper');
 var campaign_helper = require('./../../helpers/campaign_helper');
 var transaction_helper = require('./../../helpers/transaction_helper');
 var promoter_helper = require('./../../helpers/promoter_helper');
