@@ -196,11 +196,16 @@ router.post('/purchase', async (req, res) => {
                     console.log("Updating status of campaign user");
                     // mark status as purchased for campaign_user
                     let cart_items_resp = active_cart.results.cart_items.map(async (cart_item) => {
+
+                        console.log("\n\nCart item => ",cart_item);
+
                         if (cart_item.user._id) {
+                            console.log("\n\nSending push notification to user : ",cart_item.user._id);
                             // Send push notification to user
                             let user_res = await user_helper.get_user_by_id(cart_item.user._id);
-                            if (user_res.state === 1 && user_res.User) {
-
+                            console.log("\n\nUser resp ==> ",user_res);
+                            if (user_res.status === 1 && user_res.User) {
+                                console.log("\n\nUser found");
                                 let image_url = "";
                                 if (cart_item.campaign_id) {
                                     let campaign_resp = await campaign_helper.get_campaign_by_id(cart_item.campaign_id);
@@ -211,7 +216,7 @@ router.post('/purchase', async (req, res) => {
 
                                 // Check status and enter notification into DB
                                 if (user_res.User.notification_settings && user_res.User.notification_settings.got_approved) {
-
+                                    console.log("\n\nStoring got approved notification");
                                     var notification_obj = {
                                         "user_id": user_res.User._id,
                                         "text": "You applied post has been approved.",
@@ -220,24 +225,29 @@ router.post('/purchase', async (req, res) => {
                                         "type": "got-approved"
                                     };
                                     let notification_resp = await notification_helper.insert_notification(notification_obj);
+                                    console.log("\n\nNotification resp => ",notification_resp);
                                 }
 
                                 if (user_res.User.device_token && user_res.User.device_token.length > 0) {
+                                    console.log("\n\nDevice avaiable");
                                     if (user_res.User.notification_settings && user_res.User.notification_settings.push_got_approved) {
+                                        console.log("Sending push notification");
                                         let notification_resp = user_res.User.device_token.map(async (token) => {
+                                            console.log("\n\nToken ==> ",token);
                                             if (token.platform && token.token) {
                                                 if (token.platform == "ios") {
+                                                    console.log("Sending notification to ios device");
                                                     await push_notification_helper.sendToIOS(token.token, {
                                                         "message": "You applied post has been approved."
                                                     });
                                                 } else if (token.platform == "android") {
+                                                    console.log("Sending notification to android device");
                                                     await push_notification_helper.sendToAndroid(token.token, {
                                                         "message": "You applied post has been approved."
                                                     });
                                                 }
                                             }
                                         });
-
                                         notification_resp = await Promise.all(notification_resp);
                                     }
                                 }
