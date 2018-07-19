@@ -584,8 +584,10 @@ campaign_helper.insert_campaign = async (campaign_object) => {
  *          status 1 - If campaign data found, with campaign object
  *          status 2 - If campaign not found, with appropriate message
  */
-campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, page_size) => {
+campaign_helper.get_user_offer = async (user_id, filter, search, sort, page_no, page_size) => {
     try {
+        let regex = new RegExp(search);
+
         let aggregate = [
             {
                 "$match": {
@@ -611,6 +613,53 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
                 }
             },
             {
+                "$match":filter
+            },
+            {
+                "$facet": {
+                    "tagMatch": [{
+                        "$redact": {
+                            "$cond": {
+                                "if": {
+                                    "$or": [
+                                        {
+                                            "$setIsSubset": [
+                                                [search],
+                                                "$campaign.at_tag"
+                                            ]
+                                        },
+                                        {
+                                            "$setIsSubset": [
+                                                [search],
+                                                "$campaign.hash_tag"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "then": "$$KEEP",
+                                "else": "$$PRUNE"
+                            }
+                        }
+                    }],
+                    "nameMatch": [{
+                        "$match": {
+                            "campaign.name": { "$regex": regex, "$options": "i" }
+                        }
+                    }]
+                }
+            },
+            {
+                "$project": {
+                    "data": {
+                        "$concatArrays": ["$tagMatch", "$nameMatch"]
+                    }
+                }
+            },
+            {
+                "$unwind": "$data"
+            },
+            { "$replaceRoot": { "newRoot": "$data" } },
+            {
                 "$lookup": {
                     "from": "promoters",
                     "localField": "campaign.promoter_id",
@@ -628,14 +677,6 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
                 }
             }
         ];
-
-        if (filter) {
-            aggregate.push({ "$match": filter });
-        }
-
-        if (redact) {
-            aggregate.push({ "$redact": { "$cond": { "if": redact, "then": "$$KEEP", "else": "$$PRUNE" } } });
-        }
 
         if (sort) {
             aggregate.push({ "$sort": sort });
@@ -665,6 +706,7 @@ campaign_helper.get_user_offer = async (user_id, filter, redact, sort, page_no, 
             });
         }
 
+        console.log("Aggregate ==> ", JSON.stringify(aggregate));
         var user_offers = await Campaign_User.aggregate(aggregate);
 
         if (user_offers && user_offers[0] && user_offers[0].campaign.length > 0) {
@@ -1467,9 +1509,9 @@ campaign_helper.count_country_of_user = async (promoter_id) => {
             "$unwind": "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -1571,9 +1613,9 @@ campaign_helper.count_state_of_user = async (promoter_id) => {
             $unwind: "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -1648,9 +1690,9 @@ campaign_helper.count_suburb_of_user = async (promoter_id) => {
             $unwind: "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -1726,9 +1768,9 @@ campaign_helper.count_gender_of_user = async (promoter_id) => {
             $unwind: "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -1804,9 +1846,9 @@ campaign_helper.count_job_industry_of_user = async (promoter_id) => {
             "$unwind": "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -1905,9 +1947,9 @@ campaign_helper.count_education_of_user = async (promoter_id) => {
             "$unwind": "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -2006,9 +2048,9 @@ campaign_helper.count_language_of_user = async (promoter_id) => {
             "$unwind": "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -2107,9 +2149,9 @@ campaign_helper.count_ethnicity_of_user = async (promoter_id) => {
             "$unwind": "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -2208,9 +2250,9 @@ campaign_helper.count_music_taste_of_user = async (promoter_id) => {
             "$unwind": "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -2309,9 +2351,9 @@ campaign_helper.count_relationship_status_of_user = async (promoter_id) => {
             $unwind: "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -2387,9 +2429,9 @@ campaign_helper.count_sexual_orientation_of_user = async (promoter_id) => {
             $unwind: "$user"
         },
         {
-            "$match":{
-                "user.status":true,
-                "user.removed":false
+            "$match": {
+                "user.status": true,
+                "user.removed": false
             }
         },
         {
@@ -2472,9 +2514,9 @@ campaign_helper.get_applied_post_of_campaign = async (campaign_id, page_no, page
                 "$unwind": "$user"
             },
             {
-                "$match":{
-                    "user.status":true,
-                    "user.removed":false
+                "$match": {
+                    "user.status": true,
+                    "user.removed": false
                 }
             },
             {
@@ -2696,7 +2738,7 @@ campaign_helper.get_posted_post_by_promoter = async (promoter_id, page_no, page_
                                 "image": "$applied_post.image",
                                 "description": "$applied_post.desription",
                                 "campaign_name": "$name",
-                                "start_date":"$start_date",
+                                "start_date": "$start_date",
                                 "no_of_likes": "$campaign_post.no_of_likes",
                                 "no_of_comments": "$campaign_post.no_of_comments",
                                 "no_of_shares": "$campaign_post.no_of_shares",
@@ -2710,7 +2752,7 @@ campaign_helper.get_posted_post_by_promoter = async (promoter_id, page_no, page_
             { "$unwind": "$applied_post" },
             { "$replaceRoot": { "newRoot": "$applied_post" } },
             {
-                "$match":filter
+                "$match": filter
             },
             { "$sort": sort },
             {
@@ -2725,17 +2767,17 @@ campaign_helper.get_posted_post_by_promoter = async (promoter_id, page_no, page_
                 "$unwind": "$user"
             },
             {
-                "$group":{
-                    "_id":1,
-                    "total":{"$sum":1},
-                    "posts":{"$push":"$$ROOT"}
+                "$group": {
+                    "_id": 1,
+                    "total": { "$sum": 1 },
+                    "posts": { "$push": "$$ROOT" }
                 }
             },
             {
-                "$project":{
-                    "_id":1,
-                    "total":1,
-                    "posts":{"$slice":["$posts",page_size * (page_no - 1), page_size]}
+                "$project": {
+                    "_id": 1,
+                    "total": 1,
+                    "posts": { "$slice": ["$posts", page_size * (page_no - 1), page_size] }
                 }
             }
         ];
@@ -2743,12 +2785,12 @@ campaign_helper.get_posted_post_by_promoter = async (promoter_id, page_no, page_
         var posts = await Campaign_post.aggregate(aggregate);
 
         if (posts && posts[0]) {
-            return {"status":1,"message":"Post found","posts":posts[0]};
+            return { "status": 1, "message": "Post found", "posts": posts[0] };
         } else {
             return { "status": 2, "message": "No post found" };
         }
     } catch (err) {
-        return {"status":0,"message":"Error occured while getting data","error":err};
+        return { "status": 0, "message": "Error occured while getting data", "error": err };
     }
 }
 

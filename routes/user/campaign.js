@@ -252,22 +252,14 @@ router.post("/myoffer", async (req, res) => {
   if (!errors) {
     let filter = {};
     let sort = {};
-    var redact = {};
+    var search = "";
 
     if (req.body.social_media_platform) {
       filter["campaign.social_media_platform"] = { "$in": req.body.social_media_platform };
     }
 
     if (req.body.search) {
-      var r = new RegExp(req.body.search);
-      var regex = { "$regex": r, "$options": "i" };
-      redact = {
-        "$or": [
-          { "$setIsSubset": [[req.body.search], "$campaign.at_tag"] },
-          { "$setIsSubset": [[req.body.search], "$campaign.hash_tag"] },
-          { "$eq": [{ "$substr": ["$campaign.name", 0, -1] }, req.body.search] }
-        ]
-      }
+      search = req.body.search;
     }
 
     if (typeof req.body.price != "undefined") {
@@ -276,7 +268,7 @@ router.post("/myoffer", async (req, res) => {
       sort["campaign._id"] = 1;
     }
 
-    var resp_data = await campaign_helper.get_user_offer(req.userInfo.id, filter, redact, sort, req.body.page_no, req.body.page_size);
+    var resp_data = await campaign_helper.get_user_offer(req.userInfo.id, filter, search, sort, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching offer = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
@@ -704,6 +696,7 @@ router.post("/social_post_new", async (req, res) => {
 
           if (transaction.status == 1) {
 
+            console.log("Transaction done");
             let twentyfive = (campaign_resp.Campaign.price * 25 / 100); // Credited to clique's account
             let five = (campaign_resp.Campaign.price * 5 / 100); // Credited to partner account, if available
             let seventy = (campaign_resp.Campaign.price * 70 / 100); // Credited to user's account
@@ -712,17 +705,17 @@ router.post("/social_post_new", async (req, res) => {
 
             // Add balance in user's wallet
             let user_resp = await user_helper.get_user_by_id(req.userInfo.id);
-            logger.info("User object : ", user_resp)
+            logger.info("User object : ", user_resp);
             let obj = { "wallet_balance": (user_resp.User.wallet_balance) + seventy };
             let user_update = await user_helper.update_user_by_id(req.userInfo.id, obj);
             logger.info("User update resp : ", user_update);
 
             // Send push notification to user
             if (user_resp.status === 1 && user_resp.User) {
-
+              console.log("Sending notification");
               // Check status and enter notification into DB
               if (user_resp.User.notification_settings && user_resp.User.notification_settings.got_paid) {
-
+                console.log("Inserting notification");
                 var notification_obj = {
                   "user_id": user_resp.User._id,
                   "text": 'You got paid for the your campaign <b>"' + campaign_resp.Campaign.name + '"</b>',
@@ -731,17 +724,22 @@ router.post("/social_post_new", async (req, res) => {
                   "type": "got-paid"
                 };
                 let notification_resp = await notification_helper.insert_notification(notification_obj);
+                console.log("Notification resp ==> ",notification_resp);
               }
 
+              console.log("Sending push notification");
               if (user_resp.User.device_token && user_resp.User.device_token.length > 0) {
                 if (user_resp.User.notification_settings && user_resp.User.notification_settings.push_got_paid) {
+                  console.log("Iterating");
                   let notification_resp = user_resp.User.device_token.map(async (token) => {
                     if (token.platform && token.token) {
                       if (token.platform == "ios") {
+                        console.log("Ios device");
                         await push_notification_helper.sendToIOS(token.token, {
                           "message": 'You got paid for the your campaign <b>"' + campaign_resp.Campaign.name + '"</b>'
                         });
                       } else if (token.platform == "android") {
+                        console.log("Android device");
                         await push_notification_helper.sendToAndroid(token.token, {
                           "message": 'You got paid for the your campaign <b>"' + campaign_resp.Campaign.name + '"</b>'
                         });
