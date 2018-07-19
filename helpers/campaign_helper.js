@@ -187,11 +187,11 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
                     {
                         "$unwind": "$campaign"
                     },
-                    {
-                        "$match": {
-                            "campaign.end_date": { "$gte": new Date() }
-                        }
-                    },
+                    // {
+                    //     "$match": {
+                    //         "campaign.end_date": { "$gte": new Date() }
+                    //     }
+                    // },
                     {
                         "$project": {
                             "_id": 1,
