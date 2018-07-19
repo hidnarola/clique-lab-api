@@ -588,6 +588,9 @@ campaign_helper.get_user_offer = async (user_id, filter, search, sort, page_no, 
     try {
         let regex = new RegExp(search);
 
+        let hash = search.replace(/^#+/,"");
+        let at = search.replace(/^@+/,"");
+
         let aggregate = [
             {
                 "$match": {
@@ -616,50 +619,6 @@ campaign_helper.get_user_offer = async (user_id, filter, search, sort, page_no, 
                 "$match":filter
             },
             {
-                "$facet": {
-                    "tagMatch": [{
-                        "$redact": {
-                            "$cond": {
-                                "if": {
-                                    "$or": [
-                                        {
-                                            "$setIsSubset": [
-                                                [search],
-                                                "$campaign.at_tag"
-                                            ]
-                                        },
-                                        {
-                                            "$setIsSubset": [
-                                                [search],
-                                                "$campaign.hash_tag"
-                                            ]
-                                        }
-                                    ]
-                                },
-                                "then": "$$KEEP",
-                                "else": "$$PRUNE"
-                            }
-                        }
-                    }],
-                    "nameMatch": [{
-                        "$match": {
-                            "campaign.name": { "$regex": regex, "$options": "i" }
-                        }
-                    }]
-                }
-            },
-            {
-                "$project": {
-                    "data": {
-                        "$concatArrays": ["$tagMatch", "$nameMatch"]
-                    }
-                }
-            },
-            {
-                "$unwind": "$data"
-            },
-            { "$replaceRoot": { "newRoot": "$data" } },
-            {
                 "$lookup": {
                     "from": "promoters",
                     "localField": "campaign.promoter_id",
@@ -675,12 +634,68 @@ campaign_helper.get_user_offer = async (user_id, filter, search, sort, page_no, 
                     "promoter.status": true,
                     "promoter.removed": false,
                 }
-            }
+            },
+            {
+                "$facet": {
+                    "tagMatch": [{
+                        "$redact": {
+                            "$cond": {
+                                "if": {
+                                    "$or": [
+                                        {
+                                            "$setIsSubset": [
+                                                [at],
+                                                "$campaign.at_tag"
+                                            ]
+                                        },
+                                        {
+                                            "$setIsSubset": [
+                                                [hash],
+                                                "$campaign.hash_tag"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "then": "$$KEEP",
+                                "else": "$$PRUNE"
+                            }
+                        }
+                    }],
+                    "nameMatch": [{
+                        "$match": {
+                            "campaign.name": { "$regex": regex, "$options": "i" }
+                        }
+                    }],
+                    "companyMatch": [{
+                        "$match": {
+                            "promoter.company": { "$regex": regex, "$options": "i" }
+                        }
+                    }]
+                }
+            },
+            {
+                "$project": {
+                    "data": {
+                        "$concatArrays": ["$tagMatch", "$nameMatch","$companyMatch"]
+                    }
+                }
+            },
+            {
+                "$unwind": "$data"
+            },
+            { "$replaceRoot": { "newRoot": "$data" } }
         ];
 
         if (sort) {
             aggregate.push({ "$sort": sort });
         }
+
+        aggregate.push({
+            "$group": {
+                "_id": "$campaign._id",
+                "campaign":{"$first":"$campaign"}
+            }
+        });
 
         aggregate.push({
             "$group": {
