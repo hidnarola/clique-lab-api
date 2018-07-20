@@ -317,14 +317,23 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
     }
 }
 
-campaign_helper.get_public_campaign_for_user = async (user_id, filter, redact, sort, page_no, page_size) => {
+campaign_helper.get_public_campaign_for_user = async (user_id, filter, search, sort, page_no, page_size) => {
     try {
+        let regex = new RegExp(search);
+
+        let hash = search.replace(/^#+/,"");
+        let at = search.replace(/^@+/,"");
+
+
         var aggregate = [
             {
                 "$match": {
                     "end_date": { "$gt": new Date() },
                     "start_date": { "$lt": new Date() }
                 }
+            },
+            {
+                "$match":filter
             },
             {
                 "$lookup": {
@@ -344,6 +353,55 @@ campaign_helper.get_public_campaign_for_user = async (user_id, filter, redact, s
                 }
             },
             {
+                "$facet": {
+                    "tagMatch": [{
+                        "$redact": {
+                            "$cond": {
+                                "if": {
+                                    "$or": [
+                                        {
+                                            "$setIsSubset": [
+                                                [at],
+                                                "$at_tag"
+                                            ]
+                                        },
+                                        {
+                                            "$setIsSubset": [
+                                                [hash],
+                                                "$hash_tag"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "then": "$$KEEP",
+                                "else": "$$PRUNE"
+                            }
+                        }
+                    }],
+                    "nameMatch": [{
+                        "$match": {
+                            "name": { "$regex": regex, "$options": "i" }
+                        }
+                    }],
+                    "companyMatch": [{
+                        "$match": {
+                            "promoter.company": { "$regex": regex, "$options": "i" }
+                        }
+                    }]
+                }
+            },
+            {
+                "$project": {
+                    "data": {
+                        "$concatArrays": ["$tagMatch", "$nameMatch","$companyMatch"]
+                    }
+                }
+            },
+            {
+                "$unwind": "$data"
+            },
+            { "$replaceRoot": { "newRoot": "$data" } },
+            {
                 "$lookup":
                 {
                     "from": "campaign_applied",
@@ -353,7 +411,7 @@ campaign_helper.get_public_campaign_for_user = async (user_id, filter, redact, s
                 }
             },
             {
-                "$unwind": { "path": "$cmapaign", "preserveNullAndEmptyArrays": true }
+                "$unwind": { "path": "$campaign", "preserveNullAndEmptyArrays": true }
             },
             {
                 "$match": {
@@ -361,23 +419,23 @@ campaign_helper.get_public_campaign_for_user = async (user_id, filter, redact, s
                 }
             }
         ];
-        if (filter) {
-            aggregate.push({ "$match": filter });
-        }
-
-        if (redact) {
-            aggregate.push({ "$redact": { "$cond": { "if": redact, "then": "$$KEEP", "else": "$$PRUNE" } } });
-        }
-
+        
         if (sort) {
             aggregate.push({ "$sort": sort });
         }
 
         aggregate.push({
             "$group": {
+                "_id": "$_id",
+                "campaign":{"$first":"$$ROOT"}
+            }
+        });
+
+        aggregate.push({
+            "$group": {
                 "_id": null,
                 "total": { "$sum": 1 },
-                'results': { "$push": '$$ROOT' }
+                'results': { "$push": '$campaign' }
             }
         });
 

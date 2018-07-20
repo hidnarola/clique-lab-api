@@ -168,10 +168,6 @@ router.post("/approved_post", async (req, res) => {
  */
 router.post("/public_campaign", async (req, res) => {
   logger.trace("Get all Public Campaign API called");
-  var filter = { "privacy": "public" };
-  var redact = {};
-  var sort = {};
-
   var schema = {
     "page_no": {
       notEmpty: true,
@@ -186,20 +182,16 @@ router.post("/public_campaign", async (req, res) => {
   var errors = req.validationErrors();
 
   if (!errors) {
+    var filter = { "privacy": "public" };
+    var search = "";
+    var sort = {};
+
     if (req.body.social_media_platform) {
       filter["social_media_platform"] = { "$in": req.body.social_media_platform };
     }
 
     if (req.body.search) {
-      var r = new RegExp(req.body.search);
-      var regex = { "$regex": r, "$options": "i" };
-      redact = {
-        "$or": [
-          { "$setIsSubset": [[req.body.search], "$at_tag"] },
-          { "$setIsSubset": [[req.body.search], "$hash_tag"] },
-          { "$eq": [{ "$substr": ["$name", 0, -1] }, req.body.search] }
-        ]
-      }
+      search = req.body.search;
     }
 
     if (typeof req.body.price != "undefined") {
@@ -207,7 +199,7 @@ router.post("/public_campaign", async (req, res) => {
     } else {
       sort["_id"] = 1;
     }
-    var resp_data = await campaign_helper.get_public_campaign_for_user(req.userInfo.id, filter, redact, sort, req.body.page_no, req.body.page_size);
+    var resp_data = await campaign_helper.get_public_campaign_for_user(req.userInfo.id, filter, search, sort, req.body.page_no, req.body.page_size);
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching Public Campaign = ", resp_data);
       res.status(config.INTERNAL_SERVER_ERROR).json(resp_data);
@@ -724,7 +716,7 @@ router.post("/social_post_new", async (req, res) => {
                   "type": "got-paid"
                 };
                 let notification_resp = await notification_helper.insert_notification(notification_obj);
-                console.log("Notification resp ==> ",notification_resp);
+                console.log("Notification resp ==> ", notification_resp);
               }
 
               console.log("Sending push notification");
