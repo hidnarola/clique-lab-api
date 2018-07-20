@@ -152,8 +152,12 @@ campaign_helper.get_users_approved_campaign = async (user_id, filter, redact, so
     }
 }
 
-campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, page_no, page_size) => {
+campaign_helper.get_users_approved_post = async (user_id, filter, search, sort, page_no, page_size) => {
     try {
+        let regex = new RegExp(search);
+        let hash = search.replace(/^#+/,"");
+        let at = search.replace(/^@+/,"");
+
         let aggregate = [
             {
                 "$match": {
@@ -186,6 +190,9 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
                     },
                     {
                         "$unwind": "$campaign"
+                    },
+                    {
+                        "$match":filter
                     },
                     // {
                     //     "$match": {
@@ -258,16 +265,74 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
             },
             {
                 "$replaceRoot": { "newRoot": "$data" }
-            }
+            },
+            {
+                "$lookup": {
+                    "from": "promoters",
+                    "localField": "promoter_id",
+                    "foreignField": "_id",
+                    "as": "promoter"
+                }
+            },
+            {
+                "$unwind": "$promoter"
+            },
+            {
+                "$match": {
+                    "promoter.status": true,
+                    "promoter.removed": false,
+                }
+            },
+            {
+                "$facet": {
+                    "tagMatch": [{
+                        "$redact": {
+                            "$cond": {
+                                "if": {
+                                    "$or": [
+                                        {
+                                            "$setIsSubset": [
+                                                [at],
+                                                "$campaign.at_tag"
+                                            ]
+                                        },
+                                        {
+                                            "$setIsSubset": [
+                                                [hash],
+                                                "$campaign.hash_tag"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "then": "$$KEEP",
+                                "else": "$$PRUNE"
+                            }
+                        }
+                    }],
+                    "nameMatch": [{
+                        "$match": {
+                            "campaign.name": { "$regex": regex, "$options": "i" }
+                        }
+                    }],
+                    "companyMatch": [{
+                        "$match": {
+                            "promoter.company": { "$regex": regex, "$options": "i" }
+                        }
+                    }]
+                }
+            },
+            {
+                "$project": {
+                    "data": {
+                        "$concatArrays": ["$tagMatch", "$nameMatch","$companyMatch"]
+                    }
+                }
+            },
+            {
+                "$unwind": "$data"
+            },
+            { "$replaceRoot": { "newRoot": "$data" } }
         ];
-
-        if (filter) {
-            aggregate.push({ "$match": filter });
-        }
-
-        if (redact) {
-            aggregate.push({ "$redact": { "$cond": { "if": redact, "then": "$$KEEP", "else": "$$PRUNE" } } });
-        }
 
         if (sort) {
             aggregate.push({ "$sort": sort });
@@ -275,9 +340,16 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
 
         aggregate.push({
             "$group": {
+                "_id": "$_id",
+                "campaign":{"$first":"$$ROOT"}
+            }
+        });
+
+        aggregate.push({
+            "$group": {
                 "_id": null,
                 "total": { "$sum": 1 },
-                'results': { "$push": "$$ROOT" }
+                'results': { "$push": "$campaign" }
             }
         });
 
@@ -320,10 +392,8 @@ campaign_helper.get_users_approved_post = async (user_id, filter, redact, sort, 
 campaign_helper.get_public_campaign_for_user = async (user_id, filter, search, sort, page_no, page_size) => {
     try {
         let regex = new RegExp(search);
-
         let hash = search.replace(/^#+/,"");
         let at = search.replace(/^@+/,"");
-
 
         var aggregate = [
             {

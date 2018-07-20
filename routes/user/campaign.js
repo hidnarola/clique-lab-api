@@ -118,22 +118,14 @@ router.post("/approved_post", async (req, res) => {
   if (!errors) {
     let filter = {};
     let sort = {};
-    var redact = {};
+    let search = "";
 
     if (req.body.social_media_platform) {
-      filter["social_media_platform"] = { "$in": req.body.social_media_platform };
+      filter["campaign.social_media_platform"] = { "$in": req.body.social_media_platform };
     }
 
     if (req.body.search) {
-      var r = new RegExp(req.body.search);
-      var regex = { "$regex": r, "$options": "i" };
-      redact = {
-        "$or": [
-          { "$setIsSubset": [[req.body.search], "$campaign.at_tag"] },
-          { "$setIsSubset": [[req.body.search], "$campaign.hash_tag"] },
-          { "$eq": [{ "$substr": ["$campaign.name", 0, -1] }, req.body.search] }
-        ]
-      }
+      search = req.body.search;
     }
 
     if (typeof req.body.price != "undefined") {
@@ -142,7 +134,7 @@ router.post("/approved_post", async (req, res) => {
       sort["purchased_at"] = -1;
     }
 
-    var resp_data = await campaign_helper.get_users_approved_post(req.userInfo.id, filter, redact, sort, req.body.page_no, req.body.page_size);
+    var resp_data = await campaign_helper.get_users_approved_post(req.userInfo.id, filter, search, sort, req.body.page_no, req.body.page_size);
 
     if (resp_data.status == 0) {
       logger.error("Error occured while fetching campaign = ", resp_data);
