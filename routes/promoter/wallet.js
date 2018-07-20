@@ -40,7 +40,7 @@ router.get('/balance', async (req, res) => {
 router.get('/cards', async (req, res) => {
     let promoter_resp = await promoter_helper.get_promoter_by_id(req.userInfo.id);
     if (promoter_resp.status === 1 && promoter_resp.promoter.stripe_customer_id) {
-        let cards = await stripe.customers.listCards(promoter_resp.promoter.stripe_customer_id,{"limit":100});
+        let cards = await stripe.customers.listCards(promoter_resp.promoter.stripe_customer_id, { "limit": 100 });
         res.status(config.OK_STATUS).json({ "status": 1, "message": "Card available", "cards": cards.data });
     } else {
         console.log("resp => ", promoter_resp);
@@ -122,12 +122,11 @@ router.get('/bank_account', async (req, res) => {
     if (promoter_resp.status === 1) {
         if (promoter_resp.promoter.stripe_connect_id) {
             try {
-                let accounts = await stripe.accounts.listExternalAccounts(promoter_resp.promoter.stripe_connect_id, { object: "bank_account", "limit":100 });
+                let accounts = await stripe.accounts.listExternalAccounts(promoter_resp.promoter.stripe_connect_id, { object: "bank_account", "limit": 100 });
 
                 let bank_account = [];
                 if (accounts.data.length > 0) {
                     accounts.data.forEach((obj) => {
-                        console.log("obj ==> ", obj);
                         bank_account.push({
                             "id": obj.id,
                             "account_holder_name": obj.account_holder_name,
@@ -255,12 +254,47 @@ router.delete('/bank_account/:bank_account_id', async (req, res) => {
     if (promoter_resp.status === 1) {
         if (promoter_resp.promoter.stripe_connect_id) {
             try {
-                let resp = await stripe.accounts.deleteExternalAccount(promoter_resp.promoter.stripe_connect_id, req.params.bank_account_id);
-                if (resp.deleted === true) {
-                    res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been removed" });
+                let account = await stripe.accounts.retrieveExternalAccount(promoter_resp.promoter.stripe_connect_id, req.params.bank_account_id);
+                if (account) {
+                    if (account.default_for_currency) {
+                        let accounts = await stripe.accounts.listExternalAccounts(promoter_resp.promoter.stripe_connect_id, { object: "bank_account", "limit": 2 });
+                        if (accounts.data.length > 1) {
+                            // Another account is available, make it default
+                            for (acc of accounts.data) {
+                                if (!acc.default_for_currency) {
+                                    await stripe.accounts.updateExternalAccount(promoter_resp.promoter.stripe_connect_id, acc.id, { "default_for_currency": true });
+                                    let resp = await stripe.accounts.deleteExternalAccount(promoter_resp.promoter.stripe_connect_id, req.params.bank_account_id);
+                                    if (resp.deleted === true) {
+                                        res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been removed" });
+                                    } else {
+                                        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
+                                    }
+                                    break;
+                                }
+                            }
+                        } else {
+                            // No other account avilable, delete stripe connected account
+                            let del_resp = await stripe.accounts.del(promoter_resp.promoter.stripe_connect_id);
+                            if (del_resp.deleted) {
+                                await promoter_helper.update_promoter_by_id(promoter_resp.promoter._id, { "stripe_connect_id": "" })
+                                res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been removed" });
+                            } else {
+                                res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
+                            }
+                        }
+                    } else {
+                        let resp = await stripe.accounts.deleteExternalAccount(promoter_resp.promoter.stripe_connect_id, req.params.bank_account_id);
+                        if (resp.deleted === true) {
+                            res.status(config.OK_STATUS).json({ "status": 1, "message": "Bank account has been removed" });
+                        } else {
+                            res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
+                        }
+                    }
                 } else {
-                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account", "error": err });
+                    res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while removing bank account" });
                 }
+
+
             } catch (err) {
                 console.log("Error while deleting external account ==> ", err);
                 res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Error occured while finding bank account", "error": err });
