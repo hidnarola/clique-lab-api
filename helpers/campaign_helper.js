@@ -352,7 +352,7 @@ campaign_helper.get_users_approved_post = async (user_id, filter, search, sort, 
                 'results': { "$push": "$campaign" }
             }
         });
-
+        
         if (page_size && page_no) {
             aggregate.push({
                 "$project": {

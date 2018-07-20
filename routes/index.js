@@ -110,7 +110,7 @@ router.post('/promoter_login', async (req, res) => {
           } else {
             if (!promoter_resp.promoter.status) {
               logger.trace("Account is inactive");
-              res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is suspended. Contact to admin for more information." });
+              res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not approved or suspended by admin." });
             } else {
               logger.trace("Account is inactive");
               res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Please verify your email to logged-in" });
@@ -278,9 +278,9 @@ router.post('/resend_email', async (req, res) => {
         }
       } else {
         if (promoter_resp.promoter.removed) {
-          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details." });
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details." });
         } else {
-          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been suspended by admin. Please contact to admin for more details." });
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not approved or suspended by admin." });
         }
       }
 
@@ -412,9 +412,9 @@ router.post('/promoter_forgot_password', async (req, res) => {
         }
       } else {
         if (promoter_resp.promoter.removed) {
-          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details." });
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details." });
         } else {
-          res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Account has been suspended by admin. Please contact to admin for more details." });
+          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not approved or suspended by admin." });
         }
       }
 
