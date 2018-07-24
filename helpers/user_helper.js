@@ -19,7 +19,7 @@ var earning_helper = require("./earning_helper");
 var notification_helper = require("./notification_helper");
 
 /*
- * get_login_by_email is used to fetch single user by email address
+ * get_user_by_email is used to fetch single user by email address
  * 
  * @param   email   Specify email address of user
  * 
@@ -29,7 +29,7 @@ var notification_helper = require("./notification_helper");
  * 
  * @developed by "ar"
  */
-user_helper.get_login_by_email = async (email) => {
+user_helper.get_user_by_email = async (email) => {
     try {
         var user = await User.findOne({ "email": email }).lean();
         if (user) {
