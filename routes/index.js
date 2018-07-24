@@ -274,7 +274,7 @@ router.post('/resend_email', async (req, res) => {
         if (mail_resp.status === 0) {
           res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending confirmation email", "error": mail_resp.error });
         } else {
-          res.status(config.OK_STATUS).json({ "status": 1, "message": "Promoter registered successfully" });
+          res.status(config.OK_STATUS).json({ "status": 1, "message": "Email has been verified" });
         }
       } else {
         if (promoter_resp.promoter.removed) {

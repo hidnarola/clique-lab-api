@@ -395,11 +395,28 @@ campaign_helper.get_public_campaign_for_user = async (user_id, filter, search, s
         let hash = search.replace(/^#+/,"");
         let at = search.replace(/^@+/,"");
 
+        let applied_campaigns = await Campaign_Applied.aggregate([
+            {
+                "$match":{
+                    "user_id":new ObjectId(user_id)
+                }
+            },
+            {
+                "$group":{
+                    "_id":null,
+                    "campaigns":{"$push":"$campaign_id"}
+                }
+            }
+        ]);
+
+        console.log("Campaigns ==> ",applied_campaigns[0].campaigns);
+
         var aggregate = [
             {
                 "$match": {
                     "end_date": { "$gt": new Date() },
-                    "start_date": { "$lt": new Date() }
+                    "start_date": { "$lt": new Date() },
+                    "_id":{"$nin":applied_campaigns[0].campaigns}
                 }
             },
             {
@@ -471,23 +488,23 @@ campaign_helper.get_public_campaign_for_user = async (user_id, filter, search, s
                 "$unwind": "$data"
             },
             { "$replaceRoot": { "newRoot": "$data" } },
-            {
-                "$lookup":
-                {
-                    "from": "campaign_applied",
-                    "localField": "_id",
-                    "foreignField": "campaign_id",
-                    "as": "campaign"
-                }
-            },
-            {
-                "$unwind": { "path": "$campaign", "preserveNullAndEmptyArrays": true }
-            },
-            {
-                "$match": {
-                    "campaign.user_id": { "$ne": new ObjectId(user_id) }
-                }
-            }
+            // {
+            //     "$lookup":
+            //     {
+            //         "from": "campaign_applied",
+            //         "localField": "_id",
+            //         "foreignField": "campaign_id",
+            //         "as": "campaign"
+            //     }
+            // },
+            // {
+            //     "$unwind": { "path": "$campaign", "preserveNullAndEmptyArrays": true }
+            // },
+            // {
+            //     "$match": {
+            //         "campaign.user_id": { "$ne": new ObjectId(user_id) }
+            //     }
+            // }
         ];
         
         if (sort) {
