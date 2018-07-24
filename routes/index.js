@@ -615,110 +615,110 @@ router.post('/social_registration', async (req, res) => {
   if (!errors) {
 
     let user_resp = await user_helper.get_user_by_email(req.body.email);
-    if (user_resp.status === 0) {
-      res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Something went wrong while finding promoter", "error": promoter_resp.error });
-    } else if (user_resp.status === 1) {
+    if (user_resp.status === 1) {
       if(user_resp.user.status === false){
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been suspended" });
       } else if(user_resp.user.removed === true){
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed" });
       } else {
-        var reg_obj = {
-          "name": req.body.name,
-          "gender": req.body.gender,
-          "facebook": { "no_of_friends": 0 },
-          "instagram": { "no_of_friends": 0 },
-          "twitter": { "no_of_friends": 0 },
-          "pinterest": { "no_of_friends": 0 },
-          "linkedin": { "no_of_friends": 0 },
-          "notification_settings": {}
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "This account is already exist" });
+      }
+    } else {
+      var reg_obj = {
+        "name": req.body.name,
+        "gender": req.body.gender,
+        "facebook": { "no_of_friends": 0 },
+        "instagram": { "no_of_friends": 0 },
+        "twitter": { "no_of_friends": 0 },
+        "pinterest": { "no_of_friends": 0 },
+        "linkedin": { "no_of_friends": 0 },
+        "notification_settings": {}
+      };
+  
+      if (req.body.email) {
+        reg_obj.email = req.body.email;
+      }
+      if (req.body.social_type === "facebook") {
+        reg_obj.facebook = {
+          "id": req.body.social_id,
+          "access_token": req.body.access_token
         };
-    
-        if (req.body.email) {
-          reg_obj.email = req.body.email;
+        if (req.body.username) {
+          reg_obj.facebook['username'] = req.body.username;
         }
-        if (req.body.social_type === "facebook") {
-          reg_obj.facebook = {
-            "id": req.body.social_id,
-            "access_token": req.body.access_token
-          };
-          if (req.body.username) {
-            reg_obj.facebook['username'] = req.body.username;
-          }
-        } else if (req.body.social_type === "instagram") {
-          reg_obj.instagram = {
-            "id": req.body.social_id,
-            "access_token": req.body.access_token
-          };
-          if (req.body.username) {
-            reg_obj.instagram['username'] = req.body.username;
-          }
-        } else if (req.body.social_type == "pinterest") {
-          reg_obj.pinterest = {
-            "id": req.body.social_id,
-            "access_token": req.body.access_token
-          };
-          if (req.body.username) {
-            reg_obj.pinterest['username'] = req.body.username;
-          }
-        } else if (req.body.social_type == "twitter") {
-          reg_obj.twitter = {
-            "id": req.body.social_id,
-            "access_token": req.body.access_token,
-            "access_token_secret": req.body.access_token_secret
-          };
-          if (req.body.username) {
-            reg_obj.twitter['username'] = req.body.username;
-          }
-        } else if (req.body.social_type == "linkedin") {
-          reg_obj.linkedin = {
-            "id": req.body.social_id,
-            "access_token": req.body.access_token
-          };
-          if (req.body.username) {
-            reg_obj.linkedin['username'] = req.body.username;
-          }
+      } else if (req.body.social_type === "instagram") {
+        reg_obj.instagram = {
+          "id": req.body.social_id,
+          "access_token": req.body.access_token
+        };
+        if (req.body.username) {
+          reg_obj.instagram['username'] = req.body.username;
         }
-    
-        // Check for referral
+      } else if (req.body.social_type == "pinterest") {
+        reg_obj.pinterest = {
+          "id": req.body.social_id,
+          "access_token": req.body.access_token
+        };
+        if (req.body.username) {
+          reg_obj.pinterest['username'] = req.body.username;
+        }
+      } else if (req.body.social_type == "twitter") {
+        reg_obj.twitter = {
+          "id": req.body.social_id,
+          "access_token": req.body.access_token,
+          "access_token_secret": req.body.access_token_secret
+        };
+        if (req.body.username) {
+          reg_obj.twitter['username'] = req.body.username;
+        }
+      } else if (req.body.social_type == "linkedin") {
+        reg_obj.linkedin = {
+          "id": req.body.social_id,
+          "access_token": req.body.access_token
+        };
+        if (req.body.username) {
+          reg_obj.linkedin['username'] = req.body.username;
+        }
+      }
+  
+      // Check for referral
+      if (req.body.referral_id) {
+        reg_obj.referral_id = req.body.referral_id;
+      }
+  
+      let reg_data = await user_helper.insert_user(reg_obj);
+      if (reg_data.status === 0) {
+        res.status(config.BAD_REQUEST).json(reg_data);
+      } else {
+  
+        // Add device token to DB
+        if (req.body.device_token && req.body.device_platform) {
+          console.log("adding device token");
+          await user_helper.add_device_token_for_user(reg_data.user._id, req.body.device_token, req.body.device_platform);
+        }
+  
         if (req.body.referral_id) {
-          reg_obj.referral_id = req.body.referral_id;
-        }
-    
-        let reg_data = await user_helper.insert_user(reg_obj);
-        if (reg_data.status === 0) {
-          res.status(config.BAD_REQUEST).json(reg_data);
-        } else {
-    
-          // Add device token to DB
-          if (req.body.device_token && req.body.device_platform) {
-            console.log("adding device token");
-            await user_helper.add_device_token_for_user(reg_data.user._id, req.body.device_token, req.body.device_platform);
-          }
-    
-          if (req.body.referral_id) {
-            // Find referral promoter
-            // Check for referral
-            let referral_promoter = await promoter_helper.get_promoter_by_id(req.body.referral_id);
-            if (referral_promoter.status == 1) {
-              // Update some referral reward to promoter's account
-              let updated_promoter = await promoter_helper.update_promoter_by_id(req.body.referral_id, { "wallet_balance": referral_promoter.promoter.wallet_balance + config.REFERRAL_REWARD });
-              let referral_obj = {
-                "promoter_id": req.body.referral_id,
-                "user_id": reg_data.user._id,
-                "reward_amount": config.REFERRAL_REWARD
-              };
-              let referral_resp = await referral_helper.insert_referral(referral_obj);
-              res.status(config.OK_STATUS).json(reg_data);
-            } else {
-              res.status(config.OK_STATUS).json(reg_data);
-            }
+          // Find referral promoter
+          // Check for referral
+          let referral_promoter = await promoter_helper.get_promoter_by_id(req.body.referral_id);
+          if (referral_promoter.status == 1) {
+            // Update some referral reward to promoter's account
+            let updated_promoter = await promoter_helper.update_promoter_by_id(req.body.referral_id, { "wallet_balance": referral_promoter.promoter.wallet_balance + config.REFERRAL_REWARD });
+            let referral_obj = {
+              "promoter_id": req.body.referral_id,
+              "user_id": reg_data.user._id,
+              "reward_amount": config.REFERRAL_REWARD
+            };
+            let referral_resp = await referral_helper.insert_referral(referral_obj);
+            res.status(config.OK_STATUS).json(reg_data);
           } else {
             res.status(config.OK_STATUS).json(reg_data);
           }
+        } else {
+          res.status(config.OK_STATUS).json(reg_data);
         }
       }
-    }   
+    }
   } else {
     logger.error("Validation Error = ", errors);
     res.status(config.BAD_REQUEST).json({ message: errors });
