@@ -248,6 +248,10 @@ campaign_helper.get_users_approved_post = async (user_id, filter, search, sort, 
                             "inspired_post": {
                                 "_id": "$inspired_post._id",
                                 "description": "$inspired_post.text"
+                            },
+                            "campaign":{
+                                "hash_tag":[],
+                                "at_tag":[]
                             }
                         }
                     }]
