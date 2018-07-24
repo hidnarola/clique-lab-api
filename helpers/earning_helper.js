@@ -92,6 +92,9 @@ earning_helper.get_earning_by_user = async (user_id, page_no, page_size) => {
                     "post_description": "$applied_post.desription",
                     "post_image": "$applied_post.image"
                 }
+            },
+            {
+                "$sort":{"created_at":-1}
             }
         ];
 
