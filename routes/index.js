@@ -765,9 +765,13 @@ router.post('/login', async (req, res) => {
 
       res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Something went wrong while finding promoter", "error": promoter_resp.error });
     } else if (login_resp.status === 1) {
-
+      
       logger.trace("User found. Executing next instruction");
-      if (req.body.social_id == login_resp.user[req.body.social_type]['id']) {
+      if(login_resp.user.status === false){
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been suspended" });
+      } else if(login_resp.user.removed === true){
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed" });
+      } else if (req.body.social_id == login_resp.user[req.body.social_type]['id']) {
 
         logger.trace("valid token. Generating token");
 
