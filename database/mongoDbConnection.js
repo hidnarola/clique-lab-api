@@ -5,7 +5,6 @@ var config = require('../config');
 
 //Set up default mongoose connection
 var mongoDB = config.database;
-// mongoose.connect(mongoDB, { auth: { authdb: "admin" }, useMongoClient: true });
 mongoose.connect(mongoDB);
 
 //Get the default connection
@@ -14,7 +13,7 @@ var db = mongoose.connection;
 // CONNECTION EVENTS
 // When successfully connected
 db.on('connected', function () {
-    //console.log('Mongoose connection open to ' + mongoDB);
+    console.log('Mongoose connection open to ' + mongoDB);
 });
 
 // If the connection throws an error

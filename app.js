@@ -1,15 +1,9 @@
-var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var fs = require('fs');
-var db = require('./models/db');
-var auth = require('./middlewares/auth');
-var authorization = require('./middlewares/authorization');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var dotenv = require('dotenv').config();
 
 var fileUpload = require('express-fileupload');
 var expressValidator = require('express-validator');
@@ -81,7 +75,6 @@ var admin = require('./routes/admin');
 var cron = require("./routes/cron");
 // var admin = require('./routes/admin');
 
-
 app.use('/api/',index);
 app.use('/api/user', user);
 app.use('/api/promoter', promoter);
@@ -106,7 +99,7 @@ if (app.get('env') === 'development') {
 }
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function(err, req, res) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -117,18 +110,18 @@ app.use(function(err, req, res, next) {
 });
 
 // if (cluster.isMaster) {
-  // for (var i = 0; i < numCPUs; i++) {
-    // // Create a worker
-    // cluster.fork();
-  // }
+//   for (var i = 0; i < numCPUs; i++) {
+//     // Create a worker
+//     cluster.fork();
+//   }
 // } else {
-  // var server = app.listen((config.node_port || 3000), function () {
-    // //console.log('Listening on port ' + (config.node_port || 3000) + '...');
-  // });
+//   var server = app.listen((config.node_port || 3000), function () {
+//     //console.log('Listening on port ' + (config.node_port || 3000) + '...');
+//   });
 // }
 // cluster.on('exit', function (worker, code, signal) {
-  // console.log('Worker %d died with code/signal %s. Restarting worker...', worker.process.pid, signal || code);
-  // cluster.fork();
+//   console.log('Worker %d died with code/signal %s. Restarting worker...', worker.process.pid, signal || code);
+//   cluster.fork();
 // });
 
 module.exports = app;
