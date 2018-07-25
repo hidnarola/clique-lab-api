@@ -1,8 +1,3 @@
-var config = require('../config');
-
-var fs = require("fs");
-var sharp = require('sharp');
-
 var user_helper = require('./../helpers/user_helper');
 var campaign_post_helper = require("./../helpers/campaign_post_helper");
 
@@ -13,7 +8,7 @@ cron.schedule('0 * * * *', async () => {
     if (users.status === 1) {
         users.users.forEach(async (user) => {
             let resp = await user_helper.update_social_connection(user._id);
-            console.log("Resp ==> ",resp);
+            // console.log("Resp ==> ",resp);
         });
     }
 });
