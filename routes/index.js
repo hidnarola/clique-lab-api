@@ -369,11 +369,10 @@ router.post('/resend_email', async (req, res) => {
             "confirm_url": config.website_url + "/email_confirm/" + promoter_resp.promoter._id
           });
 
-        console.log("mail resp = ", mail_resp);
         if (mail_resp.status === 0) {
           res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Error occured while sending confirmation email", "error": mail_resp.error });
         } else {
-          res.status(config.OK_STATUS).json({ "status": 1, "message": "Email has been verified" });
+          res.status(config.OK_STATUS).json({ "status": 1, "message": "Mail has been to your email address" });
         }
       } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details." });
