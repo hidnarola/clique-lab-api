@@ -2,17 +2,16 @@ var express = require('express');
 var router = express.Router();
 var config = require('../config');
 var jwt = require('jsonwebtoken');
-var moment = require('moment');
 var bcrypt = require('bcrypt');
 var fs = require("fs");
+
 const saltRounds = 10;
-var async = require("async");
+
 var promoter_helper = require('./../helpers/promoter_helper');
 var admin_helper = require('./../helpers/admin_helper');
 var mail_helper = require('./../helpers/mail_helper');
 var interest_helper = require("../helpers/interest_helper");
 var job_industry = require("../helpers/job_industry_helper");
-//var profile = require("../helpers/profile_helper");
 var music_taste = require("../helpers/music_taste_helper");
 var user_helper = require('./../helpers/user_helper');
 var country_helper = require("./../helpers/country_helper");
@@ -22,9 +21,109 @@ var logger = config.logger;
 var stripe = require("stripe")(config.STRIPE_SECRET_KEY);
 
 /* GET home page. */
-router.get('/', function (req, res, next) {
+router.get('/', function (req, res) {
   res.render('index', { title: 'Express' });
 });
+
+
+/**
+ * @api {post} /login Login
+ * @apiName  Login
+ * @apiGroup Root
+ * 
+ * @apiDescription Login request
+ * 
+ * @apiHeader {String}  Content-Type application/json
+ * 
+ * @apiParam {String} email Email
+ * @apiParam {String} social_id as Social identification
+ * @apiParam {String} social_type as Social media platform
+ * @apiParam {String} [device_token] Token of mobile device
+ * @apiParam {String} [device_platform] OS from which user logged-in. It can be android or ios
+ * 
+ * @apiSuccess (Success 200) {JSON} user  user object.
+ * @apiSuccess (Success 200) {String} token Unique token which needs to be passed in subsequent requests.
+ * @apiSuccess (Success 200) {String} refresh_token Unique token which needs to be passed to generate next access token.
+ * @apiError (Error 4xx) {String} message Validation or error message.
+ */
+router.post('/login', async (req, res) => {
+  logger.trace("API - User login called");
+  logger.debug("req.body = ", req.body);
+
+  var schema = {
+    'email': {
+      notEmpty: true,
+      errorMessage: "Email is required.",
+      isEmail: { errorMessage: "Please enter valid email address" }
+    },
+    'social_id': {
+      notEmpty: true,
+      errorMessage: "Social identification is required."
+    },
+    'social_type': {
+      notEmpty: true,
+      errorMessage: "Social Type is required."
+    }
+  };
+  req.checkBody(schema);
+  var errors = req.validationErrors();
+  if (!errors) {
+    logger.trace("Valid request of login");
+    logger.trace("Checking for user availability");
+
+    let login_resp = await user_helper.get_user_by_email(req.body.email);
+    logger.trace("Login checked resp = ", login_resp);
+    if (login_resp.status === 0) {
+      logger.trace("Login checked resp = ", login_resp);
+      logger.error("Error in finding by email in login API. Err = ", login_resp.err);
+
+      res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Something went wrong while finding promoter", "error": promoter_resp.error });
+    } else if (login_resp.status === 1) {
+
+      logger.trace("User found. Executing next instruction");
+      if (login_resp.user.status === false) {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been suspended" });
+      } else if (login_resp.user.removed === true) {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed" });
+      } else if (req.body.social_id == login_resp.user[req.body.social_type]['id']) {
+
+        logger.trace("valid token. Generating token");
+
+        var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
+        let update_resp = await user_helper.update_user_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
+        var LoginJson = { id: login_resp.user._id, email: login_resp.email, role: "user" };
+
+        var token = jwt.sign(LoginJson, config.ACCESS_TOKEN_SECRET_KEY, {
+          expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
+        });
+
+        delete login_resp.user.status;
+        delete login_resp.user.password;
+        delete login_resp.user.refresh_token;
+        delete login_resp.user.last_login_date;
+        delete login_resp.user.created_at;
+
+        // Add device token to DB
+        if (req.body.device_token && req.body.device_platform) {
+          await user_helper.add_device_token_for_user(login_resp.user._id, req.body.device_token, req.body.device_platform);
+        }
+
+        logger.info("Token generated");
+        res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "user": login_resp.user, "token": token, "refresh_token": refreshToken });
+      } else {
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or token" });
+      }
+    } else {
+      logger.info("Account doesn't exist.");
+      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or token" });
+    }
+  } else {
+    logger.error("Validation Error = ", errors);
+    res.status(config.BAD_REQUEST).json({ message: errors });
+  }
+});
+
+
 
 // Tested - OK
 /**
@@ -261,7 +360,7 @@ router.post('/resend_email', async (req, res) => {
       res.status(config.BAD_REQUEST).json({ "status": 0, "message": "No user available with given email" });
     } else {
 
-      if (promoter_resp.promoter.status && !promoter_resp.promoter.removed) {
+      if (!promoter_resp.promoter.removed) {
         let mail_resp = await mail_helper.send("email_confirmation", {
           "to": promoter_resp.promoter.email,
           "subject": "Clique Labs – Last step is to Confirm your Email."
@@ -277,14 +376,8 @@ router.post('/resend_email', async (req, res) => {
           res.status(config.OK_STATUS).json({ "status": 1, "message": "Email has been verified" });
         }
       } else {
-        if (promoter_resp.promoter.removed) {
-          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details." });
-        } else {
-          res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account is not approved or suspended by admin." });
-        }
+        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed by admin. Please contact to admin for more details." });
       }
-
-
     }
   } else {
     res.status(config.BAD_REQUEST).json({ message: errors });
@@ -616,9 +709,9 @@ router.post('/social_registration', async (req, res) => {
 
     let user_resp = await user_helper.get_user_by_email(req.body.email);
     if (user_resp.status === 1) {
-      if(user_resp.user.status === false){
+      if (user_resp.user.status === false) {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been suspended" });
-      } else if(user_resp.user.removed === true){
+      } else if (user_resp.user.removed === true) {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed" });
       } else {
         res.status(config.BAD_REQUEST).json({ "status": 0, "message": "This account is already exist" });
@@ -634,7 +727,7 @@ router.post('/social_registration', async (req, res) => {
         "linkedin": { "no_of_friends": 0 },
         "notification_settings": {}
       };
-  
+
       if (req.body.email) {
         reg_obj.email = req.body.email;
       }
@@ -680,23 +773,23 @@ router.post('/social_registration', async (req, res) => {
           reg_obj.linkedin['username'] = req.body.username;
         }
       }
-  
+
       // Check for referral
       if (req.body.referral_id) {
         reg_obj.referral_id = req.body.referral_id;
       }
-  
+
       let reg_data = await user_helper.insert_user(reg_obj);
       if (reg_data.status === 0) {
         res.status(config.BAD_REQUEST).json(reg_data);
       } else {
-  
+
         // Add device token to DB
         if (req.body.device_token && req.body.device_platform) {
           console.log("adding device token");
           await user_helper.add_device_token_for_user(reg_data.user._id, req.body.device_token, req.body.device_platform);
         }
-  
+
         if (req.body.referral_id) {
           // Find referral promoter
           // Check for referral
@@ -718,102 +811,6 @@ router.post('/social_registration', async (req, res) => {
           res.status(config.OK_STATUS).json(reg_data);
         }
       }
-    }
-  } else {
-    logger.error("Validation Error = ", errors);
-    res.status(config.BAD_REQUEST).json({ message: errors });
-  }
-});
-
-/**
- * @api {post} /login Login
- * @apiName  Login
- * @apiGroup Root
- * 
- * @apiDescription Login request
- * 
- * @apiHeader {String}  Content-Type application/json
- * 
- * @apiParam {String} email Email
- * @apiParam {String} social_id as Social identification
- * @apiParam {String} [device_token] Token of mobile device
- * @apiParam {String} [device_platform] OS from which user logged-in. It can be android or ios
- * 
- * @apiSuccess (Success 200) {JSON} user  user object.
- * @apiSuccess (Success 200) {String} token Unique token which needs to be passed in subsequent requests.
- * @apiSuccess (Success 200) {String} refresh_token Unique token which needs to be passed to generate next access token.
- * @apiError (Error 4xx) {String} message Validation or error message.
- */
-router.post('/login', async (req, res) => {
-  logger.trace("API - User login called");
-  logger.debug("req.body = ", req.body);
-
-  var schema = {
-    'email': {
-      notEmpty: true,
-      errorMessage: "Email is required.",
-      isEmail: { errorMessage: "Please enter valid email address" }
-    },
-    'social_id': {
-      notEmpty: true,
-      errorMessage: "Social identification is required."
-    },
-    'social_type': {
-      notEmpty: true,
-      errorMessage: "Social Type is required."
-    }
-  };
-  req.checkBody(schema);
-  var errors = req.validationErrors();
-  if (!errors) {
-    logger.trace("Valid request of login");
-    logger.trace("Checking for user availability");
-
-    let login_resp = await user_helper.get_user_by_email(req.body.email);
-    logger.trace("Login checked resp = ", login_resp);
-    if (login_resp.status === 0) {
-      logger.trace("Login checked resp = ", login_resp);
-      logger.error("Error in finding by email in login API. Err = ", login_resp.err);
-
-      res.status(config.INTERNAL_SERVER_ERROR).json({ "status": 0, "message": "Something went wrong while finding promoter", "error": promoter_resp.error });
-    } else if (login_resp.status === 1) {
-      
-      logger.trace("User found. Executing next instruction");
-      if(login_resp.user.status === false){
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been suspended" });
-      } else if(login_resp.user.removed === true){
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Account has been removed" });
-      } else if (req.body.social_id == login_resp.user[req.body.social_type]['id']) {
-
-        logger.trace("valid token. Generating token");
-
-        var refreshToken = jwt.sign({ id: login_resp.user._id }, config.REFRESH_TOKEN_SECRET_KEY, {});
-        let update_resp = await user_helper.update_user_by_id(login_resp.user._id, { "refresh_token": refreshToken, "last_login_date": Date.now() });
-        var LoginJson = { id: login_resp.user._id, email: login_resp.email, role: "user" };
-
-        var token = jwt.sign(LoginJson, config.ACCESS_TOKEN_SECRET_KEY, {
-          expiresIn: config.ACCESS_TOKEN_EXPIRE_TIME
-        });
-
-        delete login_resp.user.status;
-        delete login_resp.user.password;
-        delete login_resp.user.refresh_token;
-        delete login_resp.user.last_login_date;
-        delete login_resp.user.created_at;
-
-        // Add device token to DB
-        if (req.body.device_token && req.body.device_platform) {
-          await user_helper.add_device_token_for_user(login_resp.user._id, req.body.device_token, req.body.device_platform);
-        }
-
-        logger.info("Token generated");
-        res.status(config.OK_STATUS).json({ "status": 1, "message": "Logged in successful", "user": login_resp.user, "token": token, "refresh_token": refreshToken });
-      } else {
-        res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or token" });
-      }
-    } else {
-      logger.info("Account doesn't exist.");
-      res.status(config.BAD_REQUEST).json({ "status": 0, "message": "Invalid email address or token" });
     }
   } else {
     logger.error("Validation Error = ", errors);
