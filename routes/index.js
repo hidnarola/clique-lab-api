@@ -25,7 +25,6 @@ router.get('/', function (req, res) {
   res.render('index', { title: 'Express' });
 });
 
-
 /**
  * @api {post} /login Login
  * @apiName  Login
@@ -667,7 +666,7 @@ router.get("/music_taste", async (req, res) => {
  * @apiParam {String} [referral_id] Referral id of invited promoter
  * @apiParam {String} [username] Username of social platform
  * @apiParam {String} access_token Access token of social platform
- * @apiParam {String} access_token_secret Access token secret of social platform (Twitter)
+ * @apiParam {String} [access_token_secret] Access token secret of social platform (Twitter)
  * @apiParam {String} [device_token] Token of mobile device
  * @apiParam {String} [device_platform] OS from which user logged-in. It can be android or ios
  * 
@@ -782,7 +781,6 @@ router.post('/social_registration', async (req, res) => {
       if (reg_data.status === 0) {
         res.status(config.BAD_REQUEST).json(reg_data);
       } else {
-
         // Add device token to DB
         if (req.body.device_token && req.body.device_platform) {
           console.log("adding device token");

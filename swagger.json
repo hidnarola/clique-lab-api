@@ -2,11 +2,11 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "Clique Lab API",
-    "description": "Clique Lab API - API for fronetend client and mobile app"
+    "title": "Clique Labs - API",
+    "description": "Clique Lab API - API for fronetend web app and mobile app"
   },
-  "host": "192.168.1.186:3200",
-  "basePath": "/",
+  "host": "localhost:3200",
+  "basePath": "/api/",
   "securityDefinitions": {
     "jwt": {
       "type": "apiKey",
@@ -31,6 +31,10 @@
     {
       "name": "User",
       "description": "API for User role (Mobile app)"
+    },
+    {
+      "name": "Admin",
+      "description": "API for Admin role (Admin panel)"
     }
   ],
   "schemes": [
@@ -44,6 +48,285 @@
     "application/json"
   ],
   "paths": {
+    "/login": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/login"
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "User login (Mobile app user)",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and user object"
+          }
+        }
+      }
+    },
+    "/social_registration": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/registration"
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "User Signup (Mobile app user) ",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and user object"
+          }
+        }
+      }
+    },
+    "/job_industry": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Get all job industry",
+        "responses": {
+          "200": {
+            "description": "Job industry found"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get User's details",
+        "responses": {
+          "200": {
+            "description": "Return user object with appropriate message and status"
+          }
+        }
+      }
+    },
+    "/user": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "name",
+              "user_interest",
+              "job_industry",
+              "music_taste",
+              "avatar"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "Sachin Tendulkar"
+              },
+              "job_industry": {
+                "type": "string",
+                "example": "id of selected job industry"
+              },
+              "job_title": {
+                "type": "string",
+                "example": "id of selected job title"
+              },
+              "music_taste": {
+                "type": "string",
+                "example": "id of selected music taste"
+              },
+              "user_interest": {
+                "type": "string",
+                "example": ["id of selected user interests","123456","789"]
+              },
+              "username": {
+                "type": "string",
+                "example": "Username"
+              },
+              "email": {
+                "type": "string",
+                "example": "Valid email of user"
+              },
+              "short_bio": {
+                "type": "string",
+                "example": "Short bio of user"
+              },
+              "education": {
+                "type": "string",
+                "example": "id of selected eductation"
+              },
+              "language": {
+                "type": "string",
+                "example": "id of selected language"
+              },
+              "ethnicity": {
+                "type": "string",
+                "example": "id of selected ethnicity"
+              },
+              "relationship_status": {
+                "type": "string",
+                "example": "Single/Married"
+              },
+              "state":{
+                "type":"string",
+                "example":"Maharastra"
+              },
+              "suburb": {
+                "type": "string",
+                "example": "suburb selected from google location"
+              },
+              "gender": {
+                "type": "string",
+                "example": "male/female"
+              },
+              "date_of_birth":{
+                "type": "string",
+                "example": "date of birth"
+              },
+              "sexual_orientation": {
+                "type": "string",
+                "example": "sexual orientation"
+              },
+              "country": {
+                "type": "string",
+                "example": "id of selected country"
+              }
+            }
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update user profile",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and updated user object"
+          }
+        }
+      }
+    },
+    "/user/interest_details": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get all Interest/ Music taste/ Job industry/ Country/ Languages/ Job title/ Education and Ethnicity",
+        "responses": {
+          "200": {
+            "description": "Interest/ Music taste/ Job industry/ Country/ Languages/ Job title/ Education and Ethnicity objects"
+          }
+        }
+      }
+    },
+    "/user/social_media": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "social_media_platform"
+            ],
+            "properties": {
+              "social_media_platform": {
+                "type": "string",
+                "example": "twitter"
+              },
+              "id": {
+                "type": "string",
+                "example": "1234567890"
+              },
+              "username": {
+                "type": "string",
+                "example": "srt"
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of given social media"
+              },
+              "access_token_secret": {
+                "type": "string",
+                "example": "access token secret in case of twitter only"
+              },
+              "refresh_token": {
+                "type": "string",
+                "example": "refersh token of given social media"
+              },
+              "profile_url": {
+                "type": "string",
+                "example": "profile link of given social media"
+              },
+              "no_of_friends": {
+                "type": "string",
+                "example": "Number of connection for given social media"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Add/edit social media account of particular user",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/logout": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/logout"
+          },
+          "description": "Required details for logout"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "User logout",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status"
+          }
+        }
+      }
+    },
     "/promoter/setting/{key}": {
       "parameters": [
         {
@@ -61,20 +344,7 @@
         "summary": "Get settings value by key",
         "responses": {
           "200": {
-            "description": "Key is found"
-          }
-        }
-      }
-    },
-    "/job_industry":{
-      "get": {
-        "tags": [
-          "Root"
-        ],
-        "summary": "Get all job industry",
-        "responses": {
-          "200": {
-            "description": "Job industry found"
+            "description": "Return appropriate settings value"
           }
         }
       }
@@ -91,6 +361,94 @@
         },
         "value": {
           "type": "string"
+        }
+      }
+    },
+    "login": {
+      "required": [
+        "email",
+        "social_type"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "example": "abc@gmail.com"
+        },
+        "social_type": {
+          "type": "string",
+          "example": "facebook"
+        },
+        "social_id": {
+          "type": "string",
+          "example": "123456789"
+        }
+      }
+    },
+    "logout": {
+      "properties": {
+        "device_token": {
+          "type": "string",
+          "example": "9876543210123456"
+        },
+        "device_platform": {
+          "type": "string",
+          "example": "ios"
+        }
+      }
+    },
+    "registration": {
+      "required": [
+        "name",
+        "email",
+        "gender",
+        "social_type",
+        "social_id",
+        "access_token"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Sachin Tendulkar"
+        },
+        "email": {
+          "type": "string",
+          "example": "sachin@gmail.com"
+        },
+        "gender": {
+          "type": "string",
+          "example": "male"
+        },
+        "social_type": {
+          "type": "string",
+          "example": "facebook"
+        },
+        "social_id": {
+          "type": "string",
+          "example": "123456789"
+        },
+        "referral_id": {
+          "type": "string",
+          "example": "5b52c1ad3bb66354b635df29"
+        },
+        "username": {
+          "type": "string",
+          "example": "Master-blaster-srt"
+        },
+        "access_token": {
+          "type": "string",
+          "example": "Access token of social platform"
+        },
+        "access_token_secret": {
+          "type": "string",
+          "example": "Access token secret, if social platform is Twitter"
+        },
+        "device_token": {
+          "type": "string",
+          "example": "Token of mobile device"
+        },
+        "device_platform": {
+          "type": "string",
+          "example": "ios"
         }
       }
     }
