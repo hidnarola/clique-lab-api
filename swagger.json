@@ -5,8 +5,8 @@
     "title": "Clique Labs - API",
     "description": "Clique Lab API - API for fronetend web app and mobile app"
   },
-  "host": "localhost:3200",
-  "basePath": "/api/",
+  "host": "dev-api.cliquelabs.com",
+  "basePath": "/",
   "securityDefinitions": {
     "jwt": {
       "type": "apiKey",
@@ -38,7 +38,7 @@
     }
   ],
   "schemes": [
-    "http"
+    "https"
   ],
   "consumes": [
     "application/json",
@@ -109,6 +109,32 @@
         }
       }
     },
+    "/music_taste": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Get all music taste",
+        "responses": {
+          "200": {
+            "description": "Job music taste found"
+          }
+        }
+      }
+    },
+    "/interest": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Get all interest",
+        "responses": {
+          "200": {
+            "description": "interest found"
+          }
+        }
+      }
+    },
     "/user": {
       "get": {
         "tags": [
@@ -120,108 +146,141 @@
             "description": "Return user object with appropriate message and status"
           }
         }
-      }
-    },
-    "/user": {
-      "parameters": [
-        {
-          "name": "body",
-          "in": "body",
-          "required": true,
-          "schema": {
-            "required": [
-              "name",
-              "user_interest",
-              "job_industry",
-              "music_taste",
-              "avatar"
-            ],
-            "properties": {
-              "name": {
-                "type": "string",
-                "example": "Sachin Tendulkar"
-              },
-              "job_industry": {
-                "type": "string",
-                "example": "id of selected job industry"
-              },
-              "job_title": {
-                "type": "string",
-                "example": "id of selected job title"
-              },
-              "music_taste": {
-                "type": "string",
-                "example": "id of selected music taste"
-              },
-              "user_interest": {
-                "type": "string",
-                "example": ["id of selected user interests","123456","789"]
-              },
-              "username": {
-                "type": "string",
-                "example": "Username"
-              },
-              "email": {
-                "type": "string",
-                "example": "Valid email of user"
-              },
-              "short_bio": {
-                "type": "string",
-                "example": "Short bio of user"
-              },
-              "education": {
-                "type": "string",
-                "example": "id of selected eductation"
-              },
-              "language": {
-                "type": "string",
-                "example": "id of selected language"
-              },
-              "ethnicity": {
-                "type": "string",
-                "example": "id of selected ethnicity"
-              },
-              "relationship_status": {
-                "type": "string",
-                "example": "Single/Married"
-              },
-              "state":{
-                "type":"string",
-                "example":"Maharastra"
-              },
-              "suburb": {
-                "type": "string",
-                "example": "suburb selected from google location"
-              },
-              "gender": {
-                "type": "string",
-                "example": "male/female"
-              },
-              "date_of_birth":{
-                "type": "string",
-                "example": "date of birth"
-              },
-              "sexual_orientation": {
-                "type": "string",
-                "example": "sexual orientation"
-              },
-              "country": {
-                "type": "string",
-                "example": "id of selected country"
-              }
-            }
-          },
-          "description": "Required details for login"
-        }
-      ],
+      },
       "put": {
         "tags": [
           "User"
         ],
-        "summary": "Update user profile",
+        "summary": "Update User Profile",
+        "operationId": "uploadFile",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "job_industry",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "job_title",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "music_taste",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "user_interest",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "username",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "short_bio",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "education",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "language",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ethnicity",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "relationship_status",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "suburb",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "gender",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "country",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sexual_orientation",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_of_birth",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "avatar",
+            "in": "formData",
+            "required": false,
+            "type": "file"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Return success message with appropriate status and updated user object"
+            "description": "Import successful"
+          },
+          "500": {
+            "description": "Error importing file"
           }
         }
       }
@@ -235,6 +294,270 @@
         "responses": {
           "200": {
             "description": "Interest/ Music taste/ Job industry/ Country/ Languages/ Job title/ Education and Ethnicity objects"
+          }
+        }
+      }
+    },
+    "/country": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Get all country",
+        "responses": {
+          "200": {
+            "description": "Get all country"
+          }
+        }
+      }
+    },
+    "/promoter_forgot_password": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "email"
+            ],
+            "properties": {
+              "email": {
+                "type": "string",
+                "example": "ar@narola.email"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Add/edit social media account of particular user",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status"
+          }
+        }
+      }
+    },
+    "/resend_email": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "email"
+            ],
+            "properties": {
+              "email": {
+                "type": "string",
+                "example": "ar@narola.email"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Add/edit social media account of particular user",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status"
+          }
+        }
+      }
+    },
+    "/admin_forgot_password": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "email"
+            ],
+            "properties": {
+              "email": {
+                "type": "string",
+                "example": "ar@narola.email"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Add/edit social media account of particular user",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status"
+          }
+        }
+      }
+    },
+    "/promoter_signup ": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "name",
+              "email",
+              "username",
+              "company",
+              "password",
+              "country"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "mansi"
+              },
+              "email": {
+                "type": "string",
+                "example": "mm@narola.email"
+              },
+              "password": {
+                "type": "string",
+                "example": "123456"
+              },
+              "username": {
+                "type": "string",
+                "example": "modimansi4"
+              },
+              "company": {
+                "type": "string",
+                "example": "narola"
+              },
+              "country": {
+                "type": "string",
+                "example": "5ae15f8c6c8e736d77dd553d"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Add/edit social media account of particular user",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status"
+          }
+        }
+      }
+    },
+    "/promoter_reset_password": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "token",
+              "password"
+            ],
+            "properties": {
+              "token": {
+                "type": "string",
+                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9tb3Rlcl9pZCI6IjVhYmRlNmY1NTExNGE0MmFhNDQ5M2Y3OCIsImlhdCI6MTUyMjY0OTU3NCwiZXhwIjoxNTIyNjU2Nzc0fQ.dh6WKpLnoP42d5XXZFKncZ_y9mCTZ1RqgVcFZ4rlAgs"
+              },
+              "password": {
+                "type": "string",
+                "example": "1234567890"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Add/edit social media account of particular user",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status"
+          }
+        }
+      }
+    },
+    "/admin_reset_password": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "token",
+              "password"
+            ],
+            "properties": {
+              "token": {
+                "type": "string",
+                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9tb3Rlcl9pZCI6IjVhYmRlNmY1NTExNGE0MmFhNDQ5M2Y3OCIsImlhdCI6MTUyMjY0OTU3NCwiZXhwIjoxNTIyNjU2Nzc0fQ.dh6WKpLnoP42d5XXZFKncZ_y9mCTZ1RqgVcFZ4rlAgs"
+              },
+              "password": {
+                "type": "string",
+                "example": "1234567890"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Add/edit social media account of particular user",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status"
           }
         }
       }
@@ -327,6 +650,1051 @@
         }
       }
     },
+    "/user/deactivate": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update Social connection",
+        "responses": {
+          "200": {
+            "description": "Update Social connection"
+          }
+        }
+      }
+    },
+    "/user/leaderboard/all": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size",
+              "access_token"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for user's leaderboard"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get all user's leaderboard details",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/notification/settings": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get User's notification settings",
+        "responses": {
+          "200": {
+            "description": "Return user notification settings object with appropriate message and status"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "access_token"
+              ],
+              "properties": {
+                "got_approved": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "got_paid": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "friend_just_got_paid": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "got_new_offer": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "push_got_approved": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "push_got_paid": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "push_friend_just_got_paid": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "push_got_new_offer": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "access_token": {
+                  "type": "string",
+                  "example": "access token of user"
+                },
+                "enable": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            },
+            "description": "Required details for login"
+          }
+        ],
+        "summary": "Update user notification settings",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status"
+          }
+        }
+      }
+    },
+    "/promoter_email_verify/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "promter key",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Verify promoter by key",
+        "responses": {
+          "200": {
+            "description": "Return appropriate  message"
+          }
+        }
+      }
+    },
+    "/user/transaction": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size",
+              "access_token"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for user transaction"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get User Transactions details",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/campaign/social_post_new": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "post_id",
+              "post_type",
+              "social_post_id",
+              "social_media_platform",
+              "campaign_id",
+              "access_token"
+            ],
+            "properties": {
+              "campaign_id": {
+                "type": "string",
+                "example": "5b46f7598c99054f3830190b"
+              },
+              "post_id": {
+                "type": "string",
+                "example": "5b4450de88aa2426c5165bb4"
+              },
+              "post_type": {
+                "type": "string",
+                "example": "applied_post"
+              },
+              "social_post_id": {
+                "type": "string",
+                "example": "599198767099653_633042543715275"
+              },
+              "social_media_platform": {
+                "type": "string",
+                "example": "facebook"
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for post applied campaign"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get details for post applied campaign",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/campaign/approved_post": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size",
+              "access_token"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for approved new campaign"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get approved new campaign",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/wallet/balance": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get User's wallet balance details",
+        "responses": {
+          "200": {
+            "description": "Return user object with appropriate message and status"
+          }
+        }
+      }
+    },
+    "/user/wallet/withdraw": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "bank_account",
+              "amount",
+              "access_token"
+            ],
+            "properties": {
+              "bank_account": {
+                "type": "string",
+                "example": "ba_1CpBKjE5eeG2bjGXMHj1ut5A"
+              },
+              "amount": {
+                "type": "number",
+                "example": 5
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for post applied campaign"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get details for post applied campaign",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/wallet/add_bank_account": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "bank_name",
+              "bsb",
+              "account_number",
+              "account_name",
+              "access_token"
+            ],
+            "properties": {
+              "bank_name": {
+                "type": "string",
+                "example": "ICICI"
+              },
+              "bsb": {
+                "type": "number",
+                "example": "110000"
+              },
+              "account_number": {
+                "type": "number",
+                "example": "000123456"
+              },
+              "account_name": {
+                "type": "string",
+                "example": "mansi"
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for add bank account"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get details for add bank account",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/wallet/bank_account": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get all bank account",
+        "responses": {
+          "200": {
+            "description": "Bank account found"
+          }
+        }
+      }
+    },
+    "/user/campaign/myoffer": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "social_media_platform": {
+                "type": "string",
+                "example": [
+                  "facebook"
+                ]
+              },
+              "price": {
+                "type": "number",
+                "example": 10
+              },
+              "search": {
+                "type": "string",
+                "example": "@demo"
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for myoffer"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get my offer details",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/campaign/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "Campaign key",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get campaign value by key",
+        "responses": {
+          "200": {
+            "description": "Return appropriate campaign value"
+          }
+        }
+      }
+    },
+    "/user/campaign/public_campaign": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "price": {
+                "type": "number",
+                "example": 10
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for public campaign"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get ublic campaign details",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/admin_login": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "login_id",
+              "password"
+            ],
+            "properties": {
+              "login_id": {
+                "type": "string",
+                "example": "ar@narola.email"
+              },
+              "password": {
+                "type": "string",
+                "example": "123456"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for admin login"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Get admin login details",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/wallet/bank_account/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "bank key",
+          "type": "string"
+        }
+      ],
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get campaign value by key",
+        "responses": {
+          "200": {
+            "description": "Return appropriate campaign value"
+          }
+        }
+      }
+    },
+    "/user/notification": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size",
+              "access_token"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for user notification"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get User Notification details",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/notification/read/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "notification key",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get notification value by key",
+        "responses": {
+          "200": {
+            "description": "Return appropriate message"
+          }
+        }
+      }
+    },
+    "/admin/promoter/suspend/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "promoter key",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Suspend promoter  by key",
+        "responses": {
+          "200": {
+            "description": "Return appropriate message"
+          }
+        }
+      }
+    },
+    "/admin/promoter/remove/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "promoter key",
+          "type": "string"
+        }
+      ],
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Delete promoter  by key",
+        "responses": {
+          "200": {
+            "description": "Return appropriate message"
+          }
+        }
+      }
+    },
+    "/user/notification/unread_count": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get total unread notification",
+        "responses": {
+          "200": {
+            "description": "Total unread notification details"
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size",
+              "access_token"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for inspired brand"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Get all users ",
+        "responses": {
+          "200": {
+            "description": "Get all users with appropriate message"
+          }
+        }
+      }
+    },
+    "/admin/transactions": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size",
+              "access_token"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "search": {
+                "type": "string",
+                "example": "cool"
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for inspired brand"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Get all users ",
+        "responses": {
+          "200": {
+            "description": "Get all users with appropriate message"
+          }
+        }
+      }
+    },
+    "/user/promoter": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size",
+              "access_token"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for inspired brand"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get inspired brand details",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/leaderboard/friends": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "required": [
+              "page_no",
+              "page_size",
+              "access_token"
+            ],
+            "properties": {
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "page_size": {
+                "type": "number",
+                "example": 2
+              },
+              "access_token": {
+                "type": "string",
+                "example": "access token of user"
+              },
+              "enable": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "description": "Required details for user's friend leaderboard"
+        }
+      ],
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get all friends for leaderboard details",
+        "responses": {
+          "200": {
+            "description": "Return success with appropriate status"
+          }
+        }
+      }
+    },
+    "/user/campaign/campaign_applied": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Campaign Apply",
+        "operationId": "uploadFiles",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "desription",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "required": false,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Import successful"
+          },
+          "500": {
+            "description": "Error importing file"
+          }
+        }
+      }
+    },
+    "/user/promoter/inspired_submission": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Inspired Submission",
+        "operationId": "uploadFil",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "social_media_platform",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "price",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "text",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "company",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "required": false,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Import successful"
+          },
+          "500": {
+            "description": "Error importing file"
+          }
+        }
+      }
+    },
     "/promoter/setting/{key}": {
       "parameters": [
         {
@@ -345,6 +1713,1349 @@
         "responses": {
           "200": {
             "description": "Return appropriate settings value"
+          }
+        }
+      }
+    },
+    "/promoter/filter_preference": {
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get preference value ",
+        "responses": {
+          "200": {
+            "description": "Return appropriate preference value"
+          }
+        }
+      }
+    },
+    "/promoter/post": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/analytics"
+          },
+          "description": "Required details to get analytics"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get analytics data or dashboard post listing",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and analytic object"
+          }
+        }
+      }
+    },
+    "/promoter/get_social_analytics": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/social_analytics"
+          },
+          "description": "Required details to get social analytics"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get social analytics data",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and social analytic object"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/applied/{id}/download": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Campaign Id",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Download images of given campaign id for promoter",
+        "responses": {
+          "200": {
+            "description": "Download images"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/purchased": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/purchasedpost_list"
+          },
+          "description": "Required details to get purchased post"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get all purchased post",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and purchased post object"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/active": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/active_past_future_list"
+          },
+          "description": "Required details to get active campaign"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get all active campaign",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and active campaign object"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/past": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/active_past_future_list"
+          },
+          "description": "Required details to get past campaign"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get all past campaign",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and past campaign object"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/future": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/active_past_future_list"
+          },
+          "description": "Required details to get future campaign"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get all future campaign",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and future campaign object"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/stop/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Campaign Id",
+          "type": "string"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Stop campaign",
+        "responses": {
+          "200": {
+            "description": "Stop campaign"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Campaign Id",
+          "type": "string"
+        }
+      ],
+      "delete": {
+        "tags": [
+            "Promoter"
+        ],
+        "summary": "Delete campaign",
+        "responses": {
+          "200": {
+            "description": "Delete campaign"
+          }
+        }
+      },
+      "post": {
+        "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "description": "Campaign Id",
+          "schema": {
+              "properties": {
+                "page_size": {
+                  "type": "number",
+                  "example": 10
+                },
+                "page_no": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+          }
+        }
+        ],
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get campaigns applied post",
+        "responses": {
+          "200": {
+            "description": "Return status with appropriate message and applied post list"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/{id}/add_filtered_applied_post_to_cart": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Campaign Id",
+          "type": "string"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add filter post to cart",
+        "responses": {
+          "200": {
+            "description": "Add filter post to cart"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/calendar": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "properties": {
+                "start_date": {
+                 "type": "string",
+                 "example": "2017-03-10"
+                },
+                "end_date": {
+                  "type": "string",
+                  "example": "2018-10-09"
+                },
+                "social_media_platform":{
+                  "type": "string",
+                  "example": "facebook"
+                }
+            }
+          },
+          "description": "Required details to get campaign details from calender"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get campaign details from calender",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and campaign object"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/{id}/campaign_users": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Campaign Id",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+              "properties": {
+                "page_size": {
+                  "type": "number",
+                  "example": 10
+                },
+                "page_no": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+          }
+        }
+        ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get users of campaign",
+        "responses": {
+          "200": {
+            "description": "return status and message with Users of specified campaign"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/{campaign_id}/add_user/{user_id}": {
+      "parameters": [
+        {
+          "name": "campaign_id",
+          "in": "path",
+          "required": true,
+          "description": "Campaign Id",
+          "type": "string"
+        },
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "User Id",
+          "type": "string"
+        }
+        ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add user into campaign",
+        "responses": {
+          "200": {
+            "description": "Add user into campaign"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/add_to_cart/{campaign_id}/{user_id}": {
+      "parameters": [
+        {
+          "name": "campaign_id",
+          "in": "path",
+          "required": true,
+          "description": "Campaign Id",
+          "type": "string"
+        },
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "User Id",
+          "type": "string"
+        }
+        ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add campaign user into cart",
+        "responses": {
+          "200": {
+            "description": "Add campaign user into cart"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/{campaign_id}/{group_id}/add_filter_result_to_campaign": {
+      "parameters": [
+        {
+          "name": "campaign_id",
+          "in": "path",
+          "required": true,
+          "description": "Campaign Id",
+          "type": "string"
+        },
+        {
+          "name": "group_id",
+          "in": "path",
+          "required": true,
+          "description": "User Id",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "in": "body",
+          "description": "Required details to add filter group member to campaign",
+          "schema":{
+            "properties": {
+              "filter":{
+                "type": "array",
+                "example": [{"field": "age", "type": "between", "min_value": 15, "max_value": 21},{"field": "gender", "type": "exact", "value": "male"}]
+              }
+            } 
+          }
+        }
+        ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add filter group member to campaign",
+        "responses": {
+          "200": {
+            "description": "Add filter group member to campaign"
+          }
+        }
+      }
+    },
+    "/promoter/user": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/active_past_future_list"
+          },
+          "description": "Required details to user"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get users by filter",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and filter users"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/list_for_user/{user_id}": {
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "User Id",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+            "Promoter"
+        ],
+        "summary": "List of not assigned campaign for user",
+        "responses": {
+          "200": {
+            "description": "Return status with appropriate message and list of not assigned campaign for user"
+          }
+        }
+      }
+    },
+    "/promoter/group/list_for_user/{user_id}": {
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "User Id",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+            "Promoter"
+        ],
+        "summary": "List of not assigned group for user",
+        "responses": {
+          "200": {
+            "description": "Return status with appropriate message and list of not assigned group for user"
+          }
+        }
+      }
+    },
+    "/promoter/group/filter": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "properties": {
+              "page_size": {
+               "type": "number",
+               "example": 10
+              },
+              "page_no": {
+                "type": "number",
+                "example": 1
+              },
+              "sort":{
+                "type": "array",
+                "example": [{"field":"created_at","value":1},{"field":"social_power","value":-1}]
+              }
+            }      
+          },
+          "description": "Required details to get group by filter"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get groups by applying filter",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and group object"
+          }
+        }
+      }
+    },
+    "/promoter/group/{group_id}/add_user/{user_id}": {
+      "parameters": [
+        {
+          "name": "group_id",
+          "in": "path",
+          "required": true,
+          "description": "Group Id",
+          "type": "string"
+        },
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "User Id",
+          "type": "string"
+        }
+        ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add user into group",
+        "responses": {
+          "200": {
+            "description": "Add user into group"
+          }
+        }
+      }
+    },
+    "/promoter/group/{group_id}/add_filter_result_to_group": {
+      "parameters": [
+        {
+          "name": "group_id",
+          "in": "path",
+          "required": true,
+          "description": "Group Id",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "in": "body",
+          "description": "Required details to add filter data",
+          "schema":{
+            "properties": {
+              "filter":{
+                "type": "array",
+                "example": [{"field": "age", "type": "between", "min_value": 15, "max_value": 21},{"field": "gender", "type": "exact", "value": "male"}]
+              }
+            } 
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add filter user to group",
+        "responses": {
+          "200": {
+            "description": "Add filter user to group"
+          }
+        }
+      }
+    },
+    "/promoter/campaign/{campaign_id}/add_filter_result_to_campaign": {
+      "parameters": [
+        {
+          "name": "campaign_id",
+          "in": "path",
+          "required": true,
+          "description": "Campaign Id",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "in": "body",
+          "description": "Required details to add filter data",
+          "schema":{
+            "properties": {
+              "filter":{
+                "type": "array",
+                "example": [{"field": "age", "type": "between", "min_value": 15, "max_value": 21},{"field": "gender", "type": "exact", "value": "male"}]
+              }
+            } 
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add filter user to campaign",
+        "responses": {
+          "200": {
+            "description": "Add filter user to campaign"
+          }
+        }
+      }
+    },
+    "/promoter/group/{group_id}/members": {
+      "parameters": [
+        {
+          "name": "group_id",
+          "in": "path",
+          "required": true,
+          "description": "Group Id",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema":{
+            "properties": {
+              "page_size": {
+                "type": "number",
+                "example": 10
+              },
+              "page_no": {
+                "type": "number",
+                "example": 1
+              }
+            }
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get members of specific group",
+        "responses": {
+          "200": {
+            "description": "Return status with appropriate message and members of specific group"
+          }
+        }
+      }
+    },
+    "/promoter/inspired_submission": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/inspired_submission"
+          },
+          "description": "Required details to get inspire submission"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get inspired submission",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and inspired submission data"
+          }
+        }
+      }
+    },
+    "/promoter/inspired_submission/add_to_cart/{inspire_id}": {
+      "parameters": [
+        {
+          "name": "inspire_id",
+          "in": "path",
+          "required": true,
+          "description": "Inspire Post Id",
+          "type": "string"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add inspire submission post into cart",
+        "responses": {
+          "200": {
+            "description": "Return status with appropriate message"
+          }
+        }
+      }
+    },
+    "/promoter/cart": {
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get cart items",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and cart items"
+          }
+        }
+      }
+    },
+    "/promoter/cart/count": {
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Count cart items",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and total items in carts"
+          }
+        }
+      }
+    },
+    "/promoter/cart/purchase": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/chekout"
+          },
+          "description": "Required details for checkout process"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Checkout and purchase",
+        "responses": {
+          "200": {
+            "description": "Return appropriate status and message"
+          }
+        }
+      }
+    },
+    "/promoter/cart/{item_id}": {
+      "parameters": [
+        {
+          "name": "item_id",
+          "in": "path",
+          "required": true,
+          "description": "Cart Item Id",
+          "type": "string"
+        }
+      ],
+      "delete": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Delete items from cart",
+        "responses": {
+          "200": {
+            "description": "Return status with appropriate message"
+          }
+        }
+      }
+    },
+    "/promoter/wallet/cards": {
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get cards of pramoter",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status and available cards"
+          }
+        }
+      }
+    },
+    "/promoter/wallet/bank_account": {
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get bank accounts of pramoter",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status and available bank account"
+          }
+        }
+      }
+    },
+    "/promoter/wallet/balance": {
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get wallet balance of pramoter",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status and available balance"
+          }
+        }
+      }
+    },
+    "/promoter/wallet/withdraw": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "properties": {
+              "amount": {
+                "type": "number",
+                "example": 1
+              },
+              "bank_account": {
+                "type": "string",
+                "example": "ba_1Cx7ukAmCk9fwrOljCrbMMFX"
+              }
+            }
+          },
+          "description": "Required details to get inspire submission"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get inspired submission",
+        "responses": {
+          "200": {
+            "description": "Return success message with appropriate status and inspired submission data"
+          }
+        }
+      }
+    },
+    "/promoter/wallet/add_bank_account": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/add_bank_account"
+          },
+          "description": "Required details to add new bank account"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add new bank account",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status"
+          }
+        }
+      }
+    },
+    "/promoter/wallet/bank_account/{bank_Ac_id}": {
+      "parameters": [
+        {
+          "name": "bank_Ac_id",
+          "in": "path",
+          "required": true,
+          "description": "Bank Account No",
+          "type": "string"
+        }
+      ],
+      "delete": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Delete bank account",
+        "responses": {
+          "200": {
+            "description": "Return status with appropriate message"
+          }
+        }
+      }
+    },
+    "/promoter/wallet/credit_card": {
+      "post": {
+        "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/add_credit_card"
+          },
+          "description": "Required details to add credit card"
+        }
+        ],
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Add new credit card",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status"
+          }
+        }
+      },
+      "put": {
+        "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/edit_credit_card"
+          },
+          "description": "Required details to update credit card"
+        }
+        ],
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "update credit card detail",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status"
+          }
+        }
+      }
+    },
+    "/promoter/wallet/credit_card/{card_id}": {
+      "parameters": [
+        {
+          "name": "card_id",
+          "in": "path",
+          "required": true,
+          "description": "Card Id",
+          "type": "string"
+        }
+      ],
+      "delete": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Delete credit card",
+        "responses": {
+          "200": {
+            "description": "Return status with appropriate message"
+          }
+        }
+      }
+    },
+    "/promoter/change_password": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+              "properties": {
+                "old_password": {
+                 "type": "string",
+                 "example": "123456"
+                },
+                "new_password": {
+                  "type": "string",
+                  "example": "password"
+                }
+              }
+          },
+          "description": "Required details to change password"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Change Password",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status"
+          }
+        }
+      }
+    },
+    "/promoter/transaction": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/active_past_future_list"
+          },
+          "description": "Required details transection history"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get transection history",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status and transection history"
+          }
+        }
+      }
+    },
+    "/promoter/referral/referral_view": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+              "properties": {
+                "start_date": {
+                 "type": "string",
+                 "example": "2017-03-10"
+                },
+                "end_date": {
+                  "type": "string",
+                  "example": "2018-10-09"
+                }
+              }
+          },
+          "description": "Required details to get join referral"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get join referral",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status and referral data"
+          }
+        }
+      }
+    },
+    "/promoter/referral/referral_revenue": {
+      "parameters": [
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+              "properties": {
+                "start_date": {
+                 "type": "string",
+                 "example": "2017-03-10"
+                },
+                "end_date": {
+                  "type": "string",
+                  "example": "2018-10-09"
+                }
+              }
+          },
+          "description": "Required details to get referral revenue"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get referral revenue",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status and referral revenue"
+          }
+        }
+      }
+    },
+    "/promoter/faq": {
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get F.A.Q",
+        "responses": {
+          "200": {
+            "description": "Return message with appropriate status and available faq"
+          }
+        }
+      }
+    },
+    "/promoter/group": {  
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get all groups of promoter",
+        "responses": {
+          "200": {
+            "description": "Return group object with appropriate message and status"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Promoter" ],
+        "summary" : "Create new group",
+        "operationId" : "uploadFil0",
+        "consumes" : [ "multipart/form-data" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [
+        {
+          "name" : "name",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "image",
+          "in" : "formData",
+          "required" : true,
+          "type" : "file"
+        } 
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "Return status with appropriate message"
+          }
+        }
+      }
+    },
+    "/promoter/update_profile": {  
+      "post" : {
+        "tags" : [ "Promoter" ],
+        "summary" : "Update promoter profile",
+        "operationId" : "uploadFil11",
+        "consumes" : [ "multipart/form-data" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [
+        {
+          "name" : "name",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "company",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "industry_category",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "industry_description",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "avatar",
+          "in" : "formData",
+          "required" : true,
+          "type" : "file"
+        }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "Return status with appropriate message"
+          }
+        }
+      }
+    },
+    "/promoter/campaign": {  
+      "get": {
+        "tags": [
+          "Promoter"
+        ],
+        "summary": "Get all campaign of promoter",
+        "responses": {
+          "200": {
+            "description": "Return campaign object with appropriate message and status"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Promoter" ],
+        "summary" : "Create Campaign",
+        "operationId" : "uploadFil12",
+        "consumes" : [ "multipart/form-data" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [
+        {
+          "name" : "name",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "start_date",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "end_date",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "call_to_action",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "discount_code",
+          "in" : "formData",
+          "required" : false,
+          "type" : "string"
+        },
+        {
+          "name" : "description",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "social_media_platform",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "hash_tag",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "at_tag",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "privacy",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "media_format",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "location",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "price",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "currency",
+          "in" : "formData",
+          "required" : true,
+          "type" : "string"
+        },
+        {
+          "name" : "cover_image",
+          "in" : "formData",
+          "required" : true,
+          "type" : "file"
+        },
+        {
+          "name" : "board_image",
+          "in" : "formData",
+          "required" : true,
+          "type" : "file"
+        }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "Return status with appropriate message"
           }
         }
       }
@@ -449,6 +3160,260 @@
         "device_platform": {
           "type": "string",
           "example": "ios"
+        }
+      }
+    },
+    "analytics": {
+      "required": [
+        "page_size",
+        "page_no",
+        "start_date",
+        "end_date"
+      ],
+      "properties": {
+        "page_size": {
+          "type": "number",
+          "example": 10
+        },
+        "page_no": {
+          "type": "number",
+          "example": 1
+        },
+        "start_date": {
+         "type": "string",
+         "example": "2017-03-10"
+        },
+        "end_date": {
+          "type": "string",
+          "example": "2018-10-09"
+        },
+        "social_media_platform":{
+          "type": "string",
+          "example": "facebook"
+        }
+      }
+    },
+    "social_analytics": {
+      "required": [
+        "start_date",
+        "end_date",
+        "social_media_platform",
+        "filter"
+      ],
+      "properties": {
+        "start_date": {
+         "type": "string",
+         "example": "2017-03-10"
+        },
+        "end_date": {
+          "type": "string",
+          "example": "2018-10-09"
+        },
+        "social_media_platform":{
+          "type": "string",
+          "example": "facebook"
+        },
+        "filter":{
+          "type": "array",
+          "example": [[],[]]
+        }
+      }
+    },
+    "purchasedpost_list": {
+      "required": [
+        "page_size",
+        "page_no"
+      ],
+      "properties": {
+        "page_size": {
+          "type": "number",
+          "example": 10
+        },
+        "page_no": {
+          "type": "number",
+          "example": 1
+        }
+      }
+    },
+    "active_past_future_list": {
+      "required": [
+        "page_size",
+        "page_no"
+      ],
+      "properties": {
+        "page_size": {
+          "type": "number",
+          "example": 10
+        },
+        "page_no": {
+          "type": "number",
+          "example": 1
+        }
+      }
+    },
+    "inspired_submission": {
+      "required": [
+        "page_size",
+        "page_no"
+      ],
+      "properties": {
+        "page_size": {
+          "type": "number",
+          "example": 10
+        },
+        "page_no": {
+          "type": "number",
+          "example": 1
+        },
+        "filter":{
+          "type": "array",
+          "example": [{"field": "age", "type": "between", "min_value": 15, "max_value": 43},{"field": "gender", "type": "exact", "value": "male"}]
+        },
+        "sort":{
+          "type": "array",
+          "example": [{"field": "created_at", "value": -1}]
+        }
+      }
+    },
+    "chekout": {
+      "required": [
+        "name",
+        "email",
+        "company",
+        "abn",
+        "country",
+        "address_line_1",
+        "city",
+        "state",
+        "post_code",
+        "credit_card"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Sachin Tendulkar"
+        },
+        "email": {
+          "type": "string",
+          "example": "sachin@gmail.com"
+        },
+        "company": {
+          "type": "string",
+          "example": "DM"
+        },
+        "abn": {
+          "type": "number",
+          "example": 12365478901
+        },
+        "country": {
+          "type": "string",
+          "example": "Australia"
+        },
+        "address_line_1": {
+          "type": "string",
+          "example": "Sydney"
+        },
+        "address_line_2": {
+          "type": "string",
+          "example": "Sydney"
+        },
+        "city": {
+          "type": "string",
+          "example": "Sydney"
+        },
+        "state": {
+          "type": "string",
+          "example": "South Australia"
+        },
+        "post_code": {
+          "type": "number",
+          "example": 1234
+        },
+        "credit_card": {
+          "type": "string",
+          "example": "card_1Cx73ZCwWQeTNlIERkZKjWoK"
+        }
+      }
+    },
+    "add_bank_account": {
+      "required": [
+        "bank_name",
+        "bsb",
+        "account_number",
+        "account_name"
+      ],
+      "properties": {
+        "bank_name": {
+          "type": "string",
+          "example": "ICICI"
+        },
+        "bsb": {
+          "type": "string",
+          "example": "110000"
+        },
+        "account_number": {
+          "type": "string",
+          "example": "000123456"
+        },
+        "account_name": {
+          "type": "string",
+          "example": "Devil"
+        }
+      }
+    },
+    "add_credit_card": {
+      "required": [
+        "card_holder_name",
+        "card_number",
+        "expiry_month",
+        "expiry_year",
+        "cvv"
+      ],
+      "properties": {
+        "card_holder_name": {
+          "type": "string",
+          "example": "Dm"
+        },
+        "card_number": {
+          "type": "string",
+          "example": "4242424242424242"
+        },
+        "expiry_month": {
+          "type": "string",
+          "example": "10"
+        },
+        "expiry_year": {
+          "type": "string",
+          "example": "20"
+        },
+        "cvv": {
+          "type": "string",
+          "example": "321"
+        }
+      }
+    },
+    "edit_credit_card": {
+      "required": [
+        "card_holder_name",
+        "expiry_month",
+        "expiry_year"
+      ],
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "example": "card_1Cx8IYCwWQeTNlIE1Zk0AiFd"
+        },
+        "card_holder_name": {
+          "type": "string",
+          "example": "DJM"
+        },
+        "expiry_month": {
+          "type": "string",
+          "example": "10"
+        },
+        "expiry_year": {
+          "type": "string",
+          "example": "25"
         }
       }
     }
