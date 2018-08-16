@@ -660,7 +660,7 @@ router.get("/music_taste", async (req, res) => {
  * 
  * @apiParam {String} name Name of User
  * @apiParam {String} email Email of User
- * @apiParam {String} gender Gender of User
+ * @apiParam {String} [gender] Gender of User
  * @apiParam {String} social_type Social Type of User
  * @apiParam {String} social_id Social Id of User
  * @apiParam {String} [referral_id] Referral id of invited promoter
@@ -683,10 +683,10 @@ router.post('/social_registration', async (req, res) => {
     //   notEmpty: true,
     //   errorMessage: "Email is required"
     // },
-    "gender": {
-      notEmpty: true,
-      errorMessage: "Gender is required"
-    },
+    // "gender": {
+      // notEmpty: true,
+      // errorMessage: "Gender is required"
+    // },
     "social_type": {
       notEmpty: true,
       errorMessage: "Social Type is required"
@@ -717,7 +717,7 @@ router.post('/social_registration', async (req, res) => {
     } else {
       var reg_obj = {
         "name": req.body.name,
-        "gender": req.body.gender,
+        // "gender": req.body.gender,
         "facebook": { "no_of_friends": 0 },
         "instagram": { "no_of_friends": 0 },
         "twitter": { "no_of_friends": 0 },
@@ -728,6 +728,9 @@ router.post('/social_registration', async (req, res) => {
 
       if (req.body.email) {
         reg_obj.email = req.body.email;
+      }
+	  if (req.body.gender) {
+        reg_obj.gender = req.body.gender;
       }
       if (req.body.social_type === "facebook") {
         reg_obj.facebook = {
