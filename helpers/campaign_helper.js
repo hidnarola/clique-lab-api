@@ -413,14 +413,14 @@ campaign_helper.get_public_campaign_for_user = async (user_id, filter, search, s
             }
         ]);
 
-        console.log("Campaigns ==> ",applied_campaigns[0].campaigns);
+        // console.log("Campaigns ==> ",applied_campaigns[0].campaigns);
 
         var aggregate = [
             {
                 "$match": {
                     "end_date": { "$gt": new Date() },
                     "start_date": { "$lt": new Date() },
-                    "_id":{"$nin":applied_campaigns[0].campaigns}
+                    "_id":{"$nin":(applied_campaigns && applied_campaigns[0] && applied_campaigns[0].campaigns) ? applied_campaigns[0].campaigns : [] }
                 }
             },
             {
